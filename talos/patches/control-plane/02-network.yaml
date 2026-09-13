@@ -1,0 +1,8 @@
+machine:
+  network:
+    interfaces:
+      - interface: eth0
+        dhcp: true
+  certSANs:
+    - 140.238.210.235
+    - 10.20.20.10

@@ -1,0 +1,4 @@
+.private
+.direnv
+talos/kubeconfig
+talos/talosconfig

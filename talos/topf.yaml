@@ -1,0 +1,23 @@
+# TOPF cluster definition — hybrid: OCI control plane + Pi 5 worker (joins later).
+clusterName: infra
+clusterEndpoint: https://140.238.210.235:6443
+kubernetesVersion: 1.35.3
+talosVersion: 1.14.0
+
+patchesDir: patches
+secretsPath: talsecret.sops.yaml
+
+# Default platform for bare-metal nodes (Pi 5); cloud nodes override per node.
+platform: metal
+
+nodes:
+  # OCI Ampere A1 control plane — public endpoint, private IP 10.20.20.10 via DHCP.
+  - host: oci
+    ip: 140.238.210.235
+    role: control-plane
+    platform: oracle # matches the oracle-arm64 factory image the VM boots
+
+  # Raspberry Pi 5 worker — add once the node is online.
+  # - host: rpi5-worker
+  #   ip: 10.10.20.10
+  #   role: worker
