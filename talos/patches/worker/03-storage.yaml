@@ -1,0 +1,8 @@
+# machine:
+#   disks:
+#     - device: /dev/nvme0n1
+#       partitions:
+#         - mountpoint: /var/mnt/storage/nvme0
+#     - device: /dev/nvme1n1
+#       partitions:
+#         - mountpoint: /var/mnt/storage/nvme1

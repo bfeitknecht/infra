@@ -4,5 +4,12 @@ machine:
       - interface: eth0
         dhcp: true
   certSANs:
-    - 140.238.210.235
+    - oci.tailac5960.ts.net
+    - 100.73.186.19
     - 10.20.20.10
+    - 140.238.213.197 # failsafe
+  sysctls:
+    net.ipv4.ip_forward: "1"
+    net.ipv6.conf.all.forwarding: "1"
+  env:
+    TS_EXTRA_ARGS: "--accept-dns=true --accept-routes=true --advertise-routes=10.20.20.0/24"

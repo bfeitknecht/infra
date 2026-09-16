@@ -31,12 +31,11 @@ This roadmap breaks down the setup of the hybrid Talos Linux Kubernetes cluster 
 
 ### 1.2 Worker Node (Raspberry Pi 5)
 
-- [ ] Generate Pi 5 Talos Linux raw image from Image Factory with PCIe/SATA system extensions.
-- [ ] Flash image to Pi 5 SD card and boot node.
-- [ ] Configure `talos/patches/worker/rpi5.yaml`:
-    - Enable PCIe Gen 3.0.
+- [x] Generate Pi 5 Talos Linux raw image from Image Factory with PCIe/SATA system extensions.
+- [x] Flash image to Pi 5 SD card and boot node.
+- [x] Configure `talos/patches/worker/rpi5.yaml`:
     - Mount NVMe/SATA HAT storage to `/var/mnt/storage`.
-- [ ] Apply configuration using `topf apply` to join Pi 5 as a dedicated Worker Node.
+- [x] Apply configuration using `topf apply` to join Pi 5 as a dedicated Worker Node.
 - [ ] Verify node status with `kubectl get nodes -o wide`.
 
 ---

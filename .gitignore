@@ -2,3 +2,4 @@
 .direnv
 talos/kubeconfig
 talos/talosconfig
+talos/output
