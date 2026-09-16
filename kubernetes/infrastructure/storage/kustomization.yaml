@@ -3,4 +3,3 @@ kind: Kustomization
 namespace: local-path-storage
 resources:
   - local-path-storage.yaml
-  - local-path-config.yaml
