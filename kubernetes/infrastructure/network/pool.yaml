@@ -1,0 +1,22 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: lan-pool
+  namespace: kube-system
+spec:
+  blocks:
+    - cidr: 10.10.20.128/25
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: lan-policy
+  namespace: kube-system
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: rbpi
+  interfaces:
+    - end0
+  externalIPs: true
+  loadBalancerIPs: true
