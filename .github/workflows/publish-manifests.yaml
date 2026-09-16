@@ -1,0 +1,33 @@
+name: Publish OCI Artifact
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers on tags like v1.0.0, v1.0.1, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish OCI Artifact to GHCR
+        run: |
+          flux push artifact oci://ghcr.io/${{ github.repository_owner }}/infra:${{ github.ref_name }} \
+            --path="./" \
+            --source="${{ github.server_url }}/${{ github.repository }}" \
+            --revision="${{ github.ref_name }}"
