@@ -44,13 +44,53 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: ingress
+  name: cert-manager
   namespace: flux-system
 spec:
   dependsOn:
     - name: network
   interval: 10m0s
-  path: ./kubernetes/infrastructure/ingress
+  path: ./kubernetes/infrastructure/ingress/cert-manager
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: traefik
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cert-manager
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/ingress/traefik
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tailscale
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: traefik
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/ingress/tailscale
   prune: true
   wait: true
   sourceRef:
