@@ -24,6 +24,7 @@ metadata:
 spec:
   dependsOn:
     - name: storage
+    - name: gateway-api-crds
   interval: 10m0s
   path: ./kubernetes/infrastructure/network
   prune: true

@@ -18,12 +18,17 @@ spec:
   chart:
     spec:
       chart: cilium
-      version: "1.15.6"
+      version: "1.20.2"
       sourceRef:
         kind: HelmRepository
         name: cilium
         namespace: flux-system
       interval: 1h
+
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
 
   values:
     ipam:
@@ -32,8 +37,7 @@ spec:
     kubeProxyReplacement: true
 
     gatewayAPI:
-      enabled: true
-      installAutoCRDs: true
+      enabled: false
 
     k8sServiceHost: localhost
     k8sServicePort: 7445

@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: tailscale-operator
-      version: "1.76.0"
+      version: "1.102.3"
       sourceRef:
         kind: HelmRepository
         name: tailscale
@@ -25,6 +25,3 @@ spec:
   targetNamespace: tailscale
   install:
     createNamespace: true
-  values:
-    oauth:
-      secretName: tailscale-oauth

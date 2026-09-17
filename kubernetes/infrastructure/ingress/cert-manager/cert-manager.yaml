@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: cert-manager
-      version: "v1.16.2"
+      version: "v1.21.2"
       sourceRef:
         kind: HelmRepository
         name: jetstack
@@ -25,7 +25,9 @@ spec:
   targetNamespace: cert-manager
   install:
     createNamespace: true
-    crds: Create
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
   values:
     crds:
       enabled: true

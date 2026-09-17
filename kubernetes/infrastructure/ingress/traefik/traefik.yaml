@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: "33.2.1"
+      version: "41.6.0"
       sourceRef:
         kind: HelmRepository
         name: traefik
@@ -38,8 +38,12 @@ spec:
         expose:
           default: true
         exposedPort: 80
-        redirectTo:
-          port: websecure
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true
       websecure:
         port: 8443
         expose:
@@ -53,6 +57,8 @@ spec:
         allowCrossNamespace: true
       kubernetesIngress:
         enabled: false
+    gateway:
+      enabled: false
     globalArguments:
       - "--global.checknewversion=false"
       - "--global.sendanonymoususage=false"
@@ -72,6 +78,6 @@ spec:
         - name: api@internal
           kind: TraefikService
       middlewares:
-        - name: internal-ip-allowlist
+        - name: internal-allowlist
   tls:
     secretName: wildcard-internal-tls
