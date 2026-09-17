@@ -41,7 +41,3 @@ spec:
 
     securityContext:
       privileged: true
-
-    gatewayAPI:
-      enabled: true
-      installAutoCRDs: true
