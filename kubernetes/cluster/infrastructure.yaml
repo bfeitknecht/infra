@@ -44,26 +44,6 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cert-manager
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: network
-  interval: 10m0s
-  path: ./kubernetes/infrastructure/ingress/cert-manager
-  prune: true
-  wait: true
-  sourceRef:
-    kind: OCIRepository
-    name: flux-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
   name: gateway-api
   namespace: flux-system
 spec:
@@ -76,6 +56,26 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: gateway-api
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/ingress/cert-manager
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
