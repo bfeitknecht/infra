@@ -44,3 +44,4 @@ spec:
 
     gatewayAPI:
       enabled: true
+      installAutoCRDs: true
