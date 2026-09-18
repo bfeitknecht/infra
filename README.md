@@ -18,7 +18,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 
 ### Network & Cluster
 
-- **Networking & Ingress:** Cilium, MetalLB, Traefik, Tailscale, Cert-Manager + Cloudflare DNS-01 Challenge
+- **Networking & Ingress:** Cilium, Traefik, Tailscale, Cert-Manager + Cloudflare DNS-01 Challenge
 - **Monitoring:** Metrics Server
 
 ### Applications
@@ -60,7 +60,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
     │   └── applications.yaml
     ├── infrastructure/             # Platform Core
     │   ├── storage/                # Local Path Provisioner (/var/mnt/storage)
-    │   ├── network/                # Cilium, MetalLB (Pool: 10.10.20.200-210), Tailscale
+    │   ├── network/                # Cilium (LB Pool: 10.10.20.200-210), Tailscale
     │   └── ingress/                # Traefik (IngressRoute CRDs), cert-manager
     └── applications/               # User Workloads
         ├── dev/                    # Forgejo, ATProto PDS, wasmCloud
@@ -85,3 +85,56 @@ Function zones use decade-based third octets.
 | 40   | 10.10.40.0/24 | 10.20.40.0/24 | Trusted LAN devices               |
 | 50   | 10.10.50.0/24 | 10.20.50.0/24 | IoT and smart-home devices        |
 | 60   | 10.10.60.0/24 | 10.20.60.0/24 | Guest and DMZ workloads           |
+
+### Current Stack
+
+| Layer        | Component                                             | Version             |
+| ------------ | ----------------------------------------------------- | ------------------- |
+| OS           | Talos Linux                                           | 1.14.0              |
+| Kubernetes   | API server / kubelet                                  | 1.35.3              |
+| GitOps       | Flux (source, kustomize, helm, notification)          | 2.9.5               |
+| CNI          | Cilium (kube-proxy replacement, LB-IPAM, L2 announce) | 1.20.2              |
+| Ingress      | Traefik via Gateway API                               | chart 41.6.0 (v3.7) |
+| Gateway API  | standard channel CRDs                                 | 1.6.2               |
+| Certificates | cert-manager                                          | 1.21.2              |
+| Mesh / VPN   | Tailscale (operator in-cluster, extension on nodes)   | 1.102.3             |
+
+### GitOps Delivery
+
+Manifests are packaged as an OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag. The `flux-system` OCIRepository tracks `semver >=1.0.0`, so pushing a tag is the only deployment mechanism — the cluster never reads the working tree or plain git.
+
+```
+git tag vX.Y.Z && git push origin master vX.Y.Z   # CI publishes, Flux reconciles
+flux reconcile source oci flux-system             # optional: pull immediately
+flux reconcile kustomization flux-system          # optional: apply immediately
+```
+
+### Kustomization Topology
+
+```
+cluster/crds.yaml            gateway-api-crds (v1.6.2), traefik-crds (v41.6.0)
+                             ↑ pinned upstream GitRepository sources, prune: false
+
+cluster/infrastructure.yaml  storage → cilium → ipam
+                                     └────► cert-manager → traefik → tailscale
+```
+
+A Kustomization's server-side dry-run validates its whole manifest set before applying anything, so custom resources must never share a Kustomization with the HelmRelease that creates their CRDs. Cilium's CRDs are created by its operator at runtime (no upstream files exist), which is why the LB pool and L2 policy live in their own `ipam` Kustomization depending on `cilium`.
+
+### Ingress & Certificates
+
+- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443; the LoadBalancer Service exposes 80/443.
+- The Gateway address `10.10.20.128` comes from the Cilium LB-IPAM pool (`network/ipam`) and is L2-announced on the worker's `end0` interface.
+- Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
+- Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap → 10y CA → 1y wildcard certificate).
+- Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
+
+### Secrets
+
+All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
+
+### Access
+
+- `kubeconfig` and `talosconfig` live in the repo root (gitignored).
+- Off-LAN access runs over the tailnet: the nodes run the Tailscale system extension; advertise `10.10.20.0/24` from the worker node and approve the route in the Tailscale admin console.
+- `dashboard.internal` needs a DNS record pointing at `10.10.20.128` (planned: Knot Resolver local data) or a hosts entry as a stopgap.

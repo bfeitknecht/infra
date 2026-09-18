@@ -1,124 +1,100 @@
-# Cluster Bootstrapping & Provisioning Overview
+# AGENTS.md
 
-## Core Objective
+Context for AI agents working in this repository. Read this before making changes.
 
-Bootstrap a hybrid Kubernetes cluster using **Talos Linux** with:
+## What this is
 
-- **Control Plane Node:** OCI Zurich (`10.20.20.10`, Public IP `140.238.210.235`).
-- **Worker Node:** Raspberry Pi 5 (`10.10.20.10`).
-- **Tooling Stack:** `topf` (for cluster/patch orchestration), `talosctl` (for bootstrap/API interaction), `sops` + `age` (for secret encryption), and `flux` (for GitOps delivery).
+Declarative infrastructure for a hybrid Talos Linux Kubernetes cluster: one control-plane node in Oracle Cloud (eu-zurich-1, `10.20.20.10`), one Raspberry Pi 5 worker at home (`10.10.20.10`). Everything on the cluster is managed by Flux from this repository. See `README.md` for the human overview.
 
----
+## The one rule
 
-## Targeted Repository Structure
+The cluster only consumes published OCI artifacts. To change anything:
 
-```text
-.
-├── README.md
-├── ROADMAP.md
-├── .sops.yaml                       # SOPS configuration (age public key)
-│
-├── talos/                          # Talos & topf OS Configurations
-│   ├── topf.yaml                   # TOPF cluster definition & node mapping
-│   ├── talsecret.sops.yaml         # SOPS-encrypted cluster secrets bundle
-│   └── patches/
-│       ├── all/                     # Applied to all nodes
-│       │   └── 01-hostname.yaml.tpl # HostnameConfig from topf node name
-│       ├── control-plane/           # Applied to OCI Cloud VM (10.20.20.10)
-│       │   ├── 01-installation.yaml # UnattendedInstallConfig → /dev/sda
-│       │   └── 02-network.yaml      # eth0 DHCP + cert SANs (public/private)
-│       └── worker/                  # Applied to Pi Worker (10.10.20.10) — populated on arrival
-│
-└── kubernetes/                     # Flux GitOps Manifests
-    ├── flux/                       # Flux controller bootstrap & tag filter
-    │   └── gotk-sync.yaml
-    ├── cluster/                    # High-level entrypoints
-    │   ├── infrastructure.yaml
-    │   └── applications.yaml
-    ├── infrastructure/             # Platform Core
-    │   ├── storage/                # Local Path Provisioner (/var/mnt/storage)
-    │   ├── network/                # Cilium, MetalLB (Pool: 10.10.20.200-210), Tailscale
-    │   └── ingress/                # Traefik (IngressRoute CRDs), cert-manager
-    └── applications/               # User Workloads
-        ├── dev/                    # Forgejo, ATProto PDS, wasmCloud
-        ├── media/                  # Immich, Jellyfin, *arr, Copyparty, Yarr
-        ├── utilities/              # Pi-hole, Homepage, Dawarich
-        └── template/               # Blueprint for custom Dockerfile apps
-            ├── kustomization.yaml
-            └── app.yaml
+```
+edit manifests → git commit → push a vX.Y.Z tag → CI publishes to ghcr.io/bfeitknecht/infra → Flux reconciles
 ```
 
----
+- Never `kubectl apply` manifests (read-only dry-runs are fine).
+- The OCIRepository tracks `semver >=1.0.0`; re-tagging the same commit changes nothing. Verify a tag contains your change: `git show <tag>:<path>`.
+- Tags are cheap; a broken tag means a broken reconcile loop until the next one.
 
-## Agent Operational Sequence
+## Layout
 
-### Phase 1: Secrets & TOPF Configuration
+```
+kubernetes/
+├── flux/                       source.yaml (OCIRepository), sync.yaml (root Kustomization)
+├── cluster/                    applied by the root Kustomization
+│   ├── crds.yaml               GitRepository + Kustomization pairs installing CRDs from
+│   │                           pinned upstream tags (gateway-api v1.6.2, traefik chart v41.6.0,
+│   │                           k8up 4.10.0)
+│   ├── infrastructure.yaml     the Kustomization dependency tree
+│   ├── applications.yaml       application Kustomizations (empty for now)
+│   └── ghcr-pat.sops.yaml
+├── infrastructure/
+│   ├── storage/                local-path-provisioner
+│   ├── backup/
+│   │   └── k8up/               k8up operator + nightly Schedule; restic → Garage S3 on the
+│   │                           friend's NAS over Tailscale (see backup/k8up/README.md)
+│   ├── network/
+│   │   ├── cilium/             Cilium HelmRelease (the operator creates its CRDs at runtime)
+│   │   └── ipam/               CiliumLoadBalancerIPPool + CiliumL2AnnouncementPolicy
+│   └── ingress/
+│       ├── cert-manager/       HelmRelease + Namespace + cloudflare-dns01 secret
+│       ├── traefik/            HelmRelease, Gateway, certificates, middleware, Namespace
+│       └── tailscale/          HelmRelease + Namespace + operator-oauth secret
+└── applications/               user workloads (to be populated)
+```
 
-1. **Secrets Initialization:**
-    - Use `sops` with your `age` key (defined in `.sops.yaml`).
-    - Generate the secret bundle via `talosctl gen secrets -o talos/talsecret.sops.yaml` and encrypt it using `sops -e -i`.
+## Kustomization dependency tree
 
-2. **Patch Architecture (topf scope layers: `all/` → `<role>/` → `node/<host>/`):**
-    - **`talos/patches/all/01-hostname.yaml.tpl`:** Sets each node's hostname from its topf node name via `HostnameConfig`.
-    - **`talos/patches/control-plane/01-installation.yaml`:** Install disk via `UnattendedInstallConfig` (Talos ≥ 1.14) targeting `/dev/sda`, `wipe: false`.
-    - **`talos/patches/control-plane/02-network.yaml`:** DHCP on `eth0` (OCI VNIC) and machine cert SANs (`140.238.210.235`, `10.20.20.10`).
-    - **`talos/patches/worker/…`:** Populated when the Pi 5 arrives (PCIe 3.0, storage mounts under `/var/mnt/storage`; `rpi5-worker` hostname comes free from the `all/` template).
-    - **CNI:** Default flannel is kept for bootstrap; a patch setting `cluster.network.cni.name: none` is added only once Cilium is deployed via Flux.
+```
+storage → cilium → ipam
+               └──► cert-manager → traefik → tailscale
+traefik also dependsOn: gateway-api-crds, traefik-crds
+```
 
-3. **TOPF Definition (`talos/topf.yaml`):**
-    - Declare cluster metadata (`infra`), network endpoint (`https://140.238.210.235:6443`), `secretsPath` → SOPS bundle, and node maps linking IPs to their roles (`control-plane`/`worker`) with per-node platform overrides (`oracle` vs `metal`).
+Hard constraint behind this shape: a Kustomization's server-side dry-run validates its entire manifest set before applying anything. A custom resource whose CRD does not exist yet fails the dry-run and nothing in that Kustomization applies — including the HelmRelease that would have created the CRD. Therefore:
 
----
+- CRs never share a Kustomization with the HelmRelease that produces their CRDs (that is why `ipam` is separate from `cilium`, and why cert-manager CRs live in the `traefik` dir which `dependsOn: cert-manager`).
+- Gateway API and Traefik CRDs are installed up-front from pinned upstream GitRepository tags (`cluster/crds.yaml`, `prune: false`).
+- Cilium ships no CRD files anywhere — its operator creates them at runtime. Never try to vendor or fetch them.
+- Upgrading a chart version means bumping the matching CRD GitRepository tag in the same commit (traefik chart ↔ traefik-crds).
 
-### Phase 2: OCI Control Plane Bootstrap
+## Component notes
 
-1. **Configuration Application:**
-    - Execute `topf apply` (or `talosctl apply-config --insecure`) targeting the OCI node (`140.238.210.235`).
-    - Allow Talos to process the patch stack, apply static settings, and reboot out of maintenance mode.
+- **cilium 1.20.2** (`network/cilium/cilium.yaml`): `kubeProxyReplacement: true`, `ipam.mode: kubernetes`, `gatewayAPI.enabled: false` (Traefik owns Gateway API), `k8sServiceHost: localhost` / `k8sServicePort: 7445` (Talos apid proxy), cgroup + privileged settings for Talos. LB-IPAM pool `10.10.20.128/25` and L2 announcement on node `rbpi`, interface `end0` live in `network/ipam/pool.yaml`. Gateway LB address: `10.10.20.128`.
+- **traefik chart 41.6.0** (`ingress/traefik/traefik.yaml`): values schema is strict. `globalArguments` no longer exists — use the `global:` block. Port redirects use `http.redirections.entryPoint` (not `redirectTo`). Gateway listeners must match the entrypoint `port` values (8000/8443), not the exposed Service ports (80/443). The chart's built-in default Gateway is disabled (`gateway.enabled: false`) because `gateway.yaml` owns the Gateway. The dashboard is the chart-managed IngressRoute (`ingressRoute.dashboard`, host `dashboard.internal`, internal cert, `internal-allowlist` middleware) — the only IngressRoute allowed in this repo.
+- **gateway.yaml**: listeners `web` (8000, HTTP), `websecure` (8443, `*.0xbf.ch`, cert `wildcard-domain-tls`), `websecure-internal` (8443, `*.internal`, cert `wildcard-internal-tls`).
+- **certificates.yaml**: Let's Encrypt ClusterIssuer (Cloudflare DNS-01) + `wildcard-domain` cert for `0xbf.ch`/`*.0xbf.ch`; internal CA chain (selfsigned bootstrap → 10y CA in cert-manager ns → CA ClusterIssuer → 1y `*.internal` wildcard) because Let's Encrypt cannot issue for `.internal`.
+- **tailscale operator 1.102.3**: reads OAuth credentials from Secret `operator-oauth` (chart default name; do not rename back). The nodes themselves run the `ext-tailscale` Talos extension (config in `talos/patches/all/02-tailscale.sops.yaml`).
+- **k8up 4.10.0** (`backup/k8up/`): nightly restic backup of all local-path PVCs to Garage S3 on the friend's NAS over Tailscale (node-shared). The `Schedule` endpoint points at the NAS tailnet address; credentials in `backup-credentials.sops.yaml`. `wait: false` on the Kustomization — Schedule health semantics are not kstatus-clean. NAS-side setup is documented in `backup/k8up/README.md`.
+- **cert-manager 1.21.2**: `install.crds`/`upgrade.crds: CreateReplace` + `crds.enabled: true`.
 
-2. **`talosctl` Client Sync:**
-    - Configure local `talosconfig` to set `endpoints` and `nodes` to the public OCI address.
+## Secrets
 
-3. **Cluster Bootstrap:**
-    - Execute `talosctl bootstrap` against the OCI controller node to trigger single-node `etcd` initialization.
-    - Monitor health using `talosctl health` until the Kubernetes API server responds on port `6443`.
+- SOPS + age; `.sops.yaml` matches `*.sops.yaml`. Flux decrypts in-cluster with the `sops-age` Secret in `flux-system`.
+- Encrypted files: `cluster/ghcr-pat.sops.yaml`, `ingress/cert-manager/cloudflare-dns01.sops.yaml`, `ingress/tailscale/operator-oauth.sops.yaml`, `talos/talsecret.sops.yaml`, `talos/patches/all/02-tailscale.sops.yaml`.
+- **Never decrypt, encrypt, or edit SOPS files as an agent.** The owner performs all secret operations locally and will ask for the exact commands if needed. If a secret's shape matters, ask; do not read values.
 
-4. **Kubeconfig Retrieval:**
-    - Fetch the cluster admin kubeconfig (`talosctl kubeconfig`) and verify control plane node registration (`kubectl get nodes`).
+## Cluster access
 
----
+- `kubectl --kubeconfig kubeconfig ...` (repo root, gitignored). Server is K8s 1.35.3; the local kubectl (1.33) is older — skew warnings are cosmetic.
+- `talosctl --talosconfig talosconfig -e 10.20.20.10 -n <node-ip>` for node-level work.
+- Nodes: `oci` (control-plane, tainted, no workloads), `rbpi` (worker, runs everything). Talos 1.14.0.
 
-### Phase 3: Local Pi 5 Worker Onboarding
+## Debugging playbook
 
-1. **Flash & Mount Preparation:**
-    - Flash the Pi 5 SD card with Talos ARM64 image (including required PCIe system extensions).
-    - Ensure HAT hardware is attached.
+1. `flux get kustomizations` — the first red/Unknown link in the chain is where to look.
+2. `kubectl -n flux-system describe kustomization <name>` — conditions and events say whether it is build, dry-run, apply, or health-check that failed.
+3. HelmRelease problems: `kubectl -n <namespace> describe helmrelease <name>` — chart values schema violations appear verbatim in the message and name the offending key.
+4. All Flux controllers in CrashLoopBackOff with `dial tcp 10.96.0.1:443: no route to host` means in-cluster service routing is down (typically right after a Cilium restart). Fix the datapath first, then `kubectl -n flux-system rollout restart deployment` — long-running pods can lose their Cilium endpoint when the agent restarts and stay detached from the datapath.
+5. Validate locally before tagging: `kubectl kustomize <dir>` for each changed directory; `kubectl apply --dry-run=server -f <file>` for `cluster/*.yaml`.
+6. After bumping a chart version, diff its `values.yaml` against the pinned values — renamed keys fail the values schema at install time.
 
-2. **Node Join Execution:**
-    - Execute `topf apply` targeting the local worker node (`10.10.20.10`).
-    - The Pi 5 receives `rpi5.yaml` patches, formats/mounts storage under `/var/mnt/storage`, and joins the OCI control plane over the network.
-    - Verify cluster membership: `kubectl get nodes -o wide`.
+## Conventions
 
----
-
-### Phase 4: FluxCD GitOps Transfer
-
-1. **Repository Setup:**
-    - Push repository state to **Tangled.sh**.
-
-2. **Flux Bootstrap:**
-    - Initialize FluxCD watching `kubernetes/flux/gotk-sync.yaml`.
-    - Configure Flux source controller with **SemVer tag filtering** (`>=1.0.0`) so reconciliation is strictly tag-driven.
-    - Inject the `age` private key as a Kubernetes Secret (`sops-age`) into `flux-system` to allow Flux to decrypt in-repo SOPS secrets natively.
-
-3. **Reconciliation Sequence:**
-    - **Order of Execution:** Storage Provisioner $\rightarrow$ Cilium CNI $\rightarrow$ MetalLB (LAN Pool `10.10.20.200-210`) $\rightarrow$ Traefik Ingress & `cert-manager` (Cloudflare DNS-01) $\rightarrow$ Tailscale $\rightarrow$ Tenant Applications (Forgejo, ATProto PDS, Immich, etc.).
-
----
-
-## Key Constraints & Guardrails
-
-- **No Direct Master Writes:** The OCI control plane is tainted; user workloads run exclusively on the Pi 5 worker node.
-- **Tag-Driven Deployments:** Pushing commits to `main` must **not** trigger Flux deployment; releases require a Git tag push (`v1.0.0`).
-- **No Annotations Ingress Hacks:** All Traefik routing rules must use native `IngressRoute` / `IngressRouteTCP` CRDs.
-- **Zero Cloudflare Proxying:** Cloudflare records must remain **Grey Cloud (DNS Only)** to prevent proxy rate limits and allow direct TLS termination.
+- Gateway API for all routing; the Traefik dashboard IngressRoute is the sole exception.
+- No vendored CRDs; CRDs come from pinned upstream GitRepository sources or from Helm charts themselves.
+- No explanatory YAML comments except load-bearing gotchas (listener port mapping, chart collisions, internal CA rationale).
+- No hardcoded IPs inside Helm values; cluster-specific values live in git-side resources (ipam pool, middlewares).
+- Cluster DNS for `*.internal` names is a planned application (Knot Resolver); until then `dashboard.internal` needs a hosts entry or local DNS record pointing at `10.10.20.128`.
