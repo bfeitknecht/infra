@@ -69,6 +69,6 @@ spec:
           secretName: wildcard-internal-tls
     gateway:
       enabled: false
-    globalArguments:
-      - "--global.checknewversion=false"
-      - "--global.sendanonymoususage=false"
+    global:
+      checkNewVersion: false
+      sendAnonymousUsage: false
