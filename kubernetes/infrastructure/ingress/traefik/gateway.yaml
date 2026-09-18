@@ -6,8 +6,6 @@ metadata:
 spec:
   gatewayClassName: traefik
   listeners:
-    # Traefik binds Gateway listeners to entrypoints by matching these ports
-    # against entrypoint ports (8000/8443), NOT exposed 80/443.
     - name: web
       protocol: HTTP
       port: 8000
@@ -17,6 +15,7 @@ spec:
     - name: websecure
       protocol: HTTPS
       port: 8443
+      hostname: "*.0xbf.ch"
       allowedRoutes:
         namespaces:
           from: All
@@ -24,3 +23,14 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: wildcard-domain-tls
+    - name: websecure-internal
+      protocol: HTTPS
+      port: 8443
+      hostname: "*.internal"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-internal-tls

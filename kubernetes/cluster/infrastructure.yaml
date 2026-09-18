@@ -19,14 +19,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: network
+  name: cilium
   namespace: flux-system
 spec:
   dependsOn:
     - name: storage
-    - name: gateway-api-crds
   interval: 10m0s
-  path: ./kubernetes/infrastructure/network
+  path: ./kubernetes/infrastructure/network/cilium
   prune: true
   wait: true
   healthChecks:
@@ -49,11 +48,31 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: ipam
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cilium
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/network/ipam
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: cert-manager
   namespace: flux-system
 spec:
   dependsOn:
-    - name: network
+    - name: cilium
   interval: 10m0s
   path: ./kubernetes/infrastructure/ingress/cert-manager
   prune: true
@@ -74,6 +93,8 @@ metadata:
 spec:
   dependsOn:
     - name: cert-manager
+    - name: gateway-api-crds
+    - name: traefik-crds
   interval: 10m0s
   path: ./kubernetes/infrastructure/ingress/traefik
   prune: true

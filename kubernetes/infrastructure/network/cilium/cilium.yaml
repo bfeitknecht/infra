@@ -25,10 +25,7 @@ spec:
         namespace: flux-system
       interval: 1h
 
-  install:
-    crds: CreateReplace
-  upgrade:
-    crds: CreateReplace
+  targetNamespace: kube-system
 
   values:
     ipam:

@@ -57,27 +57,18 @@ spec:
         allowCrossNamespace: true
       kubernetesIngress:
         enabled: false
+    ingressRoute:
+      dashboard:
+        enabled: true
+        matchRule: Host(`dashboard.internal`)
+        entryPoints:
+          - websecure
+        middlewares:
+          - name: internal-allowlist
+        tls:
+          secretName: wildcard-internal-tls
     gateway:
       enabled: false
     globalArguments:
       - "--global.checknewversion=false"
       - "--global.sendanonymoususage=false"
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: traefik-dashboard
-  namespace: ingress
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`dashboard.internal`)
-      kind: Rule
-      services:
-        - name: api@internal
-          kind: TraefikService
-      middlewares:
-        - name: internal-allowlist
-  tls:
-    secretName: wildcard-internal-tls
