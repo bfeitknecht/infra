@@ -49,6 +49,7 @@ spec:
         probeSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
         storageSpec:
+          disableMountSubPath: true
           volumeClaimTemplate:
             spec:
               storageClassName: local-path
@@ -62,6 +63,7 @@ spec:
             cpu: 50m
             memory: 128Mi
         storage:
+          disableMountSubPath: true
           volumeClaimTemplate:
             spec:
               storageClassName: local-path
