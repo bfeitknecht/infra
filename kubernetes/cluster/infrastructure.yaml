@@ -24,6 +24,7 @@ metadata:
 spec:
   dependsOn:
     - name: storage
+    - name: prometheus-crds
   interval: 10m0s
   path: ./kubernetes/infrastructure/network/cilium
   prune: true
@@ -97,6 +98,27 @@ spec:
     - name: traefik-crds
   interval: 10m0s
   path: ./kubernetes/infrastructure/ingress/traefik
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: prometheus-crds
+    - name: traefik
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/monitoring
   prune: true
   wait: true
   sourceRef:

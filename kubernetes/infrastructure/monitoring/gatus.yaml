@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatus-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    storage:
+      type: sqlite
+      path: /data/gatus.db
+    ui:
+      title: Infra Status
+    endpoints:
+      - name: grafana
+        url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+      - name: traefik-metrics
+        url: http://ingress-traefik.ingress.svc.cluster.local:9100/metrics
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+      - name: gateway-lan
+        url: https://10.10.20.128
+        interval: 1m
+        client:
+          insecure: true
+        conditions: ["[STATUS] == 404"]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gatus-data
+  namespace: monitoring
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gatus
+  template:
+    metadata:
+      labels:
+        app: gatus
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: gatus-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: gatus-data
+      containers:
+        - name: gatus
+          image: ghcr.io/twin/gatus:v5.36.0
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatus
+  namespace: monitoring
+  labels:
+    app: gatus
+spec:
+  selector:
+    app: gatus
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gatus
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure-internal
+  hostnames:
+    - status.internal
+  rules:
+    - backendRefs:
+        - name: gatus
+          port: 80

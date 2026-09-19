@@ -26,15 +26,13 @@ kubernetes/
 ├── cluster/                    applied by the root Kustomization
 │   ├── crds.yaml               GitRepository + Kustomization pairs installing CRDs from
 │   │                           pinned upstream tags (gateway-api v1.6.2, traefik chart v41.6.0,
-│   │                           k8up 4.10.0)
+│   │                           kube-prometheus-stack 91.4.1)
 │   ├── infrastructure.yaml     the Kustomization dependency tree
 │   ├── applications.yaml       application Kustomizations (empty for now)
 │   └── ghcr-pat.sops.yaml
 ├── infrastructure/
 │   ├── storage/                local-path-provisioner
-│   ├── backup/
-│   │   └── k8up/               k8up operator + nightly Schedule; restic → Garage S3 on the
-│   │                           friend's NAS over Tailscale (see backup/k8up/README.md)
+│   ├── monitoring/             kube-prometheus-stack + metrics-server + Gatus
 │   ├── network/
 │   │   ├── cilium/             Cilium HelmRelease (the operator creates its CRDs at runtime)
 │   │   └── ipam/               CiliumLoadBalancerIPPool + CiliumL2AnnouncementPolicy
@@ -50,6 +48,8 @@ kubernetes/
 ```
 storage → cilium → ipam
                └──► cert-manager → traefik → tailscale
+cilium also dependsOn: prometheus-crds
+monitoring also dependsOn: prometheus-crds, traefik
 traefik also dependsOn: gateway-api-crds, traefik-crds
 ```
 
@@ -62,13 +62,13 @@ Hard constraint behind this shape: a Kustomization's server-side dry-run validat
 
 ## Component notes
 
-- **cilium 1.20.2** (`network/cilium/cilium.yaml`): `kubeProxyReplacement: true`, `ipam.mode: kubernetes`, `gatewayAPI.enabled: false` (Traefik owns Gateway API), `k8sServiceHost: localhost` / `k8sServicePort: 7445` (Talos apid proxy), cgroup + privileged settings for Talos. LB-IPAM pool `10.10.20.128/25` and L2 announcement on node `rbpi`, interface `end0` live in `network/ipam/pool.yaml`. Gateway LB address: `10.10.20.128`.
-- **traefik chart 41.6.0** (`ingress/traefik/traefik.yaml`): values schema is strict. `globalArguments` no longer exists — use the `global:` block. Port redirects use `http.redirections.entryPoint` (not `redirectTo`). Gateway listeners must match the entrypoint `port` values (8000/8443), not the exposed Service ports (80/443). The chart's built-in default Gateway is disabled (`gateway.enabled: false`) because `gateway.yaml` owns the Gateway. The dashboard is the chart-managed IngressRoute (`ingressRoute.dashboard`, host `dashboard.internal`, internal cert, `internal-allowlist` middleware) — the only IngressRoute allowed in this repo.
+- **cilium 1.20.2** (`network/cilium/cilium.yaml`): `kubeProxyReplacement: true`, `ipam.mode: kubernetes`, `gatewayAPI.enabled: false` (Traefik owns Gateway API), `k8sServiceHost: localhost` / `k8sServicePort: 7445` (Talos apid proxy), cgroup + privileged settings for Talos. `prometheus.enabled` + ServiceMonitors + Hubble metrics are on (requires the prometheus CRDs from the crds phase — hence `cilium` dependsOn `prometheus-crds`). LB-IPAM pool `10.10.20.128/25` and L2 announcement on node `rbpi`, interface `end0` live in `network/ipam/pool.yaml`. Gateway LB address: `10.10.20.128`.
+- **traefik chart 41.6.0** (`ingress/traefik/traefik.yaml`): values schema is strict. `globalArguments` no longer exists — use the `global:` block. Port redirects use `http.redirections.entryPoint` (not `redirectTo`). Gateway listeners must match the entrypoint `port` values (8000/8443), not the exposed Service ports (80/443). The chart's built-in default Gateway is disabled (`gateway.enabled: false`) because `gateway.yaml` owns the Gateway. The dashboard is the chart-managed IngressRoute (`ingressRoute.dashboard`, host `dashboard.internal`, internal cert, `internal-allowlist` middleware) — the only IngressRoute allowed in this repo. Prometheus metrics enabled (`metrics.prometheus`), scraped by the `traefik` ServiceMonitor in `monitoring/`.
 - **gateway.yaml**: listeners `web` (8000, HTTP), `websecure` (8443, `*.0xbf.ch`, cert `wildcard-domain-tls`), `websecure-internal` (8443, `*.internal`, cert `wildcard-internal-tls`).
 - **certificates.yaml**: Let's Encrypt ClusterIssuer (Cloudflare DNS-01) + `wildcard-domain` cert for `0xbf.ch`/`*.0xbf.ch`; internal CA chain (selfsigned bootstrap → 10y CA in cert-manager ns → CA ClusterIssuer → 1y `*.internal` wildcard) because Let's Encrypt cannot issue for `.internal`.
 - **tailscale operator 1.102.3**: reads OAuth credentials from Secret `operator-oauth` (chart default name; do not rename back). Gotcha: the OAuth client bears `tag:k8s` + `tag:k8s-operator`, and the operator can only mint authkeys for tags **managed by** the client's tags — so `tagOwners` must list the tags as owners of each other (cross-ownership), not just the human user. The client's tags are fixed at creation; wrong tags mean regenerating the client and re-`sops`-ing the secret. Proxy pods get `tag:k8s` via `proxyConfig.defaultTags`.
 - **tailscale on the nodes**: the nodes run the `ext-tailscale` Talos system extension (config in `talos/patches/all/02-tailscale.sops.yaml`), tagged `tag:infra` — a separate identity from the operator.
-- **k8up 4.10.0** (`backup/k8up/`): nightly restic backup of all local-path PVCs to Garage S3 on the friend's NAS over Tailscale (node-shared). The `Schedule` endpoint points at the NAS tailnet address; credentials in `backup-credentials.sops.yaml`. `wait: false` on the Kustomization — Schedule health semantics are not kstatus-clean. NAS-side setup is documented in `backup/k8up/README.md`.
+- **monitoring** (`infrastructure/monitoring/`): kube-prometheus-stack 91.4.1 + metrics-server 3.14.0 + Gatus v5.36.0 (`status.internal`). Talos gotchas baked into values: kubeControllerManager/kubeScheduler/kubeEtcd/kubeProxy scraping disabled (unreachable on Talos / replaced by Cilium KPR); metrics-server needs `--kubelet-insecure-tls`. Prometheus retention 7d/8GB on local-path; Grafana admin credentials via `monitoring-credentials.sops.yaml`; all selectors set to `NilUsesHelmValues: false` so future ServiceMonitors are picked up without release labels. Alertmanager receivers: decision pending (ntfy/Discord/Telegram).
 - **cert-manager 1.21.2**: `install.crds`/`upgrade.crds: CreateReplace` + `crds.enabled: true`.
 
 ## Secrets
