@@ -5,7 +5,7 @@ kubernetesVersion: 1.35.3
 talosVersion: 1.14.0
 
 patchesDir: patches
-secretsPath: talsecret.sops.yaml
+secretsPath: secrets.sops.yaml
 
 platform: metal
 

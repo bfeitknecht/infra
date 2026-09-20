@@ -74,7 +74,7 @@ Hard constraint behind this shape: a Kustomization's server-side dry-run validat
 ## Secrets
 
 - SOPS + age; `.sops.yaml` matches `*.sops.yaml`. Flux decrypts in-cluster with the `sops-age` Secret in `flux-system`.
-- Encrypted files: `cluster/ghcr-pat.sops.yaml`, `ingress/cert-manager/cloudflare-dns01.sops.yaml`, `ingress/tailscale/operator-oauth.sops.yaml`, `talos/talsecret.sops.yaml`, `talos/patches/all/02-tailscale.sops.yaml`.
+- Encrypted files: `cluster/ghcr-pat.sops.yaml`, `ingress/cert-manager/cloudflare-dns01.sops.yaml`, `ingress/tailscale/operator-oauth.sops.yaml`, `monitoring/grafana-credentials.sops.yaml`, `applications/utilities/pihole/pihole-credentials.sops.yaml` (Kubernetes Secrets — only `data`/`stringData` values are encrypted, structural fields stay plaintext), `talos/secrets.sops.yaml`, `talos/patches/all/02-tailscale.sops.yaml` (Talos configs — fully encrypted, they are not Kubernetes Secrets).
 - **Never decrypt, encrypt, or edit SOPS files as an agent.** The owner performs all secret operations locally and will ask for the exact commands if needed. If a secret's shape matters, ask; do not read values.
 
 ## Cluster access

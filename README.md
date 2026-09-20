@@ -43,7 +43,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 │
 ├── talos/                          # Talos & topf OS Configurations
 │   ├── topf.yaml                   # TOPF cluster definition & node mapping
-│   ├── talsecret.sops.yaml         # SOPS-encrypted cluster secrets bundle
+│   ├── secrets.sops.yaml           # SOPS-encrypted cluster secrets bundle
 │   └── patches/
 │       ├── all/                     # HostnameConfig from topf node name
 │       │   └── 01-hostname.yaml.tpl

@@ -1,3 +1,11 @@
 creation_rules:
+  # Talos configs are not Kubernetes Secrets and everything in them is sensitive,
+  # so they stay fully encrypted (sops uses the first matching rule).
+  - path_regex: (^|/)talos/.*\.sops\.yaml$
+    age: "age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju"
+  # In Kubernetes Secrets only the values under data/stringData are sensitive.
+  # apiVersion/kind/metadata/type stay plaintext so tools (flux, kustomize, kubectl)
+  # can parse the manifest before decryption.
   - path_regex: .*\.sops\.yaml$
+    encrypted_regex: ^(data|stringData)$
     age: "age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju"
