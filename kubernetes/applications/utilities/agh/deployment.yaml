@@ -19,10 +19,12 @@ spec:
     spec:
       initContainers:
         # Seed the config on first boot only; afterwards AGH owns the file
-        # on the PVC (UI edits persist across restarts).
+        # on the PVC (UI edits persist across restarts). Both subdirectories
+        # must pre-exist: local-path volumes do not support kubelet-created
+        # subPath directories.
         - name: config-seed
           image: docker.io/busybox:1.37.0
-          command: ["sh", "-c", "mkdir -p /agh-data/conf && [ -f /agh-data/conf/AdGuardHome.yaml ] || cp /agh-seed/AdGuardHome.yaml /agh-data/conf/AdGuardHome.yaml"]
+          command: ["sh", "-c", "mkdir -p /agh-data/conf /agh-data/work && [ -f /agh-data/conf/AdGuardHome.yaml ] || cp /agh-seed/AdGuardHome.yaml /agh-data/conf/AdGuardHome.yaml"]
           volumeMounts:
             - name: data
               mountPath: /agh-data
@@ -34,9 +36,9 @@ spec:
           image: docker.io/adguard/adguardhome:v0.107.79
           args:
             - "-c"
-            - "/opt/adguardhome/conf/AdGuardHome.yaml"
+            - "/agh-data/conf/AdGuardHome.yaml"
             - "-w"
-            - "/opt/adguardhome/work"
+            - "/agh-data/work"
             - "--no-check-update"
           ports:
             - containerPort: 53
@@ -50,11 +52,7 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: data
-              mountPath: /opt/adguardhome/conf
-              subPath: conf
-            - name: data
-              mountPath: /opt/adguardhome/work
-              subPath: work
+              mountPath: /agh-data
           resources:
             requests:
               cpu: 32m
