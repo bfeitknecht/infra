@@ -63,13 +63,14 @@ spec:
               memory: 512Mi
           readinessProbe:
             httpGet:
-              path: /
+              # FTL v6 serves 403 on / — the UI lives under /admin/
+              path: /admin/login
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /
+              path: /admin/login
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 30
