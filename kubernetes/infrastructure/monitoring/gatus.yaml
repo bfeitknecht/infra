@@ -40,6 +40,15 @@ data:
           query-name: example.com
           query-type: A
         conditions: ["[DNS_RCODE] == NOERROR"]
+      # The edge resolver (AGH) as LAN/tailnet clients actually experience it:
+      # AGH -> kresd -> knotd, hairpinned through the LoadBalancer IP
+      - name: dns-edge
+        url: 10.10.20.153
+        interval: 1m
+        dns:
+          query-name: dashboard.internal
+          query-type: A
+        conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

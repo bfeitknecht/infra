@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agh
+  namespace: agh
+spec:
+  replicas: 1
+  # Recreate: query log/stats are SQLite behind a RWO local-path volume —
+  # two AGH instances must never run against the same data.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: agh
+  template:
+    metadata:
+      labels:
+        app: agh
+    spec:
+      initContainers:
+        # Seed the config on first boot only; afterwards AGH owns the file
+        # on the PVC (UI edits persist across restarts).
+        - name: config-seed
+          image: docker.io/busybox:1.37.0
+          command: ["sh", "-c", "mkdir -p /agh-data/conf && [ -f /agh-data/conf/AdGuardHome.yaml ] || cp /agh-seed/AdGuardHome.yaml /agh-data/conf/AdGuardHome.yaml"]
+          volumeMounts:
+            - name: data
+              mountPath: /agh-data
+            - name: config-seed
+              mountPath: /agh-seed
+              readOnly: true
+      containers:
+        - name: agh
+          image: docker.io/adguard/adguardhome:v0.107.79
+          args:
+            - "-c"
+            - "/opt/adguardhome/conf/AdGuardHome.yaml"
+            - "-w"
+            - "/opt/adguardhome/work"
+            - "--no-check-update"
+          ports:
+            - containerPort: 53
+              name: dns
+              protocol: UDP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /opt/adguardhome/conf
+              subPath: conf
+            - name: data
+              mountPath: /opt/adguardhome/work
+              subPath: work
+          resources:
+            requests:
+              cpu: 32m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            # DNS is the critical service; the web UI is checked by liveness
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: agh-data
+        - name: config-seed
+          secret:
+            secretName: agh-config
