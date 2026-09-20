@@ -25,6 +25,21 @@ data:
         client:
           insecure: true
         conditions: ["[STATUS] == 404"]
+      # kresd ClusterIP (pinned in applications/utilities/dns)
+      - name: dns-internal
+        url: 10.96.0.53
+        interval: 1m
+        dns:
+          query-name: dashboard.internal
+          query-type: A
+        conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
+      - name: dns-public
+        url: 10.96.0.53
+        interval: 1m
+        dns:
+          query-name: example.com
+          query-type: A
+        conditions: ["[DNS_RCODE] == NOERROR"]
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -1,0 +1,19 @@
+$ORIGIN internal.
+$TTL 1h
+@       IN SOA  ns.internal. hostmaster.internal. (
+                2026092001  ; serial
+                6h          ; refresh
+                1h          ; retry
+                1w          ; expire
+                5m )        ; negative TTL
+@       IN NS   ns.internal.
+; The NS target is cosmetic: kresd forwards internal. to knotd by IP (stub
+; mode), so delegation records are never followed. It exists so direct zone
+; queries (dig ... NS) return a well-formed answer.
+ns      IN A    10.10.20.128
+@       IN A    10.10.20.128
+*       IN A    10.10.20.128
+; Explicit records take precedence over the wildcard: use them for
+; non-cluster LAN devices that must answer on their own IP (no Traefik, no
+; internal CA — the device serves its own certificate).
+router  IN A    10.10.10.1

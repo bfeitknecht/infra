@@ -19,9 +19,9 @@ Target: the friend's UGREEN NAS (DXP4800 Plus) on his LAN, reached over Tailscal
 Public names need a DNS record pointing at the (dynamic) home IP; LAN names need a resolver.
 
 - [ ] **DDNS updater** (`applications/utilities/ddns-updater/`): keeps the single apex A record `0xbf.ch` pointed at the current home IP — prerequisite for anything public on the domain. Cloudflare API token via SOPS. Never per-subdomain records: the wildcard cert covers `*.0xbf.ch`, Traefik routes subdomains by Host header.
-- [ ] **Knot Resolver** (`applications/utilities/dns/`): LAN-only recursive resolver with DNSSEC validation enabled, wildcard local data for internal names → `10.10.20.128`. Never exposed publicly. Own LoadBalancer IP from the ipam pool (DNS is not HTTP — no Gateway involvement).
+- [x] **Knot Resolver** (`applications/utilities/dns/`): LAN-only recursive resolver with DNSSEC validation enabled, never exposed publicly. Shipped as one pod: kresd (recursion + DNSSEC, ClusterIP `10.96.0.53`) + knotd (authoritative `internal.` zone, wildcard → `10.10.20.128`). kresd local-data cannot expand wildcards, so the zone is grafted via an authoritative stub (`forward: subtree: internal, authoritative: true, dnssec: false`) — the documented pattern for reserved TLDs.
 - [ ] Point devices at it (router DHCP or manual), retire any hosts-file stopgaps.
-- [ ] **Pi-hole** (`applications/utilities/pihole/`): LAN-only ad-blocking DNS, forwarding to Knot (Knot stays the recursive/validating resolver, Pi-hole is not the sole resolver). Decision on ordering: Pi-hole first as the LAN-facing resolver with Knot behind it, or Knot first and Pi-hole later.
+- [x] **Pi-hole** (`applications/utilities/pihole/`): LAN-only ad-blocking DNS at `10.10.20.153` (static LB IP — the router DHCP target must not float), forwarding to kresd (Knot stays the recursive/validating resolver, Pi-hole is not the sole resolver). Admin UI at `pihole.internal` via HTTPRoute. Needs `pihole-credentials.sops.yaml` (Secret `pihole-credentials`, key `password`) before the pods will start.
 
 ## Phase 3 — Forgejo (high priority)
 
@@ -68,7 +68,7 @@ A second worker unlocks the heavy stuff; the GPU is the point.
 - [ ] Decision: public exposure mechanism for public apps — home-router port-forward + DDNS (Phase 2 covers the DDNS half), Tailscale Funnel, or an OCI-side ingress. Gates every public app.
 - [ ] Observability: metrics-server, kube-prometheus-stack, Gatus + alerting.
 - [ ] Kubernetes 1.35 → 1.37 (`talosctl upgrade-k8s`), Talos 1.14.0 → 1.14.1, local kubectl upgrade.
-- [ ] Tailscale subnet route from the worker (off-LAN access without DNS gymnastics).
+- [x] Tailscale subnet route from the worker (off-LAN access without DNS gymnastics) — `10.10.10.0/24` and `10.10.20.0/24` advertised from `rbpi`.
 - [ ] Dex (OIDC) for SSO across Forgejo/Grafana.
 - [ ] Ollama + Open WebUI (GPU via the Blade).
 - [ ] XMPP (Prosody), Mumble, I2P, Yggdrasil.
@@ -78,4 +78,4 @@ A second worker unlocks the heavy stuff; the GPU is the point.
 - One directory per app under `kubernetes/applications/<category>/<app>/` with its own `kustomization.yaml`.
 - One Kustomization entry in `cluster/applications.yaml`, `dependsOn` only what it actually needs (usually `traefik`).
 - Exposure via `HTTPRoute` (Gateway API only); secrets via SOPS; storage via local-path PVCs.
-- DNS: one apex record + wildcard cert; adding an app means adding an HTTPRoute, never a DNS entry.
+- DNS: one apex record + wildcard cert; adding an app means adding an HTTPRoute, never a DNS entry. Exception: non-cluster LAN devices get explicit records in the knot `internal.` zone (e.g. `router.internal` → the router's own IP) — no HTTPRoute, no Traefik, no internal CA.

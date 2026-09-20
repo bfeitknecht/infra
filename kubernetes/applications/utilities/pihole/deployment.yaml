@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  # Recreate: gravity.db is SQLite behind a RWO local-path volume —
+  # two FTL instances must never run against the same data.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+        - name: pihole
+          image: docker.io/pihole/pihole:2026.07.2
+          # FTL needs these to bind :53 and manage its sockets;
+          # NET_ADMIN (DHCP) and SYS_TIME (NTP server) are deliberately not granted
+          securityContext:
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
+                - NET_RAW
+                - CHOWN
+          env:
+            - name: TZ
+              value: Europe/Zurich
+            # kresd ClusterIP (pinned in applications/utilities/dns)
+            - name: FTLCONF_dns_upstreams
+              value: "10.96.0.53"
+            # default LOCAL binds loopback only; ALL answers on the pod IP
+            - name: FTLCONF_dns_listeningMode
+              value: "ALL"
+            - name: FTLCONF_webserver_api_password
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-credentials
+                  key: password
+          ports:
+            - containerPort: 53
+              name: dns
+              protocol: UDP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /etc/pihole
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pihole-data

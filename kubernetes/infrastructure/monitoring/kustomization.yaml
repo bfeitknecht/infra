@@ -5,5 +5,6 @@ resources:
   - kube-prometheus-stack.yaml
   - metrics-server.yaml
   - gatus.yaml
+  - grafana.yaml
   - servicemonitors.yaml
   - grafana-credentials.sops.yaml

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dns
+  namespace: dns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dns
+  template:
+    metadata:
+      labels:
+        app: dns
+    spec:
+      containers:
+        # Authoritative server for the internal. zone. Loopback only:
+        # kresd stubs to it over localhost, nothing else reaches it.
+        - name: knotd
+          image: docker.io/cznic/knot:v3.6.0
+          command: ["knotd", "-c", "/knot-config/knot.conf"]
+          ports:
+            - containerPort: 53
+              name: dns
+              protocol: UDP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+          volumeMounts:
+            - name: knot-config
+              mountPath: /knot-config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          livenessProbe:
+            exec:
+              command: ["knotc", "status"]
+            initialDelaySeconds: 5
+            periodSeconds: 30
+        # Recursive resolver with DNSSEC validation for everything public.
+        - name: kresd
+          image: docker.io/cznic/knot-resolver:v6.4.2
+          args: ["-c", "/kresd-config/config.yaml"]
+          ports:
+            - containerPort: 53
+              name: dns
+              protocol: UDP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+          volumeMounts:
+            - name: kresd-config
+              mountPath: /kresd-config
+              readOnly: true
+            - name: kresd-cache
+              mountPath: /var/cache/knot-resolver
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 53
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      volumes:
+        - name: knot-config
+          configMap:
+            name: knot-config
+        - name: kresd-config
+          configMap:
+            name: kresd-config
+        # tmpfs per Knot Resolver docs (cache performance, no disk wear);
+        # default cache size-max is 100M, 256Mi leaves headroom
+        - name: kresd-cache
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
