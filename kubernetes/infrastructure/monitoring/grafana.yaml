@@ -12,5 +12,7 @@ spec:
     - grafana.internal
   rules:
     - backendRefs:
-        - name: kube-prometheus-stack-grafana
+        # namespace-prefixed fullname: the HelmRelease installs as
+        # monitoring-kube-prometheus-stack, not kube-prometheus-stack
+        - name: monitoring-kube-prometheus-stack-grafana
           port: 80

@@ -12,7 +12,7 @@ data:
       title: Infra Status
     endpoints:
       - name: grafana
-        url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
+        url: http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
         interval: 1m
         conditions: ["[STATUS] == 200"]
       - name: traefik-metrics
