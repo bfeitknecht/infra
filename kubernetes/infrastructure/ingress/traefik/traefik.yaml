@@ -72,6 +72,11 @@ spec:
     metrics:
       prometheus:
         enabled: true
+        # dedicated metrics Service (ingress-traefik-metrics:9100) —
+        # the LB service carries only web/websecure
+        # so gatus + the ServiceMonitor scrape this one
+        service:
+          enabled: true
     global:
       checkNewVersion: false
       sendAnonymousUsage: false
