@@ -16,7 +16,8 @@ data:
         interval: 1m
         conditions: ["[STATUS] == 200"]
       - name: traefik-metrics
-        url: http://ingress-traefik.ingress.svc.cluster.local:9100/metrics
+        # the chart exposes metrics on a dedicated Service, not the LB one
+        url: http://ingress-traefik-metrics.ingress.svc.cluster.local:9100/metrics
         interval: 1m
         conditions: ["[STATUS] == 200"]
       - name: gateway-lan
