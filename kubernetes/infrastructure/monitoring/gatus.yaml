@@ -51,6 +51,10 @@ data:
           query-name: dashboard.internal
           query-type: A
         conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
+      - name: homepage
+        url: http://homepage.homepage.svc.cluster.local
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

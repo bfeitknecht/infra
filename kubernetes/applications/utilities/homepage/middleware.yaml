@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: internal-allowlist
+  namespace: homepage
+spec:
+  ipAllowList:
+    sourceRange:
+      - 10.10.0.0/16
+      # HTTPRoute ExtensionRef has no namespace field:
+      # Middleware CRs must live in the route's namespace,
+      # hence this copy of the ingress one.
+      - 100.64.0.0/10

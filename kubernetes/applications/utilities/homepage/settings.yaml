@@ -1,0 +1,7 @@
+title: 0xbf.ch
+theme: dark
+color: slate
+headerStyle: boxed
+layout:
+  Infrastructure:
+    columns: 3
