@@ -3,13 +3,12 @@ kind: Kustomization
 namespace: dns
 resources:
   - namespace.yaml
-  - deployment.yaml
-  - service.yaml
+  - resolver.yaml
 configMapGenerator:
-  - name: kresd-config
-    files:
-      - kresd/config.yaml
   - name: knot-config
     files:
       - knot/knot.conf
       - knot/internal.zone
+  - name: kresd-config
+    files:
+      - kresd/config.yaml

@@ -3,13 +3,12 @@ logging:
   level: info
 network:
   listen:
-    # pod interface only: knotd owns 127.0.0.1:53 in the same network namespace
     - interface: eth0@53
 forward:
-  # internal. is a reserved TLD with no public DNS;
-  # DNSSEC validation would reject it as indistinguishable from spoofing, 
-  # so it is grafted via an authoritative stub instead
-  # (per Knot Resolver docs, "fake top-level domains").
+  # internal. is a reserved TLD with no public DNS; DNSSEC validation would
+  # reject it as indistinguishable from spoofing, so it is grafted via an
+  # authoritative stub instead (per Knot Resolver docs, "fake top-level
+  # domains"). knotd runs in the same pod and answers on loopback.
   - subtree: internal
     servers: [ 127.0.0.1 ]
     options:
