@@ -24,9 +24,15 @@ spec:
           ports:
             - containerPort: 3000
               name: http
+          # Each file mounted individually, subPath mount into the ConfigMap-mounted
+          # /app/config dir fails container creation with ENOTDIR (verified 2026-09-21).
           volumeMounts:
             - name: config
-              mountPath: /app/config
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+            - name: config
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
             - name: services
               mountPath: /app/config/services.yaml
               subPath: services.yaml

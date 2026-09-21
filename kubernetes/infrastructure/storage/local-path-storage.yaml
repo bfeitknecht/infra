@@ -135,6 +135,10 @@ data:
     {
             "nodePathMap":[
             {
+                    "node":"rbpi",
+                    "paths": ["/var/mnt/storage/nvme0", "/var/mnt/storage/nvme1"]
+            },
+            {
                     "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
                     "paths": ["/var/mnt/storage"]
             }

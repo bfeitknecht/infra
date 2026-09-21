@@ -1,5 +1,5 @@
 .private
 .direnv
 kubeconfig
-talosconfig
+talos/talosconfig
 talos/output
