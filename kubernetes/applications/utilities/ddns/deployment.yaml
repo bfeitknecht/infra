@@ -26,7 +26,7 @@ spec:
                     type: RuntimeDefault
             containers:
                 - name: cloudflare-ddns
-                  image: ghcr.io/favonia/cloudflare-ddns:2
+                  image: ghcr.io/favonia/cloudflare-ddns:1
                   imagePullPolicy: IfNotPresent
                   env:
                     - name: CLOUDFLARE_API_TOKEN
