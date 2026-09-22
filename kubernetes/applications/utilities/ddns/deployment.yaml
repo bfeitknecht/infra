@@ -33,7 +33,7 @@ spec:
                       valueFrom:
                         secretKeyRef:
                           name: cloudflare-ddns
-                          key: api-token
+                          key: token
                     - name: DOMAINS
                       value: 0xbf.ch,*.0xbf.ch
                     - name: PROXIED
