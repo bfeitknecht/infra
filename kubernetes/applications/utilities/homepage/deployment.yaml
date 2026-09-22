@@ -44,15 +44,23 @@ spec:
             limits:
               memory: 512Mi
           readinessProbe:
+            # Host header required: homepage rejects requests whose Host is not in
+            # HOMEPAGE_ALLOWED_HOSTS (the kubelet probe defaults to the pod IP).
             httpGet:
               path: /
               port: 3000
+              httpHeaders:
+                - name: Host
+                  value: homepage.internal
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /
               port: 3000
+              httpHeaders:
+                - name: Host
+                  value: homepage.internal
             initialDelaySeconds: 30
             periodSeconds: 30
       volumes:
