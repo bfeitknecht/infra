@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: cloudflare-ddns
+    namespace: ddns
+stringData:
+    token: ENC[AES256_GCM,data:l8VL5plFO/kZDjvxra23ECYGtMtsHoXS0k9ulWmQVUk4g+Qkw2vq0A4v6fW2D1yqWtPBgz0=,iv:CPJvxr4suE3ahFrgB4lYYao/fMyY7ImAsTmNHIf92kg=,tag:XcvyWqE8zhqjwPYoxMZ+iw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBHdjU5V0ZMQmlqdXk2TEZ5
+            QlhiaDdtVEhiNGNCRjRON1dlWFd0RTJLL3pzCjIweEpoSXBLOEhyY0hVQXdKRHB0
+            UGNheitkY2JFVzBoNnBGdFcvSWIycDQKLS0tIDE0dVo1MVA0QXZGWUpOWEVpZlV4
+            VlZkdFRJZzVKNzNuQWlBalhjT0thSUEKnnGmdcnABsBrH9JQjPXUBiRueA6dn1RX
+            b/S4PZeWfMvzQLLSWSeBPMBPLKZN5V3RQvc/D4IODdrnDNddZYyOQQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-22T10:55:54Z"
+    mac: ENC[AES256_GCM,data:S7LMvQ5SosHfg29/RBi29rkhFdBYEfB2mQHhIe1SZmwtkjrCBBvTCuuBsNRDbkx/jxxCuHzq7w/eVOgKVUBFzgkw7RNseBp9qy1YxBaF0oLU7qvDILm+p3vGLXsZ3U0sz0Cvdr41Lda4WfngknLmbnzjCxrQlyiRzOa6os6wdbg=,iv:ZSMrEVLVFLu5Zxc2EVc+q6K6vD0y8WjpQbanDoBSf2w=,tag:dBJANjZfnWOujo5NClh8wA==,type:str]
+    version: 3.13.3

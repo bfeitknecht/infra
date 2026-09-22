@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: cloudflare-ddns
+    namespace: ddns
+    labels:
+        app.kubernetes.io/name: cloudflare-ddns
+spec:
+    replicas: 1
+    strategy:
+        # single writer: two updaters would race the Cloudflare record
+        type: Recreate
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: cloudflare-ddns
+    template:
+        metadata:
+            labels:
+                app.kubernetes.io/name: cloudflare-ddns
+        spec:
+            securityContext:
+                runAsNonRoot: true
+                runAsUser: 65532
+                runAsGroup: 65532
+                seccompProfile:
+                    type: RuntimeDefault
+            containers:
+                - name: cloudflare-ddns
+                  image: ghcr.io/favonia/cloudflare-ddns:2
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: CLOUDFLARE_API_TOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          name: cloudflare-ddns
+                          key: api-token
+                    - name: DOMAINS
+                      value: 0xbf.ch,*.0xbf.ch
+                    - name: PROXIED
+                      value: "false"
+                    - name: UPDATE_ON_START
+                      value: "true"
+                    - name: UPDATE_CRON
+                      value: "*/5 * * * *"
+                    - name: DELETE_ON_STOP
+                      value: "false"
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 16Mi
+                    limits:
+                      memory: 64Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop: ["ALL"]
