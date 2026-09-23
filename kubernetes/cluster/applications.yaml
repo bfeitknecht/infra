@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./kubernetes/applications/utilities/dns
+  path: ./kubernetes/applications/dns
   prune: true
   wait: true
   sourceRef:
@@ -23,7 +23,7 @@ spec:
     - name: dns
     - name: traefik
   interval: 10m0s
-  path: ./kubernetes/applications/utilities/agh
+  path: ./kubernetes/applications/agh
   prune: true
   wait: true
   sourceRef:
@@ -43,7 +43,7 @@ spec:
   dependsOn:
     - name: traefik
   interval: 10m0s
-  path: ./kubernetes/applications/utilities/homepage
+  path: ./kubernetes/applications/homepage
   prune: true
   wait: true
   sourceRef:
@@ -61,7 +61,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./kubernetes/applications/utilities/ddns
+  path: ./kubernetes/applications/ddns
   prune: true
   wait: true
   sourceRef:
@@ -71,3 +71,25 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apex
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: traefik
+  interval: 10m0s
+  path: ./kubernetes/applications/apex
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  ignore:
+    - paths:
+        - /spec/template/spec/containers/0/image
+      target:
+        kind: Deployment
+        name: apex

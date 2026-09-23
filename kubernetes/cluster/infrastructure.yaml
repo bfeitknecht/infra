@@ -148,3 +148,17 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: keel
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/keel
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system

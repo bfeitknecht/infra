@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: apex
+    namespace: apex
+    labels:
+        app.kubernetes.io/name: apex
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: apex
+    template:
+        metadata:
+            labels:
+                app.kubernetes.io/name: apex
+            annotations:
+                # Tier-2 release engine: Keel polls the :latest digest of the
+                # image published by the apex app repo and re-rolls this pod on
+                # change. Flux ignores this field via the Kustomization
+                # spec.ignore (see cluster/applications.yaml).
+                keel.sh/trigger: poll
+                keel.sh/policy: latest
+                keel.sh/match-tag: "true"
+        spec:
+            containers:
+                - name: apex
+                  # Hardcoded :latest on purpose — Keel follows the digest.
+                  image: ghcr.io/bfeitknecht/apex:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 8080
+                      name: http
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 32Mi
+                    limits:
+                      memory: 128Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop: ["ALL"]
+                    seccompProfile:
+                      type: RuntimeDefault

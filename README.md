@@ -30,7 +30,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 ### Planned
 
 - **Communication:** XMPP, Mumble
-- **AI & Mesh:** Ollama, Opencode, Open WebUI, I2P, Yggdrasil
+- **AI & Mesh:** Ollama, Opencode, Open WebUI, I2P, Yggdrasil, Reticulum, Meshtastic
 - **Miscellaneous**: Dex, ATProto PDS
 
 ### Repository Structure

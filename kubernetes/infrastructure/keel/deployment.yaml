@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: keel
+    namespace: keel
+    labels:
+        app: keel
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: keel
+    template:
+        metadata:
+            labels:
+                app: keel
+        spec:
+            serviceAccountName: keel
+            containers:
+                - name: keel
+                  image: ghcr.io/keel-hq/keel:0.22.3
+                  imagePullPolicy: IfNotPresent
+                  command: ["/bin/keel"]
+                  env:
+                    - name: NAMESPACE
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: metadata.namespace
+                    # Poll-based registry watching only: no webhook/Actions
+                    # triggers, no Helm3 provider (the secrets RBAC rule is
+                    # omitted for the same reason), no Basic Auth (the Admin
+                    # UI/API is not exposed — there is no Service for it).
+                    - name: POLL
+                      value: "true"
+                    - name: POLL_DEFAULTSCHEDULE
+                      value: "@every 1m"
+                    - name: HELM3_PROVIDER
+                      value: "false"
+                    - name: NOTIFICATION_LEVEL
+                      value: "info"
+                  ports:
+                    - containerPort: 9300
+                  startupProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 9300
+                    initialDelaySeconds: 0
+                    periodSeconds: 5
+                    timeoutSeconds: 5
+                    failureThreshold: 30
+                  livenessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 9300
+                    initialDelaySeconds: 5
+                    timeoutSeconds: 10
+                  readinessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 9300
+                    initialDelaySeconds: 5
+                    timeoutSeconds: 10
+                  resources:
+                    limits:
+                      cpu: 100m
+                      memory: 128Mi
+                    requests:
+                      cpu: 50m
+                      memory: 64Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: false
+                    capabilities:
+                      drop: ["ALL"]
