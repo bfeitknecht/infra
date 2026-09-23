@@ -1,6 +1,7 @@
 clusterName: infra
-clusterEndpoint: https://140.238.213.197:6443
 # clusterEndpoint: https://10.20.20.10:6443
+clusterEndpoint: https://100.73.186.19:6443 # tailscale
+# clusterEndpoint: https://140.238.213.197:6443 # public
 kubernetesVersion: 1.35.3
 talosVersion: 1.14.0
 
@@ -13,12 +14,10 @@ nodes:
   # OCI Ampere A1 control plane.
   - host: oci
     ip: 10.20.20.10
-    # ip: 140.238.213.197 # public IP
     role: control-plane
     platform: oracle
 
   # Raspberry Pi 5 worker.
   - host: rbpi
     ip: 10.10.20.10
-    # ip: 100.97.31.114 # tailscale IP
     role: worker
