@@ -9,23 +9,20 @@ metadata:
     namespace: knative-serving
 spec:
     version: "1.23.0"
-    # All Knative config values live here (the supported mechanism — the
-    # operator renders them into the config-map layer on every reconcile).
+    ingress:
+        istio:
+            enabled: false
     config:
         network:
-            # The net-gateway-api ingress layer: KSvc HTTPRoutes are rendered on
-            # the existing Traefik Gateway — no Kourier, no extra LoadBalancer.
+            # The net-gateway-api ingress layer: KSvc HTTPRoutes are rendered
+            # on the existing Traefik Gateway — no Kourier, no extra LoadBalancer.
             ingress-class: "net-gateway-api"
-            # Whim domain template: every Knative Service is live at
-            # <name>.0xbf.ch — the KSvc name declares the domain, no per-app
-            # route or DNS work.
             domainTemplate: "{{.Name}}.0xbf.ch"
         gateway:
-            # Route Knative's per-service HTTPRoutes through the existing
-            # Traefik Gateway — the wildcard DNS + router forward already
-            # carry *.0xbf.ch to it.
+            # Route Knative's per-service HTTPRoutes through the
+            # existing Traefik Gateway — the wildcard DNS + router forward
+            # already carry *.0xbf.ch to it.
             external-gateways: |
                 - class: traefik
                   gateway: ingress/traefik-gateway
                   service: ingress/ingress-traefik
-
