@@ -1,0 +1,27 @@
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: local-path-pvcs
+  namespace: k8up
+spec:
+  backend:
+    repoPasswordSecretRef:
+      name: k8up-password
+      key: password
+    s3:
+      endpoint: http://dxp4800plus-brd.tail112719.ts.net:3900
+      bucket: k8up
+      accessKeyIDSecretRef:
+        name: garage-s3-credentials
+        key: access-key-id
+      secretAccessKeySecretRef:
+        name: garage-s3-credentials
+        key: secret-access-key
+  backup:
+    schedule: "0 3 * * *"
+  prune:
+    schedule: "30 3 * * *"
+    retention:
+      keepDaily: 7
+      keepWeekly: 4
+      keepMonthly: 3

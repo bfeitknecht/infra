@@ -1,8 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-# The Knative Operator creates the CRDs + control plane at runtime from the
-# KnativeServing CR (the Cilium pattern — no vendored manifests; all config
-# values live in kserving.yaml's spec.config, the supported mechanism).
-resources:
-    - operator.yaml
-    - kserving.yaml

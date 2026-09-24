@@ -78,3 +78,30 @@ spec:
   sourceRef:
     kind: GitRepository
     name: prometheus-crds
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: k8up-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/k8up-io/k8up
+  ref:
+    tag: k8up-4.10.0
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: k8up-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  wait: true
+  prune: false
+  path: ./charts/k8up/crds
+  sourceRef:
+    kind: GitRepository
+    name: k8up-crds
