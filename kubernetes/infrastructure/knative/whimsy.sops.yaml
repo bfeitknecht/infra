@@ -27,7 +27,7 @@ metadata:
     name: default
     namespace: whimsy
 imagePullSecrets:
-    - name: ghcr-pull
+    - name: dockerconfigjson
 sops:
     age:
         - enc: |
@@ -47,7 +47,7 @@ sops:
 apiVersion: v1
 kind: Secret
 metadata:
-    name: ghcr-pull
+    name: dockerconfigjson
     namespace: whimsy
 type: kubernetes.io/dockerconfigjson
 stringData:

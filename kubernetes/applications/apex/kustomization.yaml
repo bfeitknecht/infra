@@ -5,3 +5,5 @@ resources:
     - deployment.yaml
     - service.yaml
     - httproute.yaml
+    - serviceaccount.yaml
+    - pull-secret.sops.yaml
