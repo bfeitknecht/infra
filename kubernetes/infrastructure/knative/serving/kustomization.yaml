@@ -3,4 +3,5 @@ kind: Kustomization
 # Depends on the operator Kustomization: the KnativeServing CRD is created by
 # the operator at runtime, so this must apply after it reports Ready.
 resources:
+    - namespace.yaml
     - kserving.yaml
