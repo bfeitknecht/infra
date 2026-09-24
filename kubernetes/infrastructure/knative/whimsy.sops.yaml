@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: whimsy
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBseFlVOHRrRU45Y3hwSXk0
+            VSs0NUFuOVlGWVYzK0phUk8wTWROei9mbGswCmZTcXM3QUF5UEVUN0xhNy82Z3A4
+            b3dXL0lsTTRGTXBKRERPSllqUnAydGsKLS0tIHV1Rkdhd2c1MmVaYjFlWGJTM0VL
+            bjNhRzBTZVNZWkhKenJlSGJWYnNKajgKmTNSD2iVKcYcJBv/XXLqWmwUjvCrfIZZ
+            xum7qMTFAPLoRt9Dux3xa+ch5sO6x28oHRqt4kCypXUHKRrEoUFSUA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-23T23:19:54Z"
+    mac: ENC[AES256_GCM,data:XjcLkZgmyqoKWkv41Y94OREUUAib/X0Jwjokhdr1e6XR06WCPhv4Pjq8ZNnHXTU5U5g8fwyBdEGv4bCvqNnLljw+oPhxc6y2EgT8qs04c2L4PYq5sNznFqtZFrqzhC00OkOtQ8hCjiGXSkN9FsTvyI10XQC/4C5y83yVbZI+OYY=,iv:WLDBhctmEz08ql9v9pSwX4Vi/FtSTQU1Qcot/ygBMuk=,tag:OZsag12aey/NNQ9gaY0YeQ==,type:str]
+    version: 3.13.3
+---
+# The namespace's default ServiceAccount carries the GHCR pull Secret,
+# so `kn service create/update -n whimsy` never needs a serviceAccountName
+# and private whim images pull without per-service config.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: default
+    namespace: whimsy
+imagePullSecrets:
+    - name: ghcr-pull
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBseFlVOHRrRU45Y3hwSXk0
+            VSs0NUFuOVlGWVYzK0phUk8wTWROei9mbGswCmZTcXM3QUF5UEVUN0xhNy82Z3A4
+            b3dXL0lsTTRGTXBKRERPSllqUnAydGsKLS0tIHV1Rkdhd2c1MmVaYjFlWGJTM0VL
+            bjNhRzBTZVNZWkhKenJlSGJWYnNKajgKmTNSD2iVKcYcJBv/XXLqWmwUjvCrfIZZ
+            xum7qMTFAPLoRt9Dux3xa+ch5sO6x28oHRqt4kCypXUHKRrEoUFSUA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-23T23:19:54Z"
+    mac: ENC[AES256_GCM,data:XjcLkZgmyqoKWkv41Y94OREUUAib/X0Jwjokhdr1e6XR06WCPhv4Pjq8ZNnHXTU5U5g8fwyBdEGv4bCvqNnLljw+oPhxc6y2EgT8qs04c2L4PYq5sNznFqtZFrqzhC00OkOtQ8hCjiGXSkN9FsTvyI10XQC/4C5y83yVbZI+OYY=,iv:WLDBhctmEz08ql9v9pSwX4Vi/FtSTQU1Qcot/ygBMuk=,tag:OZsag12aey/NNQ9gaY0YeQ==,type:str]
+    version: 3.13.3
+---
+apiVersion: v1
+kind: Secret
+metadata:
+    name: ghcr-pull
+    namespace: whimsy
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson:
+        auths:
+            ghcr.io:
+                username: ENC[AES256_GCM,data:8ZT+A3giFESjnwE=,iv:1740+B7MjXvQhiAD2kZ1Cy/TXa7MT1lT5u8HsQt3snA=,tag:dbY+M416OlcUp/h6Easm0A==,type:str]
+                password: ENC[AES256_GCM,data:dScDo8qHn3FVRd7WGkO5U3EvFAHE40OEbQxprbCCCrXuJ8Pt5oq2Tg==,iv:0M/7KVw3FZ6cG4+GOv0zDlL7g6vhYlC2UEsx72M4eT0=,tag:QQ+Uu+CMf3FjOpOW+wxbXg==,type:str]
+                auth: ENC[AES256_GCM,data:utuja2IpccfLUhV060tS2Ih1cInk+91rJm0kL4jVv2qXivEXQRY3K6rbIJ254IbuH/spa9vbNgAwsWH0kpVKtbASrYj9CwgP,iv:tMBTontiqNF4qG6JByvGnDUVMhgfNAqbaqyAuOFasng=,tag:jghK4PN/sfliz6VCXIF0jw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBseFlVOHRrRU45Y3hwSXk0
+            VSs0NUFuOVlGWVYzK0phUk8wTWROei9mbGswCmZTcXM3QUF5UEVUN0xhNy82Z3A4
+            b3dXL0lsTTRGTXBKRERPSllqUnAydGsKLS0tIHV1Rkdhd2c1MmVaYjFlWGJTM0VL
+            bjNhRzBTZVNZWkhKenJlSGJWYnNKajgKmTNSD2iVKcYcJBv/XXLqWmwUjvCrfIZZ
+            xum7qMTFAPLoRt9Dux3xa+ch5sO6x28oHRqt4kCypXUHKRrEoUFSUA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-23T23:19:54Z"
+    mac: ENC[AES256_GCM,data:XjcLkZgmyqoKWkv41Y94OREUUAib/X0Jwjokhdr1e6XR06WCPhv4Pjq8ZNnHXTU5U5g8fwyBdEGv4bCvqNnLljw+oPhxc6y2EgT8qs04c2L4PYq5sNznFqtZFrqzhC00OkOtQ8hCjiGXSkN9FsTvyI10XQC/4C5y83yVbZI+OYY=,iv:WLDBhctmEz08ql9v9pSwX4Vi/FtSTQU1Qcot/ygBMuk=,tag:OZsag12aey/NNQ9gaY0YeQ==,type:str]
+    version: 3.13.3

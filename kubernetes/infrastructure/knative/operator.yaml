@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: knative-operator
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: knative-operator
+    namespace: knative-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: knative-operator
+rules:
+    # The operator synthesizes the entire Knative Serving stack (CRDs, control
+    # plane, gateways) from KnativeServing CRs — upstream ships it with
+    # cluster-admin-equivalent RBAC for exactly this reason.
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    name: knative-operator
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: knative-operator
+subjects:
+    - kind: ServiceAccount
+      name: knative-operator
+      namespace: knative-operator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: knative-operator
+    namespace: knative-operator
+    labels:
+        name: knative-operator
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            name: knative-operator
+    template:
+        metadata:
+            labels:
+                name: knative-operator
+        spec:
+            serviceAccountName: knative-operator
+            containers:
+                - name: knative-operator
+                  # The operator deploys the Knative version requested in the
+                  # KnativeServing CR (1.23.0 in kserving.yaml).
+                  image: gcr.io/knative-releases/knative.dev/operator/cmd/operator:v1.23.1
+                  command:
+                    - /ko-app/operator
+                  args:
+                    - --zap-encoder=json
+                  env:
+                    - name: POD_NAME
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: metadata.name
+                    - name: SYSTEM_NAMESPACE
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: metadata.namespace
+                    - name: METRICS_DOMAIN
+                      value: knative.dev/operator
+                  ports:
+                    - containerPort: 9090
+                      name: metrics
+                  readinessProbe:
+                    httpGet:
+                      path: /readiness
+                      port: 9090
+                    periodSeconds: 10
+                    failureThreshold: 3
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 64Mi
+                    limits:
+                      cpu: 500m
+                      memory: 256Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    runAsNonRoot: true
+                    capabilities:
+                      drop: ["ALL"]
