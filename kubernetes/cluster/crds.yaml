@@ -105,3 +105,30 @@ spec:
   sourceRef:
     kind: GitRepository
     name: k8up-crds
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: knative-operator-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/knative/operator
+  ref:
+    tag: knative-v1.23.1
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: knative-operator-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  wait: true
+  prune: false
+  path: ./config/crd
+  sourceRef:
+    kind: GitRepository
+    name: knative-operator-crds

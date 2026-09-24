@@ -175,6 +175,8 @@ metadata:
   name: knative-operator
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: knative-operator-crds
   interval: 10m0s
   path: ./kubernetes/infrastructure/knative/operator
   prune: true

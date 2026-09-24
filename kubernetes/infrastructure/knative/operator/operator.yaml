@@ -73,12 +73,9 @@ spec:
                   ports:
                     - containerPort: 9090
                       name: metrics
-                  readinessProbe:
-                    httpGet:
-                      path: /readiness
-                      port: 9090
-                    periodSeconds: 10
-                    failureThreshold: 3
+                  # No readiness/liveness probe on purpose: upstream v1.23.1 has
+                  # none — the operator serves only metrics on 9090, so probing
+                  # it deadlocks the rollout (pod never Ready).
                   resources:
                     requests:
                       cpu: 50m
