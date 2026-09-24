@@ -12,10 +12,12 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # No hostname on purpose: the listener matches all hostnames, so both the
+    # bare 0xbf.ch and *.0xbf.ch subdomains attach here. Do not add a hostname
+    # filter — a wildcard would stop matching the bare domain again.
     - name: websecure
       protocol: HTTPS
       port: 8443
-      hostname: "*.0xbf.ch"
       allowedRoutes:
         namespaces:
           from: All

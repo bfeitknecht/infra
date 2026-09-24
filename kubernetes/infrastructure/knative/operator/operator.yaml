@@ -59,8 +59,6 @@ spec:
                   image: gcr.io/knative-releases/knative.dev/operator/cmd/operator:v1.23.1
                   command:
                     - /ko-app/operator
-                  args:
-                    - --zap-encoder=json
                   env:
                     - name: POD_NAME
                       valueFrom:
