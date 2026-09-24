@@ -152,13 +152,31 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: knative
+  name: knative-operator
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/knative/operator
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: knative-serving
   namespace: flux-system
 spec:
   dependsOn:
-    - name: traefik
+    - name: knative-operator
   interval: 10m0s
-  path: ./kubernetes/infrastructure/knative
+  path: ./kubernetes/infrastructure/knative/serving
   prune: true
   wait: true
   healthChecks:
@@ -169,10 +187,6 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: flux-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

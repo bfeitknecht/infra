@@ -6,4 +6,4 @@ resources:
     - service.yaml
     - httproute.yaml
     - serviceaccount.yaml
-    - pull-secret.sops.yaml
+    - ghcr.sops.yaml
