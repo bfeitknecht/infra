@@ -38,6 +38,9 @@ spec:
         expose:
           default: true
         exposedPort: 80
+        # Zyxel router refuses virtual LB IP (10.10.20.128),
+        # so WAN entry binds Traefik directly to rbpi (10.10.20.10).
+        hostPort: 80
         http:
           redirections:
             entryPoint:
@@ -49,6 +52,7 @@ spec:
         expose:
           default: true
         exposedPort: 443
+        hostPort: 443
     providers:
       kubernetesGateway:
         enabled: true
