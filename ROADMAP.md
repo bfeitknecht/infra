@@ -6,13 +6,13 @@ Platform baseline is live: Flux reconciles the full tree (`storage → cilium �
 
 Target: the friend's UGREEN NAS (DXP4800 Plus) on his LAN, reached over Tailscale. k8up (restic-based) backs up everything non-declarative — the local-path PVC data on the NVMe now, SATA SSDs later. Declarative state lives in git; secrets are backed up independently; etcd is deferred (the OCI control plane is trusted for now) but the destination is chosen so etcd backups can plug in later.
 
-- [ ] **Network path:** friend runs Tailscale on the NAS (UGOS app or Docker container) and **shares the NAS node** to our tailnet (Tailscale admin → Share); accept the share. `rbpi` (already on the tailnet via `ext-tailscale`) then reaches the NAS at its `100.x` address — WireGuard-encrypted transport, no UGREEN Link cloud relay (that portal is for admin UI only, never backup traffic).
-- [ ] **Destination backend — decision:**
-    - **Garage (S3) in Docker on the NAS** — recommended: OSS, single binary, no GUI (AIStor is MinIO's paid successor; MinIO OSS itself is deprecated). Future-proof: the same endpoint later serves etcd backups (velero) — "plug into the UGREEN" as requested. Plain HTTP is fine over the tailnet (WireGuard wraps transport; restic encrypts at rest).
-    - **SFTP** (UGOS SSH + limited user + key) — zero extra services on the NAS, restic-native, but no velero path later.
-- [ ] **k8up operator:** HelmRepository `https://k8up-io.github.io/k8up`, HelmRelease `k8up` 4.10.0; CRDs via `cluster/crds.yaml` (GitRepository `k8up-io/k8up` @ `k8up-4.10.0`, path `./charts/k8up/crds`, `prune: false`).
-- [ ] **Schedule CR:** nightly restic backup of all local-path PVCs with retention (e.g. 7 daily / 4 weekly / 3 monthly).
-- [ ] SOPS secrets: restic repository password + S3 credentials (owner encrypts).
+- [x] **Network path:** NAS on the tailnet at `dxp4800plus-brd.tail112719.ts.net` — WireGuard-encrypted transport, no UGREEN Link cloud relay (that portal is for admin UI only, never backup traffic).
+- [x] **Destination backend — Garage (S3) in Docker on the NAS:** OSS, single binary, no GUI (AIStor is MinIO's paid successor; MinIO OSS itself is deprecated). Future-proof: the same endpoint later serves etcd backups (velero). Plain HTTP is fine over the tailnet (WireGuard wraps transport; restic encrypts at rest).
+- [x] **k8up operator:** HelmRepository `https://k8up-io.github.io/k8up`, HelmRelease `k8up` 4.10.0 (operator v2.16.0); CRDs via `cluster/crds.yaml` (GitRepository `k8up-io/k8up` @ `k8up-4.10.0`, path `./charts/k8up/crds`, `prune: false`); schedules fire in `Europe/Zurich`; global S3/repo-password env vars on the operator so per-namespace Schedules need no backend block and no secret copies.
+- [x] **Backup model — namespace-scoped, opt-in per app:** k8up backs up the PVCs of the namespace a Schedule lives in, nothing else. No Schedules exist today (monitoring/agh deliberately excluded); an app opts in by adding a Schedule to its own directory (snippet in README).
+- [x] SOPS secrets: restic repository password + Garage S3 credentials (owner encrypts).
+- [ ] **Smoke-test the endpoint:** bucket exists + credentials work + restic round-trip (README "Verifying the backup path"), after the next tag deploy.
+- [ ] **Restore drill:** restore a real snapshot to a scratch location once a tier-1 app with a PVC exists.
 
 ## Phase 2 — DDNS + DNS foundation
 

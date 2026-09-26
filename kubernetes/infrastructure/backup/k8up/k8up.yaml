@@ -22,4 +22,30 @@ spec:
         kind: HelmRepository
         name: k8up
         namespace: flux-system
+  values:
+    k8up:
+      # cron schedules fire in this timezone (default UTC)
+      timezone: Europe/Zurich
+      # global backend defaults: per-namespace Schedules need no backend block
+      # and no secret copies (k8up backs up the PVCs of the Schedule's namespace)
+      envVars:
+        - name: BACKUP_GLOBALS3ENDPOINT
+          value: http://dxp4800plus-brd.tail112719.ts.net:3900
+        - name: BACKUP_GLOBALS3BUCKET
+          value: k8up
+        - name: BACKUP_GLOBALACCESSKEYID
+          valueFrom:
+            secretKeyRef:
+              name: garage-s3-credentials
+              key: access-key-id
+        - name: BACKUP_GLOBALSECRETACCESSKEY
+          valueFrom:
+            secretKeyRef:
+              name: garage-s3-credentials
+              key: secret-access-key
+        - name: BACKUP_GLOBALREPOPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: k8up-password
+              key: password
   targetNamespace: k8up
