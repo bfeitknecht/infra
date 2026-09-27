@@ -32,6 +32,7 @@ kubernetes/
 │   └── ghcr-pat.sops.yaml
 ├── infrastructure/
 │   ├── storage/                local-path-provisioner
+│   ├── backup/                 k8up (restic → Garage S3 on the friend's NAS; no Schedule in-tree)
 │   ├── keel/                   Keel image updater (poll-based, drives tier-2 :latest apps)
 │   ├── knative/                Knative Operator v1.23.1 + KnativeServing CR (1.23.0, creates
 │   │                           CRDs + control plane + net-gateway-api ingress at runtime),
@@ -60,6 +61,7 @@ storage → cilium → ipam
 cilium also dependsOn: prometheus-crds
 monitoring also dependsOn: prometheus-crds, traefik
 traefik also dependsOn: gateway-api-crds, traefik-crds
+backup dependsOn: k8up-crds
 ```
 
 Hard constraint behind this shape: a Kustomization's server-side dry-run validates its entire manifest set before applying anything. A custom resource whose CRD does not exist yet fails the dry-run and nothing in that Kustomization applies — including the HelmRelease that would have created the CRD. Therefore:
@@ -83,6 +85,7 @@ Hard constraint behind this shape: a Kustomization's server-side dry-run validat
 - **pihole 2026.07.2**: REMOVED — replaced by AdGuard Home (`applications/agh/`, namespace `agh`). Kept as history: FTL v6 refused to forward the reserved `.internal` TLD (RFC 9760 hardening, no toggle), returned 403 on `GET /`, and needed raw dnsmasq `address=` lines as a wildcard workaround — all reasons for the swap.
 - **agh (AdGuard Home) v0.107.79**: LAN-facing DNS edge at `10.10.20.153` (static LB IP — inherited from Pi-hole; the router DHCP field and Tailscale split DNS point here and must not float). Forwards everything (including `.internal`) to kresd — AGH does not special-case the reserved TLD. Config is seeded on first boot from `agh-config.sops.yaml` (Secret `agh-config`, whole `AdGuardHome.yaml` as one `stringData` value, bcrypt admin hash inside) by an initContainer that copies it onto the PVC only if absent; afterwards AGH owns the file on the PVC and UI edits persist — the seed is the git-side intent for upstreams/filters, re-seeding requires deleting `conf/AdGuardHome.yaml` from the PVC. Admin UI at `agh.internal` (allowlisted middleware copy lives in the `agh` namespace — HTTPRoute ExtensionRef is same-namespace only).
 - **homepage v2.4.0**: dashboard at `homepage.internal` (allowlisted middleware copy in the `homepage` namespace). Config: `settings.yaml` + `kubernetes.yaml` via ConfigMap (configMapGenerator → pod rolls on change), `services.yaml` via Secret `homepage-services` (sops — contains the AGH widget credentials and the Grafana API token; re-seeding follows the agh-config pattern). Widgets: adguard (AGH stats via in-cluster Service), gatus (health overview), grafana (service-account token). Kubernetes cluster/nodes stats via the `kubernetes.yaml` config + RBAC (`rbac.yaml`: SA + ClusterRole incl. metrics.k8s.io — served by metrics-server). `HOMEPAGE_ALLOWED_HOSTS` pins the accepted Host header.
+- **k8up 4.10.0** (`infrastructure/backup/k8up/`): restic backups to Garage S3 on the friend's NAS (Garage on :3900, plain HTTP — WireGuard transport, restic encrypts at rest). Endpoint is the IP literal `100.96.72.126` — the NAS's `ts.net` name is MagicDNS-only (no public DNS record; kresd and CoreDNS both NXDOMAIN it), so cluster pods can never resolve it. Access gotcha: the NAS is shared in from the friend's tailnet (`tail112719`), and shared nodes are invisible to tagged devices (`tag:k8s`, `tag:infra`) while user-owned devices connect fine — the friend's tailnet ACL must grant shared-in devices access (`src: autogroup:shared → 100.96.72.126:3900`; if tagged devices don't match autogroup:shared, allow their tailscale IPs explicitly). Whether pods can traverse the node's tailscale0 directly is untested — if the direct path fails, fall back to a Tailscale operator egress proxy (Service with `tailscale.com/tailnet-ip` annotation; the operator rewrites it to ExternalName — give the Kustomization a `spec.ignore` for `/spec/type`, `/spec/externalName`, `/metadata/finalizers` so Flux doesn't fight it). Gotcha: **PVC discovery is namespace-scoped** — k8up backs up the PVCs of the namespace a Schedule lives in, nothing else; there is deliberately no Schedule in the tree (monitoring/agh excluded by choice). An app opts in by adding a `k8up.io/v1` Schedule (backup + prune + retention) to its own directory. The operator carries the backend as global env vars (`BACKUP_GLOBALS3ENDPOINT/BUCKET`, `BACKUP_GLOBALACCESSKEYID/SECRETACCESSKEY`, `BACKUP_GLOBALREPOPASSWORD`) sourced from `backup-credentials.sops.yaml`, so per-namespace Schedules need no backend block and no secret copies. Cron times fire in `Europe/Zurich` (`k8up.timezone`). The repo password (`k8up-password`) is the only key to the backups — never rotate it. Verification runbook: `.private/backup.md` (gitignored).
 
 ## Application tiers
 
@@ -99,7 +102,7 @@ Tier gotchas: Keel cannot update Knative Services (its kubernetes implementer ha
 ## Secrets
 
 - SOPS + age; `.sops.yaml` matches `*.sops.yaml`. Flux decrypts in-cluster with the `sops-age` Secret in `flux-system`.
-- Encrypted files: `cluster/ghcr-pat.sops.yaml`, `ingress/cert-manager/cloudflare-dns01.sops.yaml`, `ingress/tailscale/operator-oauth.sops.yaml`, `monitoring/grafana-credentials.sops.yaml`, `applications/agh/agh-config.sops.yaml`, `applications/apex/pull-secret.sops.yaml` (Kubernetes Secrets — only `data`/`stringData` values are encrypted, structural fields stay plaintext), `talos/secrets.sops.yaml`, `talos/patches/all/02-tailscale.sops.yaml` (Talos configs — fully encrypted, they are not Kubernetes Secrets).
+- Encrypted files: `cluster/ghcr-pat.sops.yaml`, `ingress/cert-manager/cloudflare-dns01.sops.yaml`, `ingress/tailscale/operator-oauth.sops.yaml`, `monitoring/grafana-credentials.sops.yaml`, `applications/agh/agh-config.sops.yaml`, `applications/apex/pull-secret.sops.yaml`, `infrastructure/backup/k8up/backup-credentials.sops.yaml` (Kubernetes Secrets — only `data`/`stringData` values are encrypted, structural fields stay plaintext), `talos/secrets.sops.yaml`, `talos/patches/all/02-tailscale.sops.yaml` (Talos configs — fully encrypted, they are not Kubernetes Secrets).
 - **Never decrypt, encrypt, or edit SOPS files as an agent.** The owner performs all secret operations locally and will ask for the exact commands if needed. If a secret's shape matters, ask; do not read values.
 
 ## Cluster access
