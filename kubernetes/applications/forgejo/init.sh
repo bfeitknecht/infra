@@ -20,6 +20,11 @@ if [ ! -f /data/gitea/conf/app.ini ]; then
   chown -R 1000:1000 /data
 fi
 
+# Run DB migrations first — the CLI user commands do not migrate, and a
+# fresh database has no tables until this runs. Idempotent (no-op when
+# up to date); also the right hook after a deliberate image bump.
+su-exec git:git forgejo migrate --config /data/gitea/conf/app.ini
+
 # Bootstrap the admin user (idempotent). Runs as git via su-exec so the
 # SQLite DB it creates is owned by the same uid as the server.
 if ! su-exec git:git forgejo admin user list --config /data/gitea/conf/app.ini 2>/dev/null | grep -qw "$ADMIN_USER"; then
