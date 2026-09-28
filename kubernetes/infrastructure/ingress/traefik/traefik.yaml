@@ -29,6 +29,11 @@ spec:
     deployment:
       kind: Deployment
       replicas: 1
+    # Recreate: the entrypoints bind hostPorts (80/443/22) on the single
+    # worker — a surge pod can never schedule while the old one holds them
+    # (maxUnavailable: 0 deadlock).
+    updateStrategy:
+      type: Recreate
     service:
       enabled: true
       type: LoadBalancer
