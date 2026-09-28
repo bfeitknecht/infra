@@ -72,6 +72,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
         ├── agh/                    # AdGuard Home (LAN DNS edge)
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
         ├── dns/                    # knotd + kresd (the .internal zone)
+        ├── forgejo/                # Git forge (git.0xbf.ch, git-ssh via TCPRoute)
         └── homepage/               # Dashboard
 ```
 
@@ -135,7 +136,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 
 ### Ingress & Certificates
 
-- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443; the LoadBalancer Service exposes 80/443.
+- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443 plus TCP 22 (git-ssh `TCPRoute`); the LoadBalancer Service exposes 80/443/22.
 - The Gateway address `10.10.20.128` comes from the Cilium LB-IPAM pool (`network/ipam`) and is L2-announced on the worker's `end0` interface.
 - Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
@@ -143,7 +144,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 
 ### Secrets
 
-All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
+All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
 
 ### Access
 

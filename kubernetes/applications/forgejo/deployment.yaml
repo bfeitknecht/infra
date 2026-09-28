@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  replicas: 1
+  # Recreate: SQLite + repos live behind a RWO local-path volume — two
+  # instances must never run against the same data.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: forgejo
+  template:
+    metadata:
+      labels:
+        app: forgejo
+    spec:
+      initContainers:
+        # Seeds app.ini (template + [security] block from the sops Secret) on
+        # first boot, then bootstraps the admin user. Afterwards Forgejo owns
+        # everything on the PVC. Both subdirectories must pre-exist:
+        # local-path volumes do not support kubelet-created subPath dirs.
+        - name: config-seed
+          image: codeberg.org/forgejo/forgejo:16.0.5
+          command: ["sh", "/seed/init.sh"]
+          env:
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: admin-user
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: admin-password
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: admin-email
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config-seed
+              mountPath: /seed
+              readOnly: true
+            - name: seed-secrets
+              mountPath: /seed-secrets
+              readOnly: true
+      containers:
+        - name: forgejo
+          image: codeberg.org/forgejo/forgejo:16.0.5
+          ports:
+            - containerPort: 3000
+              name: http
+            - containerPort: 22
+              name: ssh
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: forgejo-data
+        - name: config-seed
+          configMap:
+            name: forgejo-config
+        - name: seed-secrets
+          secret:
+            secretName: forgejo-secrets
+            items:
+              - key: secret-key
+                path: secret-key
+              - key: internal-token
+                path: internal-token

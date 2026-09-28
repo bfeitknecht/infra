@@ -36,3 +36,12 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: wildcard-internal-tls
+    # Raw TCP for forgejo git-over-SSH (TCPRoute). Port must match the
+    # gitssh entrypoint (22 — WAN 22 → git, the dev box takes 2222 later),
+    # not the exposed Service port.
+    - name: gitssh
+      protocol: TCP
+      port: 22
+      allowedRoutes:
+        namespaces:
+          from: All

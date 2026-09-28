@@ -20,7 +20,9 @@ spec:
   timeout: 5m
   wait: true
   prune: false
-  path: ./config/crd/standard
+  # experimental bundle: superset of standard (same v1.6.2 tag) — adds
+  # TCPRoute/UDPRoute/TLSRoute, needed for the forgejo git-ssh TCPRoute
+  path: ./config/crd/experimental
   sourceRef:
     kind: GitRepository
     name: gateway-api

@@ -27,12 +27,12 @@ Public names need a DNS record pointing at the (dynamic) home IP; LAN names need
 
 The sooner this is live, the sooner git is self-hosted — `git.0xbf.ch` once Phase 2 DDNS + exposure are in place.
 
-- [ ] Scaffold `applications/` tree + first entries in `cluster/applications.yaml`.
-- [ ] Forgejo with SQLite, everything under one `/data` PVC — no Postgres unless it ever outgrows (CloudNativePG would be the escape hatch).
-- [ ] HTTPRoute + subdomain (exposure: owner decides).
-- [ ] SMTP relay for outgoing mail.
-- [ ] Decision: git-over-SSH — Gateway `TCPRoute` (needs Traefik `experimentalChannel`), dedicated LoadBalancer port, or HTTPS-only to start.
-- [ ] Admin hardening: registration policy, root user, SSH keys.
+- [x] Scaffold `applications/forgejo/` + entry in `cluster/applications.yaml`.
+- [x] Forgejo with SQLite, everything under one `/data` PVC — no Postgres unless it ever outgrows (CloudNativePG would be the escape hatch).
+- [x] HTTPRoute + subdomain: `git.0xbf.ch`, public (`websecure` listener).
+- [ ] SMTP relay for outgoing mail — Proton Premium custom domain + SMTP token (`smtp.protonmail.ch`) once Proton is live; mailer disabled until then.
+- [x] Decision: git-over-SSH — Gateway `TCPRoute` (Traefik `experimentalChannel`, `gitssh` entrypoint hostPort 22 on rbpi; WAN 22 → git via router forward, no router SSH, the future dev box takes WAN 2222).
+- [x] Admin hardening: registration disabled, admin bootstrapped from `forgejo-secrets.sops.yaml` on first boot.
 
 ## Phase 4 — Renovate (soon)
 

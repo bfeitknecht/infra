@@ -97,3 +97,24 @@ spec:
       target:
         kind: Deployment
         name: apex
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: forgejo
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: storage
+    - name: traefik
+  interval: 10m0s
+  path: ./kubernetes/applications/forgejo
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

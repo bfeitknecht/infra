@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: forgejo-ssh
+  namespace: forgejo
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: gitssh
+  rules:
+    - backendRefs:
+        - name: forgejo
+          port: 22

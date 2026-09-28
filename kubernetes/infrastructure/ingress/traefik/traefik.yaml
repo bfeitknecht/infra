@@ -53,9 +53,20 @@ spec:
           default: true
         exposedPort: 443
         hostPort: 443
+      gitssh:
+        port: 22
+        expose:
+          default: true
+        exposedPort: 22
+        # WAN entry like 80/443 (Zyxel refuses the LB IP). WAN 22 → forgejo
+        # git-ssh (no router SSH wanted); the future dev box takes WAN 2222.
+        # Talos runs no sshd, so nothing else binds 22 on the node.
+        hostPort: 22
     providers:
       kubernetesGateway:
         enabled: true
+        # TCPRoute (forgejo git-ssh) is experimental-channel only
+        experimentalChannel: true
       kubernetesCRD:
         enabled: true
         allowCrossNamespace: true
@@ -77,7 +88,7 @@ spec:
       prometheus:
         enabled: true
         # dedicated metrics Service (ingress-traefik-metrics:9100) —
-        # the LB service carries only web/websecure
+        # the LB service carries only web/websecure/gitssh
         # so gatus + the ServiceMonitor scrape this one
         service:
           enabled: true
