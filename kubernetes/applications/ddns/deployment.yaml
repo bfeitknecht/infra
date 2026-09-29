@@ -35,7 +35,7 @@ spec:
                           name: cloudflare-ddns
                           key: token
                     - name: DOMAINS
-                      value: 0xbf.ch,*.0xbf.ch
+                      value: 0xbf.ch,*.0xbf.ch,*.pds.0xbf.ch
                     - name: PROXIED
                       value: "false"
                     - name: UPDATE_ON_START

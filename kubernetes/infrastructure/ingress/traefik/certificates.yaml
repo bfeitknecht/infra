@@ -72,3 +72,18 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - "*.internal"
+---
+# Second-level wildcard for PDS account handles (<name>.pds.0xbf.ch) —
+# the *.0xbf.ch cert only ever matches one label.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pds-handles-wildcard
+  namespace: ingress
+spec:
+  secretName: pds-handles-wildcard-tls
+  issuerRef:
+    name: letsencrypt-acme
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.pds.0xbf.ch"

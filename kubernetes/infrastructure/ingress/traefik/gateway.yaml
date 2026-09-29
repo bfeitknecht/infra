@@ -45,3 +45,17 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # PDS account handles (<name>.pds.0xbf.ch) — second-level wildcard needs
+    # its own cert (pds-handles-wildcard-tls); same-port listeners are
+    # distinguished by hostname, most specific wins (see websecure-internal).
+    - name: websecure-pds
+      protocol: HTTPS
+      port: 8443
+      hostname: "*.pds.0xbf.ch"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: pds-handles-wildcard-tls

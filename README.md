@@ -73,7 +73,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
         ├── dns/                    # knotd + kresd (the .internal zone)
         ├── forgejo/                # Git forge (git.0xbf.ch, git-ssh via TCPRoute)
-        ├── pds/                    # ATProto PDS (Bluesky; handles at <name>.0xbf.ch)
+        ├── pds/                    # ATProto PDS (Bluesky; handles at <name>.pds.0xbf.ch)
         └── homepage/               # Dashboard
 ```
 
@@ -142,7 +142,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 - Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
 - Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
-- A wildcard `*.0xbf.ch` HTTPRoute serves the ATProto PDS and doubles as handle resolution (`/.well-known/atproto-did`); exact-match routes win precedence over it.
+- The ATProto PDS is routed at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle resolution via `/.well-known/atproto-did`); custom-domain handles (e.g. the bare apex) resolve via DNS TXT records.
 
 ### Secrets
 

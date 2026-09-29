@@ -8,13 +8,30 @@ spec:
     - name: traefik-gateway
       namespace: ingress
       sectionName: websecure
-  # Wildcard on purpose: this route IS the handle-resolution mechanism —
-  # https://<handle>/.well-known/atproto-did must answer for every account
-  # (pds.0xbf.ch itself matches too). Owner-accepted tradeoff: unrouted
-  # *.0xbf.ch subdomains fall through to the PDS (benign 404s); exact-match
-  # routes (apex, git, whims, future apps) always win precedence.
   hostnames:
-    - "*.0xbf.ch"
+    - pds.0xbf.ch
+  rules:
+    - backendRefs:
+        - name: pds-http
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pds-handles
+  namespace: pds
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure-pds
+  # Handle resolution: https://<name>.pds.0xbf.ch/.well-known/atproto-did
+  # must reach the PDS, which answers from its account DB by Host header -
+  # no per-account DNS TXT records for pds-subdomain handles.
+  # Scoped to the dedicated pds. namespace:
+  # unrouted *.0xbf.ch subdomains still 404 at Traefik.
+  hostnames:
+    - "*.pds.0xbf.ch"
   rules:
     - backendRefs:
         - name: pds-http
