@@ -20,6 +20,12 @@ spec:
       containers:
         - name: pds
           image: ghcr.io/bluesky-social/pds:0.4.5034
+          # Explicit: a Service named `pds` would inject PDS_PORT via
+          # service-link env vars (see service.yaml) — pin it so the bind
+          # port never depends on env precedence.
+          env:
+            - name: PDS_PORT
+              value: "3000"
           ports:
             - containerPort: 3000
               name: http

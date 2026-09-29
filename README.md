@@ -142,7 +142,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 - Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
 - Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
-- The ATProto PDS is routed at `pds.0xbf.ch` plus one exact HTTPRoute per account handle (`handles.yaml`) — handle resolution rides `/.well-known/atproto-did`.
+- A wildcard `*.0xbf.ch` HTTPRoute serves the ATProto PDS and doubles as handle resolution (`/.well-known/atproto-did`); exact-match routes win precedence over it.
 
 ### Secrets
 

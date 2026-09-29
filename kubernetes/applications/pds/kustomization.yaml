@@ -7,7 +7,6 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
-  - handles.yaml
   - backup-schedule.yaml
   - pds-secrets.sops.yaml
 configMapGenerator:
