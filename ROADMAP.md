@@ -61,7 +61,7 @@ A second worker unlocks the heavy stuff; the GPU is the point.
 ## Phase 7 — Dev platforms (later)
 
 - [ ] **wasmCloud** — `wasm` (public per owner decision).
-- [ ] **ATProto PDS** — `pds` (public per owner decision).
+- [x] **ATProto PDS** — `pds` (public; vanity handles `<name>.0xbf.ch` via well-known resolution, no per-account DNS).
 
 ## Phase 8 — Platform & someday
 

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pds
+  labels:
+    # The PDS image runs as root (node:alpine, no USER directive) -
+    # baseline allows that without host-level privileges.
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/audit: baseline

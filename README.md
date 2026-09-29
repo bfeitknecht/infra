@@ -73,6 +73,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
         ├── dns/                    # knotd + kresd (the .internal zone)
         ├── forgejo/                # Git forge (git.0xbf.ch, git-ssh via TCPRoute)
+        ├── pds/                    # ATProto PDS (Bluesky; handles at <name>.0xbf.ch)
         └── homepage/               # Dashboard
 ```
 
@@ -141,10 +142,11 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 - Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
 - Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
+- The ATProto PDS is routed at `pds.0xbf.ch` plus one exact HTTPRoute per account handle (`handles.yaml`) — handle resolution rides `/.well-known/atproto-did`.
 
 ### Secrets
 
-All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
+All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `pds-secrets` (ATProto PDS: JWT secret, admin password, PLC rotation key), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
 
 ### Access
 

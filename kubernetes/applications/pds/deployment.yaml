@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pds
+  namespace: pds
+spec:
+  replicas: 1
+  # Recreate: SQLite DBs behind a RWO local-path volume -
+  # two instances must never run against the same data.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pds
+  template:
+    metadata:
+      labels:
+        app: pds
+    spec:
+      containers:
+        - name: pds
+          image: ghcr.io/bluesky-social/pds:0.4.5034
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: pds-config
+            - secretRef:
+                name: pds-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /pds
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /xrpc/_health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /xrpc/_health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pds-data
