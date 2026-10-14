@@ -63,6 +63,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
     │   ├── keel/                   # Image updater (tier-2 :latest apps)
     │   ├── knative/                # Knative operator + Serving (tier-3 whims)
     │   ├── monitoring/             # kube-prometheus-stack, metrics-server, Gatus
+    │   ├── teleport/               # Teleport CE access plane (own LB IP; devil's only door)
     │   ├── network/                # Cilium (LB-IPAM pool, L2 announce), Tailscale
     │   └── ingress/                # Traefik (Gateway API), cert-manager, Tailscale
     └── applications/               # User Workloads (one directory = one namespace)
@@ -105,6 +106,7 @@ Function zones use decade-based third octets.
 | Monitoring    | kube-prometheus-stack, metrics-server, Gatus          | 91.4.1 / 3.14.0 / v5.36.0       |
 | Backups       | k8up (restic -> Garage S3)                            | chart 4.10.0 (operator v2.16.0) |
 | Whim platform | Knative Serving via operator (scale-to-zero)          | 1.23.0 (operator 1.23.1)        |
+| Access plane  | Teleport CE (standalone chart, TLS routing)           | 18.10.0                         |
 
 ### GitOps Delivery
 
@@ -141,6 +143,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
 - Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
 - The ATProto PDS is routed at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle resolution via `/.well-known/atproto-did`); custom-domain handles (e.g. the bare apex) resolve via DNS TXT records.
+- Teleport is the one service NOT behind Traefik: the proxy terminates its own TLS (internal CA) on its own LB IP `10.10.20.154` (`teleport.internal`, explicit knot zone record); web UI, `tsh` and agent tunnels multiplex on 443.
 
 ### Secrets
 
