@@ -47,6 +47,9 @@ spec:
         loadBalancerIP: 10.10.20.154
     tls:
       existingSecretName: teleport-tls
+      # the proxy validates its own cert chain at startup;
+      # the distroless image only trusts the Mozilla bundle, so it needs the internal CA
+      existingCASecretName: teleport-ca
     podMonitor:
       enabled: true
     podSecurityPolicy:

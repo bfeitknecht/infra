@@ -5,3 +5,14 @@ resources:
   - teleport.yaml
   - certificate.yaml
   - backup-schedule.yaml
+generatorOptions:
+  # the chart mounts this secret by name (tls.existingCASecretName) —
+  # the name must stay stable across edits
+  disableNameSuffixHash: true
+secretGenerator:
+  # the internal CA cert (public material) —
+  # the teleport proxy validates its own cert chain at startup
+  # and the distroless image only trusts the Mozilla bundle
+  - name: teleport-ca
+    files:
+      - ca.pem
