@@ -1,0 +1,3 @@
+machine:
+  env:
+    TS_EXTRA_ARGS: "--accept-dns=true --accept-routes=true --advertise-routes=10.10.10.0/24,10.10.20.0/24"

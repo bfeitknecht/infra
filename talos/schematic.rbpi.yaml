@@ -1,0 +1,14 @@
+overlay:
+  image: siderolabs/sbc-raspberrypi
+  name: rpi_5
+  options:
+    configTxtAppend: |-
+      dtparam=pciex1
+      dtparam=pciex1_gen=3
+      dtoverlay=pcie-32bit-dma-pi5
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/nvme-cli
+      - siderolabs/tailscale
+      - siderolabs/kata-containers

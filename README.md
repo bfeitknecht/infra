@@ -41,16 +41,14 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 ├── ROADMAP.md
 ├── .sops.yaml                       # SOPS configuration (age public key)
 │
-├── talos/                          # Talos & topf OS Configurations
-│   ├── topf.yaml                   # TOPF cluster definition & node mapping
+├── talos/                          # Talos OS config (declarative, applied with topf)
+│   ├── topf.yaml                   # TOPF cluster definition; per-node schematicId
+│   ├── schematic.<node>.yaml       # Image-factory schematics (extensions + SBC overlays)
 │   ├── secrets.sops.yaml           # SOPS-encrypted cluster secrets bundle
-│   └── patches/
-│       ├── all/                     # HostnameConfig from topf node name
-│       │   └── 01-hostname.yaml.tpl
-│       ├── control-plane/           # OCI Cloud VM (10.20.20.10)
-│       │   ├── 01-installation.yaml # UnattendedInstallConfig -> /dev/sda
-│       │   └── 02-network.yaml      # eth0 DHCP + cert SANs (public/private)
-│       └── worker/                  # Pi Worker (10.10.20.10) — populated on arrival
+│   └── patches/                     # merged in order: all/ -> <role>/ -> node/<host>/
+│       ├── all/                     # cluster-wide: hostname, tailscale ext-config, CNI
+│       ├── control-plane/           # oci: install disk (/dev/sda) + network/certSANs
+│       └── node/                    # per-host: 01-install, 02-network, 03-tailscale, 04-storage
 │
 └── kubernetes/                     # Flux GitOps Manifests
     ├── flux/                       # Flux controller bootstrap & tag filter
@@ -96,7 +94,7 @@ Function zones use decade-based third octets.
 
 | Layer         | Component                                             | Version                         |
 | ------------- | ----------------------------------------------------- | ------------------------------- |
-| OS            | Talos Linux                                           | 1.14.0                          |
+| OS            | Talos Linux                                           | 1.14.2                          |
 | Kubernetes    | API server / kubelet                                  | 1.35.3                          |
 | GitOps        | Flux (source, kustomize, helm, notification)          | 2.9.5                           |
 | CNI           | Cilium (kube-proxy replacement, LB-IPAM, L2 announce) | 1.20.2                          |

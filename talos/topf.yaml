@@ -3,7 +3,7 @@ clusterName: infra
 clusterEndpoint: https://100.73.186.19:6443 # tailscale
 # clusterEndpoint: https://140.238.213.197:6443 # public
 kubernetesVersion: 1.35.3
-talosVersion: 1.14.0
+talosVersion: 1.14.2
 
 patchesDir: patches
 secretsPath: secrets.sops.yaml
@@ -16,8 +16,10 @@ nodes:
     ip: 10.20.20.10
     role: control-plane
     platform: oracle
+    schematicId: "@schematic.oci.yaml"
 
   # Raspberry Pi 5 worker.
   - host: rbpi
     ip: 10.10.20.10
     role: worker
+    schematicId: "@schematic.rbpi.yaml"

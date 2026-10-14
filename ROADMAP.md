@@ -67,7 +67,7 @@ A second worker unlocks the heavy stuff; the GPU is the point.
 
 - [ ] Decision: public exposure mechanism for public apps — home-router port-forward + DDNS (Phase 2 covers the DDNS half), Tailscale Funnel, or an OCI-side ingress. Gates every public app.
 - [ ] Observability: metrics-server, kube-prometheus-stack, Gatus + alerting.
-- [ ] Kubernetes 1.35 → 1.37 (`talosctl upgrade-k8s`), Talos 1.14.0 → 1.14.1, local kubectl upgrade.
+- [ ] Kubernetes 1.35 → 1.37 (`talosctl upgrade-k8s`), Talos 1.14.0 → 1.14.2, local kubectl upgrade.
 - [x] Tailscale subnet route from the worker (off-LAN access without DNS gymnastics) — `10.10.10.0/24` and `10.10.20.0/24` advertised from `rbpi`.
 - [ ] Dex (OIDC) for SSO across Forgejo/Grafana.
 - [ ] Ollama + Open WebUI (GPU via the Blade).
