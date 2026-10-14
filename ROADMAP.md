@@ -1,81 +1,127 @@
 # Roadmap
 
-Platform baseline is live: Flux reconciles the full tree (`storage → cilium → ipam`, `cert-manager → traefik → tailscale`, CRDs phase), the Gateway holds `10.10.20.128` from the Cilium LB-IPAM pool, certificates for `*.0xbf.ch` (Let's Encrypt) and `*.internal` (internal CA) are issued. What follows is application churn in smart order — each app is one directory, one Kustomization, one subdomain. Public vs internal exposure is decided per app by the owner, not in this document.
+Status as of 2026-10-14. Three lanes run in parallel — **infra** (this repo), **omni** (nix), **web** (apex + whims) — and only touch at a few gates. This file is the ordered work queue; the `.private/TODO.md` scratchpads in each repo feed it and can be pruned against it.
 
-## Phase 1 — Backups to the friend's NAS (first, before real data exists)
+## Where things stand
 
-Target: the friend's UGREEN NAS (DXP4800 Plus) on his LAN, reached over Tailscale. k8up (restic-based) backs up everything non-declarative — the local-path PVC data on the NVMe now, SATA SSDs later. Declarative state lives in git; secrets are backed up independently; etcd is deferred (the OCI control plane is trusted for now) but the destination is chosen so etcd backups can plug in later.
+- **Platform baseline is live** (through tag `v1.14.0`): Flux reconciles the full tree (`storage -> cilium -> ipam`, `cert-manager -> traefik -> tailscale`, CRDs phase), the Gateway holds `10.10.20.128`, LE wildcard + internal CA certificates issued, monitoring + Gatus up, k8up operator deployed, Keel (tier 2) and Knative Serving + `whimsy` (tier 3) live.
+- **Kata shipped in `v1.14.0`** — schematics for rbpi + rzbl, RuntimeClass `kata-qemu`.
+- **Apps live:** apex, AdGuard Home, knotd + kresd, DDNS, Homepage, Forgejo (`git.0xbf.ch`), ATProto PDS (`pds.0xbf.ch`).
+- **Local, unpushed:** `b19a45f` — topf patch restructure (`patches/node/<host>/`), `schematic.rzbl.yaml` + rzbl node patches, HARDWARE.md. Push when convenient; `talos/` rides `topf apply`, not the Flux tag.
+- **rbpi is currently powered down** mid-rework. Step 0 of everything cluster-side is plugging it back in — it rejoins as-is on the old schematic.
+- **Backup gap:** k8up is deployed and forgejo/pds Schedules exist, but jobs fail until the NAS tailnet path is fixed — nothing is actually backed up yet.
+- **omni** is a working dendritic flake: home modules (shell, tools, git, editor/nvf, nix tooling, gpg, sops secrets) + hosts `auto` (darwin), `devil` (NixOS kata-pod image), `vm` (microvm test bed).
+- **apex** is a one-page Deno site (Preact + htm, no client runtime); a **complete rework** is planned — CV and blog land in the new structure, not as an appendage.
 
-- [x] **Network path:** NAS on the tailnet at `dxp4800plus-brd.tail112719.ts.net` — WireGuard-encrypted transport, no UGREEN Link cloud relay (that portal is for admin UI only, never backup traffic).
-- [x] **Destination backend — Garage (S3) in Docker on the NAS:** OSS, single binary, no GUI (AIStor is MinIO's paid successor; MinIO OSS itself is deprecated). Future-proof: the same endpoint later serves etcd backups (velero). Plain HTTP is fine over the tailnet (WireGuard wraps transport; restic encrypts at rest).
-- [x] **k8up operator:** HelmRepository `https://k8up-io.github.io/k8up`, HelmRelease `k8up` 4.10.0 (operator v2.16.0); CRDs via `cluster/crds.yaml` (GitRepository `k8up-io/k8up` @ `k8up-4.10.0`, path `./charts/k8up/crds`, `prune: false`); schedules fire in `Europe/Zurich`; global S3/repo-password env vars on the operator so per-namespace Schedules need no backend block and no secret copies.
-- [x] **Backup model — namespace-scoped, opt-in per app:** k8up backs up the PVCs of the namespace a Schedule lives in, nothing else. No Schedules exist today (monitoring/agh deliberately excluded); an app opts in by adding a Schedule to its own directory (snippet in README).
-- [x] SOPS secrets: restic repository password + Garage S3 credentials (owner encrypts).
-- [ ] **Smoke-test the endpoint:** bucket exists + credentials work + restic round-trip (README "Verifying the backup path"), after the next tag deploy.
-- [ ] **Restore drill:** restore a real snapshot to a scratch location once a tier-1 app with a PVC exists.
+## The dependency graph
 
-## Phase 2 — DDNS + DNS foundation
+```
+rbpi plugged in (old schematic) -> cluster back -> NOW queue
+case design -> validated -> final assembly (HARDWARE.md) -> rbpi up -> samba + SATA storage
+rzbl: maintenance mode -> topf apply -> GPU labels -> THEN queue
+      -> technically needs only oci + tailnet — may be pulled ahead of the case work
+backup path works -> GATE: nothing irreplaceable (immich, photos) before this
+omni: age key backed up -> zed + macOS parity -> macbook factory reset -> nix iteration
+```
 
-Public names need a DNS record pointing at the (dynamic) home IP; LAN names need a resolver.
+## NOW — cluster is back (no hardware prerequisites)
 
-- [x] **DDNS updater** (`applications/utilities/ddns-updater/`): keeps the single apex A record `0xbf.ch` pointed at the current home IP — prerequisite for anything public on the domain. Cloudflare API token via SOPS. Never per-subdomain records: the wildcard cert covers `*.0xbf.ch`, Traefik routes subdomains by Host header.
-- [x] **Knot Resolver** (`applications/utilities/dns/`): LAN-only recursive resolver with DNSSEC validation enabled, never exposed publicly. Shipped as one pod: kresd (recursion + DNSSEC, ClusterIP `10.96.0.53`) + knotd (authoritative `internal.` zone, wildcard → `10.10.20.128`). kresd local-data cannot expand wildcards, so the zone is grafted via an authoritative stub (`forward: subtree: internal, authoritative: true, dnssec: false`) — the documented pattern for reserved TLDs.
-- [ ] Point devices at it (router DHCP or manual), retire any hosts-file stopgaps.
-- [x] **AdGuard Home** (`applications/utilities/agh/`, replaced Pi-hole): LAN-only ad-blocking DNS edge at `10.10.20.153` (static LB IP — inherited from Pi-hole, the router DHCP target must not float). Design: AGH forwards everything — including `.internal` — to kresd, which stubs the zone to knotd; no edge-side wildcard needed because AGH does not special-case the reserved TLD. Config seeded from `agh-config.sops.yaml`; admin UI at `agh.internal` via allowlisted HTTPRoute.
+First: plug rbpi in, let it boot and rejoin (old schematic), then `flux get kustomizations` all green.
 
-## Phase 3 — Forgejo (high priority)
+### Cluster
 
-The sooner this is live, the sooner git is self-hosted — `git.0xbf.ch` once Phase 2 DDNS + exposure are in place.
+- [ ] **Backup path** — fix the friend's tailnet ACL (`autogroup:shared` -> `100.96.72.126:3900`), smoke-test the restic round-trip, then a restore drill against forgejo's PVC. **Gate for every data-bearing app below.**
+- [ ] **Teleport CE** — cluster access plane; decide its relationship to devil's ssh (devil.internal ssh vs teleport).
+- [ ] **Devil live** — `nix build .#devil` -> `docker import` -> push `ghcr.io/bfeitknecht/devil:latest` -> kata pod; HTTPRoute `devil.internal` (ssh + www/ghostty-web). Split the ingress so `opencode.internal` is its own route; the opencode kata container follows. Decide devil state preservation (PVC vs ephemeral).
+- [ ] **atuin server** on the cluster (omni already ships the client).
+- [ ] **Fix grafana homepage API widget.**
+- [ ] **LAN DNS cutover** — router DHCP DNS -> `10.10.20.153` (AGH), tailnet split DNS for `internal.`; retire hosts-file stopgaps.
+- [ ] **Forgejo actions** (optional now): CI runner so apex/whim repos can move off GitHub Actions.
 
-- [x] Scaffold `applications/forgejo/` + entry in `cluster/applications.yaml`.
-- [x] Forgejo with SQLite, everything under one `/data` PVC — no Postgres unless it ever outgrows (CloudNativePG would be the escape hatch).
-- [x] HTTPRoute + subdomain: `git.0xbf.ch`, public (`websecure` listener).
-- [ ] SMTP relay for outgoing mail — Proton Premium custom domain + SMTP token (`smtp.protonmail.ch`) once Proton is live; mailer disabled until then.
-- [x] Decision: git-over-SSH — Gateway `TCPRoute` (Traefik `experimentalChannel`, `gitssh` entrypoint hostPort 22 on rbpi; WAN 22 → git via router forward, no router SSH, the future dev box takes WAN 2222).
-- [x] Admin hardening: registration disabled, admin bootstrapped from `forgejo-secrets.sops.yaml` on first boot.
+### Web
 
-## Phase 4 — Renovate (soon)
+- [ ] **apex: complete rework** — rebuild the site rather than appending to it: new structure and design, CV and blog included in the rework. Comments come later (identity lane).
 
-- [ ] Renovate keeping chart + CRD tag bumps flowing (pairs with the lockstep rule: chart version ↔ CRD tag).
-- [ ] Decision: GitHub App on this repo now vs self-hosted Renovate against Forgejo once it is live.
+### omni — pre-reset parity (the macbook reset gate)
 
-## Phase 5 — Razer Blade worker node (higher medium)
+- [ ] **Back up the age key** (`~/.config/sops/age/keys.txt`) — before any transfer, full stop.
+- [ ] **Zed settings -> nix** (layout, theme, extensions) — as little global config as possible; prefer per-project `.zed/settings.json`.
+- [ ] **macOS defaults parity** via nix-darwin `system.defaults`: dock (autohide, show speed), finder (quittable), wallpaper, liquid-glass styling.
+- [ ] **Brewfile parity** — un-comment the casks actually in use so the reset restores app parity.
+- [ ] FileVault is enabled manually during the reset (not declarable via nix-darwin).
 
-A second worker unlocks the heavy stuff; the GPU is the point.
+## NEXT — hardware
 
-- [ ] Talos on the Razer Blade, join as worker (image with NVIDIA extensions).
-- [ ] NVIDIA GPU operator / container toolkit for ML workloads.
-- [ ] Node labels/taints so GPU workloads schedule there deliberately.
-- [ ] Unlocks Immich ML acceleration; later Ollama.
+### Case + final assembly (gates samba)
 
-## Phase 6 — Media & utilities
+- [ ] **Design the rbpi case** — CAD -> print -> validate fit/clearance against the HARDWARE.md stack (Pi + 52Pi B12 + Penta HAT + back-mounted Seeed + heatsinks + FFC routing).
+- [ ] **Final assembly** per the HARDWARE.md checklist (power module -> PCIe chain/FFCs -> fans -> standoffs -> multimeter check -> power-on order).
+- [ ] rbpi back up -> **samba** (SATA drives via the Penta HAT) + **storage planning** (what lives where, hostPath vs PVC).
 
-- [ ] Storage planning for the Pi SATA HAT disks (what lives where, hostPath vs PVC).
-- [ ] **Immich** — `photos` (ML on the Blade once Phase 5 lands).
-- [ ] **Jellyfin** — `jellyfin`.
-- [ ] ***arr suite + Yarr** — `prowlarr`, `sonarr`, `radarr`, `yarr`.
-- [ ] **Copyparty** — `files` (public per owner decision).
-- [ ] **Dawarich** — `dawarich`.
-- [ ] **Homepage** — `home`, dashboard linking everything as it lands.
+### Razer Blade (technically independent — only needs oci + tailnet)
 
-## Phase 7 — Dev platforms (later)
+- [ ] Boot Talos media -> maintenance mode -> add the node to `talos/topf.yaml` (`schematicId: "@schematic.rzbl.yaml"`, real IP) — patches already exist (`patches/node/rzbl/`: NVMe install disk, sysctls, tailscale).
+- [ ] `topf apply` -> verify join -> node labels/taints + NVIDIA device plugin so GPU workloads schedule deliberately.
+- [ ] Unlocks the THEN queue.
 
-- [ ] **wasmCloud** — `wasm` (public per owner decision).
-- [x] **ATProto PDS** — `pds` (public; vanity handles `<name>.0xbf.ch` via well-known resolution, no per-account DNS).
+## THEN — unlocked by the Blade
 
-## Phase 8 — Platform & someday
+- [ ] **Immich** (`photos`, ML on the GPU) — only after the backup gate.
+- [ ] ***arr + Jellyfin** (`prowlarr`/`sonarr`/`radarr`, `jellyfin`).
+- [ ] **Copyparty** (`files`), **Dawarich**, **ppty**.
+- [ ] **Ollama + Open WebUI** (GPU).
 
-- [ ] Decision: public exposure mechanism for public apps — home-router port-forward + DDNS (Phase 2 covers the DDNS half), Tailscale Funnel, or an OCI-side ingress. Gates every public app.
-- [ ] Observability: metrics-server, kube-prometheus-stack, Gatus + alerting.
-- [ ] Kubernetes 1.35 → 1.37 (`talosctl upgrade-k8s`), Talos 1.14.0 → 1.14.2, local kubectl upgrade.
-- [x] Tailscale subnet route from the worker (off-LAN access without DNS gymnastics) — `10.10.10.0/24` and `10.10.20.0/24` advertised from `rbpi`.
-- [ ] Dex (OIDC) for SSO across Forgejo/Grafana.
-- [ ] Ollama + Open WebUI (GPU via the Blade).
-- [ ] XMPP (Prosody), Mumble, I2P, Yggdrasil.
+## LATER
+
+- [ ] **Identity & SSO** — research before committing:
+    - Decide the aggregator: authentik vs dex — the thing forgejo/grafana/blog talk OIDC to.
+    - Research atproto-as-primary-identity: atproto OAuth is its own profile, not plain OIDC — putting the PDS in front of an aggregator needs a bridge, or atproto stays a parallel login flow. This decision determines whether friends can use Google/Apple _and_ atproto behind one door.
+    - Then: forgejo OIDC, grafana OIDC, identity-gated blog comments.
+- [ ] **Renovate** — decision: GitHub App on this repo vs self-hosted against Forgejo.
+- [ ] **Alerting** — Alertmanager receiver decision (ntfy/Discord/Telegram); grafana dashboards.
+- [ ] **Daytona** agent sandbox; opencode kata container (if not done with devil).
+- [ ] **Macbook factory reset** -> omni bootstrap (README runbook) -> iterate; rice (sketchybar/yabai/…) lives here, post-reset.
+- [ ] Upgrades: k8s 1.35.3 -> 1.37 (`talosctl upgrade-k8s`), Talos patch bumps, local kubectl.
+
+## SOMEDAY / ideas
+
+XMPP (Prosody), Mumble, I2P, Yggdrasil, Reticulum, Meshtastic, wasmCloud, opengist, atproto ecosystem experiments (knot, spindle), flake exposes apps/tools (nvim, home), deeper nvf config.
+
+## The whims workflow (standing)
+
+Trying a language or framework is a tier-3 whim — no git manifests, no planning, registry push = deploy:
+
+```nu
+kn service create <name> --image ghcr.io/bfeitknecht/<name>:<tag> --port <port> -n whimsy
+kn service update <name> --image ghcr.io/bfeitknecht/<name>:<new-tag>   # SHA/version tags, not :latest
+```
+
+The domain template is `{{.Name}}.0xbf.ch` — the KSvc name declares the subdomain. Pull secrets are already on the namespace default SA. Candidates from the idea pile: idea tracker, blog backend, whatever framework itch.
+
+## PVC planning
+
+| Service         | Node | PVC                           |
+| --------------- | ---- | ----------------------------- |
+| AdGuard Home    | rbpi | nvme? 1Gi                     |
+| prometheus      | rbpi | nvme? 1Gi                     |
+| gatus           | rbpi | nvme? 1Gi                     |
+| renovate        | rbpi |                               |
+| Homepage        | rbpi |                               |
+| Forgejo         | rbpi | nvme                          |
+| ATProto PDS     | rbpi | nvme                          |
+| apex            | rbpi |                               |
+| atuin           | rbpi | small                         |
+| teleport        | rbpi |                               |
+| devil           | rbpi | pending preservation decision |
+| Immich          | rzbl |                               |
+| Copyparty       | rzbl |                               |
+| Dawarich        | rzbl |                               |
+| *arr + Jellyfin | rzbl |                               |
 
 ## Conventions for every new application
 
 - One directory per app under `kubernetes/applications/<category>/<app>/` with its own `kustomization.yaml`.
 - One Kustomization entry in `cluster/applications.yaml`, `dependsOn` only what it actually needs (usually `traefik`).
 - Exposure via `HTTPRoute` (Gateway API only); secrets via SOPS; storage via local-path PVCs.
-- DNS: one apex record + wildcard cert; adding an app means adding an HTTPRoute, never a DNS entry. Exception: non-cluster LAN devices get explicit records in the knot `internal.` zone (e.g. `router.internal` → the router's own IP) — no HTTPRoute, no Traefik, no internal CA.
+- DNS: one apex record + wildcard cert; adding an app means adding an HTTPRoute, never a DNS entry. Exception: non-cluster LAN devices get explicit records in the knot `internal.` zone (e.g. `router.internal` -> the router's own IP) — no HTTPRoute, no Traefik, no internal CA.
+- Tier discipline: tier 1 = pinned image, git-tagged; tier 2 = Keel-polled `:latest` with `spec.ignore` on the image field; tier 3 = `kn` in `whimsy`, never in this tree. Keel annotations never go on tier 1/tier 3 workloads.
