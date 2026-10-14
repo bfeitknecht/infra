@@ -14,5 +14,6 @@ secretGenerator:
   # the teleport proxy validates its own cert chain at startup
   # and the distroless image only trusts the Mozilla bundle
   - name: teleport-ca
+    namespace: teleport
     files:
       - ca.pem
