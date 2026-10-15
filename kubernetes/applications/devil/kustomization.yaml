@@ -6,3 +6,8 @@ resources:
   - deployment.yaml
   - ghcr.sops.yaml
   - teleport-token.sops.yaml
+configMapGenerator:
+  # the agent's teleport.yaml: hash suffix, so every edit rolls the pod
+  - name: devil-teleport-config
+    files:
+      - teleport.yaml

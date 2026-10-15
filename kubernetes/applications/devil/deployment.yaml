@@ -61,6 +61,15 @@ spec:
             - name: teleport-token
               mountPath: /etc/teleport-secrets
               readOnly: true
+            # teleport.yaml is Flux-managed infra plumbing (the kata VM's
+            # working dial target is a cluster-specific fact) — mounted
+            # over the image's /etc/teleport so targets change via tag,
+            # not via image rebuild. The image must NOT declare an
+            # environment.etc."teleport" entry: the NixOS etc activation
+            # would clobber this mount with a symlink to the store.
+            - name: teleport-config
+              mountPath: /etc/teleport
+              readOnly: true
             # The agent's log lands on the node's filesystem — readable via
             # talosctl read while kubectl exec stays broken (systemd as PID1).
             - name: teleport-agent-log
@@ -81,6 +90,12 @@ spec:
             items:
               - key: token
                 path: teleport-token
+        - name: teleport-config
+          configMap:
+            name: devil-teleport-config
+            items:
+              - key: teleport.yaml
+                path: teleport.yaml
         - name: teleport-agent-log
           hostPath:
             path: /var/log/teleport

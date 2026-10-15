@@ -1,0 +1,25 @@
+# teleport.yaml for the devil agent — mounted at /etc/teleport by the
+# pod, NOT baked into the image: the join target is infra plumbing.
+# The kata VM's packet path bypasses Cilium's service translation in both
+# directions — the service ClusterIP times out (no veth BPF), and the
+# proxy LB IP fails ARP (~3s "no route to host": the node doesn't own the
+# IP, and the self-hairpin through the switch is filtered). So the target
+# must be dialable by plain node-stack forwarding. Comma list = first
+# reachable wins; pods rebuild-free via configMapGenerator hash rolls.
+version: v3
+teleport:
+  nodename: devil
+  auth_server: 10.10.20.10:31069,10.244.1.104:3080,10.244.1.209:3026
+  # fingerprint of the auth host CA (tctl tokens add prints it);
+  # without it the token join cannot verify the proxy's internal-CA-signed
+  # cert against the IP-literal dial. Public material — safe to embed.
+  ca_pin: sha256:943b04599846c81bfc6f6019894bcd6c5c1c2737ba49c3052f5850b055c10b22
+auth_service:
+  enabled: "no"
+proxy_service:
+  enabled: "no"
+ssh_service:
+  enabled: "yes"
+  listen_addr: 0.0.0.0:3022
+  labels:
+    role: dev-box
