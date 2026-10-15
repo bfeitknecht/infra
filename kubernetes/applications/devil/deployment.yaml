@@ -21,12 +21,20 @@ spec:
       runtimeClassName: kata-qemu
       hostname: devil
       # The VM has no working DNS (CoreDNS rides the ClusterIP path kata
-      # bypasses), so the proxy is pinned via /etc/hosts. The dial must be
-      # BY NAME: teleport's client verifies the cert against the dial
-      # address and the internal-CA cert carries no IP SANs (the ca_pin
-      # covers trust, not names). IP tracks the proxy pod — update together
-      # with auth_server in teleport.yaml when the proxy reschedules.
+      # bypasses), so names are pinned via /etc/hosts. Two pinned names:
+      #  - teleport.cluster.local -> auth POD: the join dial. The auth's
+      #    host cert (issuer O=teleport.internal) is what the ca_pin
+      #    covers, and its SANs carry teleport.cluster.local — the proxy
+      #    listener only serves the cert-manager cert (internal-ca), which
+      #    the pin can never vouch for.
+      #  - teleport.internal -> proxy POD: what the reverse tunnel may
+      #    dial post-join.
+      # IPs track the pods — update together with auth_server in
+      # teleport.yaml when the proxy/auth pods reschedule.
       hostAliases:
+        - ip: 10.244.1.209
+          hostnames:
+            - teleport.cluster.local
         - ip: 10.244.1.104
           hostnames:
             - teleport.internal

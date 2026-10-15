@@ -9,7 +9,12 @@
 version: v3
 teleport:
   nodename: devil
-  auth_server: teleport.internal:3080
+  # Join goes DIRECT to the auth service (the chart's own agents do the
+  # same): the auth pod serves the teleport host cert — the only cert the
+  # ca_pin can verify — and its SANs carry teleport.cluster.local. The
+  # proxy's multiplex listener serves the cert-manager cert (internal-ca),
+  # which the pin cannot vouch for. 3025 = auth gRPC (the join port).
+  auth_server: teleport.cluster.local:3025
   # fingerprint of the auth host CA (tctl tokens add prints it);
   # without it the token join cannot verify the proxy's internal-CA-signed
   # cert against the IP-literal dial. Public material — safe to embed.
