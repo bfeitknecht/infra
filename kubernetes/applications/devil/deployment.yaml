@@ -48,6 +48,10 @@ spec:
             # docker-container profile's dialect) and no runtime sets it.
             - name: container
               value: docker
+          # A PTY gives the container a /dev/console — without it the shim
+          # creates none and every unit's journal+console output (including
+          # teleport's) is discarded instead of landing in kubectl logs.
+          tty: true
           # Mounted at /etc/teleport-secrets, not /run/secrets: inside the
           # kata VM systemd may classify itself as a VM (not a container) and
           # overmount /run with a tmpfs, hiding the secret mount.
