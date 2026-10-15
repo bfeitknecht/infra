@@ -9,10 +9,7 @@
 version: v3
 teleport:
   nodename: devil
-  auth_server:
-    - 10.10.20.10:31069
-    - 10.244.1.104:3080
-    - 10.244.1.209:3026
+  auth_server: 10.10.20.10:31069
   # fingerprint of the auth host CA (tctl tokens add prints it);
   # without it the token join cannot verify the proxy's internal-CA-signed
   # cert against the IP-literal dial. Public material — safe to embed.
