@@ -37,6 +37,17 @@ spec:
           # profile's shim: registers the store db, boots systemd, stays
           # fresh across in-container switches.
           command: ["/init"]
+          # systemd as PID1 creates its own init.scope under /sys/fs/cgroup,
+          # which the OCI spec mounts read-only — without this the manager
+          # allocation fails and PID1 exits 255. The kata VM is the
+          # isolation boundary, so privilege inside it buys back nothing.
+          securityContext:
+            privileged: true
+          env:
+            # NixOS stage 2 gates its remounts on $container (the
+            # docker-container profile's dialect) and no runtime sets it.
+            - name: container
+              value: docker
           # Mounted at /etc/teleport-secrets, not /run/secrets: inside the
           # kata VM systemd may classify itself as a VM (not a container) and
           # overmount /run with a tmpfs, hiding the secret mount.

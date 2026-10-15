@@ -3,6 +3,8 @@ kind: Namespace
 metadata:
   name: devil
   labels:
-    pod-security.kubernetes.io/enforce: baseline
-    pod-security.kubernetes.io/warn: baseline
-    pod-security.kubernetes.io/audit: baseline
+    # devil runs a privileged kata VM pod — the VM is the isolation
+    # boundary, and systemd-as-PID1 inside it needs a writable cgroup view.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/audit: privileged
