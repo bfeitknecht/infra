@@ -30,7 +30,8 @@ spec:
       # and no secret copies (k8up backs up the PVCs of the Schedule's namespace)
       envVars:
         - name: BACKUP_GLOBALS3ENDPOINT
-          value: http://dxp4800plus-brd.tail112719.ts.net:3900
+          # in-cluster relay: the NAS is shared-in user-scoped, tagged devices can never reach it directly
+          value: http://tailscale-relay.egress.svc.cluster.local:3900
         - name: BACKUP_GLOBALS3BUCKET
           value: k8up
         - name: BACKUP_GLOBALACCESSKEYID

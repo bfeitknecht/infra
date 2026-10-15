@@ -74,8 +74,29 @@ metadata:
 spec:
   dependsOn:
     - name: k8up-crds
+    - name: egress-tailscale
   interval: 10m0s
   path: ./kubernetes/infrastructure/backup/k8up
+  prune: true
+  wait: false
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: egress-tailscale
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: storage
+  interval: 10m0s
+  path: ./kubernetes/infrastructure/egress/tailscale
   prune: true
   wait: false
   sourceRef:

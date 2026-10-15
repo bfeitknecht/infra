@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tailscale-relay-state
+  namespace: egress
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tailscale-relay
+  namespace: egress
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tailscale-relay
+  template:
+    metadata:
+      labels:
+        app: tailscale-relay
+    spec:
+      containers:
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:v1.104.1
+          # The authkey MUST be untagged: the relay joins as a device of the
+          # owner's user, which is the only identity class that can reach a
+          # machine shared into the tailnet (tagged devices never can).
+          env:
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-relay-authkey
+                  key: authkey
+            - name: TS_AUTH_ONCE
+              value: "true"
+            - name: TS_HOSTNAME
+              value: k8s-relay
+            - name: TS_STATE_DIR
+              value: /var/lib/tailscale
+            - name: TS_USERSPACE
+              value: "false"
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: state
+              mountPath: /var/lib/tailscale
+            - name: tun
+              mountPath: /dev/net/tun
+        - name: forwarder
+          image: alpine/socat:1.8.1.3
+          # IP literal: the NAS's ts.net name is MagicDNS-only, unresolvable in-cluster
+          args:
+            - TCP-LISTEN:3900,fork,reuseaddr
+            - TCP:100.96.72.126:3900
+          readinessProbe:
+            tcpSocket:
+              port: 3900
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: tailscale-relay-state
+        - name: tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tailscale-relay
+  namespace: egress
+spec:
+  selector:
+    app: tailscale-relay
+  ports:
+    - name: s3
+      port: 3900
+      targetPort: 3900

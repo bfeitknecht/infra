@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: tailscale-relay-authkey
+    namespace: egress
+stringData:
+    authkey: ENC[AES256_GCM,data:qcxbcLXHWHvpFrJEWnP2E0a8Vm4MFDZ7hzUnR1h7U3cCRCbVPId2EhTT6MtfDqHYqSxgKk0aBcap6F7kKg==,iv:bbVtEh+Fh8xz9ZlRXPWaM/eHVCt9vDvyWUEnsYsDsAc=,tag:DjUt8ehmJjOKH9z1FyzSAw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBtZXE3bXkzQUQrM01aODQ3
+            WWtjOG8wRHRlOUdaRzl0S3piNmdPcEpINVc4CmtpNmtIT1BjZk92MWFJaXl3bWc1
+            enpCU1N3eUlFNTEzWmNSQWxmZVBEK0UKLS0tIDVqQjdwRDdhYlBzeUJvNkVVR2R3
+            U0ZxdnkwQ2RFN2ZKWHZlY1plWXNNQm8KxvO8GxAAzDD/QY7/sDpWnX6wLj/6tzSR
+            lE0zyBYWWA4yay9MKmaODXeHu9cFNiY0MD4+Zln1gfsrM5/siVqDtA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-15T11:13:09Z"
+    mac: ENC[AES256_GCM,data:X9W5QxgvI33jWP9M8TlauGY3+Wu9ev5lNQ7ERtwMcNGcr3dSwekirqplFWGs/2cUMEMkwyHfXnRt+nm24XZC0P0iE8um8NUErpAlLjFRipGQSA+ymkGACcYtcoOCTBLWczX78oKlBizk9Mblia/HhAEdvzzP313UzXpwDdqNJSI=,iv:DxHIabmPj+jjN5olFUFoTiPGitSZl9y/cwalRGjBYeU=,tag:Q7LfhmzT8lzOBhoBf9xREg==,type:str]
+    version: 3.13.3
