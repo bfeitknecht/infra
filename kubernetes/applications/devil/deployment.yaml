@@ -61,6 +61,10 @@ spec:
             - name: teleport-token
               mountPath: /etc/teleport-secrets
               readOnly: true
+            # The agent's log lands on the node's filesystem — readable via
+            # talosctl read while kubectl exec stays broken (systemd as PID1).
+            - name: teleport-agent-log
+              mountPath: /var/log/teleport
           resources:
             requests:
               cpu: 500m
@@ -77,3 +81,7 @@ spec:
             items:
               - key: token
                 path: teleport-token
+        - name: teleport-agent-log
+          hostPath:
+            path: /var/log/teleport
+            type: DirectoryOrCreate
