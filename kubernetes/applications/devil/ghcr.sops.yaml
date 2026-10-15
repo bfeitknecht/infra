@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: dockerconfigjson
+    namespace: devil
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson: ENC[AES256_GCM,data:anf6BM+6Vau7stLz9c2xFNiafD40FsZgsyGuYeViV7yRdho2X/7Mtnmn1MnLlXvpkOxp7GqmtyxwejIiHZFChr6ITFZRenPMXaCKO6xMqhFVRIPO4zBzFlNw1svv4kQdtgt1PuFIci51cKXCcyO4tHelDpdEKBExKyC/4t/o/KriKvGN6HeL93tXjtoN815qU5cjR6mht9vwUgYLDS1Hz/Wuc22TAerI+laOcXAyLW72rWlF9f/Iup+SOL975cRyfZXcZfEYV2TKtIoVI7Sym/Vc7FrDAQ4Ywp2TuptPzL0WMlnC,iv:UTuwGzJ4v9HaT551A/IqqraJCaNZRZYOXv9wV04phtE=,tag:T2SYWYke2lIZDfNMifBC6Q==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBFdmlIRmZqRTIvTFB1bW16
+            S1pvQktWWk1YNENLRE01Q1llOGxhWWF2V2k4CjFaN2g0a1lzbkwzTCt0aVRURDN4
+            Z3J2eEFlcTBxME9mSnY3VVZ4ekZhV00KLS0tIFFpUTJvR2MyVVJIWXQ2OEJ5Y2Mv
+            YTEzaGwvdU5iL0xBTTBnQ1RreUR5MlkKyxnmaXf4AnzjMfmALD41YeSGKPEjkrea
+            edOLiunpziJiyEcOY2g2e3Mrj50qYTaJmengVT8UYWMKaQSCVH9WIg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-15T00:14:03Z"
+    mac: ENC[AES256_GCM,data:xP6YX7NWZ0oxGOxcci8KKaMUSQwaeD5Mfii+cTe9I/5f3PBHIF5PJAASVqt/1XDgRJdG/GFkpibeyfPCnRAG940qZpJnoS1XhtgTqiRx5cjr0DRUEfwNhH3ChnMx3gx3pMyX66lpn+egSz0SgcS/r19TGVzNv4q6x/uofhweE1s=,iv:ZcCBrDdgA7rB+y+HWxh8J5xMUV8b8GNf5/D00tFd5vc=,tag:AXUxbp7XLxNSHsj9EwRaBw==,type:str]
+    version: 3.13.3

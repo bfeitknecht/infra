@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: devil-teleport-token
+    namespace: devil
+type: Opaque
+stringData:
+    token: ENC[AES256_GCM,data:jUcrEx0lAPAKCebHv9YQxosbGTmIYdzNrktzGmhckOA=,iv:T37jSRLBLYofYmpnXdpFZOP4v0JCZM5HIDm+vnx6uC8=,tag:wIOovzMnjB/IqlHhzTB38g==,type:str]
+    ca-pin: ENC[AES256_GCM,data:Qw/N//jM+NhPyIts8rE72Y9qPRSY6zzaQzWvUYNGYdXhtQFkl6UNj/pGO9NikBKW9KuZLqGBNNTD2PqlJkn+OoWZXbjfoaA=,iv:S7i0a9hyKyJ2bSymc+qOGc/4r4xBdbtmWuZYth4+P64=,tag:7RlguSkeHBGARbi6dhP9bA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBscjc0cFp3eVZxVFZEemNS
+            OGd0UjMzanFqVktFSGZRaDdjc21NbWJmTG53CjhCSUhDbWFhcDg2aVFaUU1tWjd0
+            RjFGL2VLZlZiMjF5WGthL29GcktJcm8KLS0tIFcwT3RjMHE2V0laY095dTF6anpU
+            SVV1WlFWTENmNDYwOTZsOEw3Vjk4NFkKLdn10IwNhkR+73bKS9W+ybJ63zs0Y1AH
+            1dkk3pi+n5zC2MqgkWms61I0118WqsUbrLbJFGTgY1+ND+3pkmvRXA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-14T23:52:22Z"
+    mac: ENC[AES256_GCM,data:1d9REOyq5NfrxhNQJP5MJdnbZjawBaMcqMZgX+lupoVUJe0f1DIuILLNWVS1kf1osHPN1W2zKuXs7cy92jeUJiuFD4f6UAlN25zoE0hRj+hHjh8uGo2CEpTwNE5evriCMkjhPn6ZoXJnpByOjbjPTOu/lGM8YK5lfWmrKsARh8M=,iv:aWZpO6+AG0zyQ6wMI8GlRbrlzgDlAT7e/7LApIOSZ1s=,tag:qqoswA2J8S5146qMjZz08A==,type:str]
+    version: 3.13.3

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devil
+  namespace: devil
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: devil
+  template:
+    metadata:
+      labels:
+        app: devil
+    spec:
+      # kata sizes the VM's vCPUs/RAM from the container limits — without a
+      # CPU limit the VM boots with the kata default (single vCPU), too slow
+      # for in-VM nix builds.
+      runtimeClassName: kata-qemu
+      hostname: devil
+      # devil never talks to the k8s API — no SA token inside the VM
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: dockerconfigjson
+      containers:
+        - name: devil
+          image: ghcr.io/bfeitknecht/devil:0.1.0
+          # The image ships no entrypoint (plain rootfs-tarball import) —
+          # the boot command lives here. /init is the docker-container
+          # profile's shim: registers the store db, boots systemd, stays
+          # fresh across in-container switches.
+          command: ["/init"]
+          # Mounted at /etc/teleport-secrets, not /run/secrets: inside the
+          # kata VM systemd may classify itself as a VM (not a container) and
+          # overmount /run with a tmpfs, hiding the secret mount.
+          # /etc/teleport-secrets is outside everything systemd and the
+          # NixOS etc activation manage.
+          volumeMounts:
+            - name: teleport-token
+              mountPath: /etc/teleport-secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+      volumes:
+        - name: teleport-token
+          secret:
+            secretName: devil-teleport-token
+            # items rename: --token expects a file path — a plain secret
+            # mount would make the target a directory of key-named files
+            items:
+              - key: token
+                path: teleport-token

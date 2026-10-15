@@ -6,7 +6,7 @@ Status as of 2026-10-14. Three lanes run in parallel — **infra** (this repo), 
 
 - **Platform baseline is live** (through tag `v1.14.0`): Flux reconciles the full tree (`storage -> cilium -> ipam`, `cert-manager -> traefik -> tailscale`, CRDs phase), the Gateway holds `10.10.20.128`, LE wildcard + internal CA certificates issued, monitoring + Gatus up, k8up operator deployed, Keel (tier 2) and Knative Serving + `whimsy` (tier 3) live.
 - **Kata shipped in `v1.14.0`** — schematics for rbpi + rzbl, RuntimeClass `kata-qemu`.
-- **Teleport CE wired in tree** (`infrastructure/teleport/`, chart 18.10.0): standalone auth+proxy, multiplex TLS on its own LB IP `10.10.20.154`, local + WebAuthn auth, k8up-scheduled. Pending tag deploy → admin bootstrap → devil agent join.
+- **Teleport CE wired in tree** (`infrastructure/teleport/`, chart 18.10.0): standalone auth+proxy, multiplex TLS on its own LB IP `10.10.20.154`, local + WebAuthn auth, k8up-scheduled. Live: admin user + passkey bootstrapped; devil agent join pending.
 - **Apps live:** apex, AdGuard Home, knotd + kresd, DDNS, Homepage, Forgejo (`git.0xbf.ch`), ATProto PDS (`pds.0xbf.ch`).
 - **Local, unpushed:** `b19a45f` — topf patch restructure (`patches/node/<host>/`), `schematic.rzbl.yaml` + rzbl node patches, HARDWARE.md. Push when convenient; `talos/` rides `topf apply`, not the Flux tag.
 - **rbpi is currently powered down** mid-rework. Step 0 of everything cluster-side is plugging it back in — it rejoins as-is on the old schematic.
@@ -31,8 +31,8 @@ omni: age key backed up -> zed + macOS parity -> macbook factory reset -> nix it
 
 ### Cluster
 
-- [x] **Teleport CE** — deployed (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Deploy: tag → `flux reconcile source oci flux-system` → `flux reconcile kustomization teleport --with-source` (OCIRepository interval is 10m). Remaining: bootstrap the admin user after the tag deploy.
-- [ ] **Devil live** — teleport-gated: the image runs a teleport agent (ssh_service), **no sshd, no HTTPRoute** — the only path is tailnet + `tsh ssh` through `teleport.internal`. Steps: `nix build .#devil` → `docker import` → push a pinned tag → sops the node join token (`devil-teleport-token`) → kata pod in `applications/devil/`. ghostty-web later via teleport app access (retires the opencode ingress split — there is no devil ingress). Decide devil state preservation (PVC vs ephemeral).
+- [x] **Teleport CE** — deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey; `tsh login --proxy teleport.internal` works.
+- [ ] **Devil live** — teleport-gated: the image runs a teleport agent (ssh_service), **no sshd, no HTTPRoute** — the only path is tailnet + `tsh ssh` through `teleport.internal`. Infra side wired and validated: kata pod in `applications/devil/` (entrypoint `command: ["/init"]` lives in the deployment — the image ships none), join token sops'd (`devil-teleport-token`, mounted at `/etc/teleport-secrets/teleport-token`, CA pin baked into the agent config), GHCR pull secret copied, Flux Kustomization `devil` (`dependsOn: kata, teleport`). Remaining: `nix build .#devil` → `docker import --platform linux/arm64` → push `0.1.0` → infra tag → `tsh ls` / `tsh ssh bf@devil`. Decide devil state preservation (PVC vs ephemeral).
 - [ ] **atuin server** on the cluster (omni already ships the client).
 - [ ] **Backup path** — fix the friend's tailnet ACL (`autogroup:shared` -> `100.96.72.126:3900`), smoke-test the restic round-trip, then a restore drill against forgejo's PVC. **Gate for every data-bearing app below.**
 - [ ] **Fix grafana homepage API widget.**
