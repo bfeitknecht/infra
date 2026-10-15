@@ -26,7 +26,12 @@ spec:
         - name: dockerconfigjson
       containers:
         - name: devil
-          image: ghcr.io/bfeitknecht/devil:0.1.0
+          image: ghcr.io/bfeitknecht/devil:latest
+          # The tag is meaningless — the image is only the bootstrap and all
+          # updates happen inside the machine (nh os switch). :latest forces
+          # imagePullPolicy Always, so every pod recreation takes the newest
+          # pushed bootstrap.
+          imagePullPolicy: Always
           # The image ships no entrypoint (plain rootfs-tarball import) —
           # the boot command lives here. /init is the docker-container
           # profile's shim: registers the store db, boots systemd, stays
