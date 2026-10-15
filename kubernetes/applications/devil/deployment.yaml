@@ -20,6 +20,16 @@ spec:
       # for in-VM nix builds.
       runtimeClassName: kata-qemu
       hostname: devil
+      # The VM has no working DNS (CoreDNS rides the ClusterIP path kata
+      # bypasses), so the proxy is pinned via /etc/hosts. The dial must be
+      # BY NAME: teleport's client verifies the cert against the dial
+      # address and the internal-CA cert carries no IP SANs (the ca_pin
+      # covers trust, not names). IP tracks the proxy pod — update together
+      # with auth_server in teleport.yaml when the proxy reschedules.
+      hostAliases:
+        - ip: 10.244.1.104
+          hostnames:
+            - teleport.internal
       # devil never talks to the k8s API — no SA token inside the VM
       automountServiceAccountToken: false
       imagePullSecrets:
