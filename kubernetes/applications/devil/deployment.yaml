@@ -15,22 +15,21 @@ spec:
       labels:
         app: devil
     spec:
-      # kata sizes the VM's vCPUs/RAM from the container limits — without a
-      # CPU limit the VM boots with the kata default (single vCPU), too slow
-      # for in-VM nix builds.
+      # kata sizes the VM's vCPUs/RAM from the container limits —
+      # without a CPU limit the VM boots with the kata default (single vCPU),
+      # too slow for in-VM nix builds.
       runtimeClassName: kata-qemu
       hostname: devil
-      # The VM has no working DNS (CoreDNS rides the ClusterIP path kata
-      # bypasses), so names are pinned via /etc/hosts. Two pinned names:
-      #  - teleport.cluster.local -> auth POD: the join dial. The auth's
-      #    host cert (issuer O=teleport.internal) is what the ca_pin
-      #    covers, and its SANs carry teleport.cluster.local — the proxy
-      #    listener only serves the cert-manager cert (internal-ca), which
-      #    the pin can never vouch for.
-      #  - teleport.internal -> proxy POD: what the reverse tunnel may
-      #    dial post-join.
-      # IPs track the pods — update together with auth_server in
-      # teleport.yaml when the proxy/auth pods reschedule.
+      # cluster DNS is unusable from the kata VM (ClusterIP bypass) —
+      # the resolver pod IP rides the pod-to-pod path that works
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 10.244.0.242
+      # The VM has no DNS path to cluster names;
+      # the join dial must be by name (the cert carries no IP SANs)
+      # and teleport.cluster.local is the pin-covered SAN on the auth host cert.
+      # IPs track the pods — update together with auth_server in teleport.yaml.
       hostAliases:
         - ip: 10.244.1.209
           hostnames:
@@ -42,6 +41,15 @@ spec:
       automountServiceAccountToken: false
       imagePullSecrets:
         - name: dockerconfigjson
+      # subPath mounts fail pod creation if the dir is missing;
+      # local-path volumes start root-owned, so home goes to bf (uid 1000)
+      initContainers:
+        - name: init-state
+          image: busybox:1.36
+          command: ["sh", "-c", "mkdir -p /volume/home /volume/teleport && chown 1000:100 /volume/home"]
+          volumeMounts:
+            - name: state
+              mountPath: /volume
       containers:
         - name: devil
           image: ghcr.io/bfeitknecht/devil:latest
@@ -92,6 +100,14 @@ spec:
             # talosctl read while kubectl exec stays broken (systemd as PID1).
             - name: teleport-agent-log
               mountPath: /var/log/teleport
+            # persistent /home + teleport identity — pod recreation no
+            # longer means a fresh machine
+            - name: state
+              mountPath: /home
+              subPath: home
+            - name: state
+              mountPath: /var/lib/teleport
+              subPath: teleport
           resources:
             requests:
               cpu: 500m
@@ -118,3 +134,6 @@ spec:
           hostPath:
             path: /var/log/teleport
             type: DirectoryOrCreate
+        - name: state
+          persistentVolumeClaim:
+            claimName: devil-state

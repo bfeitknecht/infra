@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: devil-state
+  namespace: devil
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # no default StorageClass in this cluster — local-path must be explicit
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 20Gi

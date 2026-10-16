@@ -4,6 +4,7 @@ namespace: devil
 resources:
   - namespace.yaml
   - deployment.yaml
+  - pvc.yaml
   - ghcr.sops.yaml
   - teleport-token.sops.yaml
 configMapGenerator:
