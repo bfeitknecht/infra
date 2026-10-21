@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devil
+  namespace: devil
+spec:
+  # headless on purpose: the kata VM bypasses Cilium's service translation
+  # in both directions (see the deployment notes) — a ClusterIP would never
+  # reach it. clusterIP: None makes clients (the TCPRoute, Traefik on the
+  # HTTPRoute) dial the pod IP directly via Endpoints — the pod-to-pod
+  # path that works.
+  clusterIP: None
+  selector:
+    app: devil
+  ports:
+    - name: ssh
+      port: 2222
+      targetPort: 2222
+    - name: ghostty-web
+      port: 7681
+      targetPort: 7681

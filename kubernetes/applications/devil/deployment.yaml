@@ -46,7 +46,7 @@ spec:
       initContainers:
         - name: init-state
           image: busybox:1.36
-          command: ["sh", "-c", "mkdir -p /volume/home /volume/teleport && chown 1000:100 /volume/home"]
+          command: ["sh", "-c", "mkdir -p /volume/home /volume/teleport /volume/ssh && chown 1000:100 /volume/home"]
           volumeMounts:
             - name: state
               mountPath: /volume
@@ -96,15 +96,26 @@ spec:
             - name: teleport-config
               mountPath: /etc/teleport
               readOnly: true
+            # the ghostty-web terminal page (see ghostty-web/) — ttyd in the
+            # VM serves it (-I in omni devil.nix); configMapGenerator hash
+            # rolls the pod on every edit
+            - name: ghostty-web
+              mountPath: /srv/ghostty-web
+              readOnly: true
             # The agent's log lands on the node's filesystem — readable via
             # talosctl read while kubectl exec stays broken (systemd as PID1).
             - name: teleport-agent-log
               mountPath: /var/log/teleport
-            # persistent /home + teleport identity — pod recreation no
-            # longer means a fresh machine
+            # persistent /home, ssh host keys + teleport identity — pod
+            # recreation no longer means a fresh machine
             - name: state
               mountPath: /home
               subPath: home
+            # sshd host keys (devil.nix declares /var/lib/ssh) — without
+            # this every pod recreation mints a new host key
+            - name: state
+              mountPath: /var/lib/ssh
+              subPath: ssh
             - name: state
               mountPath: /var/lib/teleport
               subPath: teleport
@@ -130,10 +141,16 @@ spec:
             items:
               - key: teleport.yaml
                 path: teleport.yaml
+        - name: ghostty-web
+          configMap:
+            name: devil-ghostty-web
+            items:
+              - key: index.html
+                path: index.html
         - name: teleport-agent-log
           hostPath:
             path: /var/log/teleport
             type: DirectoryOrCreate
         - name: state
           persistentVolumeClaim:
-            claimName: devil-state
+            claimName: devil-pvc

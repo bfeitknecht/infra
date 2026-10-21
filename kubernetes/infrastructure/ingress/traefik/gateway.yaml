@@ -45,6 +45,15 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # Raw TCP for devil ssh (TCPRoute devil-ssh). Like gitssh the port
+    # matches the devilssh entrypoint (2222) — but no hostPort and no WAN
+    # exposure: LAN + tailnet only.
+    - name: devilssh
+      protocol: TCP
+      port: 2222
+      allowedRoutes:
+        namespaces:
+          from: All
     # PDS account handles (<name>.pds.0xbf.ch) — second-level wildcard needs
     # its own cert (pds-handles-wildcard-tls); same-port listeners are
     # distinguished by hostname, most specific wins (see websecure-internal).

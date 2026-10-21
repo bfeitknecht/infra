@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: ssh
+  namespace: devil
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: devilssh
+  rules:
+    - backendRefs:
+        # the headless Service — see service.yaml
+        - name: devil
+          port: 2222

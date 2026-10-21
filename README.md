@@ -71,6 +71,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
         ├── agh/                    # AdGuard Home (LAN DNS edge)
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
         ├── dns/                    # knotd + kresd (the .internal zone)
+        ├── devil/                  # Kata VM pod (ssh 2222 via TCPRoute, ghostty-web terminal at devil.internal; page source in ghostty-web/)
         ├── forgejo/                # Git forge (git.0xbf.ch, git-ssh via TCPRoute)
         ├── pds/                    # ATProto PDS (Bluesky; handles at <name>.pds.0xbf.ch)
         └── homepage/               # Dashboard
@@ -137,13 +138,14 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 
 ### Ingress & Certificates
 
-- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443 plus TCP 22 (git-ssh `TCPRoute`); the LoadBalancer Service exposes 80/443/22.
+- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443 plus TCP 22 (forgejo git-ssh `TCPRoute`) and TCP 2222 (devil ssh `TCPRoute`, LAN/tailnet only — no WAN forward); the LoadBalancer Service exposes 80/443/22/2222.
 - The Gateway address `10.10.20.128` comes from the Cilium LB-IPAM pool (`network/ipam`) and is L2-announced on the worker's `end0` interface.
 - Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
 - Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
 - The ATProto PDS is routed at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle resolution via `/.well-known/atproto-did`); custom-domain handles (e.g. the bare apex) resolve via DNS TXT records.
-- Teleport is the one service NOT behind Traefik: the proxy terminates its own TLS (internal CA) on its own LB IP `10.10.20.154` (`teleport.internal`, explicit knot zone record); web UI, `tsh` and agent tunnels multiplex on 443.
+- Devil (kata VM pod): `devil.internal` serves the ghostty-web terminal (HTTPRoute → ttyd in the VM, a real `login` prompt is the auth) and ssh on port 2222 (TCPRoute → VM sshd, pubkey-only); LAN + tailnet only.
+- Teleport is the one service NOT behind Traefik: the proxy terminates its own TLS (internal CA) on its own LB IP `10.10.20.154` (`teleport.internal`, explicit knot zone record); web UI, `tsh` and agent tunnels multiplex on 443. (Kept for a demo — teardown queued in the ROADMAP; devil's everyday doors are ssh + ghostty-web.)
 
 ### Secrets
 
