@@ -5,7 +5,8 @@
      (see omni devil.nix) — the login prompt is the auth.
      Wire protocol (ttyd):
        GET /token -> {"token": ...}
-       WS  wss://<host>/ws, subprotocol "ttyd", binary frames
+       WS  wss://<host>/ws, subprotocol "tty" (ttyd registers "tty", not
+           "ttyd" — lws rejects unknown subprotocols at upgrade), binary frames
        open:  {AuthToken, columns, rows} (binary-encoded JSON)
        -> '0' + input bytes | '1' + {"columns": c, "rows": r}
        <- '0' + output bytes | '1' + title (ignored, ghostty handles OSC)
@@ -64,7 +65,7 @@
       .addEventListener("change", (e) => applyTheme(e.matches ? "light" : "dark"));
 
     const { token } = await (await fetch("/token")).json();
-    const ws = new WebSocket(`wss://${location.host}/ws`, ["ttyd"]);
+    const ws = new WebSocket(`wss://${location.host}/ws`, ["tty"]);
     ws.binaryType = "arraybuffer";
 
     const enc = new TextEncoder();
