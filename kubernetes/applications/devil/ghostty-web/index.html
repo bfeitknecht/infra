@@ -8,7 +8,9 @@
        WS  wss://<host>/ws, subprotocol "ttyd", binary frames
        open:  {AuthToken, columns, rows} (binary-encoded JSON)
        -> '0' + input bytes | '1' + {"columns": c, "rows": r}
-       <- '0' + output bytes | '1' + title (ignored, ghostty handles OSC) -->
+       <- '0' + output bytes | '1' + title (ignored, ghostty handles OSC)
+     FitAddon comes from ghostty-web itself (the @xterm one reaches into
+     xterm.js internals ghostty-web lacks — _renderService crash). -->
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -31,8 +33,7 @@
   <body>
     <div id="term"></div>
     <script type="module">
-    import { init, Terminal } from "https://esm.sh/ghostty-web@0.4.0";
-    import { FitAddon } from "https://esm.sh/@xterm/addon-fit@0.10.0";
+    import { FitAddon, init, Terminal } from "https://esm.sh/ghostty-web@0.4.0";
 
     await init();
 
@@ -51,6 +52,7 @@
     term.open(document.getElementById("term"));
     term.loadAddon(fit);
     fit.fit();
+    fit.observeResize();
 
     const applyTheme = (name) => {
       term.options.theme = themes[name];
