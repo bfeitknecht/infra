@@ -30,7 +30,7 @@ kubernetes/
 │   │                           pinned upstream tags (gateway-api v1.6.2, traefik chart v41.6.0,
 │   │                           kube-prometheus-stack 91.4.1)
 │   ├── infrastructure.yaml     the Kustomization dependency tree
-│   ├── applications.yaml       per-app Kustomizations (dns, agh, homepage, ddns, apex, forgejo, pds)
+│   ├── applications.yaml       per-app Kustomizations (dns, agh, homepage, ddns, apex, forgejo, pds, atuin)
 │   └── ghcr-pat.sops.yaml
 ├── infrastructure/
 │   ├── storage/                local-path-provisioner
@@ -51,6 +51,7 @@ kubernetes/
 │       └── tailscale/          HelmRelease + Namespace + operator-oauth secret
 └── applications/               one directory = one namespace
     ├── apex/                   tier-2: the apex site (image from the apex repo, Keel-polled)
+    ├── atuin/                  tier-1: shell history sync server (atuin.0xbf.ch, k8up backup)
     ├── agh/                    AdGuard Home (LAN DNS edge)
     ├── ddns/                   favonia/cloudflare-ddns (0xbf.ch + *.0xbf.ch → home IP)
     ├── dns/                    knotd + kresd (the .internal zone — resolver pod on OCI)
@@ -107,6 +108,8 @@ let did = (http get $"https://($handle)/.well-known/atproto-did" | str trim)
 http post -H {Authorization: $"Bearer ($cf_token)"} -t application/json $"https://api.cloudflare.com/client/v4/zones/($zone_id)/dns_records" ({type: "TXT", name: $"_atproto.($custom)", content: $"did=($did)", ttl: 3600} | to json) | select success errors
 dig +short $"_atproto.($custom)" TXT "@1.1.1.1"
 ```
+
+- **atuin 18.24.2** (`applications/atuin/`, tier-1): shell history sync server at `atuin.0xbf.ch` (public, `websecure` listener, LE wildcard cert). Image `ghcr.io/atuinsh/atuin:18.24.2` pinned — deliberate bumps only; the image publishes no `:latest` and the release tag loses its `v` (`v18.24.2` release → `18.24.2` image tag). SQLite server DB (tier-one per upstream) at `/config/atuin.db` on one PVC (5Gi local-path), `Recreate` strategy — same shape as forgejo/pds, no Postgres pod. Fully env-configured (ConfigMap `atuin-config` via configMapGenerator `envs`; no sops Secret — the SQLite DB needs no credentials). `ATUIN_OPEN_REGISTRATION=true` while the first user registers, then flip to `false`. Image entrypoint is `atuin-server`; the Deployment passes `start`. `enableServiceLinks: false` plus explicit `ATUIN_PORT`/`ATUIN_HOST`: a Service named `atuin` injects `ATUIN_PORT=tcp://…` service-link env vars (upstream ignores that form with a warning — the explicit env removes the ambiguity). Probes hit `/healthz`. History is client-side encrypted — the server stores blobs it cannot read, so no server key. k8up Schedule in-namespace (04:30 backup / 06:30 prune, staggered behind forgejo/pds/teleport). Clients point at `https://atuin.0xbf.ch` (`sync_address` in `~/.config/atuin/config.toml`).
 
 - **homepage v2.4.0**: dashboard at `homepage.internal` (allowlisted middleware copy in the `homepage` namespace). Config: `settings.yaml` + `kubernetes.yaml` via ConfigMap (configMapGenerator → pod rolls on change), `services.yaml` via Secret `homepage-services` (sops — contains the AGH widget credentials and the Grafana API token; re-seeding follows the agh-config pattern). Widgets: adguard (AGH stats via in-cluster Service), gatus (health overview), grafana (service-account token). Kubernetes cluster/nodes stats via the `kubernetes.yaml` config + RBAC (`rbac.yaml`: SA + ClusterRole incl. metrics.k8s.io — served by metrics-server). `HOMEPAGE_ALLOWED_HOSTS` pins the accepted Host header.
 - **tailscale-relay** (`infrastructure/egress/tailscale/`, ns `egress`): user-owned tailnet egress point. Verified Tailscale constraint (docs + live probes 2026-10-15): link-based sharing is user-scoped — a shared-in machine is visible only to the recipient user's devices, and **tagged machines can never access shared-in machines**; tags are stripped across shares and no ACL rule can change this. That kills both the node path (`tag:infra`) and the operator egress-proxy fallback (`tag:k8s`) for shared-in targets — this relay is the workaround: tailscaled joined via an **untagged** authkey, so the device is owned by the owner's user and lands inside the share's scope like the owner's Mac. TUN mode (`/dev/net/tun` hostPath + NET_ADMIN) with a socat sidecar forwarding listeners to tailnet targets (currently :3900 → `100.96.72.126:3900`, the friend's NAS/Garage for k8up); new targets = extra `TCP-LISTEN` args in `relay.yaml`. State on a 1Gi local-path PVC so the node key survives restarts (authkey only needed on first join, `TS_AUTH_ONCE`; disable key expiry on the `k8s-relay` device after first join). Authkey in `relay-authkey.sops.yaml` (Secret `tailscale-relay-authkey`) and must remain untagged. Any workload reaches a target via `tailscale-relay.egress.svc.cluster.local:<port>`. For regular (non-shared) tailnet targets, prefer the operator's egress Services instead — tagged `tag:k8s` proxies work there.

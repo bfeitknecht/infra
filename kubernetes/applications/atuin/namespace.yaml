@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: atuin
+  labels:
+    # The atuin image runs as the non-root `atuin` user (uid 1000) -
+    # baseline allows that without host-level privileges.
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/audit: baseline

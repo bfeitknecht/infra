@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atuin
+  namespace: atuin
+spec:
+  replicas: 1
+  # Recreate: the SQLite DB lives behind a RWO local-path volume - two
+  # instances must never run against the same data.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: atuin
+  template:
+    metadata:
+      labels:
+        app: atuin
+    spec:
+      # A Service named `atuin` injects ATUIN_PORT=tcp://... as a service-link
+      # env var. Atuin ignores that form with a warning, but the explicit env
+      # here removes the ambiguity entirely (atuin docs: Service links).
+      enableServiceLinks: false
+      containers:
+        - name: atuin
+          image: ghcr.io/atuinsh/atuin:18.24.2
+          # Entrypoint is the atuin-server binary; `start` runs the server.
+          args: ["start"]
+          envFrom:
+            - configMapRef:
+                name: atuin-config
+          ports:
+            - containerPort: 8888
+              name: http
+          volumeMounts:
+            - name: data
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8888
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8888
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: atuin-data

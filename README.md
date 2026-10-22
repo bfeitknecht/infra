@@ -68,6 +68,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
     │   └── ingress/                # Traefik (Gateway API), cert-manager, Tailscale
     └── applications/               # User Workloads (one directory = one namespace)
         ├── apex/                   # Public site (Keel-polled :latest)
+        ├── atuin/                  # Shell history sync server (atuin.0xbf.ch)
         ├── agh/                    # AdGuard Home (LAN DNS edge)
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
         ├── dns/                    # knotd + kresd (the .internal zone)
