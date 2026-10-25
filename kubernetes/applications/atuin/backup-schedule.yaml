@@ -5,7 +5,7 @@ metadata:
   namespace: atuin
 spec:
   # Times fire in Europe/Zurich (operator-level k8up.timezone).
-  # Staggered behind forgejo (03:00/05:00), pds (03:30/05:30), teleport (04:00/06:00).
+  # Staggered behind forgejo (03:00/05:00) and pds (03:30/05:30).
   backup:
     schedule: "30 4 * * *"
     failedJobsHistoryLimit: 3

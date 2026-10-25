@@ -169,7 +169,6 @@ metadata:
 spec:
   dependsOn:
     - name: kata
-    - name: teleport
     - name: traefik
   interval: 10m0s
   path: ./kubernetes/applications/devil

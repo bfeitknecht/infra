@@ -26,17 +26,6 @@ spec:
       dnsConfig:
         nameservers:
           - 10.244.0.242
-      # The VM has no DNS path to cluster names;
-      # the join dial must be by name (the cert carries no IP SANs)
-      # and teleport.cluster.local is the pin-covered SAN on the auth host cert.
-      # IPs track the pods — update together with auth_server in teleport.yaml.
-      hostAliases:
-        - ip: 10.244.1.209
-          hostnames:
-            - teleport.cluster.local
-        - ip: 10.244.1.104
-          hostnames:
-            - teleport.internal
       # devil never talks to the k8s API — no SA token inside the VM
       automountServiceAccountToken: false
       imagePullSecrets:
@@ -46,7 +35,7 @@ spec:
       initContainers:
         - name: init-state
           image: busybox:1.36
-          command: ["sh", "-c", "mkdir -p /volume/home /volume/teleport /volume/ssh && chown 1000:100 /volume/home"]
+          command: ["sh", "-c", "mkdir -p /volume/home /volume/ssh && chown 1000:100 /volume/home"]
           volumeMounts:
             - name: state
               mountPath: /volume
@@ -75,39 +64,18 @@ spec:
             - name: container
               value: docker
           # A PTY gives the container a /dev/console — without it the shim
-          # creates none and every unit's journal+console output (including
-          # teleport's) is discarded instead of landing in kubectl logs.
+          # creates none and every unit's journal+console output is
+          # discarded instead of landing in kubectl logs.
           tty: true
-          # Mounted at /etc/teleport-secrets, not /run/secrets: inside the
-          # kata VM systemd may classify itself as a VM (not a container) and
-          # overmount /run with a tmpfs, hiding the secret mount.
-          # /etc/teleport-secrets is outside everything systemd and the
-          # NixOS etc activation manage.
           volumeMounts:
-            - name: teleport-token
-              mountPath: /etc/teleport-secrets
-              readOnly: true
-            # teleport.yaml is Flux-managed infra plumbing (the kata VM's
-            # working dial target is a cluster-specific fact) — mounted
-            # over the image's /etc/teleport so targets change via tag,
-            # not via image rebuild. The image must NOT declare an
-            # environment.etc."teleport" entry: the NixOS etc activation
-            # would clobber this mount with a symlink to the store.
-            - name: teleport-config
-              mountPath: /etc/teleport
-              readOnly: true
             # the ghostty-web terminal page (see ghostty-web/) — ttyd in the
             # VM serves it (-I in omni devil.nix); configMapGenerator hash
             # rolls the pod on every edit
             - name: ghostty-web
               mountPath: /srv/ghostty-web
               readOnly: true
-            # The agent's log lands on the node's filesystem — readable via
-            # talosctl read while kubectl exec stays broken (systemd as PID1).
-            - name: teleport-agent-log
-              mountPath: /var/log/teleport
-            # persistent /home, ssh host keys + teleport identity — pod
-            # recreation no longer means a fresh machine
+            # persistent /home + ssh host keys — pod recreation no longer
+            # means a fresh machine
             - name: state
               mountPath: /home
               subPath: home
@@ -116,9 +84,6 @@ spec:
             - name: state
               mountPath: /var/lib/ssh
               subPath: ssh
-            - name: state
-              mountPath: /var/lib/teleport
-              subPath: teleport
           resources:
             requests:
               cpu: 500m
@@ -127,30 +92,12 @@ spec:
               cpu: "4"
               memory: 4Gi
       volumes:
-        - name: teleport-token
-          secret:
-            secretName: devil-teleport-token
-            # items rename: --token expects a file path — a plain secret
-            # mount would make the target a directory of key-named files
-            items:
-              - key: token
-                path: teleport-token
-        - name: teleport-config
-          configMap:
-            name: devil-teleport-config
-            items:
-              - key: teleport.yaml
-                path: teleport.yaml
         - name: ghostty-web
           configMap:
             name: devil-ghostty-web
             items:
               - key: index.html
                 path: index.html
-        - name: teleport-agent-log
-          hostPath:
-            path: /var/log/teleport
-            type: DirectoryOrCreate
         - name: state
           persistentVolumeClaim:
             claimName: devil-pvc

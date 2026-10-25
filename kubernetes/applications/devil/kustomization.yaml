@@ -10,12 +10,7 @@ resources:
   - tcproute.yaml
   - middleware.yaml
   - ghcr.sops.yaml
-  - teleport-token.sops.yaml
 configMapGenerator:
-  # the agent's teleport.yaml: hash suffix, so every edit rolls the pod
-  - name: devil-teleport-config
-    files:
-      - teleport.yaml
   # the ghostty-web terminal page (ttyd serves it, -I in omni devil.nix):
   # hash suffix, so every edit rolls the pod
   - name: devil-ghostty-web

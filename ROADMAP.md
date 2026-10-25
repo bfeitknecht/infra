@@ -6,7 +6,7 @@ Status as of 2026-10-14. Three lanes run in parallel — **infra** (this repo), 
 
 - **Platform baseline is live** (through tag `v1.14.0`): Flux reconciles the full tree (`storage -> cilium -> ipam`, `cert-manager -> traefik -> tailscale`, CRDs phase), the Gateway holds `10.10.20.128`, LE wildcard + internal CA certificates issued, monitoring + Gatus up, k8up operator deployed, Keel (tier 2) and Knative Serving + `whimsy` (tier 3) live.
 - **Kata shipped in `v1.14.0`** — schematics for rbpi + rzbl, RuntimeClass `kata-qemu`.
-- **Teleport CE wired in tree** (`infrastructure/teleport/`, chart 18.10.0): standalone auth+proxy, multiplex TLS on its own LB IP `10.10.20.154`, local + WebAuthn auth, k8up-scheduled. Live: admin user + passkey bootstrapped; devil agent join pending.
+- **Teleport CE torn down** (2026-10-24, after the friend demo) — `infrastructure/teleport/` and the devil agent wiring removed; devil's doors are ssh (2222) + ghostty-web.
 - **Apps live:** apex, AdGuard Home, knotd + kresd, DDNS, Homepage, Forgejo (`git.0xbf.ch`), ATProto PDS (`pds.0xbf.ch`).
 - **Local, unpushed:** `b19a45f` — topf patch restructure (`patches/node/<host>/`), `schematic.rzbl.yaml` + rzbl node patches, HARDWARE.md. Push when convenient; `talos/` rides `topf apply`, not the Flux tag.
 - **rbpi is currently powered down** mid-rework. Step 0 of everything cluster-side is plugging it back in — it rejoins as-is on the old schematic.
@@ -31,13 +31,13 @@ omni: age key backed up -> zed + macOS parity -> macbook factory reset -> nix it
 
 ### Cluster
 
-- [x] **Teleport CE** — deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey; `tsh login --proxy teleport.internal` works.
-- [x] **Devil live — access model switched (2026-10-20)**: teleport is superseded but **stays until the friend demo** (teardown is a queued LATER item). New doors, all via the gateway (one hostname, `devil.internal`, knot wildcard — no DNS record needed):
+- [x] **Teleport CE** — deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey; `tsh login --proxy teleport.internal` works. **Torn down 2026-10-24** — see LATER.
+- [x] **Devil live — access model switched (2026-10-20)**: teleport is superseded and was **torn down 2026-10-24** (friend demo done). New doors, all via the gateway (one hostname, `devil.internal`, knot wildcard — no DNS record needed):
     - **ssh 2222** — new traefik entrypoint `devilssh` (port 2222, **no hostPort**, no WAN — the router forwards nothing; WAN 2222 stays reserved for the future dev box) + gateway listener + TCPRoute `ssh` → headless Service → VM sshd (pubkey-only, host keys persisted on the PVC).
     - **ghostty-web** — HTTPRoute `devil` (websecure-internal, internal-allowlist copy — the only middleware, no basic-auth) → headless Service :7681 → **ttyd in the VM** (`devil.nix` in omni) serving the static page (ConfigMap `devil-ghostty-web` from `ghostty-web/index.html` — one html file, ghostty-web from CDN, ttyd wire protocol) and running a **real `login`** — auth is bf's PAM password (omni sops), not a middleware.
     - The **headless** Service exists because the kata VM bypasses Cilium's service translation in both directions — ClusterIP/LB never reach it; clients dial the pod IP via Endpoints (the pod-to-pod path that works).
-    - PVC renamed `devil-state` → `devil-pvc` (subPaths home/ssh/teleport). ⚠️ **migration runbook before the tag** (`.private/devil-pvc-rename.md`) — Flux prune deletes the old bound PVC and its data (the running VM holds the age key, the omni clone, the teleport identity): scale devil to 0, create `devil-pvc` from the manifest, busybox copy pod (`cp -a`, verify `du`), keep replicas at 0, tag — prune deletes `devil-state` and the manifest restores `replicas: 1`.
-    - Remaining: owner keypair+secrets (omni: `ssh/devil`, `login/devil`) → `nix build .#devil` → `docker import --platform linux/arm64` → push `latest` → infra tag → smoke tests (ssh from mac/ish, login prompt at https://devil.internal, `tsh ssh` still works).
+    - PVC renamed `devil-state` → `devil-pvc` (subPaths home/ssh). ⚠️ **migration runbook before the tag** (`.private/devil-pvc-rename.md`) — Flux prune deletes the old bound PVC and its data (the running VM holds the age key, the omni clone, the teleport identity): scale devil to 0, create `devil-pvc` from the manifest, busybox copy pod (`cp -a`, verify `du`), keep replicas at 0, tag — prune deletes `devil-state` and the manifest restores `replicas: 1`.
+    - Remaining: owner keypair+secrets (omni: `ssh/devil`, `login/devil`) → `nix build .#devil` → `docker import --platform linux/arm64` → push `latest` → infra tag → smoke tests (ssh from mac/ish, login prompt at https://devil.internal).
 - [ ] **atuin server** on the cluster (omni already ships the client).
 - [ ] **Backup path** — fix the friend's tailnet ACL (`autogroup:shared` -> `100.96.72.126:3900`), smoke-test the restic round-trip, then a restore drill against forgejo's PVC. **Gate for every data-bearing app below.**
 - [ ] **Fix grafana homepage API widget.**
@@ -85,7 +85,7 @@ omni: age key backed up -> zed + macOS parity -> macbook factory reset -> nix it
     - Then: forgejo OIDC, grafana OIDC, identity-gated blog comments.
 - [ ] **Renovate** — decision: GitHub App on this repo vs self-hosted against Forgejo.
 - [ ] **Alerting** — Alertmanager receiver decision (ntfy/Discord/Telegram); grafana dashboards.
-- [ ] **Teleport teardown (queued — kept for the friend demo)**: `infrastructure/teleport/`, the devil teleport mounts/secret/configmap + `dependsOn: teleport`, omni's teleport unit + port 3022 + `TELEPORT_SESSION` prompt special-case, AGENTS/README notes. Devil runs ssh (2222) + ghostty-web (ttyd + real login) meanwhile.
+- [x] **Teleport teardown** — done 2026-10-24 (friend demo done): `infrastructure/teleport/` deleted, the devil teleport mounts/secret/configmap + `dependsOn: teleport` removed, omni's teleport unit + port 3022 + `TELEPORT_SESSION` prompt special-case removed, AGENTS/README notes updated. Devil runs ssh (2222) + ghostty-web (ttyd + real login).
 - [ ] **Daytona** agent sandbox; opencode kata container (if not done with devil).
 - [ ] **Macbook factory reset** -> omni bootstrap (README runbook) -> iterate; rice (sketchybar/yabai/…) lives here, post-reset.
 - [ ] Upgrades: k8s 1.35.3 -> 1.37 (`talosctl upgrade-k8s`), Talos patch bumps, local kubectl.
@@ -107,23 +107,22 @@ The domain template is `{{.Name}}.0xbf.ch` — the KSvc name declares the subdom
 
 ## PVC planning
 
-| Service         | Node | PVC                                                     |
-| --------------- | ---- | ------------------------------------------------------- |
-| AdGuard Home    | rbpi | nvme? 1Gi                                               |
-| prometheus      | rbpi | nvme? 1Gi                                               |
-| gatus           | rbpi | nvme? 1Gi                                               |
-| renovate        | rbpi |                                                         |
-| Homepage        | rbpi |                                                         |
-| Forgejo         | rbpi | nvme                                                    |
-| ATProto PDS     | rbpi | nvme                                                    |
-| apex            | rbpi |                                                         |
-| atuin           | rbpi | small                                                   |
-| teleport        | rbpi |                                                         |
-| devil           | rbpi | devil-pvc 20Gi (home, ssh host keys, teleport identity) |
-| Immich          | rzbl |                                                         |
-| Copyparty       | rzbl |                                                         |
-| Dawarich        | rzbl |                                                         |
-| *arr + Jellyfin | rzbl |                                                         |
+| Service         | Node | PVC                                  |
+| --------------- | ---- | ------------------------------------ |
+| AdGuard Home    | rbpi | nvme? 1Gi                            |
+| prometheus      | rbpi | nvme? 1Gi                            |
+| gatus           | rbpi | nvme? 1Gi                            |
+| renovate        | rbpi |                                      |
+| Homepage        | rbpi |                                      |
+| Forgejo         | rbpi | nvme                                 |
+| ATProto PDS     | rbpi | nvme                                 |
+| apex            | rbpi |                                      |
+| atuin           | rbpi | small                                |
+| devil           | rbpi | devil-pvc 20Gi (home, ssh host keys) |
+| Immich          | rzbl |                                      |
+| Copyparty       | rzbl |                                      |
+| Dawarich        | rzbl |                                      |
+| *arr + Jellyfin | rzbl |                                      |
 
 ## Conventions for every new application
 

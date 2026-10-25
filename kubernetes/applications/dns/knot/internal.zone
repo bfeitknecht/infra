@@ -1,7 +1,7 @@
 $ORIGIN internal.
 $TTL 1h
 @       IN SOA  ns.internal. hostmaster.internal. (
-                2026101401  ; serial
+                2026102401  ; serial
                 6h          ; refresh
                 1h          ; retry
                 1w          ; expire
@@ -17,7 +17,3 @@ ns      IN A    10.10.20.128
 ; use them for non-cluster LAN devices that must answer on their own IP
 ; (no Traefik, no internal CA — the device serves its own certificate).
 router  IN A    10.10.10.1
-; Teleport's proxy terminates its own TLS on its own LB IP
-; (no Traefik, no wildcard coverage) — explicit record like router,
-; the wildcard would send it to the Gateway.
-teleport IN A    10.10.20.154

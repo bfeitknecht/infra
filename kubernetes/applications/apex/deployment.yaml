@@ -15,14 +15,14 @@ spec:
             labels:
                 app.kubernetes.io/name: apex
             annotations:
-                # Tier-2 release engine: Keel polls the :latest digest of the
-                # image published by the apex app repo and re-rolls this pod on
-                # change. Flux ignores this field via the Kustomization
-                # spec.ignore (see cluster/applications.yaml).
                 keel.sh/trigger: poll
-                keel.sh/policy: latest
+                keel.sh/policy: force
                 keel.sh/match-tag: "true"
         spec:
+            # Keel reads the workload's own imagePullSecrets to query the private GHCR package —
+            # the namespace default SA's secret is not enough (Keel resolves credentials from the pod template only).
+            imagePullSecrets:
+                - name: dockerconfigjson
             containers:
                 - name: apex
                   # Hardcoded :latest on purpose — Keel follows the digest.
