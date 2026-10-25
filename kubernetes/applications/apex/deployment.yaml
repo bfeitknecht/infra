@@ -5,6 +5,13 @@ metadata:
     namespace: apex
     labels:
         app.kubernetes.io/name: apex
+    # Keel reads keel.sh/* from the workload's own metadata. On the pod template
+    # (spec.template.metadata) they are invisible: the policy parses as "none"
+    # and the deployment is silently never tracked.
+    annotations:
+        keel.sh/trigger: poll
+        keel.sh/policy: force
+        keel.sh/match-tag: "true"
 spec:
     replicas: 1
     selector:
@@ -14,10 +21,6 @@ spec:
         metadata:
             labels:
                 app.kubernetes.io/name: apex
-            annotations:
-                keel.sh/trigger: poll
-                keel.sh/policy: force
-                keel.sh/match-tag: "true"
         spec:
             # Keel reads the workload's own imagePullSecrets to query the private GHCR package —
             # the namespace default SA's secret is not enough (Keel resolves credentials from the pod template only).
