@@ -24,7 +24,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 
 ### Applications
 
-- **Public:** apex site (Keel-polled `:latest`)
+- **Public:** apex site, glob blog (`blog.0xbf.ch`) (Keel-polled `:latest`)
 - **Utilities & Dashboard:** AdGuard Home, knotd + kresd (`.internal` zone), DDNS, Homepage
 
 ### Planned
@@ -67,6 +67,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
     │   └── ingress/                # Traefik (Gateway API), cert-manager, Tailscale
     └── applications/               # User Workloads (one directory = one namespace)
         ├── apex/                   # Public site (Keel-polled :latest)
+        ├── glob/                   # Blog (blog.0xbf.ch, Keel-polled :latest)
         ├── atuin/                  # Shell history sync server (atuin.0xbf.ch)
         ├── agh/                    # AdGuard Home (LAN DNS edge)
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
@@ -147,10 +148,10 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 
 ### Secrets
 
-All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `pds-secrets` (ATProto PDS: JWT secret, admin password, PLC rotation key), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
+All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `ghcr` (glob GHCR), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `pds-secrets` (ATProto PDS: JWT secret, admin password, PLC rotation key), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
 
 ### Access
 
-- `kubeconfig` and `talosconfig` live in the repo root (gitignored).
+- `kubeconfig` at repo root, `talos/talosconfig` (both gitignored).
 - Off-LAN access runs over the tailnet: the nodes run the Tailscale system extension; advertise `10.10.20.0/24` from the worker node and approve the route in the Tailscale admin console.
 - `dashboard.internal` (and every other `*.internal` name) resolves via the DNS stack: AdGuard Home (`10.10.20.153`, LAN-facing) -> the `resolver` pod on the OCI control-plane node (true recursion + DNSSEC, ClusterIP `10.96.0.53`) -> knotd in the same pod for `internal.` (authoritative zone, wildcard -> `10.10.20.128`; non-cluster devices get explicit records, e.g. `router.internal` -> `10.10.10.1`). LAN: router DHCP DNS field -> `10.10.20.153`. Off-LAN (tailnet): Tailscale split DNS, domain `internal.` -> `10.10.20.153` (requires MagicDNS; reachable via the advertised subnet routes). Until the router field is set, a hosts entry remains the stopgap.

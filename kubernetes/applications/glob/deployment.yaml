@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: glob
+    namespace: glob
+    labels:
+        app.kubernetes.io/name: glob
+    # Keel reads keel.sh/* from the workload's own metadata (never pod template).
+    annotations:
+        keel.sh/trigger: poll
+        keel.sh/policy: force
+        keel.sh/match-tag: "true"
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: glob
+    template:
+        metadata:
+            labels:
+                app.kubernetes.io/name: glob
+        spec:
+            # Keel resolves GHCR credentials from the pod template's imagePullSecrets.
+            imagePullSecrets:
+                - name: dockerconfigjson
+            containers:
+                - name: glob
+                  # Hardcoded :latest on purpose — Keel follows the digest.
+                  image: ghcr.io/bfeitknecht/glob:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 8080
+                      name: http
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 32Mi
+                    limits:
+                      memory: 128Mi
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop: ["ALL"]
+                    seccompProfile:
+                      type: RuntimeDefault
