@@ -63,6 +63,24 @@ data:
         url: http://pds-http.pds.svc.cluster.local/xrpc/_health
         interval: 1m
         conditions: ["[STATUS] == 200"]
+      - name: apex
+        url: http://apex.apex.svc.cluster.local
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+      # SSH: a successful TCP connect proves the listener and the host key
+      # loaded; the SSH banner itself is not parsed.
+      - name: apex-ssh
+        url: tcp://apex-tui.apex.svc.cluster.local:2222
+        interval: 1m
+        conditions: ["[CONNECTED] == true"]
+      - name: glob
+        url: http://glob.glob.svc.cluster.local
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+      - name: exhib
+        url: http://exhib.exhib.svc.cluster.local
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

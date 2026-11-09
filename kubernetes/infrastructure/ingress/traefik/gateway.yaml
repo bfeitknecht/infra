@@ -37,11 +37,10 @@ spec:
         certificateRefs:
           - name: wildcard-internal-tls
     # Raw TCP for forgejo git-over-SSH (TCPRoute). Port must match the
-    # gitssh entrypoint (22 — WAN 22 → git, the dev box takes 2222 later),
-    # not the exposed Service port.
+    # gitssh entrypoint (2223 since the apex portfolio took 22).
     - name: gitssh
       protocol: TCP
-      port: 22
+      port: 2223
       allowedRoutes:
         namespaces:
           from: All
@@ -51,6 +50,14 @@ spec:
     - name: devilssh
       protocol: TCP
       port: 2222
+      allowedRoutes:
+        namespaces:
+          from: All
+    # Raw TCP for the apex portfolio over SSH (TCPRoute apex-ssh). 22 is the
+    # portfolio: `ssh 0xbf.ch` needs no port argument.
+    - name: apexssh
+      protocol: TCP
+      port: 22
       allowedRoutes:
         namespaces:
           from: All

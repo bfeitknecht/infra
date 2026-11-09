@@ -7,3 +7,11 @@ resources:
     - httproute.yaml
     - serviceaccount.yaml
     - ghcr.sops.yaml
+    # SSH portfolio: its own Deployment so a broken host key or a crashed
+    # session loop can never take the static site down.
+    - tui-deployment.yaml
+    - tui-service.yaml
+    - tui-tcproute.yaml
+    # Requires the host identity first — see infra/README.md in the apex
+    # repo, then uncomment:
+    # - ssh-host-key.sops.yaml

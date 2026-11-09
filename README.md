@@ -24,7 +24,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 
 ### Applications
 
-- **Public:** apex site, glob blog (`blog.0xbf.ch`) (Keel-polled `:latest`)
+- **Public:** apex site (`0xbf.ch`: page + WebAssembly app at same URL) and its SSH portfolio on **22** (`ssh 0xbf.ch`), glob blog (`blog.0xbf.ch`), exhib gallery (`gallery.0xbf.ch`) (all Keel-polled `:latest`)
 - **Utilities & Dashboard:** AdGuard Home, knotd + kresd (`.internal` zone), DDNS, Homepage
 
 ### Planned
@@ -66,8 +66,9 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
     │   ├── network/                # Cilium (LB-IPAM pool, L2 announce), Tailscale
     │   └── ingress/                # Traefik (Gateway API), cert-manager, Tailscale
     └── applications/               # User Workloads (one directory = one namespace)
-        ├── apex/                   # Public site (Keel-polled :latest)
+        ├── apex/                   # Public site + SSH TUI (Keel-polled :latest)
         ├── glob/                   # Blog (blog.0xbf.ch, Keel-polled :latest)
+        ├── exhib/                  # Gallery (gallery.0xbf.ch, 3 containers, Keel-polled :latest)
         ├── atuin/                  # Shell history sync server (atuin.0xbf.ch)
         ├── agh/                    # AdGuard Home (LAN DNS edge)
         ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
@@ -138,7 +139,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 
 ### Ingress & Certificates
 
-- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443 plus TCP 22 (forgejo git-ssh `TCPRoute`) and TCP 2222 (devil ssh `TCPRoute`, LAN/tailnet only — no WAN forward); the LoadBalancer Service exposes 80/443/22/2222.
+- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443 plus TCP 22 (apex SSH portfolio `TCPRoute`), TCP 2222 (devil ssh `TCPRoute`, LAN/tailnet only) and TCP 2223 (forgejo git-ssh `TCPRoute`); the LoadBalancer Service exposes 80/443/22/2222/2223.
 - The Gateway address `10.10.20.128` comes from the Cilium LB-IPAM pool (`network/ipam`) and is L2-announced on the worker's `end0` interface.
 - Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
 - Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
@@ -148,7 +149,7 @@ A Kustomization's server-side dry-run validates its whole manifest set before ap
 
 ### Secrets
 
-All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `pull-secret` (apex GHCR), `ghcr` (glob GHCR), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `pds-secrets` (ATProto PDS: JWT secret, admin password, PLC rotation key), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
+All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `apex/ghcr` (apex GHCR), `glob/ghcr` (glob GHCR), `exhib/ghcr` (exhib GHCR), `apex/apex-ssh-host-key` (apex SSH portfolio host key), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `pds-secrets` (ATProto PDS: JWT secret, admin password, PLC rotation key), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
 
 ### Access
 

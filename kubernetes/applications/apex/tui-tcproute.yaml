@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+    name: apex-ssh
+    namespace: apex
+spec:
+    parentRefs:
+        # The apexssh listener terminates nothing: Traefik proxies raw TCP to
+        # the Service, so the SSH handshake stays end to end.
+        - name: traefik-gateway
+          namespace: ingress
+          sectionName: apexssh
+    rules:
+        - backendRefs:
+            - name: apex-tui
+              port: 2222
