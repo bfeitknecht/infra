@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: apex-tui
+    namespace: apex
+    labels:
+        app.kubernetes.io/name: apex-tui
+spec:
+    selector:
+        app.kubernetes.io/name: apex-tui
+    ports:
+        - name: ssh
+          port: 2222
+          targetPort: 2222

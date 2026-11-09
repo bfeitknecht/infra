@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: apex-tui
+    namespace: apex
+    labels:
+        app.kubernetes.io/name: apex-tui
+    # Keel reads keel.sh/* from the workload's own metadata. On the pod template
+    # (spec.template.metadata) they are invisible: the policy parses as "none"
+    # and the deployment is silently never tracked.
+    annotations:
+        keel.sh/trigger: poll
+        keel.sh/policy: force
+        keel.sh/match-tag: "true"
+spec:
+    # apex-ssh keeps per-connection state in memory only, so a roll costs
+    # nothing but the session in flight. One replica: 32 concurrent sessions
+    # per process is far beyond what the Pi will see.
+    replicas: 1
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: apex-tui
+    template:
+        metadata:
+            labels:
+                app.kubernetes.io/name: apex-tui
+        spec:
+            # Keel resolves registry credentials from the pod template only,
+            # never from the namespace default SA.
+            imagePullSecrets:
+                - name: dockerconfigjson
+            volumes:
+                # The host key *is* the server identity: reusing it across
+                # restarts is what keeps clients from seeing a MITM warning.
+                # It lives in a SOPS-encrypted Secret, never in the image.
+                - name: host-key
+                  secret:
+                      secretName: apex-ssh-host-key
+                      defaultMode: 0400
+            containers:
+                - name: apex-ssh
+                  # Same tag as the site Deployment: one image, two entrypoints.
+                  image: ghcr.io/bfeitknecht/apex:latest
+                  imagePullPolicy: Always
+                  command: ["/usr/local/bin/apex-ssh"]
+                  env:
+                      - name: APEX_SSH_LISTEN
+                        value: "0.0.0.0:2222"
+                      # Public portfolio: any username, no client key required.
+                      # Sessions are read-only views of the portfolio.
+                      - name: APEX_SSH_PUBLIC
+                        value: "1"
+                      - name: APEX_SSH_HOST_KEY
+                        value: /run/secrets/ssh_host_ed25519_key
+                  ports:
+                      - containerPort: 2222
+                        name: ssh
+                  volumeMounts:
+                      - name: host-key
+                        mountPath: /run/secrets
+                        readOnly: true
+                  # The process binds the port only after loading the host key,
+                  # so a TCP connect is a truthful readiness signal.
+                  readinessProbe:
+                      tcpSocket:
+                          port: 2222
+                      periodSeconds: 10
+                  livenessProbe:
+                      tcpSocket:
+                          port: 2222
+                      initialDelaySeconds: 10
+                      periodSeconds: 30
+                  resources:
+                      requests:
+                          cpu: 10m
+                          memory: 24Mi
+                      limits:
+                          memory: 96Mi
+                  securityContext:
+                      allowPrivilegeEscalation: false
+                      readOnlyRootFilesystem: true
+                      capabilities:
+                          drop: ["ALL"]
+                      seccompProfile:
+                          type: RuntimeDefault

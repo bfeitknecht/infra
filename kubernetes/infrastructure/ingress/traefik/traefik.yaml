@@ -59,14 +59,15 @@ spec:
         exposedPort: 443
         hostPort: 443
       gitssh:
-        port: 22
+        port: 2223
         expose:
           default: true
-        exposedPort: 22
-        # WAN entry like 80/443 (Zyxel refuses the LB IP). WAN 22 → forgejo
-        # git-ssh (no router SSH wanted); the future dev box takes WAN 2222.
-        # Talos runs no sshd, so nothing else binds 22 on the node.
-        hostPort: 22
+        exposedPort: 2223
+        # Forgejo git-ssh moved off 22 when the apex portfolio claimed the
+        # canonical port. WAN entry like 80/443 (the Zyxel router refuses the
+        # LB IP), so the router forwards 2223 → rbpi:2223 as well.
+        # Clone URLs: ssh://git@git.0xbf.ch:2223/<owner>/<repo>.git
+        hostPort: 2223
       devilssh:
         port: 2222
         expose:
@@ -76,6 +77,17 @@ spec:
         # router forwards nothing on 2222, WAN 2222 stays reserved for the
         # future dev box (unlike web/websecure/gitssh, the WAN doors).
         # Gateway: TCPRoute devil-ssh → headless devil Service → VM :2222.
+      apexssh:
+        port: 22
+        expose:
+          default: true
+        exposedPort: 22
+        # The portfolio is the site's SSH face, so it owns 22: `ssh 0xbf.ch`.
+        # Forgejo git-ssh moved to 2223, the dev box keeps 2222. WAN entry
+        # like 80/443 (the Zyxel router refuses the LB IP), so the router
+        # forwards 22 → rbpi:22 — the rule it already had for git.
+        hostPort: 22
+        # Gateway: TCPRoute apex-ssh → Service apex-tui → pod :2222.
     providers:
       kubernetesGateway:
         enabled: true

@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exhib
+  namespace: exhib
+  labels:
+    app.kubernetes.io/name: exhib
+  # Keel reads keel.sh/* from the workload's own metadata (never pod template).
+  annotations:
+    keel.sh/trigger: poll
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: exhib
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: exhib
+    spec:
+      # Keel resolves GHCR credentials from the pod template's imagePullSecrets.
+      imagePullSecrets:
+        - name: dockerconfigjson
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: prepare-site-volume
+          image: busybox:1.37.0
+          command: ["sh", "-c", "mkdir -p /data/public /data/incoming /data/content /data/originals"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: site
+              mountPath: /data
+      containers:
+        - name: sws
+          image: joseluisq/static-web-server:2.44.1-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVER_CONFIG_FILE
+              value: /etc/sws/sws.toml
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          # SWS serves /readyz (503 until the root dir is readable) and /livez.
+          # It has no /health endpoint — a /health probe would 404 and the pod
+          # would never become Ready. Both are enabled in sws.toml.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: site
+              mountPath: /data
+              readOnly: true
+            - name: sws-config
+              mountPath: /etc/sws
+              readOnly: true
+        # No listener or SSH on this one; uploads go through the Kubernetes API.
+        - name: uploader
+          image: busybox:1.37.0
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "while true; do sleep 3600; done"]
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: site
+              mountPath: /data
+        # Hardcoded :latest on purpose — Keel follows the digest.
+        - name: processor
+          image: ghcr.io/bfeitknecht/exhib:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: site
+              mountPath: /data
+      volumes:
+        - name: site
+          persistentVolumeClaim:
+            claimName: exhib-site
+        - name: sws-config
+          configMap:
+            name: exhib-sws
