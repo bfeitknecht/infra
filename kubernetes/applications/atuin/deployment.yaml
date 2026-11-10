@@ -5,8 +5,7 @@ metadata:
   namespace: atuin
 spec:
   replicas: 1
-  # Recreate: the SQLite DB lives behind a RWO local-path volume - two
-  # instances must never run against the same data.
+  # Use Recreate. The DB uses RWO volume. Two instances cannot share the DB.
   strategy:
     type: Recreate
   selector:
@@ -17,14 +16,13 @@ spec:
       labels:
         app: atuin
     spec:
-      # A Service named `atuin` injects ATUIN_PORT=tcp://... As a service-link
-      # env var. Atuin ignores that form with a warning, but the explicit env
-      # here removes the ambiguity entirely (atuin docs: Service links).
+      # Service atuin creates ATUIN_PORT service-link variable. Atuin ignores
+      # this variable. Set explicit env to remove ambiguity.
       enableServiceLinks: false
       containers:
         - name: atuin
           image: ghcr.io/atuinsh/atuin:18.24.2
-          # Entrypoint is the atuin-server binary; `start` runs the server.
+          # Entrypoint is atuin-server. Args start runs the server.
           args: ["start"]
           envFrom:
             - configMapRef:

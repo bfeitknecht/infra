@@ -12,9 +12,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    # Do not set a hostname. The listener matches all hostnames. Then both
-    # 0xbf.ch and *.0xbf.ch attach here. A wildcard filter does not match
-    # the bare domain.
+    # Do not set hostname. Listener matches all hostnames. Both 0xbf.ch
+    # and *.0xbf.ch attach here. Wildcard filter does not match bare domain.
     - name: websecure
       protocol: HTTPS
       port: 8443
@@ -36,33 +35,32 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: wildcard-internal-tls
-    # TCP for forgejo git over SSH. The port must match the gitssh entrypoint.
-    # The apex portfolio now uses port 22, so gitssh uses port 2223.
+    # TCP for forgejo git SSH. Port must match gitssh entrypoint. Apex
+    # uses port 22 now. Gitssh uses port 2223.
     - name: gitssh
       protocol: TCP
       port: 2223
       allowedRoutes:
         namespaces:
           from: All
-    # TCP for devil SSH. The port matches the devilssh entrypoint. The service
-    # has no hostPort and no WAN exposure. Access is via LAN and tailnet only.
+    # TCP for devil SSH. Port matches devilssh entrypoint. No hostPort.
+    # No WAN. Access via LAN and tailnet only.
     - name: devilssh
       protocol: TCP
       port: 2222
       allowedRoutes:
         namespaces:
           from: All
-    # TCP for apex SSH portfolio. Port 22 serves the portfolio. Use
-    # ssh 0xbf.ch without a port argument.
+    # TCP for apex SSH portfolio. Port 22 serves portfolio. Use ssh 0xbf.ch.
     - name: apexssh
       protocol: TCP
       port: 22
       allowedRoutes:
         namespaces:
           from: All
-    # PDS handles use <name>.pds.0xbf.ch. This needs a second-level wildcard
-    # cert. Listeners on the same port with different hostnames are distinct.
-    # The most specific hostname wins.
+    # PDS handles use <name>.pds.0xbf.ch. This needs second-level wildcard
+    # cert. Listeners on same port with different hostnames are distinct.
+    # Most specific hostname wins.
     - name: websecure-pds
       protocol: HTTPS
       port: 8443

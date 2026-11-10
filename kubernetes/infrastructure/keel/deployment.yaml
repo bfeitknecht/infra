@@ -26,10 +26,8 @@ spec:
                       valueFrom:
                         fieldRef:
                           fieldPath: metadata.namespace
-                    # Poll-based registry watching only: no webhook/Actions
-                    # triggers, no Helm3 provider (the secrets RBAC rule is
-                    # omitted for the same reason), no Basic Auth (the Admin
-                    # UI/API is not exposed: there is no Service for it).
+                    # Use poll mode only. No webhooks. No Helm provider.
+                    # No Basic Auth. Admin UI is not exposed. No Service.
                     - name: POLL
                       value: "true"
                     - name: POLL_DEFAULTSCHEDULE

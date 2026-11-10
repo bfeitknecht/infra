@@ -5,9 +5,8 @@ metadata:
   namespace: agh
 spec:
   type: LoadBalancer
-  # Static from the lan-pool: the router's DHCP DNS field and Tailscale split
-  # DNS point here, so the address must never float (Gateway holds .128).
-  # Same IP the router/tailnet already use: inherited from Pi-hole.
+  # Use static IP from lan-pool. Router DHCP and split DNS use this IP.
+  # Do not change it. Gateway uses .128.
   loadBalancerIP: 10.10.20.153
   selector:
     app: agh

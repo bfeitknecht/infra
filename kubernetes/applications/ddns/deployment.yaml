@@ -8,7 +8,7 @@ metadata:
 spec:
     replicas: 1
     strategy:
-        # single writer: two updaters would race the Cloudflare record
+        # Use one writer. Two updaters would race Cloudflare record.
         type: Recreate
     selector:
         matchLabels:
