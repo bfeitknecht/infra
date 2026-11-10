@@ -5,9 +5,8 @@ metadata:
     namespace: apex
     labels:
         app.kubernetes.io/name: apex
-    # Keel reads keel.sh/* from the workload's own metadata. On the pod template
-    # (spec.template.metadata) they are invisible: the policy parses as "none"
-    # and the deployment is silently never tracked.
+    # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
+    # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
     annotations:
         keel.sh/trigger: poll
         keel.sh/policy: force
@@ -22,13 +21,13 @@ spec:
             labels:
                 app.kubernetes.io/name: apex
         spec:
-            # Keel reads the workload's own imagePullSecrets to query the private GHCR package —
-            # the namespace default SA's secret is not enough (Keel resolves credentials from the pod template only).
+            # Keel reads imagePullSecrets from the pod template. The default
+            # ServiceAccount secret is not sufficient.
             imagePullSecrets:
                 - name: dockerconfigjson
             containers:
                 - name: apex
-                  # Hardcoded :latest on purpose — Keel follows the digest.
+                  # Use :latest. Keel tracks the image digest.
                   image: ghcr.io/bfeitknecht/apex:latest
                   imagePullPolicy: Always
                   ports:

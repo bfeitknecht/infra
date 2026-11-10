@@ -29,9 +29,8 @@ spec:
     deployment:
       kind: Deployment
       replicas: 1
-    # Recreate: the entrypoints bind hostPorts (80/443/22) on the single
-    # worker — a surge pod can never schedule while the old one holds them
-    # (maxUnavailable: 0 deadlock).
+    # Use Recreate. The entrypoints bind hostPorts on the worker. A second pod
+    # cannot start while the old pod holds the ports.
     updateStrategy:
       type: Recreate
     service:
@@ -43,8 +42,8 @@ spec:
         expose:
           default: true
         exposedPort: 80
-        # Zyxel router refuses virtual LB IP (10.10.20.128),
-        # so WAN entry binds Traefik directly to rbpi (10.10.20.10).
+        # The Zyxel router does not forward to the LB IP. Traefik binds
+        # directly to rbpi for WAN access.
         hostPort: 80
         http:
           redirections:
@@ -63,31 +62,27 @@ spec:
         expose:
           default: true
         exposedPort: 2223
-        # Forgejo git-ssh moved off 22 when the apex portfolio claimed the
-        # canonical port. WAN entry like 80/443 (the Zyxel router refuses the
-        # LB IP), so the router forwards 2223 → rbpi:2223 as well.
-        # Clone URLs: ssh://git@git.0xbf.ch:2223/<owner>/<repo>.git
+        # Forgejo git-ssh moved from port 22 to port 2223. The apex portfolio
+        # now uses port 22. The router forwards 2223 to rbpi:2223 for WAN.
+        # Clone URLs use ssh://git@git.0xbf.ch:2223/<owner>/<repo>.git
         hostPort: 2223
       devilssh:
         port: 2222
         expose:
           default: true
         exposedPort: 2222
-        # NO hostPort: devil ssh is LAN/tailnet-only via the LB IP — the
-        # router forwards nothing on 2222, WAN 2222 stays reserved for the
-        # future dev box (unlike web/websecure/gitssh, the WAN doors).
-        # Gateway: TCPRoute devil-ssh → headless devil Service → VM :2222.
+        # No hostPort. Devil SSH is via LB IP only. Access is via LAN and
+        # tailnet. The router does not forward port 2222. Port 2222 stays
+        # reserved for the future dev box.
       apexssh:
         port: 22
         expose:
           default: true
         exposedPort: 22
-        # The portfolio is the site's SSH face, so it owns 22: `ssh 0xbf.ch`.
-        # Forgejo git-ssh moved to 2223, the dev box keeps 2222. WAN entry
-        # like 80/443 (the Zyxel router refuses the LB IP), so the router
-        # forwards 22 → rbpi:22 — the rule it already had for git.
+        # The portfolio uses port 22 for ssh 0xbf.ch. Forgejo moved to port 2223.
+        # The dev box keeps port 2222. The router forwards port 22 to
+        # rbpi:22 for WAN.
         hostPort: 22
-        # Gateway: TCPRoute apex-ssh → Service apex-tui → pod :2222.
     providers:
       kubernetesGateway:
         enabled: true
@@ -113,9 +108,8 @@ spec:
     metrics:
       prometheus:
         enabled: true
-        # dedicated metrics Service (ingress-traefik-metrics:9100) —
-        # the LB service carries only web/websecure/gitssh/devilssh
-        # so gatus + the ServiceMonitor scrape this one
+        # Use a dedicated metrics Service on port 9100 for Prometheus.
+        # The LB Service does not expose metrics.
         service:
           enabled: true
     global:

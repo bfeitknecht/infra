@@ -7,8 +7,8 @@ resources:
     - httproute.yaml
     - serviceaccount.yaml
     - ghcr.sops.yaml
-    # SSH portfolio: own Deployment so broken host key
-    # or crashed session loop can never take the static site down.
+    # SSH portfolio uses a separate Deployment. A broken host key or a
+    # crashed session does not affect the static site.
     - tui-deployment.yaml
     - tui-service.yaml
     - tui-tcproute.yaml

@@ -5,8 +5,8 @@ metadata:
     namespace: apex
 spec:
     parentRefs:
-        # The apexssh listener terminates nothing: Traefik proxies raw TCP to
-        # the Service, so the SSH handshake stays end to end.
+        # The apexssh listener does not terminate TLS. Traefik forwards raw TCP
+        # to the Service. The SSH handshake stays end-to-end.
         - name: traefik-gateway
           namespace: ingress
           sectionName: apexssh

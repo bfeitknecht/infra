@@ -5,7 +5,7 @@ metadata:
   namespace: exhib
   labels:
     app.kubernetes.io/name: exhib
-  # Keel reads keel.sh/* from the workload's own metadata (never pod template).
+  # Keel reads keel.sh/* from Deployment metadata. Do not use pod template metadata.
   annotations:
     keel.sh/trigger: poll
     keel.sh/policy: force
@@ -22,7 +22,7 @@ spec:
       labels:
         app.kubernetes.io/name: exhib
     spec:
-      # Keel resolves GHCR credentials from the pod template's imagePullSecrets.
+      # Keel reads imagePullSecrets from the pod template.
       imagePullSecrets:
         - name: dockerconfigjson
       securityContext:
@@ -56,9 +56,9 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-          # SWS serves /readyz (503 until the root dir is readable) and /livez.
-          # It has no /health endpoint — a /health probe would 404 and the pod
-          # would never become Ready. Both are enabled in sws.toml.
+          # SWS provides /readyz and /livez. SWS does not provide /health.
+          # A /health probe fails and the pod never becomes ready. sws.toml
+          # enables both endpoints.
           readinessProbe:
             httpGet:
               path: /readyz
@@ -89,7 +89,7 @@ spec:
             - name: sws-config
               mountPath: /etc/sws
               readOnly: true
-        # No listener or SSH on this one; uploads go through the Kubernetes API.
+        # No listener or SSH. Uploads use the Kubernetes API.
         - name: uploader
           image: busybox:1.37.0
           imagePullPolicy: IfNotPresent
@@ -108,7 +108,7 @@ spec:
           volumeMounts:
             - name: site
               mountPath: /data
-        # Hardcoded :latest on purpose — Keel follows the digest.
+        # Use :latest. Keel tracks the image digest.
         - name: processor
           image: ghcr.io/bfeitknecht/exhib:latest
           imagePullPolicy: Always
