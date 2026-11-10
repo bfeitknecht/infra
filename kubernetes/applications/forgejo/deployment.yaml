@@ -5,7 +5,7 @@ metadata:
   namespace: forgejo
 spec:
   replicas: 1
-  # Recreate: SQLite + repos live behind a RWO local-path volume — two
+  # Recreate: SQLite + repos live behind a RWO local-path volume: two
   # instances must never run against the same data.
   strategy:
     type: Recreate

@@ -14,9 +14,9 @@ spec:
         app: resolver
     spec:
       # The single reviewed exception to "no workloads on the control plane":
-      # the DNS brain (recursion + the internal. zone authority) needs clean
+      # the DNS brain (recursion + the internal. Zone authority) needs clean
       # :53 egress, which the Sunrise router hijacks on the home segment.
-      # The taint itself stays — nothing else tolerates it.
+      # The taint itself stays: nothing else tolerates it.
       nodeSelector:
         kubernetes.io/hostname: oci
       tolerations:
@@ -25,7 +25,7 @@ spec:
           effect: NoSchedule
       containers:
         # Recursive resolver: DNSSEC-validating recursion for public names,
-        # stubs internal. to knotd over loopback.
+        # stubs internal. To knotd over loopback.
         - name: kresd
           image: docker.io/cznic/knot-resolver:v6.4.2
           args: ["-c", "/kresd-config/config.yaml"]
@@ -58,7 +58,7 @@ spec:
               port: 53
             initialDelaySeconds: 15
             periodSeconds: 30
-        # Authoritative server for the internal. zone. Loopback only: kresd
+        # Authoritative server for the internal. Zone. Loopback only: kresd
         # stubs to it over localhost, nothing else reaches it.
         - name: knotd
           image: docker.io/cznic/knot:v3.6.0
@@ -104,7 +104,7 @@ metadata:
   namespace: dns
 spec:
   type: ClusterIP
-  # Pinned: AGH forwards all client queries to this IP literal — the same
+  # Pinned: AGH forwards all client queries to this IP literal: the same
   # address the resolver stack has always been reachable at
   clusterIP: 10.96.0.53
   selector:

@@ -1,5 +1,5 @@
 # The KnativeServing CR: the operator reconciles the entire Serving stack from
-# this declaration — CRDs, control plane (controller/webhook/autoscaler/
+# this declaration: CRDs, control plane (controller/webhook/autoscaler/
 # activator), and the net-gateway-api ingress layer. Version upgrades are a
 # one-line change here; nothing is vendored.
 apiVersion: operator.knative.dev/v1beta1
@@ -15,12 +15,12 @@ spec:
     config:
         network:
             # The net-gateway-api ingress layer: KSvc HTTPRoutes are rendered
-            # on the existing Traefik Gateway — no Kourier, no extra LoadBalancer.
+            # on the existing Traefik Gateway: no Kourier, no extra LoadBalancer.
             ingress-class: "net-gateway-api"
             domainTemplate: "{{.Name}}.0xbf.ch"
         gateway:
             # Route Knative's per-service HTTPRoutes through the
-            # existing Traefik Gateway — the wildcard DNS + router forward
+            # existing Traefik Gateway: the wildcard DNS + router forward
             # already carry *.0xbf.ch to it.
             external-gateways: |
                 - class: traefik

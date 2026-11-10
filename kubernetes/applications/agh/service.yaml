@@ -7,7 +7,7 @@ spec:
   type: LoadBalancer
   # Static from the lan-pool: the router's DHCP DNS field and Tailscale split
   # DNS point here, so the address must never float (Gateway holds .128).
-  # Same IP the router/tailnet already use — inherited from Pi-hole.
+  # Same IP the router/tailnet already use: inherited from Pi-hole.
   loadBalancerIP: 10.10.20.153
   selector:
     app: agh

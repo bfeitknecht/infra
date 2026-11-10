@@ -17,7 +17,7 @@ spec:
       labels:
         app: atuin
     spec:
-      # A Service named `atuin` injects ATUIN_PORT=tcp://... as a service-link
+      # A Service named `atuin` injects ATUIN_PORT=tcp://... As a service-link
       # env var. Atuin ignores that form with a warning, but the explicit env
       # here removes the ambiguity entirely (atuin docs: Service links).
       enableServiceLinks: false

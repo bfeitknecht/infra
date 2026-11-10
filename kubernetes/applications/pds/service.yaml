@@ -12,4 +12,4 @@ spec:
       targetPort: 3000
   # Named pds-http, not pds: a Service named `pds` injects PDS_PORT /
   # PDS_SERVICE_HOST service-link env vars into every pod in this namespace,
-  # clobbering the image's PDS_PORT=3000 — the PDS then binds a random port.
+  # clobbering the image's PDS_PORT=3000: the PDS then binds a random port.

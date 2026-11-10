@@ -112,7 +112,7 @@ Function zones use decade-based third octets.
 
 ### GitOps Delivery
 
-Manifests are packaged as an OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag. The `flux-system` OCIRepository tracks `semver >=1.0.0`, so pushing a tag is the only deployment mechanism — the cluster never reads the working tree or plain git.
+Manifests are packaged as an OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag. The `flux-system` OCIRepository tracks `semver >=1.0.0`, so pushing a tag is the only deployment mechanism. The cluster never reads the working tree or plain git.
 
 ```
 git tag vX.Y.Z && git push origin master vX.Y.Z   # CI publishes, Flux reconciles

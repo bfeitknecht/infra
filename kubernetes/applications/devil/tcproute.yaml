@@ -10,6 +10,6 @@ spec:
       sectionName: devilssh
   rules:
     - backendRefs:
-        # the headless Service — see service.yaml
+        # the headless Service: see service.yaml
         - name: devil
           port: 2222

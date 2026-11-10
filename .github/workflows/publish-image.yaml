@@ -1,6 +1,6 @@
 name: Publish Image
 
-# Reusable workflow — the single copy of the tier-2 build+push logic.
+# Reusable workflow: the single copy of the tier-2 build+push logic.
 #
 # Each app repo calls it with a job like:
 #

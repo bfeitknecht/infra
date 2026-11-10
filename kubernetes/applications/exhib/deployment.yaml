@@ -57,7 +57,7 @@ spec:
               containerPort: 8080
               protocol: TCP
           # SWS provides /readyz and /livez. SWS does not provide /health.
-          # A /health probe fails and the pod never becomes ready. sws.toml
+          # A /health probe fails and the pod never becomes ready. Sws.toml
           # enables both endpoints.
           readinessProbe:
             httpGet:

@@ -20,7 +20,7 @@ spec:
   timeout: 5m
   wait: true
   prune: false
-  # experimental bundle: superset of standard (same v1.6.2 tag) — adds
+  # experimental bundle: superset of standard (same v1.6.2 tag): adds
   # TCPRoute/UDPRoute/TLSRoute, needed for the forgejo git-ssh TCPRoute
   path: ./config/crd/experimental
   sourceRef:
