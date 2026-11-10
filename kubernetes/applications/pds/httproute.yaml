@@ -28,7 +28,7 @@ spec:
   # Handle resolution: https://<name>.pds.0xbf.ch/.well-known/atproto-did
   # must reach the PDS, which answers from its account DB by Host header -
   # no per-account DNS TXT records for pds-subdomain handles.
-  # Scoped to the dedicated pds. namespace:
+  # Scoped to the dedicated pds. Namespace:
   # unrouted *.0xbf.ch subdomains still 404 at Traefik.
   hostnames:
     - "*.pds.0xbf.ch"

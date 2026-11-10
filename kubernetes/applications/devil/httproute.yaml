@@ -1,12 +1,10 @@
-# devil.internal — the ghostty-web terminal: ttyd in the devil VM serves
-# the bare page (ConfigMap devil-ghostty-web, source in ghostty-web/) and
-# puts a real `login` prompt on the PTY — auth is bf's PAM password, not a
-# middleware. The allowlist is the only gate in front of the route.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: devil
   namespace: devil
+  # Ghostty-web terminal at devil.internal. Ttyd serves ConfigMap page.
+  # Login uses PAM password. Allowlist gates access.
 spec:
   parentRefs:
     - name: traefik-gateway
@@ -22,6 +20,6 @@ spec:
             kind: Middleware
             name: internal-allowlist
       backendRefs:
-        # the headless Service — see service.yaml (kata VM, no ClusterIP)
+        # Headless Service. See service.yaml. No ClusterIP.
         - name: devil
           port: 7681

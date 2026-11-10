@@ -1,9 +1,8 @@
 name: Publish Image
 
-# Reusable workflow — the single copy of the tier-2 build+push logic.
+# Reusable workflow for tier-2 build and push. One copy for all app repos.
 #
-# Each app repo calls it with a job like:
-#
+# Caller job:
 #   jobs:
 #     publish:
 #       permissions:
@@ -11,12 +10,11 @@ name: Publish Image
 #         packages: write
 #       uses: bfeitknecht/infra/.github/workflows/publish-image.yaml@master
 #
-# The image name is derived from the caller's repository: in a called workflow
-# the `github` context always belongs to the caller, so `github.repository` is
-# the app repo and no inputs are needed.
+# Image name comes from caller repository. In called workflow github.context
+# belongs to caller. No inputs needed. App repo needs no extra config.
 #
-# NOTE: a public repository can only call reusable workflows that live in a
-# public repository. `infra` is public, so public app repos can call this.
+# Infra is public. Public repos can call reusable workflows only from
+# public repos.
 
 on:
   workflow_call:

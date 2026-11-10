@@ -4,8 +4,7 @@ metadata:
   name: forgejo-backup
   namespace: forgejo
 spec:
-  # Times fire in Europe/Zurich (operator-level k8up.timezone). Jobs fail
-  # until the Garage NAS tailnet path is fixed — that is expected.
+  # Times use Europe/Zurich. Jobs fail until NAS path is fixed. This is expected.
   backup:
     schedule: "0 3 * * *"
     failedJobsHistoryLimit: 3

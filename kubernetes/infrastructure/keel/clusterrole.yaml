@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
     name: keel
 rules:
-    # Keel inspects the cluster to find the workloads it manages.
+    # Keel inspects cluster to find workloads. It updates images.
     - apiGroups:
           - ""
       resources:
@@ -13,10 +13,8 @@ rules:
           - get
           - watch
           - list
-    # The workloads Keel watches and rewrites images on. The empty string is the
-    # core API group and must stay: pods and replicationcontrollers belong to it.
-    # The secrets/configmaps rules from the upstream manifests are omitted —
-    # they exist only for Keel's Helm3 provider, which is disabled below.
+    # Workloads Keel watches. Core group "" holds pods. Secrets and
+    # configmaps are omitted. They belong to Helm provider which is disabled.
     - apiGroups:
           - ""
           - extensions

@@ -5,7 +5,7 @@ metadata:
     namespace: glob
     labels:
         app.kubernetes.io/name: glob
-    # Keel reads keel.sh/* from the workload's own metadata (never pod template).
+    # Keel reads keel.sh/* from Deployment metadata. Do not use pod template metadata.
     annotations:
         keel.sh/trigger: poll
         keel.sh/policy: force
@@ -20,12 +20,12 @@ spec:
             labels:
                 app.kubernetes.io/name: glob
         spec:
-            # Keel resolves GHCR credentials from the pod template's imagePullSecrets.
+            # Keel reads imagePullSecrets from the pod template.
             imagePullSecrets:
                 - name: dockerconfigjson
             containers:
                 - name: glob
-                  # Hardcoded :latest on purpose — Keel follows the digest.
+                  # Use :latest. Keel tracks the image digest.
                   image: ghcr.io/bfeitknecht/glob:latest
                   imagePullPolicy: Always
                   ports:

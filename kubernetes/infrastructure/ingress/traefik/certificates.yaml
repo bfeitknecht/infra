@@ -28,8 +28,8 @@ spec:
     - "0xbf.ch"
     - "*.0xbf.ch"
 ---
-# Let's Encrypt cannot issue for reserved .internal TLD,
-# internal certificates come from local CA.
+# Let's Encrypt cannot issue for reserved .internal TLD.
+# Internal certificates come from local CA.
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -73,8 +73,8 @@ spec:
   dnsNames:
     - "*.internal"
 ---
-# Second-level wildcard for PDS account handles (<name>.pds.0xbf.ch) —
-# the *.0xbf.ch cert only ever matches one label.
+# Second-level wildcard for PDS handles. Pattern is <name>.pds.0xbf.ch.
+# The *.0xbf.ch cert matches one label only.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:

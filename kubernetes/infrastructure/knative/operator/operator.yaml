@@ -15,7 +15,7 @@ metadata:
     name: knative-operator
 rules:
     # The operator synthesizes the entire Knative Serving stack (CRDs, control
-    # plane, gateways) from KnativeServing CRs — upstream ships it with
+    # plane, gateways) from KnativeServing CRs: upstream ships it with
     # cluster-admin-equivalent RBAC for exactly this reason.
     - apiGroups: ["*"]
       resources: ["*"]
@@ -74,7 +74,7 @@ spec:
                     - containerPort: 9090
                       name: metrics
                   # No readiness/liveness probe on purpose: upstream v1.23.1 has
-                  # none — the operator serves only metrics on 9090, so probing
+                  # none: the operator serves only metrics on 9090, so probing
                   # it deadlocks the rollout (pod never Ready).
                   resources:
                     requests:

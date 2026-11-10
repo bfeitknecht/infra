@@ -1,14 +1,13 @@
-# static-web-server — only what ENV cannot express.
+# static-web-server. Use this file for settings that ENV cannot define.
 #
-# 1. Root is /data/public (the Hugo output the processor writes). The SWS
-#    image's default root is `.` (its own home dir), which would serve the
-#    image instead of the gallery — do not drop this.
-# 2. Health endpoints `/livez` and `/readyz` are enabled here; without
-#    `health = true` SWS does not serve them at all (they are off by default).
-# 3. Cache-Control: no-cache on everything (HTML, XML, media) so repeat visits
-#    revalidate (Last-Modified -> 304) and uploads show up immediately.
-# 4. Immutable 1-year caching on the content-hashed css/** (site.min.<sha256>.css,
-#    built from assets/css) and on the self-hosted Commit Mono fonts below.
+# 1. Root is /data/public. This is the Hugo output. The default root is the
+#    image home directory. Without this setting the server serves the wrong files.
+# 2. Health endpoints /livez and /readyz need health = true. Without this,
+#    the endpoints are disabled by default.
+# 3. Cache-Control is no-cache for HTML, XML and media. Clients revalidate
+#    and new uploads are visible immediately.
+# 4. Cache-Control is immutable for css/** and fonts/**. These files have a
+#    content hash, so long caching is safe.
 [general]
 root = "/data/public"
 health = true

@@ -7,6 +7,6 @@ spec:
   ipAllowList:
     sourceRange:
       - 10.10.0.0/16
-      # HTTPRoute ExtensionRef has no namespace field: Middleware CRs must
-      # live in the route's namespace, hence this copy of the ingress one.
+      # Middleware must be in the route namespace. HTTPRoute ExtensionRef
+      # has no namespace field. Copy the ingress middleware here.
       - 100.64.0.0/10

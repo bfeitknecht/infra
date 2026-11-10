@@ -4,11 +4,9 @@ metadata:
   name: devil
   namespace: devil
 spec:
-  # headless on purpose: the kata VM bypasses Cilium's service translation
-  # in both directions (see the deployment notes) — a ClusterIP would never
-  # reach it. clusterIP: None makes clients (the TCPRoute, Traefik on the
-  # HTTPRoute) dial the pod IP directly via Endpoints — the pod-to-pod
-  # path that works.
+  # Use headless Service. Kata VM bypasses Cilium service translation.
+  # ClusterIP does not reach VM. Use pod IP via Endpoints. Pod-to-pod
+  # path works.
   clusterIP: None
   selector:
     app: devil

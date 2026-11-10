@@ -16,7 +16,7 @@ data:
         interval: 1m
         conditions: ["[STATUS] == 200"]
       - name: traefik-metrics
-        # the chart exposes metrics on a dedicated Service, not the LB one
+        # Metrics use a dedicated Service.
         url: http://ingress-traefik-metrics.ingress.svc.cluster.local:9100/metrics
         interval: 1m
         conditions: ["[STATUS] == 200"]
@@ -26,7 +26,7 @@ data:
         client:
           insecure: true
         conditions: ["[STATUS] == 404"]
-      # kresd ClusterIP (pinned in applications/utilities/dns)
+      # kresd ClusterIP (see applications/dns)
       - name: dns-internal
         url: 10.96.0.53
         interval: 1m
@@ -34,7 +34,7 @@ data:
           query-name: dashboard.internal
           query-type: A
         conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
-      # kresd-oci — public recursion runs on the OCI control-plane node
+      # kresd on OCI does public recursion.
       - name: dns-public
         url: 10.96.0.53
         interval: 1m
@@ -42,8 +42,7 @@ data:
           query-name: example.com
           query-type: A
         conditions: ["[DNS_RCODE] == NOERROR"]
-      # The edge resolver (AGH) as LAN/tailnet clients actually experience it:
-      # AGH -> kresd -> knotd, hairpinned through the LoadBalancer IP
+      # Edge resolver. AGH forwards to kresd and knotd via LB IP.
       - name: dns-edge
         url: 10.10.20.153
         interval: 1m
@@ -67,8 +66,8 @@ data:
         url: http://apex.apex.svc.cluster.local
         interval: 1m
         conditions: ["[STATUS] == 200"]
-      # SSH: a successful TCP connect proves the listener and the host key
-      # loaded; the SSH banner itself is not parsed.
+      # SSH check uses TCP connect. A successful connection shows the
+      # listener is active and the host key is present.
       - name: apex-ssh
         url: tcp://apex-tui.apex.svc.cluster.local:2222
         interval: 1m

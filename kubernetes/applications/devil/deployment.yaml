@@ -15,23 +15,22 @@ spec:
       labels:
         app: devil
     spec:
-      # kata sizes the VM's vCPUs/RAM from the container limits —
-      # without a CPU limit the VM boots with the kata default (single vCPU),
-      # too slow for in-VM nix builds.
+      # Kata sets vCPU and RAM from container limits. Without a CPU limit the
+      # VM boots with one vCPU. This is too slow for nix builds.
       runtimeClassName: kata-qemu
       hostname: devil
-      # cluster DNS is unusable from the kata VM (ClusterIP bypass) —
-      # the resolver pod IP rides the pod-to-pod path that works
+      # Cluster DNS does not work from the kata VM. The VM bypasses ClusterIP.
+      # Use the resolver pod IP for DNS.
       dnsPolicy: None
       dnsConfig:
         nameservers:
           - 10.244.0.242
-      # devil never talks to the k8s API — no SA token inside the VM
+      # Devil does not use the Kubernetes API. Do not mount a service account token.
       automountServiceAccountToken: false
       imagePullSecrets:
         - name: dockerconfigjson
-      # subPath mounts fail pod creation if the dir is missing;
-      # local-path volumes start root-owned, so home goes to bf (uid 1000)
+      # SubPath mounts need the directory. Local-path volumes start as root.
+      # Create the home directory for user 1000.
       initContainers:
         - name: init-state
           image: busybox:1.36
@@ -42,45 +41,33 @@ spec:
       containers:
         - name: devil
           image: ghcr.io/bfeitknecht/devil:latest
-          # The tag is meaningless — the image is only the bootstrap and all
-          # updates happen inside the machine (nh os switch). :latest forces
-          # imagePullPolicy Always, so every pod recreation takes the newest
-          # pushed bootstrap.
+          # The tag has no effect. The image is only bootstrap. Updates happen
+          # inside the VM. Use :latest to pull the newest bootstrap.
           imagePullPolicy: Always
-          # The image ships no entrypoint (plain rootfs-tarball import) —
-          # the boot command lives here. /init is the docker-container
-          # profile's shim: registers the store db, boots systemd, stays
-          # fresh across in-container switches.
+          # The image has no entrypoint. The boot command is here. /init
+          # registers the store and boots systemd.
           command: ["/init"]
-          # systemd as PID1 creates its own init.scope under /sys/fs/cgroup,
-          # which the OCI spec mounts read-only — without this the manager
-          # allocation fails and PID1 exits 255. The kata VM is the
-          # isolation boundary, so privilege inside it buys back nothing.
+          # Systemd as PID1 needs write access to /sys/fs/cgroup. The OCI spec
+          # mounts this path read-only. The pod needs privileged mode.
           securityContext:
             privileged: true
           env:
-            # NixOS stage 2 gates its remounts on $container (the
-            # docker-container profile's dialect) and no runtime sets it.
+            # NixOS stage 2 checks $container. Set it to docker.
             - name: container
               value: docker
-          # A PTY gives the container a /dev/console — without it the shim
-          # creates none and every unit's journal+console output is
-          # discarded instead of landing in kubectl logs.
+          # TTY provides /dev/console. Without TTY logs do not reach kubectl logs.
           tty: true
           volumeMounts:
-            # the ghostty-web terminal page (see ghostty-web/) — ttyd in the
-            # VM serves it (-I in omni devil.nix); configMapGenerator hash
-            # rolls the pod on every edit
+            # Ghostty-web terminal page. Ttyd serves the page. A new hash
+            # restarts the pod.
             - name: ghostty-web
               mountPath: /srv/ghostty-web
               readOnly: true
-            # persistent /home + ssh host keys — pod recreation no longer
-            # means a fresh machine
+            # Keep /home on PVC. Pod recreation keeps the machine state.
             - name: state
               mountPath: /home
               subPath: home
-            # sshd host keys (devil.nix declares /var/lib/ssh) — without
-            # this every pod recreation mints a new host key
+            # Keep SSH host keys on PVC. A new pod must not create a new host key.
             - name: state
               mountPath: /var/lib/ssh
               subPath: ssh

@@ -6,7 +6,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  # no default StorageClass in this cluster — local-path must be explicit
+  # No default StorageClass. Set local-path explicitly.
   storageClassName: local-path
   resources:
     requests:

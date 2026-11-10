@@ -5,8 +5,7 @@ metadata:
   namespace: agh
 spec:
   replicas: 1
-  # Recreate: query log/stats are SQLite behind a RWO local-path volume —
-  # two AGH instances must never run against the same data.
+  # Use Recreate. The volume is RWO. Two instances cannot share the data.
   strategy:
     type: Recreate
   selector:
@@ -18,10 +17,9 @@ spec:
         app: agh
     spec:
       initContainers:
-        # Seed the config on first boot only; afterwards AGH owns the file
-        # on the PVC (UI edits persist across restarts). Both subdirectories
-        # must pre-exist: local-path volumes do not support kubelet-created
-        # subPath directories.
+        # Seed config on first boot only. AGH owns the file after that.
+        # UI edits persist on PVC. Create both directories. Local-path does
+        # not create subPath directories.
         - name: config-seed
           image: docker.io/busybox:1.37.0
           command: ["sh", "-c", "mkdir -p /agh-data/conf /agh-data/work && [ -f /agh-data/conf/AdGuardHome.yaml ] || cp /agh-seed/AdGuardHome.yaml /agh-data/conf/AdGuardHome.yaml"]
@@ -60,7 +58,7 @@ spec:
             limits:
               memory: 256Mi
           readinessProbe:
-            # DNS is the critical service; the web UI is checked by liveness
+            # Check DNS. DNS is the main service.
             tcpSocket:
               port: 53
             initialDelaySeconds: 5

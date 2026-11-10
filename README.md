@@ -15,16 +15,16 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 
 - **CD & Automation:** Flux, Renovate, Kustomize
 - **Secrets Management:** SOPS + age
-- **Backups:** k8up (restic) -> Garage S3
+- **Backups:** k8up (restic) to Garage S3
 
 ### Network & Cluster
 
-- **Networking & Ingress:** Cilium, Traefik, Tailscale, Cert-Manager + Cloudflare DNS-01 Challenge
+- **Networking & Ingress:** Cilium, Traefik, Tailscale, Cert-Manager + Cloudflare DNS-01
 - **Monitoring:** kube-prometheus-stack, Metrics Server, Gatus
 
 ### Applications
 
-- **Public:** apex site (`0xbf.ch`: page + WebAssembly app at same URL) and its SSH portfolio on **22** (`ssh 0xbf.ch`), glob blog (`blog.0xbf.ch`), exhib gallery (`gallery.0xbf.ch`) (all Keel-polled `:latest`)
+- **Public:** apex site `0xbf.ch` with SSH portfolio on `22` (`ssh 0xbf.ch`), glob blog `blog.0xbf.ch`, exhib gallery `gallery.0xbf.ch` (all Keel-polled `:latest`)
 - **Utilities & Dashboard:** AdGuard Home, knotd + kresd (`.internal` zone), DDNS, Homepage
 
 ### Planned
@@ -39,49 +39,49 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
 .
 ├── README.md
 ├── ROADMAP.md
-├── .sops.yaml                       # SOPS configuration (age public key)
+├── .sops.yaml                       # SOPS config (age public key)
 │
-├── talos/                          # Talos OS config (declarative, applied with topf)
+├── talos/                          # Talos OS config (topf)
 │   ├── topf.yaml                   # TOPF cluster definition; per-node schematicId
-│   ├── schematic.<node>.yaml       # Image-factory schematics (extensions + SBC overlays)
-│   ├── secrets.sops.yaml           # SOPS-encrypted cluster secrets bundle
-│   └── patches/                     # merged in order: all/ -> <role>/ -> node/<host>/
-│       ├── all/                     # cluster-wide: hostname, tailscale ext-config, CNI
-│       ├── control-plane/           # oci: install disk (/dev/sda) + network/certSANs
-│       └── node/                    # per-host: 01-install, 02-network, 03-tailscale, 04-storage
+│   ├── schematic.<node>.yaml       # Image-factory schematics
+│   ├── secrets.sops.yaml           # SOPS-encrypted cluster secrets
+│   └── patches/                    # merged: all/ -> <role>/ -> node/<host>/
+│       ├── all/                    # cluster-wide: hostname, tailscale, CNI
+│       ├── control-plane/          # oci: install disk, network, certSANs
+│       └── node/                   # per-host: 01-install, 02-network, 03-tailscale, 04-storage
 │
 └── kubernetes/                     # Flux GitOps Manifests
-    ├── flux/                       # Flux controller bootstrap & tag filter
+    ├── flux/                       # Flux bootstrap + tag filter
     │   └── gotk-sync.yaml
-    ├── cluster/                    # High-level entrypoints
-    │   ├── crds.yaml               # Pinned upstream CRD installs (prune: false)
+    ├── cluster/                    # entrypoints
+    │   ├── crds.yaml               # pinned upstream CRDs (prune: false)
     │   ├── infrastructure.yaml     # Kustomization dependency tree
-    │   └── applications.yaml       # Per-app Kustomizations
-    ├── infrastructure/             # Platform Core
-    │   ├── storage/                # Local Path Provisioner (/var/mnt/storage)
-    │   ├── backup/                 # k8up (restic -> Garage S3)
-    │   ├── keel/                   # Image updater (tier-2 :latest apps)
-    │   ├── knative/                # Knative operator + Serving (tier-3 whims)
+    │   └── applications.yaml       # per-app Kustomizations
+    ├── infrastructure/             # platform
+    │   ├── storage/                # Local Path Provisioner
+    │   ├── backup/                 # k8up (restic to Garage S3)
+    │   ├── keel/                   # image updater for tier-2 :latest
+    │   ├── knative/                # Knative operator + Serving (tier-3)
     │   ├── monitoring/             # kube-prometheus-stack, metrics-server, Gatus
-    │   ├── network/                # Cilium (LB-IPAM pool, L2 announce), Tailscale
+    │   ├── network/                # Cilium (LB-IPAM, L2 announce), Tailscale
     │   └── ingress/                # Traefik (Gateway API), cert-manager, Tailscale
-    └── applications/               # User Workloads (one directory = one namespace)
-        ├── apex/                   # Public site + SSH TUI (Keel-polled :latest)
-        ├── glob/                   # Blog (blog.0xbf.ch, Keel-polled :latest)
-        ├── exhib/                  # Gallery (gallery.0xbf.ch, 3 containers, Keel-polled :latest)
-        ├── atuin/                  # Shell history sync server (atuin.0xbf.ch)
+    └── applications/               # workloads (one directory = one namespace)
+        ├── apex/                   # public site + SSH TUI (Keel-polled :latest)
+        ├── glob/                   # blog (Keel-polled :latest)
+        ├── exhib/                  # gallery (3 containers, Keel-polled :latest)
+        ├── atuin/                  # shell history (atuin.0xbf.ch)
         ├── agh/                    # AdGuard Home (LAN DNS edge)
-        ├── ddns/                   # favonia/cloudflare-ddns (0xbf.ch -> home IP)
-        ├── dns/                    # knotd + kresd (the .internal zone)
-        ├── devil/                  # Kata VM pod (ssh 2222 via TCPRoute, ghostty-web terminal at devil.internal; page source in ghostty-web/)
-        ├── forgejo/                # Git forge (git.0xbf.ch, git-ssh via TCPRoute)
-        ├── pds/                    # ATProto PDS (Bluesky; handles at <name>.pds.0xbf.ch)
-        └── homepage/               # Dashboard
+        ├── ddns/                   # favonia/cloudflare-ddns
+        ├── dns/                    # knotd + kresd (internal. zone)
+        ├── devil/                  # kata VM pod (ssh 2222, ghostty-web at devil.internal)
+        ├── forgejo/                # git forge (git.0xbf.ch)
+        ├── pds/                    # ATProto PDS (handles at <name>.pds.0xbf.ch)
+        └── homepage/               # dashboard
 ```
 
 ### Network Model
 
-Addressing follows `10.<location>.<function>.<host>` with `location = 10` for home and `location = 20` for cloud (eu-zurich-1).
+Addressing follows `10.<location>.<function>.<host>` with `location = 10` for home and `location = 20` for cloud `eu-zurich-1`.
 
 Function zones use decade-based third octets.
 
@@ -105,28 +105,27 @@ Function zones use decade-based third octets.
 | Ingress       | Traefik via Gateway API                               | chart 41.6.0 (v3.7)             |
 | Gateway API   | standard channel CRDs                                 | 1.6.2                           |
 | Certificates  | cert-manager                                          | 1.21.2                          |
-| Mesh / VPN    | Tailscale (operator in-cluster, extension on nodes)   | 1.102.3                         |
+| Mesh / VPN    | Tailscale (operator + extension on nodes)             | 1.102.3                         |
 | Monitoring    | kube-prometheus-stack, metrics-server, Gatus          | 91.4.1 / 3.14.0 / v5.36.0       |
-| Backups       | k8up (restic -> Garage S3)                            | chart 4.10.0 (operator v2.16.0) |
+| Backups       | k8up (restic to Garage S3)                            | chart 4.10.0 (operator v2.16.0) |
 | Whim platform | Knative Serving via operator (scale-to-zero)          | 1.23.0 (operator 1.23.1)        |
 
 ### GitOps Delivery
 
-Manifests are packaged as an OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag. The `flux-system` OCIRepository tracks `semver >=1.0.0`, so pushing a tag is the only deployment mechanism — the cluster never reads the working tree or plain git.
+Manifests are packaged as OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag. OCIRepository in `flux-system` tracks `semver >=1.0.0`. Push tag is the only deploy method. Cluster never reads working tree or plain git.
 
 ```
 git tag vX.Y.Z && git push origin master vX.Y.Z   # CI publishes, Flux reconciles
-flux reconcile source oci flux-system             # optional: pull immediately
-flux reconcile kustomization flux-system          # optional: apply immediately
+flux reconcile source oci flux-system             # pull immediately (optional)
+flux reconcile kustomization flux-system          # apply immediately (optional)
 ```
 
 ### Kustomization Topology
 
 ```
 cluster/crds.yaml            gateway-api-crds (v1.6.2), traefik-crds (v41.6.0),
-                             prometheus-crds (kube-prometheus-stack 91.4.1),
-                             k8up-crds (k8up-4.10.0), knative-operator-crds (v1.23.1)
-                             ↑ pinned upstream GitRepository sources, prune: false
+                             prometheus-crds (91.4.1), k8up-crds (4.10.0), knative-operator-crds (v1.23.1)
+                             pinned GitRepository sources, prune: false
 
 cluster/infrastructure.yaml  storage -> cilium -> ipam
                              cilium -> cert-manager -> traefik -> tailscale
@@ -135,24 +134,24 @@ cluster/infrastructure.yaml  storage -> cilium -> ipam
                              keel, monitoring (dependsOn prometheus-crds + traefik)
 ```
 
-A Kustomization's server-side dry-run validates its whole manifest set before applying anything, so custom resources must never share a Kustomization with the HelmRelease that creates their CRDs. Cilium's CRDs are created by its operator at runtime (no upstream files exist), which is why the LB pool and L2 policy live in their own `ipam` Kustomization depending on `cilium`.
+Dry-run validates all manifests in a Kustomization before apply. So CRs must not share Kustomization with HelmRelease that creates their CRDs. Cilium CRDs are created by operator at runtime (no upstream files). So LB pool and L2 policy are in separate `ipam` Kustomization that depends on `cilium`.
 
 ### Ingress & Certificates
 
-- Traefik is the Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners bind to the entrypoint ports 8000/8443 plus TCP 22 (apex SSH portfolio `TCPRoute`), TCP 2222 (devil ssh `TCPRoute`, LAN/tailnet only) and TCP 2223 (forgejo git-ssh `TCPRoute`); the LoadBalancer Service exposes 80/443/22/2222/2223.
-- The Gateway address `10.10.20.128` comes from the Cilium LB-IPAM pool (`network/ipam`) and is L2-announced on the worker's `end0` interface.
-- Public names (`0xbf.ch`, `*.0xbf.ch`) terminate with a Let's Encrypt wildcard certificate via Cloudflare DNS-01.
-- Internal names (`*.internal`) terminate with a cert-manager internal CA (self-signed bootstrap -> 10y CA -> 1y wildcard certificate).
-- Traefik dashboard: `https://dashboard.internal` (chart-managed IngressRoute, LAN allowlist middleware).
-- The ATProto PDS is routed at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle resolution via `/.well-known/atproto-did`); custom-domain handles (e.g. the bare apex) resolve via DNS TXT records.
-- Devil (kata VM pod): `devil.internal` serves the ghostty-web terminal (HTTPRoute → ttyd in the VM, a real `login` prompt is the auth) and ssh on port 2222 (TCPRoute → VM sshd, pubkey-only); LAN + tailnet only.
+- Traefik is Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners use `8000/8443` plus TCP `22` for apex SSH, `2222` for devil SSH (LAN/tailnet only), `2223` for forgejo git-ssh. LoadBalancer Service exposes `80/443/22/2222/2223`.
+- Gateway address `10.10.20.128` is from Cilium LB-IPAM pool in `network/ipam`. It is L2-announced on worker `end0`.
+- Public names `0xbf.ch` and `*.0xbf.ch` use Let's Encrypt wildcard via Cloudflare DNS-01.
+- Internal names `*.internal` use cert-manager internal CA. Chain is selfsigned bootstrap to 10y CA to 1y wildcard. Let's Encrypt cannot issue for `internal`.
+- Traefik dashboard is at `https://dashboard.internal`. It is IngressRoute with LAN allowlist middleware.
+- ATProto PDS is at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle via `/.well-known/atproto-did`). Custom handles use DNS TXT.
+- Devil kata VM: `devil.internal` serves ghostty-web terminal via HTTPRoute to ttyd in VM. Login uses real `login` prompt and PAM password. SSH is on `2222` via TCPRoute to VM sshd. LAN + tailnet only.
 
 ### Secrets
 
-All secrets are SOPS-encrypted with age (`.sops.yaml`); Flux decrypts in-cluster using the `sops-age` key. In-repo secrets: `ghcr-pat` (OCI artifact pull), `cloudflare-dns01` (DNS-01 solver), `operator-oauth` (Tailscale operator), `grafana-credentials` (monitoring), `agh-config` (AdGuard Home seed), `apex/ghcr` (apex GHCR), `glob/ghcr` (glob GHCR), `exhib/ghcr` (exhib GHCR), `apex/apex-ssh-host-key` (apex SSH portfolio host key), `forgejo-secrets` (Forgejo: SECRET_KEY, INTERNAL_TOKEN, admin bootstrap), `pds-secrets` (ATProto PDS: JWT secret, admin password, PLC rotation key), `backup-credentials` (k8up: restic repo password + Garage S3 keys), plus the Talos secrets bundle and node Tailscale patch under `talos/`.
+All secrets are SOPS-encrypted with age (`.sops.yaml`). Flux decrypts with `sops-age` key. Repo secrets: `ghcr-pat`, `cloudflare-dns01`, `operator-oauth`, `grafana-credentials`, `agh-config`, `apex/ghcr`, `glob/ghcr`, `exhib/ghcr`, `apex/apex-ssh-host-key`, `forgejo-secrets`, `pds-secrets`, `backup-credentials`, plus Talos secrets bundle and node Tailscale patch in `talos/`.
 
 ### Access
 
-- `kubeconfig` at repo root, `talos/talosconfig` (both gitignored).
-- Off-LAN access runs over the tailnet: the nodes run the Tailscale system extension; advertise `10.10.20.0/24` from the worker node and approve the route in the Tailscale admin console.
-- `dashboard.internal` (and every other `*.internal` name) resolves via the DNS stack: AdGuard Home (`10.10.20.153`, LAN-facing) -> the `resolver` pod on the OCI control-plane node (true recursion + DNSSEC, ClusterIP `10.96.0.53`) -> knotd in the same pod for `internal.` (authoritative zone, wildcard -> `10.10.20.128`; non-cluster devices get explicit records, e.g. `router.internal` -> `10.10.10.1`). LAN: router DHCP DNS field -> `10.10.20.153`. Off-LAN (tailnet): Tailscale split DNS, domain `internal.` -> `10.10.20.153` (requires MagicDNS; reachable via the advertised subnet routes). Until the router field is set, a hosts entry remains the stopgap.
+- `kubeconfig` at repo root and `talos/talosconfig` (both gitignored).
+- Off-LAN access is over tailnet. Nodes run Tailscale extension. Worker advertises `10.10.20.0/24`. Approve route in Tailscale admin console.
+- `dashboard.internal` and all `*.internal` names resolve via DNS stack: AdGuard Home `10.10.20.153` (LAN-facing) to `resolver` pod on OCI (recursion + DNSSEC, ClusterIP `10.96.0.53`) to knotd for `internal.` (wildcard to `10.10.20.128`; explicit records for LAN devices like `router.internal` to `10.10.10.1`). LAN: router DHCP DNS to `10.10.20.153`. Off-LAN via Tailscale split DNS `internal.` to `10.10.20.153` (needs MagicDNS via advertised subnet routes). Use hosts entry as stopgap until router field is set.

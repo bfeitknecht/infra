@@ -4,9 +4,8 @@ metadata:
   name: pds-backup
   namespace: pds
 spec:
-  # Times fire in Europe/Zurich (operator-level k8up.timezone).
-  # Staggered half an hour behind forgejo.
-  # Jobs fail until the Garage NAS tailnet path is fixed.
+  # Times use Europe/Zurich. Stagger 30m behind forgejo. Jobs fail until
+  # NAS path is fixed.
   backup:
     schedule: "30 3 * * *"
     failedJobsHistoryLimit: 3

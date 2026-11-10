@@ -12,9 +12,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    # No hostname on purpose: the listener matches all hostnames, so both the
-    # bare 0xbf.ch and *.0xbf.ch subdomains attach here. Do not add a hostname
-    # filter — a wildcard would stop matching the bare domain again.
+    # Do not set hostname. Listener matches all hostnames. Both 0xbf.ch
+    # and *.0xbf.ch attach here. Wildcard filter does not match bare domain.
     - name: websecure
       protocol: HTTPS
       port: 8443
@@ -36,34 +35,32 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: wildcard-internal-tls
-    # Raw TCP for forgejo git-over-SSH (TCPRoute). Port must match the
-    # gitssh entrypoint (2223 since the apex portfolio took 22).
+    # TCP for forgejo git SSH. Port must match gitssh entrypoint. Apex
+    # uses port 22 now. Gitssh uses port 2223.
     - name: gitssh
       protocol: TCP
       port: 2223
       allowedRoutes:
         namespaces:
           from: All
-    # Raw TCP for devil ssh (TCPRoute devil-ssh). Like gitssh the port
-    # matches the devilssh entrypoint (2222) — but no hostPort and no WAN
-    # exposure: LAN + tailnet only.
+    # TCP for devil SSH. Port matches devilssh entrypoint. No hostPort.
+    # No WAN. Access via LAN and tailnet only.
     - name: devilssh
       protocol: TCP
       port: 2222
       allowedRoutes:
         namespaces:
           from: All
-    # Raw TCP for the apex portfolio over SSH (TCPRoute apex-ssh). 22 is the
-    # portfolio: `ssh 0xbf.ch` needs no port argument.
+    # TCP for apex SSH portfolio. Port 22 serves portfolio. Use ssh 0xbf.ch.
     - name: apexssh
       protocol: TCP
       port: 22
       allowedRoutes:
         namespaces:
           from: All
-    # PDS account handles (<name>.pds.0xbf.ch) — second-level wildcard needs
-    # its own cert (pds-handles-wildcard-tls); same-port listeners are
-    # distinguished by hostname, most specific wins (see websecure-internal).
+    # PDS handles use <name>.pds.0xbf.ch. This needs second-level wildcard
+    # cert. Listeners on same port with different hostnames are distinct.
+    # Most specific hostname wins.
     - name: websecure-pds
       protocol: HTTPS
       port: 8443

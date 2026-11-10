@@ -1,109 +1,109 @@
 # Roadmap
 
-Status as of 2026-10-14. Three lanes run in parallel — **infra** (this repo), **omni** (nix), **web** (apex + whims) — and only touch at a few gates. This file is the ordered work queue; the `.private/TODO.md` scratchpads in each repo feed it and can be pruned against it.
+Status as of 2026-10-14. Three lanes run in parallel: **infra** (this repo), **omni** (nix), **web** (apex + whims). They meet at few gates. This file is ordered work queue. `.private/TODO.md` in each repo feeds it.
 
 ## Where things stand
 
-- **Platform baseline is live** (through tag `v1.14.0`): Flux reconciles the full tree (`storage -> cilium -> ipam`, `cert-manager -> traefik -> tailscale`, CRDs phase), the Gateway holds `10.10.20.128`, LE wildcard + internal CA certificates issued, monitoring + Gatus up, k8up operator deployed, Keel (tier 2) and Knative Serving + `whimsy` (tier 3) live.
-- **Kata shipped in `v1.14.0`** — schematics for rbpi + rzbl, RuntimeClass `kata-qemu`.
-- **Teleport CE torn down** (2026-10-24, after the friend demo) — `infrastructure/teleport/` and the devil agent wiring removed; devil's doors are ssh (2222) + ghostty-web.
-- **Apps live:** apex, AdGuard Home, knotd + kresd, DDNS, Homepage, Forgejo (`git.0xbf.ch`), ATProto PDS (`pds.0xbf.ch`).
-- **Local, unpushed:** `b19a45f` — topf patch restructure (`patches/node/<host>/`), `schematic.rzbl.yaml` + rzbl node patches, HARDWARE.md. Push when convenient; `talos/` rides `topf apply`, not the Flux tag.
-- **rbpi is currently powered down** mid-rework. Step 0 of everything cluster-side is plugging it back in — it rejoins as-is on the old schematic.
-- **Backup gap:** k8up is deployed and forgejo/pds Schedules exist, but jobs fail until the NAS tailnet path is fixed — nothing is actually backed up yet.
-- **omni** is a working dendritic flake: home modules (shell, tools, git, editor/nvf, nix tooling, gpg, sops secrets) + hosts `auto` (darwin), `devil` (NixOS kata-pod image), `vm` (microvm test bed).
-- **apex** is a one-page Deno site (Preact + htm, no client runtime); a **complete rework** is planned — CV and blog land in the new structure, not as an appendage.
+- **Platform baseline is live** through `v1.14.0`. Flux reconciles full tree (`storage` to `cilium` to `ipam`, `cert-manager` to `traefik` to `tailscale`, CRDs). Gateway holds `10.10.20.128`. LE wildcard and internal CA certs are issued. Monitoring + Gatus are up. K8up operator is deployed. Keel (tier 2) and Knative Serving + `whimsy` (tier 3) are live.
+- **Kata shipped in `v1.14.0`**. Schematics for rbpi + rzbl. RuntimeClass `kata-qemu`.
+- **Teleport CE removed** 2026-10-24 after friend demo. `infrastructure/teleport/` and devil agent wiring are removed. Devil now uses ssh 2222 + ghostty-web.
+- **Apps live:** apex, AdGuard Home, knotd + kresd, DDNS, Homepage, Forgejo at `git.0xbf.ch`, ATProto PDS at `pds.0xbf.ch`.
+- **Local, unpushed:** `b19a45f` holds topf patch restructure (`patches/node/<host>/`), `schematic.rzbl.yaml` + rzbl patches, HARDWARE.md. Push when convenient. `talos/` uses `topf apply`, not Flux tag.
+- **rbpi is powered down** mid-rework. Step 0 is plug it in. It rejoins on old schematic.
+- **Backup gap:** k8up is deployed. Forgejo and pds Schedules exist. Jobs fail until NAS tailnet path is fixed. Nothing is backed up yet.
+- **omni** is working flake: home modules (shell, tools, git, editor/nvf, nix tooling, gpg, sops secrets) + hosts `auto` (darwin), `devil` (NixOS kata-pod image), `vm` (microvm test bed).
+- **apex** is one-page Deno site (Preact + htm, no client runtime). Full rework is planned. CV and blog go into new structure.
 
-## The dependency graph
+## Dependency graph
 
 ```
 rbpi plugged in (old schematic) -> cluster back -> NOW queue
-case design -> validated -> final assembly (HARDWARE.md) -> rbpi up -> samba + SATA storage
+case design -> validated -> final assembly (HARDWARE.md) -> rbpi up -> samba + SATA
 rzbl: maintenance mode -> topf apply -> GPU labels -> THEN queue
-      -> technically needs only oci + tailnet — may be pulled ahead of the case work
-backup path works -> GATE: nothing irreplaceable (immich, photos) before this
-omni: age key backed up -> zed + macOS parity -> macbook factory reset -> nix iteration
+      needs only oci + tailnet. Can run ahead of case work.
+backup path works -> GATE: no irreplaceable data (immich, photos) before this
+omni: age key backed up -> zed + macOS parity -> macbook reset -> nix iteration
 ```
 
-## NOW — cluster is back (no hardware prerequisites)
+## NOW: cluster is back (no hardware prereqs)
 
 - [x] First: plug rbpi in, let it boot and rejoin (old schematic), then `flux get kustomizations` all green.
 
 ### Cluster
 
-- [x] **Teleport CE** — deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey; `tsh login --proxy teleport.internal` works. **Torn down 2026-10-24** — see LATER.
-- [x] **Devil live — access model switched (2026-10-20)**: teleport is superseded and was **torn down 2026-10-24** (friend demo done). New doors, all via the gateway (one hostname, `devil.internal`, knot wildcard — no DNS record needed):
-    - **ssh 2222** — new traefik entrypoint `devilssh` (port 2222, **no hostPort**, no WAN — the router forwards nothing; WAN 2222 stays reserved for the future dev box) + gateway listener + TCPRoute `ssh` → headless Service → VM sshd (pubkey-only, host keys persisted on the PVC).
-    - **ghostty-web** — HTTPRoute `devil` (websecure-internal, internal-allowlist copy — the only middleware, no basic-auth) → headless Service :7681 → **ttyd in the VM** (`devil.nix` in omni) serving the static page (ConfigMap `devil-ghostty-web` from `ghostty-web/index.html` — one html file, ghostty-web from CDN, ttyd wire protocol) and running a **real `login`** — auth is bf's PAM password (omni sops), not a middleware.
-    - The **headless** Service exists because the kata VM bypasses Cilium's service translation in both directions — ClusterIP/LB never reach it; clients dial the pod IP via Endpoints (the pod-to-pod path that works).
-    - PVC renamed `devil-state` → `devil-pvc` (subPaths home/ssh). ⚠️ **migration runbook before the tag** (`.private/devil-pvc-rename.md`) — Flux prune deletes the old bound PVC and its data (the running VM holds the age key, the omni clone, the teleport identity): scale devil to 0, create `devil-pvc` from the manifest, busybox copy pod (`cp -a`, verify `du`), keep replicas at 0, tag — prune deletes `devil-state` and the manifest restores `replicas: 1`.
-    - Remaining: owner keypair+secrets (omni: `ssh/devil`, `login/devil`) → `nix build .#devil` → `docker import --platform linux/arm64` → push `latest` → infra tag → smoke tests (ssh from mac/ish, login prompt at https://devil.internal).
-- [ ] **atuin server** on the cluster (omni already ships the client).
-- [ ] **Backup path** — fix the friend's tailnet ACL (`autogroup:shared` -> `100.96.72.126:3900`), smoke-test the restic round-trip, then a restore drill against forgejo's PVC. **Gate for every data-bearing app below.**
+- [x] **Teleport CE**. Deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0, multiplex TLS on LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin `bf` (access/editor/auditor) registered with passkey. `tsh login --proxy teleport.internal` works. **Removed 2026-10-24**. See LATER.
+- [x] **Devil live. Access model switched (2026-10-20)**: Teleport is superseded and removed 2026-10-24. New doors via gateway (one hostname `devil.internal`, knot wildcard, no DNS record):
+    - **ssh 2222**. New entrypoint `devilssh` (port `2222`, no hostPort, no WAN; router forwards nothing; WAN `2222` reserved for future dev box) + gateway listener + TCPRoute `ssh` to headless Service to VM sshd (pubkey-only, host keys on PVC).
+    - **ghostty-web**. HTTPRoute `devil` (`websecure-internal`, allowlist copy in devil ns, only middleware, no basic-auth) to headless Service `7681` to **ttyd in VM** (`devil.nix` in omni) serving static page (ConfigMap `devil-ghostty-web` from `ghostty-web/index.html`; one html file, ghostty-web from CDN, ttyd wire protocol) and running **real `login`**. Auth is bf PAM password (omni sops `login/devil`), not middleware.
+    - Headless Service is required. Kata VM bypasses Cilium service translation both ways. ClusterIP never reaches VM. Clients use pod IP via Endpoints (pod-to-pod path that works).
+    - PVC renamed `devil-state` to `devil-pvc` (subPaths `home`/`ssh`). See migration runbook before tag (`.private/devil-pvc-rename.md`). Flux prune deletes old bound PVC and its data (running VM holds age key, omni clone, teleport identity). Steps: scale devil to `0`, create `devil-pvc` from manifest, busybox copy pod with `cp -a` and verify `du`, keep replicas at `0`, tag; prune deletes `devil-state` and manifest restores `replicas: 1`.
+    - Remaining: owner keypair + secrets (omni `ssh/devil`, `login/devil`) to `nix build .#devil` to `docker import --platform linux/arm64` to push `latest` to infra tag to smoke tests (ssh from mac/ish, login at https://devil.internal).
+- [ ] **atuin server** on cluster (omni already ships client).
+- [ ] **Backup path**. Fix friend tailnet ACL (`autogroup:shared` to `100.96.72.126:3900`), smoke-test restic round-trip, then restore drill on forgejo PVC. **Gate for all data-bearing apps below.**
 - [ ] **Fix grafana homepage API widget.**
-- [ ] **LAN DNS cutover** — router DHCP DNS -> `10.10.20.153` (AGH), tailnet split DNS for `internal.`; retire hosts-file stopgaps.
-- [ ] **Forgejo actions** (optional now): CI runner so apex/whim repos can move off GitHub Actions.
+- [ ] **LAN DNS cutover**. Router DHCP DNS to `10.10.20.153` (AGH), tailnet split DNS for `internal.`; retire hosts-file stopgaps.
+- [ ] **Forgejo actions** (optional): CI runner so apex/whim repos can leave GitHub Actions.
 
 ### Web
 
-- [ ] **apex: complete rework** — rebuild the site rather than appending to it: new structure and design, CV and blog included in the rework. Comments come later (identity lane).
+- [ ] **apex: complete rework**. Rebuild site, not append. New structure and design. Include CV and blog. Comments come later (identity lane).
 
-### omni — pre-reset parity (the macbook reset gate)
+### omni: pre-reset parity (macbook reset gate)
 
-- [ ] **Back up the age key** (`~/.config/sops/age/keys.txt`) — before any transfer, full stop.
-- [ ] **Zed settings -> nix** (layout, theme, extensions) — as little global config as possible; prefer per-project `.zed/settings.json`.
+- [ ] **Back up age key** (`~/.config/sops/age/keys.txt`). Do this before any transfer.
+- [ ] **Zed settings to nix** (layout, theme, extensions). Keep global config minimal. Prefer per-project `.zed/settings.json`.
 - [ ] **macOS defaults parity** via nix-darwin `system.defaults`: dock (autohide, show speed), finder (quittable), wallpaper, liquid-glass styling.
-- [ ] **Brewfile parity** — un-comment the casks actually in use so the reset restores app parity.
-- [ ] FileVault is enabled manually during the reset (not declarable via nix-darwin).
+- [ ] **Brewfile parity**. Uncomment casks in use so reset restores app parity.
+- [ ] FileVault is enabled manually during reset. It is not declarable via nix-darwin.
 
-## NEXT — hardware
+## NEXT: hardware
 
 ### Case + final assembly (gates samba)
 
-- [ ] **Design the rbpi case** — CAD -> print -> validate fit/clearance against the HARDWARE.md stack (Pi + 52Pi B12 + Penta HAT + back-mounted Seeed + heatsinks + FFC routing).
-- [ ] **Final assembly** per the HARDWARE.md checklist (power module -> PCIe chain/FFCs -> fans -> standoffs -> multimeter check -> power-on order).
-- [ ] rbpi back up -> **samba** (SATA drives via the Penta HAT) + **storage planning** (what lives where, hostPath vs PVC).
+- [ ] **Design rbpi case**. CAD to print to validate fit and clearance against HARDWARE.md stack (Pi + 52Pi B12 + Penta HAT + back-mounted Seeed + heatsinks + FFC routing).
+- [ ] **Final assembly** per HARDWARE.md checklist (power module to PCIe chain/FFCs to fans to standoffs to multimeter check to power-on order).
+- [ ] rbpi back up to **samba** (SATA drives via Penta HAT) + **storage planning** (what lives where, hostPath vs PVC).
 
-### Razer Blade (technically independent — only needs oci + tailnet)
+### Razer Blade (technically independent: needs only oci + tailnet)
 
-- [ ] Boot Talos media -> maintenance mode -> add the node to `talos/topf.yaml` (`schematicId: "@schematic.rzbl.yaml"`, real IP) — patches already exist (`patches/node/rzbl/`: NVMe install disk, sysctls, tailscale).
-- [ ] `topf apply` -> verify join -> node labels/taints + NVIDIA device plugin so GPU workloads schedule deliberately.
-- [ ] Unlocks the THEN queue.
+- [ ] Boot Talos media to maintenance mode. Add node to `talos/topf.yaml` with `schematicId: "@schematic.rzbl.yaml"` and real IP. Patches already exist (`patches/node/rzbl/`: NVMe install disk, sysctls, tailscale).
+- [ ] Run `topf apply` to join. Verify join. Add node labels/taints + NVIDIA device plugin for GPU workloads.
+- [ ] This unlocks THEN queue.
 
-## THEN — unlocked by the Blade
+## THEN: unlocked by Blade
 
-- [ ] **Immich** (`photos`, ML on the GPU) — only after the backup gate.
+- [ ] **Immich** (`photos`, ML on GPU). Only after backup gate.
 - [ ] ***arr + Jellyfin** (`prowlarr`/`sonarr`/`radarr`, `jellyfin`).
 - [ ] **Copyparty** (`files`), **Dawarich**, **ppty**.
 - [ ] **Ollama + Open WebUI** (GPU).
 
 ## LATER
 
-- [ ] **Identity & SSO** — research before committing:
-    - Decide the aggregator: authentik vs dex — the thing forgejo/grafana/blog talk OIDC to.
-    - Research atproto-as-primary-identity: atproto OAuth is its own profile, not plain OIDC — putting the PDS in front of an aggregator needs a bridge, or atproto stays a parallel login flow. This decision determines whether friends can use Google/Apple _and_ atproto behind one door.
+- [ ] **Identity & SSO**. Research before commit:
+    - Choose aggregator: authentik vs dex. Forgejo, grafana, blog will use OIDC.
+    - Research atproto as primary identity: atproto OAuth is own profile, not plain OIDC. PDS in front of aggregator needs bridge, or atproto stays parallel flow. This decides if friends can use Google/Apple and atproto behind one door.
     - Then: forgejo OIDC, grafana OIDC, identity-gated blog comments.
-- [ ] **Renovate** — decision: GitHub App on this repo vs self-hosted against Forgejo.
-- [ ] **Alerting** — Alertmanager receiver decision (ntfy/Discord/Telegram); grafana dashboards.
-- [x] **Teleport teardown** — done 2026-10-24 (friend demo done): `infrastructure/teleport/` deleted, the devil teleport mounts/secret/configmap + `dependsOn: teleport` removed, omni's teleport unit + port 3022 + `TELEPORT_SESSION` prompt special-case removed, AGENTS/README notes updated. Devil runs ssh (2222) + ghostty-web (ttyd + real login).
+- [ ] **Renovate**. Decide: GitHub App on this repo vs self-hosted against Forgejo.
+- [ ] **Alerting**. Choose Alertmanager receiver (ntfy/Discord/Telegram); build grafana dashboards.
+- [x] **Teleport teardown**. Done 2026-10-24 after friend demo: `infrastructure/teleport/` deleted, devil teleport mounts/secret/configmap + `dependsOn: teleport` removed, omni teleport unit + port `3022` + `TELEPORT_SESSION` prompt removed, AGENTS/README updated. Devil uses ssh `2222` + ghostty-web (ttyd + login).
 - [ ] **Daytona** agent sandbox; opencode kata container (if not done with devil).
-- [ ] **Macbook factory reset** -> omni bootstrap (README runbook) -> iterate; rice (sketchybar/yabai/…) lives here, post-reset.
-- [ ] Upgrades: k8s 1.35.3 -> 1.37 (`talosctl upgrade-k8s`), Talos patch bumps, local kubectl.
+- [ ] **Macbook factory reset** to omni bootstrap (README runbook) to iterate; rice (sketchybar/yabai/etc.) lives here, post-reset.
+- [ ] Upgrades: k8s `1.35.3` to `1.37` (`talosctl upgrade-k8s`), Talos patch bumps, local kubectl.
 
 ## SOMEDAY / ideas
 
 XMPP (Prosody), Mumble, I2P, Yggdrasil, Reticulum, Meshtastic, wasmCloud, opengist, atproto ecosystem experiments (knot, spindle), flake exposes apps/tools (nvim, home), deeper nvf config.
 
-## The whims workflow (standing)
+## Whims workflow (standing)
 
-Trying a language or framework is a tier-3 whim — no git manifests, no planning, registry push = deploy:
+Trying a language or framework is tier-3 whim. No git manifests, no planning, registry push = deploy:
 
 ```nu
 kn service create <name> --image ghcr.io/bfeitknecht/<name>:<tag> --port <port> -n whimsy
-kn service update <name> --image ghcr.io/bfeitknecht/<name>:<new-tag>   # SHA/version tags, not :latest
+kn service update <name> --image ghcr.io/bfeitknecht/<name>:<new-tag>   # use SHA/version tags, not :latest
 ```
 
-The domain template is `{{.Name}}.0xbf.ch` — the KSvc name declares the subdomain. Pull secrets are already on the namespace default SA. Candidates from the idea pile: idea tracker, blog backend, whatever framework itch.
+Domain template is `{{.Name}}.0xbf.ch`. KSvc name sets subdomain. Pull secrets are on namespace default SA. Candidates: idea tracker, blog backend, any framework itch.
 
 ## PVC planning
 
@@ -126,8 +126,8 @@ The domain template is `{{.Name}}.0xbf.ch` — the KSvc name declares the subdom
 
 ## Conventions for every new application
 
-- One directory per app under `kubernetes/applications/<category>/<app>/` with its own `kustomization.yaml`.
-- One Kustomization entry in `cluster/applications.yaml`, `dependsOn` only what it actually needs (usually `traefik`).
+- One directory per app in `kubernetes/applications/<category>/<app>/` with own `kustomization.yaml`.
+- One Kustomization entry in `cluster/applications.yaml`. Set `dependsOn` only to what it needs (usually `traefik`).
 - Exposure via `HTTPRoute` (Gateway API only); secrets via SOPS; storage via local-path PVCs.
-- DNS: one apex record + wildcard cert; adding an app means adding an HTTPRoute, never a DNS entry. Exception: non-cluster LAN devices get explicit records in the knot `internal.` zone (e.g. `router.internal` -> the router's own IP) — no HTTPRoute, no Traefik, no internal CA.
-- Tier discipline: tier 1 = pinned image, git-tagged; tier 2 = Keel-polled `:latest` with `spec.ignore` on the image field; tier 3 = `kn` in `whimsy`, never in this tree. Keel annotations never go on tier 1/tier 3 workloads.
+- DNS: one apex record + wildcard cert; new app needs only HTTPRoute, never DNS entry. Exception: non-cluster LAN devices get explicit records in knot `internal.` zone (e.g. `router.internal` to router IP). No HTTPRoute, no Traefik, no internal CA.
+- Tier discipline: tier 1 is pinned image, git-tagged; tier 2 is Keel-polled `:latest` with `spec.ignore` on image; tier 3 is `kn` in `whimsy`, never in this tree. Do not put Keel annotations on tier 1/tier 3.
