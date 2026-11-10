@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+    ssh_host_ed25519_key: ENC[AES256_GCM,data:hYKoTKiEtivsMWpAqu6miaImhE27IOT6Uh9DQSVm/stoxOWhzg95I5wkjSQStpwAP9V6z7YP1WgUzxVafC4PLC7oUrQlU9UrI/rixqxr4aYKzS1e+I4njJHvEq+/IeSS45/y7Nygdw8vlOzPo51gPnGdNTR6QCgiidgPkgku6dTJpFnXseMGxaeJC8CVRqs8hNXj3e8BVuYNl8g5Z0veLy6/kiSfvcCkmsA62ojr389W91d7aUTyJCp6tAEP0XLqWo9ne+9QEfkAujHCd5gQdaBJjIInh/SYXcYxxx50KsK0xdoppn8LO16a9LjQ/epOzASgVhe+IJn13Gjw1pJhYJ5teSvJh0+bAyyAbuYUNCTMcNa6h8gGI/n9E14DPgUpTpbDWzlBZGteJsHx61Qm43mzeIKvexIoMN48NK6t924VEwUQQrq8JnduUD1zmZ00qwGwmvd2ZLJx9sy9JIkEoH9OU7jC+Jh/R9KvXphIgrtraZzXwaxTmxEm4auIW52iz69WGvFI1wojiR6/StG9WXWfIwyw//DQEiCtgw12EmV+u7fCVMeUg8bp+VS8hlIsWa///nMxzGQpU6dO8NShcKO6kRsmwaNBlzWxSfmxD3KBYxL7lPnALvJTWdIzYZcuP8w8riEbmfLapSoXxwkR/eCc5qYHucpvkBqd/bDPxJv395ZxAUSeS6Ja7XwJ83U43pjRnA==,iv:+srjAe7xE+7pOkodknivZmGedh1dw5eRZy3TispGQkI=,tag:YtayHVrYB0tCqaYS8hxe3Q==,type:str]
+kind: Secret
+metadata:
+    name: apex-ssh-host-key
+    namespace: apex
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBZU3N2YzNQUjQ2UlBIM1h1
+            TDBMdkdycHFOb09YWExqcDQwZU5DTFMxY2x3Cm4yMjdVazEyUm85ZnRmbFErZ2t3
+            UUZwUld5TEpndWlOYVc5MDZNcXNxUXMKLS0tIFUvd2srQlNjZUtYWHprejlvT1ZD
+            TzZqRTRqRjhKalVsNDZvREFGU2I4WW8K+m9hgb8gjwGNI//6mVlmVc7NRkvNc1v0
+            kH1HvlTl04d+rc9GZkz7tWg0b9tn/xNP0qKswEXmOov1+gXKezr2JA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-10T15:55:55Z"
+    mac: ENC[AES256_GCM,data:SIRJZYgAKz6HjM3bXCG8WNLm3Wp4NqbrmaU2F8KA3mNrci3SKwo2+n7TvuKowMl82sGwosT70n+PmEk9t0DpzJ3w+RwLeS8/GCiV5HJ4IpkOeFDrGY5VkXnIEvYycTwTOXYmrGHBfEe8P9ebC4oznBv/ZxLlMOFoMbvdMUNk6tY=,iv:5YwwgD0u2yEyh6g5zvrFE6z6Gjr4LkyrblsSfXxyRM4=,tag:SL/g8jlt+GOtXtLU+/O7yA==,type:str]
+    version: 3.13.3
