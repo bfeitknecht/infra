@@ -7,7 +7,7 @@ provisioning:
   grow: true
 filesystem:
   type: xfs
-# Mounts at /var/mnt/storage-nvme0. Replaces old machine.disks mount /var/mnt/storage/nvme0.
+# Mounts at /var/mnt/storage-nvme0, was /var/mnt/storage/nvme0.
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig
