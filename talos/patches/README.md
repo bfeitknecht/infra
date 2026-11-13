@@ -25,6 +25,7 @@ Repo mapping:
 - `node/rzbl/02-network.yaml`: `DHCPv4Config` for `eth0` + `SysctlConfig`. Verify link name with `talosctl get links` (update if Blade reports `enp*`).
 - `node/rbpi/04-storage.yaml`: `UserVolumeConfig` for `storage-nvme0` and `storage-nvme1` with `disk.dev_path` selector, `grow: true`, `filesystem.type: xfs`.
 - `node/*/03-tailscale.yaml`: `machine.env.TS_EXTRA_ARGS` — still valid, not deprecated.
+- `node/rzbl/04-logind.yaml`: `EtcFileConfig` for `systemd/logind.conf` with `HandleLidSwitch=ignore` (and docked/external-power) so closing lid does not suspend; `HandlePowerKey=ignore` prevents power-button shutdown.
 - `all/03-cni.yaml`: `KubeFlannelCNIConfig $patch: delete` — already per-component, disables Flannel (we use Cilium).
 
 ## rzbl join (10.10.20.11)
