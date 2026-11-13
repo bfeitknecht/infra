@@ -6,7 +6,7 @@ Home-lab Talos Linux Kubernetes cluster. One control plane `oci` in cloud. Two w
 
 ### Host OS
 
-- **Talos Linux 1.14.2** on Pi 5. Boot from microSD.
+- **Talos Linux 1.14.6** on Pi 5. Boot from microSD.
 - **System extensions are in image:** `tailscale`, `nvme-cli`, `kata-containers`. See `talos/schematic.rbpi.yaml` with `rpi_5` overlay. See Cluster topology below.
 - **NVMe support:** NVMe driver is in Talos kernel `CONFIG_BLK_DEV_NVME=y`. `nvme-cli` extension adds userspace tool. It is not a driver.
 - Talos on Pi 5 is community-tested. It is not officially supported. Example is `rpi_5` imager target and community talos-rpi5 builder.
@@ -38,12 +38,12 @@ Home-lab Talos Linux Kubernetes cluster. One control plane `oci` in cloud. Two w
 - **Boot disk:** 50 GB Block Volume (`/dev/sda`, virtio, model `BlockVolume`)
 - **Network:** `eth0` (virtio). Private `10.20.20.10`, public `140.238.213.197`, tailnet `100.73.186.19` (cluster API endpoint)
 - **Role:** control-plane node, tainted. Runs no workloads except `resolver` DNS pod (clean `:53` egress; home ISP firmware hijacks DNS on LAN segment)
-- **Talos:** 1.14.0 running (declared 1.14.2); extensions: `tailscale`; `bootloader: sd-boot` (`talos/schematic.oci.yaml`)
+- **Talos:** 1.14.6 running (declared 1.14.6); extensions: `tailscale`; `bootloader: sd-boot` (`talos/schematic.oci.yaml`)
 - **Gotcha:** VCN security list allows only UDP 41641 (Tailscale WireGuard). No cluster ports are exposed. Manage over tailnet. Node tailscale key must never expire. Expired key takes API endpoint down.
 
 ## Cluster topology & Talos provisioning (verified)
 
-Three nodes. `oci` and `rbpi` are enrolled in `talos/topf.yaml`. `rzbl` patches are drafted in `talos/patches/node/rzbl/` but node is not in roster. Unreachable node aborts `topf apply`. Add it only when Blade is online. Applied with [topf](https://postfinance.github.io/topf).
+Three nodes. All three are enrolled in `talos/topf.yaml` (oci, rbpi, rzbl). Applied with [topf](https://postfinance.github.io/topf).
 
 | Node   | Role                          | Address                                 | Board                            | Talos extensions (schematic file)                                                                                                                             |
 | ------ | ----------------------------- | --------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +60,7 @@ Three nodes. `oci` and `rbpi` are enrolled in `talos/topf.yaml`. `rzbl` patches 
 | #   | Part                             | Spec/Variant                                                                                              | Qty | Total (CHF) | Ref. Number      | Date         |
 | :-- | :------------------------------- | :-------------------------------------------------------------------------------------------------------- | :-- | :---------- | :--------------- | :----------- |
 | 1   | Raspberry Pi 5                   | 16 GB RAM                                                                                                 | 1   | -           | -                | -            |
-| 2   | Imou microSD                     | 64 GB, microSDXC, UHS-I, U3/V30 (boot, Talos Linux 1.14.2)                                                | 1   | 15.90       | -                | Delivered    |
+| 2   | Imou microSD                     | 64 GB, microSDXC, UHS-I, U3/V30 (boot, Talos Linux 1.14.6)                                                | 1   | 15.90       | -                | Delivered    |
 | 3   | 52Pi Dual-FPC PCIe HAT (B12)     | ASMedia Gen2 PCIe switch, dual FPC out, bottlenecks to Gen 2 (accepted)                                   | 1   | 25.79       | 3050317770738061 | Mar 2, 2025  |
 | 4   | Radxa ROCK Penta SATA HAT        | For RPi 5. 4x SATA + eSATA, JMB585 (needs `pcie-32bit-dma-pi5`), ships with its own custom FFC           | 1   | 62.49       | 3050317770718061 | Mar 2, 2025  |
 | 5   | Seeed PCIe→Dual M.2 HAT          | 2x M.2 NVMe (both populated); Hailo/Coral-capable but no accelerator installed, PCIe 2.0, ASM1182E switch | 1   | 18.53       | 3052013889338061 | Mar 30, 2025 |
@@ -107,7 +107,7 @@ Pi 5 fan header is 4-pin, 1 mm pitch JST-SH socket. Standard PC PWM headers use 
 
 ```
 Zyxel AX7501 (10 GbE plan; Pi caps at 1 GbE) ── Ethernet ── Raspberry Pi 5 16GB
-                                      │  Host OS: Talos Linux 1.14.2 (community port)
+                                      │  Host OS: Talos Linux 1.14.6 (community port)
                                       │  Role: worker node (control plane = OCI Ampere A1)
                                       │  Extensions: tailscale, nvme-cli, kata-containers
                                       │  Boot: Imou 64GB microSD (UHS-I U3)
@@ -152,7 +152,7 @@ Zyxel AX7501 (10 GbE plan; Pi caps at 1 GbE) ── Ethernet ── Raspberry Pi
 
 Worker node rzbl (same tailnet / Talos cluster):
   Razer Blade 15 Base 2019 (RZ09-03009)
-    ├─ Host OS: Talos Linux 1.14.2 (amd64)
+    ├─ Host OS: Talos Linux 1.14.6 (amd64)
     ├─ CPU: i7-9750H, 6C/12T, 2.6/4.5 GHz
     ├─ GPU: NVIDIA GTX 1660 Ti 6GB GDDR6 (CUDA, Turing)
     ├─ RAM: 16GB DDR4-2667 (max 32GB)

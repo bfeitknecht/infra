@@ -1,8 +1,9 @@
-machine:
-  network:
-    interfaces:
-      - interface: end0
-        dhcp: true
-  sysctls:
-      net.ipv4.ip_forward: "1"
-      net.ipv6.conf.all.forwarding: "1"
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: end0
+---
+apiVersion: v1alpha1
+kind: SysctlConfig
+params:
+  net.ipv4.ip_forward: "1"
+  net.ipv6.conf.all.forwarding: "1"

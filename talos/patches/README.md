@@ -1,49 +1,41 @@
-# Talos patches: upgrade notes for 1.14.6
+# Talos patches: 1.14.6
 
-This directory holds per-layer patches merged as `all/ -> <role>/ -> node/<host>/`.
+All nodes target Talos 1.14.6. Patches use per-component documents where 1.14 deprecated the v1alpha1 fields.
 
 ## Versions
 
-- `talos/topf.yaml` declares `talosVersion: 1.14.6` (was 1.14.2).
-- `kubernetesVersion: 1.35.3` unchanged.
-- Schematics unchanged (`oci`, `rbpi`, `rzbl`) except version bump triggers new Image Factory ID. No extension rename needed (`nvidia-open-gpu-kernel-modules-lts` etc. still valid at 1.14.6).
+- `talos/topf.yaml` `talosVersion: 1.14.6`, `kubernetesVersion: 1.35.3`.
+- Schematics (`oci`, `rbpi`, `rzbl`) unchanged. No extension rename at 1.14.6. New Image Factory ID is derived on `topf upgrade`.
+- Host OS: Talos Linux 1.14.6 on all nodes (was 1.14.2).
 
 ## Document name changes (1.14.x)
 
-Talos 1.14 splits `v1alpha1` into per-component documents. Deprecated fields remain supported but are mutually exclusive with their replacement unless noted.
+Talos 1.14 splits `v1alpha1` into focused documents. Deprecated fields are still accepted but mutually exclusive with their replacement unless noted.
 
-- **Kubernetes**: `KubeClusterConfig`, `KubeAPIServerConfig`, `KubeletConfig`, `KubeNodeConfig`, `KubePrismConfig`, etc. See Upgrading Talos guide table.
-- **Kernel/udev**: `SysctlConfig`, `SysfsConfig`, `KernelModuleConfig`, `UdevRulesConfig` — if both old and new are set, new takes precedence (not exclusive).
+- **Kubernetes**: `KubeClusterConfig`, `KubeAPIServerConfig`, `KubeletConfig`, `KubeNodeConfig`, `KubePrismConfig`, etc.
+- **Kernel/udev**: `SysctlConfig`, `SysfsConfig`, `KernelModuleConfig`, `UdevRulesConfig` — new doc takes precedence on conflict (not exclusive).
 - **Install/files/CRI**: `UnattendedInstallConfig` (already in use), `EtcFileConfig`, `CRICustomizationConfig`.
-- **Network**: `machine.network.interfaces` → `LinkConfig`/`DHCPv4Config`/`VLANConfig`; `machine.network.nameservers` → `ResolverConfig`; `machine.features.hostDNS` → `ResolverConfig.hostDNS`; `machine.features.kubePrism` → `KubePrismConfig`.
+- **Network**: `machine.network.interfaces` → `DHCPv4Config`/`LinkConfig`/`VLANConfig`; `machine.network.nameservers` → `ResolverConfig`; `machine.features.hostDNS` → `ResolverConfig.hostDNS`.
+- **Storage**: `machine.disks` → `UserVolumeConfig` (deprecated since 1.10).
 
-Current repo handling:
+Repo mapping:
 
-- `control-plane/02-network.yaml` and `node/*/02-network.yaml` still use `machine.network.interfaces` (DHCP) and `machine.sysctls`/`machine.certSANs`. These are deprecated but accepted in 1.14.6. No new `LinkConfig` or `SysctlConfig` document is emitted, so no conflict.
-- `node/*/03-tailscale.yaml` uses `machine.env.TS_EXTRA_ARGS` — still valid.
-- `node/rbpi/04-storage.yaml` uses `machine.disks` — deprecated since 1.10 in favor of `UserVolumeConfig` but still accepted. Migration to `UserVolumeConfig` is next step.
+- `control-plane/02-network.yaml`: `DHCPv4Config` for `eth0` + `SysctlConfig` for `net.ipv4.ip_forward`/`net.ipv6.conf.all.forwarding`; `machine.certSANs` stays in v1alpha1 (not deprecated).
+- `node/rbpi/02-network.yaml`: `DHCPv4Config` for `end0` + `SysctlConfig`.
+- `node/rzbl/02-network.yaml`: `DHCPv4Config` for `eth0` + `SysctlConfig`. Verify link name with `talosctl get links` (update if Blade reports `enp*`).
+- `node/rbpi/04-storage.yaml`: `UserVolumeConfig` for `storage-nvme0` and `storage-nvme1` with `disk.dev_path` selector, `grow: true`, `filesystem.type: xfs`.
+- `node/*/03-tailscale.yaml`: `machine.env.TS_EXTRA_ARGS` — still valid, not deprecated.
+- `all/03-cni.yaml`: `KubeFlannelCNIConfig $patch: delete` — already per-component, disables Flannel (we use Cilium).
 
-When bumping `topf` to 1.14 contract (if/when `talosctl gen config` emits new docs with mutual-exclusion validation), migrate:
-
-- `machine.network.interfaces` → `LinkConfig` with `deviceSelector`/`DHCP`/`addresses`.
-- `machine.certSANs` → `KubeAPIServerConfig` `certSANs`.
-- `machine.sysctls` → `SysctlConfig` documents (or keep legacy; precedence is new).
-- `machine.disks` → `UserVolumeConfig` (one doc per NVMe, `diskSelector` by `disk.dev_path` or `disk.transport`).
-
-Do not migrate in this commit. Keep deprecated fields until every node reports 1.14.6.
-
-## rzbl join steps
+## rzbl join (10.10.20.11)
 
 1. Boot generic Talos 1.14.6 metal image on Blade to maintenance mode.
-2. Get IP (`ip addr` or DHCP lease table). Update `talos/topf.yaml` `nodes.rzbl.ip` if not `10.10.20.11`.
-3. Ensure Blade NIC name matches schematic? Current `rbpi` uses `end0`; `oci` uses `eth0`; `rzbl` has no interface override (DHCP via default). Check `talosctl get links` in maintenance to confirm.
-4. Run `topf apply --nodes 10.10.20.11` (or full apply when `oci` reachable over tailnet `100.73.186.19`).
-5. Run `topf upgrade` if version skew.
-6. Verify `talosctl health`, `kubectl get nodes`, GPU `nvidia-smi` via DaemonSet.
+2. Confirm IP is 10.10.20.11 and link name is eth0 (run `ip addr` or check DHCP lease table; `talosctl get links` shows name).
+3. `topf apply` (all nodes) or `topf apply --nodes 10.10.20.11` if oci is unreachable. This writes machine config.
+4. `topf upgrade` if declared version differs from running.
+5. Verify `talosctl health`, `kubectl get nodes`, GPU `nvidia-smi` via plugin DaemonSet.
 
 ## Schematics
-
-Extensions are baked into installer image. Change requires `topf upgrade` with new schematic ID. `factory.talos.dev` IDs are derived from `schematic.<node>.yaml`.
 
 - `oci`: `tailscale` + `sd-boot`.
 - `rbpi`: `rpi_5` overlay + `nvme-cli`, `tailscale`, `kata-containers`.

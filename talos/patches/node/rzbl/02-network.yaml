@@ -1,4 +1,10 @@
-machine:
-  sysctls:
-    net.ipv4.ip_forward: "1"
-    net.ipv6.conf.all.forwarding: "1"
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: eth0
+# Blade uses eth0 for wired. Verify with talosctl get links. If name differs (e.g., enp60s0), update.
+---
+apiVersion: v1alpha1
+kind: SysctlConfig
+params:
+  net.ipv4.ip_forward: "1"
+  net.ipv6.conf.all.forwarding: "1"

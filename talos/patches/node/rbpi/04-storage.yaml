@@ -1,8 +1,21 @@
-machine:
-  disks:
-    - device: /dev/nvme0n1
-      partitions:
-        - mountpoint: /var/mnt/storage/nvme0
-    - device: /dev/nvme1n1
-      partitions:
-        - mountpoint: /var/mnt/storage/nvme1
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: storage-nvme0
+provisioning:
+  diskSelector:
+    match: disk.dev_path == "/dev/nvme0n1"
+  grow: true
+filesystem:
+  type: xfs
+# Mounts at /var/mnt/storage-nvme0. Replaces old machine.disks mount /var/mnt/storage/nvme0.
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: storage-nvme1
+provisioning:
+  diskSelector:
+    match: disk.dev_path == "/dev/nvme1n1"
+  grow: true
+filesystem:
+  type: xfs
+# Mounts at /var/mnt/storage-nvme1. Replaces old /var/mnt/storage/nvme1.
