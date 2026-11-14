@@ -2,7 +2,7 @@
 
 This note describes how to go from the current cluster to the target state in one tag.
 The tag will ship Talos 1.14.6, the new worker `rzbl`, and the three apps `apex`, `glob`, `exhib` together.
-Do this only after `thyme` is merged. `apex` and `glob` stay blocked until `thyme` is on `master` and `exemel@preview` is published. `exhib` could go live now. Wait with it and ship all three apps at once.
+Do this only after `thyme` is merged. `apex` and `glob` stay blocked until `thyme` with `syndicate` is on `master`. `exemel` was dropped. `exhib` could go live now. Wait with it and ship all three apps at once.
 
 Use STE100. Be terse. No em dashes. No `kubectl apply`. The cluster updates only from a `v*` tag.
 
@@ -14,7 +14,7 @@ Current state before this go-live:
 * `rbpi` at `10.10.20.10` (worker, Pi 5) runs Talos 1.14.2. Declared `1.14.2`. Extensions `tailscale`, `nvme-cli`, `kata-containers` plus `rpi_5` overlay.
 * `rzbl` (Razer Blade 15 Base 2019, i7-9750H, GTX 1660 Ti, `10.10.20.11`) is not in `topf.yaml` on `master`. It boots a generic Talos 1.14.6 metal image to maintenance mode. No machine config applied yet.
 * Kubernetes is `1.35.3`. Cilium, Traefik, cert-manager, monitoring, k8up, Knative, Keel are live through the last `v*` tag.
-* App manifests for `apex`, `glob`, `exhib` are already in the repo on `master` (PR #2 merged at `924d1fe`). They are not yet live on the cluster until the next tag reconciles. `apex` and `glob` images are missing. They need `thyme@0.1.0` and `exemel@0.3.0` with `exemel` on `@preview`. `exhib` image `ghcr.io/bfeitknecht/exhib:latest` can be published now but will wait.
+* App manifests for `apex`, `glob`, `exhib` are already in the repo on `master` (PR #2 merged at `924d1fe`). They are not yet live on the cluster until the next tag reconciles. `apex` and `glob` images are missing. They need `thyme@0.1.0` with `syndicate` xml package (exemel was dropped, thyme now vendors syndicate). Downstream `apex`/`glob`/`exhib` should not be affected beyond re-vendor. `exhib` image `ghcr.io/bfeitknecht/exhib:latest` can be published now but will wait.
 * Backup is not yet verified. `k8up` points to `tailscale-relay.egress.svc.cluster.local:3900` which forwards to friend NAS `100.96.72.126:3900`. See `docs/BACKUP_NAS_OUTLINE.md`. Direct tagged-device access to the shared-in NAS is not yet proven. Relay is the current path.
 
 ## Target state
@@ -22,7 +22,7 @@ Current state before this go-live:
 Target state after this go-live:
 
 * All nodes run Talos `1.14.6`. Declared `1.14.6` in `talos/topf.yaml`. Image Factory IDs are re-derived on `topf upgrade`.
-* `rzbl` is a worker at `10.10.20.11`. Schematic `talos/schematic.rzbl.yaml` with `tailscale`, `intel-ucode`, `nvme-cli`, `kata-containers`, `nvidia-open-gpu-kernel-modules-lts`, `nvidia-container-toolkit-lts`. Patches `talos/patches/node/rzbl/*` applied. Lid close does not suspend (`04-logind.yaml` with `HandleLidSwitch=ignore` via `EtcFileConfig`). GPU is available to workloads via NVIDIA device plugin.
+* `rzbl` is a worker at `10.10.20.11`. Schematic `talos/schematic.rzbl.yaml` with `tailscale`, `intel-ucode`, `nvme-cli`, `kata-containers`, `nvidia-open-gpu-kernel-modules-lts`, `nvidia-container-toolkit-lts`. Patches `talos/patches/node/rzbl/*` applied. Lid close does not suspend (`04-logind.yaml` with `HandleLidSwitch=ignore` via `EtcFileConfig`). Keyboard is static white, no cycle (`05-keyboard.yaml` via `SysfsConfig`/`UdevRulesConfig` plus `rzbl-keyboard` DaemonSet fallback on `rzbl`). GPU is available to workloads via NVIDIA device plugin.
 * `apex` is live at `https://0xbf.ch` and `ssh 0xbf.ch` on port `22`. `glob` is live at `https://blog.0xbf.ch`. `exhib` is live at `https://gallery.0xbf.ch`.
 * Single tag ships both Talos config and app manifests. No second tag is needed for this cutover.
 
@@ -39,7 +39,9 @@ Talos part (see `talos/patches/README.md` for detail):
 * `talos/patches/node/rzbl/02-network.yaml`: add `DHCPv4Config` for `eth0` plus `SysctlConfig`. Verify link name with `talosctl get links`. Blade reports `eth0` on Talos. Update if `enp*`.
 * `talos/patches/node/rbpi/04-storage.yaml`: migrate `machine.disks` to `UserVolumeConfig` `storage-nvme0` and `storage-nvme1` with `disk.dev_path`, `grow: true`, `filesystem.type: xfs`. Mounts are `/var/mnt/storage-nvme0` and `/var/mnt/storage-nvme1`. Old paths were `/var/mnt/storage/nvme0|nvme1`.
 * `talos/patches/node/rzbl/04-logind.yaml`: new `EtcFileConfig` `systemd/logind.conf` with `HandleLidSwitch=ignore`, `HandleLidSwitchExternalPower=ignore`, `HandleLidSwitchDocked=ignore`, `HandlePowerKey=ignore`. Lid close does not suspend or power off the Blade.
+* `talos/patches/node/rzbl/05-keyboard.yaml`: `SysfsConfig` and `UdevRulesConfig` to force `chrome::kbd_backlight` brightness `255` and disable Razer wave/spectrum effects, enable static white (`matrix_effect_static=1`). `kubernetes/infrastructure/rzbl-keyboard/` DaemonSet on `rzbl` keeps white every 15s as fallback (privileged `alpine` that writes `/sys` hid sysfs and hidraw).
 * `kubernetes/infrastructure/storage/local-path-storage.yaml`: update `nodePathMap` for `rbpi` to new `/var/mnt/storage-nvme0,nvme1` paths.
+* `kubernetes/infrastructure/rzbl-keyboard/`: new `DaemonSet` `rzbl-kbd-white` (privileged `alpine`, nodeSelector `rzbl`) via `kubernetes/cluster/infrastructure.yaml` entry `rzbl-keyboard`.
 * `HARDWARE.md` and `README.md`: update version strings to `1.14.6` and topology table to three nodes.
 * Docs: `docs/BACKUP_NAS_OUTLINE.md` added (friend NAS relay, tagged-device hypothesis, ACL fix options). This file is `talos/patches/README.md` companion for `exhib` etc.
 
@@ -53,11 +55,11 @@ App part (already on `master` via PR #2, see `docs/GO_LIVE.md` for full app deta
 
 No new app manifests are added in this branch. App manifests are already on `master`. This branch only adds Talos and docs.
 
-## Gate: thyme
+## Gate: thyme (now with syndicate)
 
-Do not start Talos rollout until `thyme` is merged.
+Do not start Talos rollout until `thyme` is merged. `exemel` was dropped. Thyeme now uses own `syndicate` xml package. Downstream should not be affected beyond re-vendor.
 
-* `glob` and `apex` vendor `thyme@0.1.0` and `exemel@0.3.0`. `exemel` must be on `@preview` before `thyme` release. `thyme` re-vendor must land on `master` in `apex` and `glob` repos.
+* `glob` and `apex` vendor `thyme@0.1.0` with `syndicate`. No `@preview` step for exemel. `thyme` re-vendor must land on `master` in `apex` and `glob` repos.
 * After `thyme` is on `master`, tag `apex` and `glob` repos with `just release v0.1.0` so `ghcr.io/bfeitknecht/apex:latest` and `glob:latest` exist. Verify with `oras` or GHCR UI.
 * Publish `exhib` image `ghcr.io/bfeitknecht/exhib:latest` at same time. Do not tag `infra` until all three `latest` images exist. Missing image causes `ImagePullBackOff`.
 
@@ -167,6 +169,15 @@ loginctl show | grep HandleLid  # on node if you exec
 
 Close lid test: node stays `Ready`. `kubectl get nodes` still shows `rzbl` `Ready` after 60 seconds with lid closed.
 
+Check keyboard on `rzbl` after apply:
+
+```
+talosctl --nodes 10.10.20.11 get sysfs | grep kbd
+cat /sys/class/leds/chrome::kbd_backlight/brightness  # should be 255
+kubectl -n rzbl-keyboard logs daemonset/rzbl-kbd-white --tail=20
+# visual: lid open, keyboard should be static white, no cycle
+```
+
 ## Step 3: Verify cluster health before tag
 
 Do not tag until Talos health is green.
@@ -261,7 +272,7 @@ Traefik Gateway address stays `10.10.20.128` from Cilium LB-IPAM. No pool change
 
 ## References
 
-* `talos/patches/README.md` — Talos 1.14.6 document changes and `rzbl` join steps.
+* `talos/topf.yaml` and `talos/patches/node/rzbl/` — Talos 1.14.6 config (see commit log, `05-keyboard.yaml` for white).
 * `docs/GO_LIVE.md` — full app go-live detail (ports, Traefik, secrets, verification).
 * `docs/BACKUP_NAS_OUTLINE.md` — friend NAS relay, tagged-device hypothesis, ACL options.
 * `HARDWARE.md` — topology and provisioning flow.

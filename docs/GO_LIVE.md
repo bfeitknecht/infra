@@ -75,7 +75,7 @@ just release v0.1.0 "apex v0.1.0"
 
 The workflow is at `bfeitknecht/infra/.github/workflows/publish-image.yaml@master`. It builds `linux/amd64,linux/arm64`. Apex builds `linux/arm64` only.
 
-* Check thyme and exemel. `glob` and `apex` use `thyme@0.1.0` and `exemel@0.3.0` from `vendor/`. The build needs `exemel` on the `@preview` registry before the `thyme` release. Do not tag `infra` until `exemel` is published and `thyme` is re-vendored.
+* Check thyme. `glob` and `apex` use `thyme@0.1.0` with `syndicate` xml package (exemel was dropped, thyme now vendors syndicate). No `@preview` step is needed for exemel. Do not tag `infra` until `thyme` is re-vendored and downstream is not affected.
 
 ## Router
 

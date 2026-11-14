@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: rzbl-kbd-white
+  namespace: rzbl-keyboard
+  labels:
+    app: rzbl-kbd-white
+spec:
+  selector:
+    matchLabels:
+      app: rzbl-kbd-white
+  template:
+    metadata:
+      labels:
+        app: rzbl-kbd-white
+    spec:
+      hostNetwork: false
+      hostPID: true
+      hostIPC: true
+      tolerations:
+        - operator: Exists
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      containers:
+        - name: set-white
+          image: alpine:3.20
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          volumeMounts:
+            - name: sys
+              mountPath: /sys
+            - name: dev
+              mountPath: /dev
+            - name: run-udev
+              mountPath: /run/udev
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              echo "rzbl-kbd-white: start, loop to keep static white"
+              # Fallback to Talos SysfsConfig/Udev. This DaemonSet keeps white even after suspend/resume.
+              while true; do
+                for p in /sys/class/leds/*kbd*backlight*/brightness /sys/class/leds/chrome*brightness /sys/class/leds/*::kbd_backlight/brightness; do
+                  if [ -w "$p" ]; then
+                    echo 255 > "$p" 2>/dev/null || true
+                  fi
+                done
+                for p in /sys/bus/hid/drivers/razerkbd/*/matrix_effect_static /sys/bus/hid/drivers/razer*/matrix_effect_static /sys/class/*/*matrix_effect_static; do
+                  if [ -w "$p" ]; then
+                    echo 1 > "$p" 2>/dev/null || true
+                  fi
+                done
+                for p in /sys/bus/hid/drivers/razerkbd/*/matrix_effect_wave /sys/bus/hid/drivers/razerkbd/*/matrix_effect_spectrum /sys/bus/hid/drivers/razerkbd/*/matrix_effect_breath; do
+                  if [ -w "$p" ]; then
+                    echo 0 > "$p" 2>/dev/null || true
+                  fi
+                done
+                for p in /sys/bus/hid/drivers/razerkbd/*/matrix_brightness; do
+                  if [ -w "$p" ]; then
+                    echo 255 > "$p" 2>/dev/null || true
+                  fi
+                done
+                # Try hidraw via razer-cli if present (openrazer image would provide it)
+                if command -v razer-cli >/dev/null 2>&1; then
+                  razer-cli -a 1532:0240 --effect static --color FFFFFF 2>/dev/null || true
+                fi
+                sleep 15
+              done
+      volumes:
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: run-udev
+          hostPath:
+            path: /run/udev
+            type: Directory

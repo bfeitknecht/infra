@@ -1,6 +1,6 @@
 # Go-live shortlist: exhib only
 
-Scope: Only `exhib` can go live now. `apex` and `glob` are blocked. They need `exemel@preview` and `thyme` re-vendor. This list shows the minimum steps to bring `gallery.0xbf.ch` live.
+Scope: Only `exhib` can go live now. `apex` and `glob` are blocked. They need `thyme` re-vendor with `syndicate` xml package (exemel was dropped). This list shows the minimum steps to bring `gallery.0xbf.ch` live.
 
 ## 1. Review the PR
 
@@ -9,7 +9,7 @@ Branch `arena/61403a01-infra` is at `fc2136f` (2 commits ahead of `master@40c0a9
 Contents:
 
 * `kubernetes/applications/exhib/*`: gallery at `gallery.0xbf.ch`, 3 containers (`sws` on `2.44.1-alpine`, `uploader` on `busybox:1.37.0`, `processor` on `ghcr.io/bfeitknecht/exhib:latest`), PVC `exhib-site` 50Gi local-path, health on `/livez|/readyz`, Keel on `containers[2]`
-* `kubernetes/applications/apex/*` + `glob/*` + `traefik/gateway.yaml|traefik.yaml` + `gatus.yaml` + docs: already in PR, will deploy but stay in `ImagePullBackOff` until `exemel` is on `@preview`. This does not block `exhib`. No extra action now.
+* `kubernetes/applications/apex/*` + `glob/*` + `traefik/gateway.yaml|traefik.yaml` + `gatus.yaml` + docs: already in PR, will deploy but stay in `ImagePullBackOff` until `thyme` with `syndicate` is re-vendored. This does not block `exhib`. No extra action now.
 * Style sweep `fc2136f`: remove all em dashes repo-wide, use STE100 short sentences. No functional change.
 
 Action: Review diff, merge PR with `--ff-only` or squash on GitHub.
@@ -82,4 +82,4 @@ Upload test: `scripts/upload-item.sh <file>` then check `kubectl -n exhib logs d
 * Keep `docs/GO_LIVE.md` until `v1.15.0` is active, then move to `.private/` or delete.
 * Do not remove `infra/` from `bfeitknecht/exhib` until you verified uploads and builds.
 * `exhib-site` PVC stores originals at `/data/originals`. Back up before you delete the namespace. `k8up` does not cover this PVC yet.
-* When `exemel@preview` is live, re-vendor `thyme` in `apex`/`glob`, publish their images, then tag `v1.16.0` for their go-live. No new infra changes are required for them except `apex-ssh-host-key.sops.yaml`.
+* When `thyme` with `syndicate` is live, re-vendor `thyme` in `apex`/`glob`, publish their images, then tag `v1.16.0` for their go-live. No new infra changes are required for them except `apex-ssh-host-key.sops.yaml`.
