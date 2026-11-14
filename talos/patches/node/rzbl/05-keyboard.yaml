@@ -1,0 +1,18 @@
+apiVersion: v1alpha1
+kind: SysfsConfig
+params:
+  class.leds.chrome::kbd_backlight.brightness: "255"
+  class.leds.input3::capslock.brightness: "0"
+  class.leds.input3::numlock.brightness: "0"
+  class.leds.input3::scrolllock.brightness: "0"
+  bus.hid.drivers.razerkbd.0003:1532:0240.0001.matrix_effect_static: "1"
+  bus.hid.drivers.razerkbd.0003:1532:0240.0001.matrix_effect_wave: "0"
+  bus.hid.drivers.razerkbd.0003:1532:0240.0001.matrix_effect_spectrum: "0"
+  bus.hid.drivers.razerkbd.0003:1532:0240.0001.matrix_brightness: "255"
+---
+apiVersion: v1alpha1
+kind: UdevRulesConfig
+rules:
+  - 'SUBSYSTEM=="leds", KERNEL=="*kbd_backlight", ATTR{brightness}="255"'
+  - 'SUBSYSTEM=="hid", ATTRS{idVendor}=="1532", TAG+="uaccess"'
+  - 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", TAG+="uaccess"'

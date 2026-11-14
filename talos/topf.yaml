@@ -3,7 +3,7 @@ clusterName: infra
 clusterEndpoint: https://100.73.186.19:6443 # tailscale
 # clusterEndpoint: https://140.238.213.197:6443 # public
 kubernetesVersion: 1.35.3
-talosVersion: 1.14.2
+talosVersion: 1.14.6
 
 patchesDir: patches
 secretsPath: secrets.sops.yaml
@@ -23,3 +23,9 @@ nodes:
     ip: 10.10.20.10
     role: worker
     schematicId: "@schematic.rbpi.yaml"
+
+  # Razer Blade 15 Base worker with GPU.
+  - host: rzbl
+    ip: 10.10.20.11
+    role: worker
+    schematicId: "@schematic.rzbl.yaml"

@@ -98,7 +98,7 @@ Function zones use decade-based third octets.
 
 | Layer         | Component                                             | Version                         |
 | ------------- | ----------------------------------------------------- | ------------------------------- |
-| OS            | Talos Linux                                           | 1.14.2                          |
+| OS            | Talos Linux                                           | 1.14.6                          |
 | Kubernetes    | API server / kubelet                                  | 1.35.3                          |
 | GitOps        | Flux (source, kustomize, helm, notification)          | 2.9.5                           |
 | CNI           | Cilium (kube-proxy replacement, LB-IPAM, L2 announce) | 1.20.2                          |
