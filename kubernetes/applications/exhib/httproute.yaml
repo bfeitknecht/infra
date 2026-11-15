@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: exhib
+  namespace: exhib
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure
+  hostnames:
+    - gallery.0xbf.ch
+  rules:
+    - backendRefs:
+        - name: exhib
+          port: 80

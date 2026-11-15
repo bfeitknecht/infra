@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exhib
+  namespace: exhib
+  labels:
+    app.kubernetes.io/name: exhib
+  # Keel reads keel.sh/* from Deployment metadata. Do not use pod template metadata.
+  annotations:
+    keel.sh/trigger: poll
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: exhib
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: exhib
+    spec:
+      # Keel reads imagePullSecrets from the pod template.
+      imagePullSecrets:
+        - name: dockerconfigjson
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: prepare-site-volume
+          image: busybox:1.37.0
+          command: ["sh", "-c", "mkdir -p /data/public /data/incoming /data/content /data/originals"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: site
+              mountPath: /data
+      containers:
+        # One image runs SWS and the processor under a supervisor.
+        # Use :latest. Keel tracks the image digest.
+        - name: exhib
+          image: ghcr.io/bfeitknecht/exhib:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          # SWS provides /readyz and /livez. SWS does not provide /health.
+          # The image sws.toml enables both endpoints.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: site
+              mountPath: /data
+      volumes:
+        - name: site
+          persistentVolumeClaim:
+            claimName: exhib-site
