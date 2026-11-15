@@ -29,6 +29,9 @@ spec:
     deployment:
       kind: Deployment
       replicas: 1
+    # Router forwards WAN 80/443/22/2223 to rbpi. hostPorts work only there.
+    nodeSelector:
+      kubernetes.io/hostname: rbpi
     # Use Recreate. Entrypoints bind hostPorts on worker. Second pod cannot
     # start while old pod holds ports.
     updateStrategy:

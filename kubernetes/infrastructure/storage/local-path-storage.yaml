@@ -139,6 +139,10 @@ data:
                     "paths": ["/var/mnt/storage-nvme0", "/var/mnt/storage-nvme1"]
             },
             {
+                    "node":"rzbl",
+                    "paths": ["/var/mnt/storage-nvme0", "/var/mnt/storage-ssd0"]
+            },
+            {
                     "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
                     "paths": ["/var/mnt/storage"]
             }

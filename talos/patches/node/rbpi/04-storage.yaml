@@ -1,21 +1,15 @@
+# Mount the existing xfs partitions. No wipe. Data stays in place.
+# Mount path is /var/mnt/<name>. Old machine.disks path was /var/mnt/storage/nvme0|1.
 apiVersion: v1alpha1
-kind: UserVolumeConfig
+kind: ExistingVolumeConfig
 name: storage-nvme0
-provisioning:
-  diskSelector:
-    match: disk.dev_path == "/dev/nvme0n1"
-  grow: true
-filesystem:
-  type: xfs
-# Mounts at /var/mnt/storage-nvme0, was /var/mnt/storage/nvme0.
+discovery:
+  volumeSelector:
+    match: volume.uuid == "e46d626f-c800-4169-92d6-7b17a117006d"
 ---
 apiVersion: v1alpha1
-kind: UserVolumeConfig
+kind: ExistingVolumeConfig
 name: storage-nvme1
-provisioning:
-  diskSelector:
-    match: disk.dev_path == "/dev/nvme1n1"
-  grow: true
-filesystem:
-  type: xfs
-# Mounts at /var/mnt/storage-nvme1. Replaces old /var/mnt/storage/nvme1.
+discovery:
+  volumeSelector:
+    match: volume.uuid == "96f27bd1-0f92-4ed3-b86f-de8b690bf997"

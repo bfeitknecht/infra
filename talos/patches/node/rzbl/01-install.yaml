@@ -1,6 +1,8 @@
+# Talos system disk is the SanDisk USB stick. NVMe and SSD stay free for
+# workloads (06-storage.yaml). Boot maintenance mode from another medium.
 apiVersion: v1alpha1
 kind: UnattendedInstallConfig
 provisioning:
   diskSelector:
-    match: disk.dev_path == "/dev/nvme0n1"
+    match: disk.transport == "usb" && disk.model == "SanDisk 3.2Gen1"
   wipe: false

@@ -1,7 +1,16 @@
 apiVersion: v1alpha1
 kind: DHCPv4Config
-name: eth0
-# Blade uses eth0. Verify with talosctl get links. Update if enp*.
+name: enp2s0
+# Wired NIC on the Blade (talosctl get links, maintenance mode).
+---
+# LAN stays on the LAN. Tailscale rule 5270 (table 52) holds rbpi's
+# 10.10.20.0/24 route. Priority 5200 runs first.
+apiVersion: v1alpha1
+kind: RoutingRuleConfig
+name: "5200"
+dst: 10.10.0.0/16
+table: main
+action: unicast
 ---
 apiVersion: v1alpha1
 kind: SysctlConfig

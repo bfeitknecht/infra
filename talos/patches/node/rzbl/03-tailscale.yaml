@@ -1,3 +1,7 @@
+# Accept routes for direct tailnet path to oci 10.20.20.0/24 (like rbpi).
+# Advertise own /32 so oci reaches rzbl directly, not via rbpi SNAT. VXLAN
+# between oci and rzbl does not survive the rbpi hop.
+# Rule 5200 in 02-network.yaml keeps LAN 10.10.0.0/16 out of table 52.
 machine:
   env:
-    TS_EXTRA_ARGS: "--accept-dns=true --accept-routes=true"
+    TS_EXTRA_ARGS: "--accept-dns=true --accept-routes=true --advertise-routes=10.10.20.11/32"
