@@ -3,4 +3,4 @@ kind: UnattendedInstallConfig
 provisioning:
   diskSelector:
     match: disk.dev_path == "/dev/nvme0n1"
-  wipe: false
+  wipe: true

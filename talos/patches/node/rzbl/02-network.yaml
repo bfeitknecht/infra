@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: DHCPv4Config
-name: eth0
-# Blade uses eth0. Verify with talosctl get links. Update if enp*.
+name: enp2s0
+# Wired NIC on the Blade (talosctl get links, maintenance mode).
 ---
 apiVersion: v1alpha1
 kind: SysctlConfig
