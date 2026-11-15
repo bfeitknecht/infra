@@ -1,0 +1,24 @@
+# Whole NVMe and whole SATA SSD as xfs user volumes for local-path.
+# Disks must be empty first: talosctl wipe disk nvme0n1 sda.
+# Mounts at /var/mnt/<name>.
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: storage-nvme0
+provisioning:
+  diskSelector:
+    match: disk.transport == "nvme"
+  minSize: 100GiB
+  grow: true
+filesystem:
+  type: xfs
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: storage-ssd0
+provisioning:
+  diskSelector:
+    match: disk.transport == "sata" && !disk.rotational
+  minSize: 1TiB
+  grow: true
+filesystem:
+  type: xfs
