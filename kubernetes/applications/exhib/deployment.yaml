@@ -55,17 +55,17 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-          # SWS provides /readyz and /livez. SWS does not provide /health.
-          # The image sws.toml enables both endpoints.
+          # SWS 2.44.1 serves /health only. It has no /livez or /readyz.
+          # The image sws.toml enables it.
           readinessProbe:
             httpGet:
-              path: /readyz
+              path: /health
               port: http
             initialDelaySeconds: 2
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /livez
+              path: /health
               port: http
             initialDelaySeconds: 10
             periodSeconds: 20
