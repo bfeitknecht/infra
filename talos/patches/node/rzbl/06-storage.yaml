@@ -1,6 +1,17 @@
-# Whole NVMe and whole SATA SSD as xfs user volumes for local-path.
+# /var (EPHEMERAL) is 100 GiB on the NVMe, not on the USB system stick.
+# Rest of the NVMe and the whole SATA SSD are xfs user volumes for local-path.
 # Disks must be empty first: talosctl wipe disk nvme0n1 sda.
 # Mounts at /var/mnt/<name>.
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  diskSelector:
+    match: disk.transport == "nvme"
+  minSize: 100GiB
+  maxSize: 100GiB
+  grow: false
+---
 apiVersion: v1alpha1
 kind: UserVolumeConfig
 name: storage-nvme0
