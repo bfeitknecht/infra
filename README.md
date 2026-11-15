@@ -68,7 +68,7 @@ Raspberry Pi running Talos Linux Kubernetes cluster.
     └── applications/               # workloads (one directory = one namespace)
         ├── apex/                   # public site + SSH TUI (Keel-polled :latest)
         ├── glob/                   # blog (Keel-polled :latest)
-        ├── exhib/                  # gallery (3 containers, Keel-polled :latest)
+        ├── exhib/                  # gallery (1 container, Keel-polled :latest)
         ├── atuin/                  # shell history (atuin.0xbf.ch)
         ├── agh/                    # AdGuard Home (LAN DNS edge)
         ├── ddns/                   # favonia/cloudflare-ddns
