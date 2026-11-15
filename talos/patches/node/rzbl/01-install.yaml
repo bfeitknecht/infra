@@ -5,4 +5,4 @@ kind: UnattendedInstallConfig
 provisioning:
   diskSelector:
     match: disk.transport == "usb" && disk.model == "SanDisk 3.2Gen1"
-  wipe: true
+  wipe: false

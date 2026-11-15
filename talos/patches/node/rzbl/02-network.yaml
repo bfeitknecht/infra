@@ -4,6 +4,15 @@ name: enp2s0
 # Wired NIC on the Blade (talosctl get links, maintenance mode).
 ---
 apiVersion: v1alpha1
+kind: LinkConfig
+name: enp2s0
+up: true
+# oci subnet via rbpi, the tailnet subnet router on the LAN.
+routes:
+  - destination: 10.20.20.0/24
+    gateway: 10.10.20.10
+---
+apiVersion: v1alpha1
 kind: SysctlConfig
 params:
   net.ipv4.ip_forward: "1"
