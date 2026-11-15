@@ -1,10 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# Prometheus, Grafana, alertmanager and Gatus are off until monitoring is
+# set up again (with Renovate). Files stay. Uncomment to re-enable.
+# metrics-server stays: homepage cluster stats and kubectl top need it.
+# prometheus-crds Kustomization stays: Cilium and Traefik ServiceMonitors need the CRDs.
 resources:
   - namespace.yaml
-  - kube-prometheus-stack.yaml
   - metrics-server.yaml
-  - gatus.yaml
-  - grafana.yaml
-  - servicemonitors.yaml
-  - grafana-credentials.sops.yaml
+  # - kube-prometheus-stack.yaml
+  # - gatus.yaml
+  # - grafana.yaml
+  # - servicemonitors.yaml
+  # - grafana-credentials.sops.yaml
