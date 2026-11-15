@@ -4,7 +4,7 @@ Read this before you change the repo.
 
 ## What this is
 
-Declarative infra for a hybrid Talos Linux cluster. One control plane in Oracle Cloud `eu-zurich-1` at `10.20.20.10` (oci). One worker at home at `10.10.20.10` (rbpi Pi 5). Flux manages all cluster state from this repo.
+Declarative infra for a hybrid Talos Linux cluster. One control plane in Oracle Cloud `eu-zurich-1` at `10.20.20.10` (oci). Two workers at home: `10.10.20.10` (rbpi Pi 5) and `10.10.20.11` (rzbl Razer Blade 15, i7-9750H, GTX 1660 Ti). Flux manages all cluster state from this repo.
 
 ## Rules
 
@@ -83,7 +83,7 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **kata-containers 3.32.0** (rbpi + rzbl): Declare in node schematic (`talos/schematic.rbpi.yaml`, `talos/schematic.rzbl.yaml`). Register only `kata-qemu` handler. Extension includes Cloud Hypervisor binary but no `clh` handler. CLH is not usable without custom extension. RuntimeClass `kata-qemu` is in `infrastructure/kata/`. It is cluster-scoped. It has no node selector. Pods with this RuntimeClass must land on kata-enabled node. That excludes tainted OCI node. `/dev/kvm` exists on Pi 5. Blade i7-9750H has VT-x.
 
-- **traefik chart 41.6.0** (`ingress/traefik/traefik.yaml`): Values schema is strict. `globalArguments` does not exist. Use `global` block. Redirects use `http.redirections.entryPoint`. Do not use `redirectTo`. Listeners must match entrypoint ports `8000/8443/22/2222`. Do not use Service ports `80/443/22/2222`. Set `providers.kubernetesGateway.experimentalChannel: true`. TCPRoute needs this. Gateway-api v1.6.2 includes ValidatingAdmissionPolicy `safe-upgrades.gateway.networking.k8s.io`. This blocks experimental CRDs over standard CRDs. Previous switch blocked `gateway-api-crds` in retry loop. To change channel, delete VAP and binding first. Chart default Gateway is disabled. `gateway.yaml` owns Gateway. Dashboard uses IngressRoute `ingressRoute.dashboard` at `dashboard.internal` with `internal-allowlist`. This is the only IngressRoute. Chart exposes Prometheus metrics. ServiceMonitor scrapes them.
+- **traefik chart 41.6.0** (`ingress/traefik/traefik.yaml`): Pinned to rbpi with `nodeSelector`. Router forwards WAN ports to rbpi only. Values schema is strict. `globalArguments` does not exist. Use `global` block. Redirects use `http.redirections.entryPoint`. Do not use `redirectTo`. Listeners must match entrypoint ports `8000/8443/22/2222`. Do not use Service ports `80/443/22/2222`. Set `providers.kubernetesGateway.experimentalChannel: true`. TCPRoute needs this. Gateway-api v1.6.2 includes ValidatingAdmissionPolicy `safe-upgrades.gateway.networking.k8s.io`. This blocks experimental CRDs over standard CRDs. Previous switch blocked `gateway-api-crds` in retry loop. To change channel, delete VAP and binding first. Chart default Gateway is disabled. `gateway.yaml` owns Gateway. Dashboard uses IngressRoute `ingressRoute.dashboard` at `dashboard.internal` with `internal-allowlist`. This is the only IngressRoute. Chart exposes Prometheus metrics. ServiceMonitor scrapes them.
 
 - **gateway.yaml**: Listeners are `web` `8000` HTTP and `websecure` `8443` HTTPS. `websecure` has no hostname. It matches all hostnames. It uses cert `wildcard-domain-tls`. Do not add hostname filter. Filter breaks bare domain. Other listeners: `websecure-internal` `8443` for `*.internal` with `wildcard-internal-tls`; `apexssh` `22` TCP for apex SSH with `hostPort: 22`; `devilssh` `2222` TCP for devil SSH with no hostPort and no WAN; `gitssh` `2223` TCP for forgejo SSH.
 
@@ -91,7 +91,7 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **tailscale operator 1.102.3**: Reads OAuth from Secret `operator-oauth`. Do not rename it. OAuth client has `tag:k8s` and `tag:k8s-operator`. Operator can mint authkeys only for tags managed by client tags. Set `tagOwners` so tags own each other. Client tags are fixed at creation. Wrong tags require new client and new sops secret. Proxy pods get `tag:k8s` via `proxyConfig.defaultTags`.
 
-- **tailscale on nodes**: Nodes run `ext-tailscale` Talos extension. Config is in `talos/patches/all/02-tailscale.sops.yaml`. Nodes use `tag:infra`. This is different from operator identity.
+- **tailscale on nodes**: Nodes run `ext-tailscale` Talos extension. Config is in `talos/patches/all/02-tailscale.sops.yaml`. Nodes use `tag:infra`. This is different from operator identity. rbpi is subnet router for `10.10.10.0/24,10.10.20.0/24`. oci is subnet router for `10.20.20.0/24`. Other home nodes (rzbl) must not reach oci through rbpi: VXLAN between oci and a node behind rbpi does not survive the rbpi hop (SNAT). So each extra home node: `--accept-routes=true --advertise-routes=<own-ip>/32` (approve route in admin console), plus `RoutingRuleConfig` priority `5200` `dst: 10.10.0.0/16 table: main`. Without the rule, rbpi's `10.10.20.0/24` in table 52 hijacks LAN traffic. See `talos/patches/node/rzbl/02-network.yaml`, `03-tailscale.yaml`.
 
 - **monitoring** (`infrastructure/monitoring/`): Use kube-prometheus-stack 91.4.1, metrics-server 3.14.0, Gatus v5.36.0 at `status.internal`. Disable kubeControllerManager, kubeScheduler, kubeEtcd, kubeProxy scrapes. They are unreachable on Talos or replaced by Cilium KPR. Metrics-server needs `--kubelet-insecure-tls`. Keep Prometheus retention 7d/8GB on local-path. Grafana admin is in `monitoring-credentials.sops.yaml`. Set selectors `NilUsesHelmValues: false` so new ServiceMonitors are picked up. Alertmanager receiver is pending (ntfy/Discord/Telegram).
 
@@ -148,7 +148,9 @@ Note: Keel cannot update Knative Services (it handles Deployment/StatefulSet/Dae
 - `kubectl --kubeconfig kubeconfig ...` (repo root, gitignored). Server is K8s 1.35.3; local kubectl 1.33 is older. Skew warning is cosmetic.
 - Endpoint is oci tailscale IP `100.73.186.19:6443` (kubeconfig for it). VCN allows only UDP `41641` (Tailscale WireGuard). No cluster ports are exposed. Manage from tailnet device only. Disable key expiry for node tailscale identities in admin console. Expired key takes endpoint down. Fallback: change `clusterEndpoint` to public IP, open security list, run `topf apply`.
 - `talosctl --talosconfig talosconfig -e 10.20.20.10 -n <node-ip>` for node work.
-- Nodes: `oci` control-plane tainted; no workloads except resolver; `rbpi` worker runs all workloads. Talos 1.14.2.
+- Nodes: `oci` control-plane tainted; no workloads except resolver and CoreDNS; `rbpi` and `rzbl` workers run workloads. Talos 1.14.6.
+- Storage: rbpi mounts its two existing xfs partitions with `ExistingVolumeConfig` (by fs UUID) at `/var/mnt/storage-nvme0|1`. rzbl: Talos on SanDisk USB stick (`/dev/sdb`), `/var` (EPHEMERAL) is 100 GiB on NVMe, user volumes `/var/mnt/storage-nvme0` (rest of NVMe) and `/var/mnt/storage-ssd0` (4 TB SATA). local-path `nodePathMap` lists both nodes.
+- Image Factory: topf computes schematic IDs locally. A new schematic is unknown to the factory (installer pull 404, node stuck in Booting). Use `topf apply|upgrade --submit-to-factory` once per new schematic.
 
 ## Debugging playbook
 
