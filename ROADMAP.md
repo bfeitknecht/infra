@@ -4,12 +4,12 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. `oci` control plane, `rbpi` (Pi 5) and `rzbl` (Razer Blade, GTX 1660 Ti) workers. Infra tag `v1.19.1`.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. `oci` control plane, `rbpi` (Pi 5) and `rzbl` (Razer Blade, GTX 1660 Ti) workers. Infra tag `v1.20.0`.
 - **rzbl joined 2026-11-15.** Talos on USB stick, `/var` on NVMe, NVMe + 4 TB SSD as user volumes. Direct tailnet path to oci (rule 5200 + own `/32` route). GPU via NVIDIA device plugin (`nvidia.com/gpu: 1`).
 - **rbpi storage migrated** to `ExistingVolumeConfig` (`/var/mnt/storage-nvme0|1`). Data kept in place.
 - **Public apps live:** apex `0xbf.ch` (site), exhib `gallery.0xbf.ch` (6 collections uploaded), forgejo `git.0xbf.ch` (SSH `2223`), pds, atuin.
-- **Internal apps live:** AGH, knot/kresd, homepage, devil, jellyfin (GPU), sonarr, radarr, prowlarr.
-- **Prepared, suspended** (wait for owner secrets, see `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty, Time Machine, forgejo runner.
+- **Internal apps live:** AGH, knot/kresd, homepage, devil, jellyfin (GPU), sonarr, radarr, prowlarr, ollama (GPU, qwen2.5-coder:7b, cluster-internal). GPU is time-sliced (4 slots).
+- **Prepared, suspended** (wait for owner secrets, see `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty, Time Machine (`10.10.20.145`), forgejo runner, opencode web.
 - **Broken on purpose until thyme is on Typst Universe:** glob (ImagePullBackOff), apex-tui SSH (CrashLoop).
 - **Monitoring off** (Prometheus, Grafana, Gatus commented out). metrics-server stays.
 - **Backup:** relay pod runs since 2026-11-16. Garage on friend NAS refuses `3900` on its tailnet IP. Nothing is backed up yet.
@@ -28,8 +28,8 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## NEXT
 
 - [ ] **Download client** (qBittorrent) for *arr. Needs VPN decision.
-- [ ] **GPU time-slicing** so immich ML and jellyfin share the GPU. Then immich ML `-cuda` image.
-- [ ] **Ollama + Open WebUI** on rzbl GPU.
+- [ ] Immich ML `-cuda` image on a GPU slot.
+- [ ] Open WebUI on top of Ollama (optional; opencode web covers coding).
 - [ ] **rzbl keyboard** white: needs openrazer as custom Talos extension.
 - [ ] **Renovate** + monitoring back (Prometheus, Grafana, Gatus, alerting receiver).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
