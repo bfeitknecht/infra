@@ -67,11 +67,11 @@ One rule per kind. New resources must follow them. Exceptions are listed below; 
 - **Namespace = app directory name** (`applications/<app>/`). Platform parts use their component name (`ingress`, `egress`, `gpu`).
 - **Workload and Service = `<app>`** for the main component. Helpers are `<app>-<role>`: `<app>-db` (Postgres), `<app>-redis` (Redis or Valkey), `<app>-<component>` otherwise (`immich-server`, `immich-machine-learning`). File names match the role: `db.yaml`, `redis.yaml`.
 - **PVC = `<app>-<role>`**, role is one of:
-  - `data`: app state, config, SQLite (`forgejo-data`, `jellyfin-data`).
-  - `db`: Postgres data directory (`authentik-db`).
-  - `files`: bulk user content: media, photos, uploads, backups (`media-files`, `immich-files`, `timemachine-files`).
-  - `cache`: can be rebuilt or re-downloaded (`ollama-cache`, `immich-cache`).
-  - Shared volumes use the namespace as `<app>` (`media-files` is shared by jellyfin and the *arr apps).
+    - `data`: app state, config, SQLite (`forgejo-data`, `jellyfin-data`).
+    - `db`: Postgres data directory (`authentik-db`).
+    - `files`: bulk user content: media, photos, uploads, backups (`media-files`, `immich-files`, `timemachine-files`).
+    - `cache`: can be rebuilt or re-downloaded (`ollama-cache`, `immich-cache`).
+    - Shared volumes use the namespace as `<app>` (`media-files` is shared by jellyfin and the *arr apps).
 - **StorageClass by role:** `data`/`db`/`cache` on `local-path-nvme`, `files` on `local-path-ssd` (rzbl). rbpi apps use `local-path`.
 - **Secret = `<app>-secrets`** (env-style keys) or `<app>-config` (the whole value is a config file). **File name = `<secret-name>.sops.yaml`.** Exception by design: GHCR pull secret `dockerconfigjson` in `ghcr.sops.yaml`.
 - **ConfigMap = `<app>-config`** (from `configMapGenerator`, hash suffix).
@@ -121,7 +121,6 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **dns (knotd + kresd on OCI)**: `resolver` pod in `dns` ns is the only workload on OCI control plane. Taint stays. It needs clean egress on port 53. Home ISP firmware hijacks DNS on home segment. Do not point router DNS to LAN resolver. That creates loop. The router model is described in a Discourse thread on DNS hijacking. Kresd does public recursion with DNSSEC. It stubs `internal.` to knotd on loopback with `authoritative: true, dnssec: false`. Knotd is authority for `internal.` zone. Service `resolver` is pinned to `10.96.0.53`. AGH uses this IP as sole upstream. Home segment runs only AGH. Zone data is in `applications/dns/knot/internal.zone`. ConfigMap hash rolls pod on change.
 
-
 - **agh (AdGuard Home) v0.107.79**: LAN DNS edge at `10.10.20.153`. Router DHCP and Tailscale split DNS use this IP. Do not let IP float. Forwards all queries to kresd. AGH handles `*.internal`. Config seed is from `agh-config.sops.yaml` Secret `agh-config`. It holds whole `AdGuardHome.yaml` as `stringData`. InitContainer copies it to PVC only if absent. AGH then owns file on PVC. UI edits persist. Seed is git intent. To re-seed, delete `conf/AdGuardHome.yaml` on PVC. Admin UI is at `agh.internal`. Middleware copy is in `agh` ns. HTTPRoute ExtensionRef is same-namespace only.
 
 - **forgejo 16.0.5** (`applications/forgejo/`, tier-1): Git forge at `git.0xbf.ch` on `websecure` with LE wildcard cert. Image is `codeberg.org/forgejo/forgejo:16.0.5` pinned. Use one PVC at `/data` (10Gi, local-path, `Recreate`). InitContainer creates `app.ini` from `forgejo-config` ConfigMap and `[security]` block from `forgejo-secrets.sops.yaml`. File then lives on PVC. To recreate, delete `/data/gitea/conf/app.ini`. InitContainer creates admin user. Registration is closed. Git SSH uses `gitssh` listener and entrypoint on `hostPort: 2223`. Use `ssh://git@git.0xbf.ch:2223/owner/repo.git`. Router forwards `2223` to `10.10.20.10`. Dev box keeps `2222`. Apex uses `22`. SSH host keys are at `/data/ssh` on PVC. Mailer is disabled. Plan Proton SMTP token after Proton Premium domain is live. K8up Schedule is in ns (daily `03:00` + prune). Jobs fail until NAS tailnet path is fixed.
@@ -143,7 +142,6 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 - **devil (kata VM, `applications/devil/`)**: NixOS VM image is from omni flake. This repo owns pod, routing, terminal page. Access via one hostname `devil.internal` (knot wildcard to gateway LB). No DNS record. **ssh 2222** via `devilssh` entrypoint/listener (no hostPort, LAN + tailnet only; WAN `2222` reserved for dev box) to TCPRoute `ssh` to headless Service to VM sshd (pubkey-only, host keys on PVC). **ghostty-web** via HTTPRoute `devil` (`websecure-internal` with `internal-allowlist` copy in `devil` ns; only middleware, no basic-auth) to headless Service `7681` to ttyd in VM (`-I /srv/ghostty-web/index.html login`). Page is `ghostty-web/index.html` (ConfigMap `devil-ghostty-web`, hash-rolled; ghostty-web from esm.sh CDN, ttyd wire protocol). Auth is `login` prompt. PAM checks bf password (omni sops `login/devil`). Shell has full home config. Service must be headless. Kata VM bypasses Cilium service translation both ways. ClusterIP dial times out. Clients use pod IP via Endpoints. State is on `devil-pvc` (subPaths `home`/`ssh`; was `devil-state`, see ROADMAP migration runbook).
 
 - **k8up 4.10.0** (`infrastructure/backup/k8up/`): Restic to Garage S3 on friend NAS (Garage on `3900` plain HTTP; WireGuard transport, restic encrypts at rest). Endpoint is relay Service `http://tailscale-relay.egress.svc.cluster.local:3900`. NAS `ts.net` name is MagicDNS only. Kresd and CoreDNS NXDOMAIN it. IP literal is unreachable from pods. See tailscale-relay note for why. Friend prerequisites (verified 2026-10-15): Garage `s3_api.bind_addr = "[::]:3900"`, NAS firewall allows `3900` on tailscale0, ACL `src: autogroup:shared -> 100.96.72.126:3900`. PVC discovery is namespace-scoped. K8up backs up PVCs in Schedule namespace only. App opts in by adding `k8up.io/v1` Schedule to its dir. First Schedule is in `applications/forgejo/` (monitoring/agh excluded). Operator holds backend as global env in `backup-credentials.sops.yaml` (`BACKUP_GLOBALS3ENDPOINT/BUCKET`, `BACKUP_GLOBALACCESSKEYID/SECRETACCESSKEY`, `BACKUP_GLOBALREPOPASSWORD`). Per-namespace Schedules need no backend. Times use `Europe/Zurich`. Repo password `k8up-password` is only key to backups. Do not rotate it. Verify with `.private/backup.md`.
-
 
 ## Application tiers
 

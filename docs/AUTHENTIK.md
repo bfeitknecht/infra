@@ -36,8 +36,8 @@ Do not rotate `AUTHENTIK_SECRET_KEY` later. It signs sessions and tokens.
 3. Delete `suspend: true` (and its comment) for `authentik` in `cluster/applications.yaml`.
 4. Commit, tag, push.
 5. Log in at `https://auth.0xbf.ch` as `akadmin`. Then:
-   - Create your own user, add it to group `authentik Admins`, set up a passkey. Deactivate `akadmin`.
-   - Optional: remove `AUTHENTIK_BOOTSTRAP_*` from the secret. They only act on first start.
+    - Create your own user, add it to group `authentik Admins`, set up a passkey. Deactivate `akadmin`.
+    - Optional: remove `AUTHENTIK_BOOTSTRAP_*` from the secret. They only act on first start.
 
 ## Invite family and friends
 
@@ -47,13 +47,13 @@ Admin > Directory > Invitations > Create. Flow: `invite`. Single use. Send the l
 
 One blueprint per app in `blueprints.yaml`: OAuth2 provider + application + group binding. The client secret lives in authentik and in the app's sops secret.
 
-| App | Method | Notes |
-| --- | --- | --- |
-| Forgejo | OIDC (native) | Site admin > Authentication sources > OpenID Connect, discovery `https://auth.0xbf.ch/application/o/forgejo/.well-known/openid-configuration` |
-| Immich | OIDC (native) | Admin > Settings > OAuth |
-| Jellyfin | SSO plugin (9p4) | Web login only. TV/phone apps keep Jellyfin passwords or Quick Connect |
-| Open WebUI, Grafana | OIDC (native) | env vars |
-| Copyparty, *arr, opencode | Forward auth (embedded outpost) | Traefik middleware `forwardAuth` to `http://authentik-server.authentik.svc/outpost.goauthentik.io/auth/traefik` |
+| App                       | Method                          | Notes                                                                                                                                         |
+| ------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Forgejo                   | OIDC (native)                   | Site admin > Authentication sources > OpenID Connect, discovery `https://auth.0xbf.ch/application/o/forgejo/.well-known/openid-configuration` |
+| Immich                    | OIDC (native)                   | Admin > Settings > OAuth                                                                                                                      |
+| Jellyfin                  | SSO plugin (9p4)                | Web login only. TV/phone apps keep Jellyfin passwords or Quick Connect                                                                        |
+| Open WebUI, Grafana       | OIDC (native)                   | env vars                                                                                                                                      |
+| Copyparty, *arr, opencode | Forward auth (embedded outpost) | Traefik middleware `forwardAuth` to `http://authentik-server.authentik.svc/outpost.goauthentik.io/auth/traefik`                               |
 
 ## atproto (PDS) login
 

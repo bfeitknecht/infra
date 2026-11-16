@@ -45,8 +45,17 @@ metadata:
 spec:
   isCA: true
   commonName: internal-ca
+  subject:
+    organizations: ["0xbf internal"]
   duration: 87600h # 10y
   secretName: internal-ca-key
+  # Clients reject any cert from this CA outside .internal. A leaked CA key
+  # cannot sign for real domains. Devices trust this CA (owner installs it).
+  nameConstraints:
+    critical: true
+    permitted:
+      dnsDomains:
+        - internal
   issuerRef:
     name: selfsigned-bootstrap
     kind: ClusterIssuer
@@ -67,6 +76,8 @@ metadata:
 spec:
   secretName: wildcard-internal-tls
   duration: 8760h # 1y
+  subject:
+    organizations: ["0xbf internal"]
   issuerRef:
     name: internal-ca
     kind: ClusterIssuer
