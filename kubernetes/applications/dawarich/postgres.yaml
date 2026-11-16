@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dawarich-postgres
+  namespace: dawarich
+  labels:
+    app.kubernetes.io/name: dawarich-postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dawarich-postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dawarich-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      enableServiceLinks: false
+      containers:
+        - name: postgres
+          image: docker.io/postgis/postgis:17-3.5-alpine
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: dawarich
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dawarich-secrets
+                  key: POSTGRES_PASSWORD
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "dawarich"]
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: shm
+              mountPath: /dev/shm
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: dawarich-postgres
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dawarich-postgres
+  namespace: dawarich
+spec:
+  selector:
+    app.kubernetes.io/name: dawarich-postgres
+  ports:
+    - name: main
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,61 @@
+# Service name must be immich-machine-learning. The server default URL is
+# http://immich-machine-learning:3003.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+  labels:
+    app.kubernetes.io/name: immich-machine-learning
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: immich-machine-learning
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: immich-machine-learning
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      enableServiceLinks: false
+      containers:
+        - name: machine-learning
+          # CPU image. For GPU use tag v3.4.1-cuda, runtimeClassName nvidia and
+          # limit nvidia.com/gpu: 1. Jellyfin holds the only GPU slot. Needs
+          # time-slicing in the device plugin config first.
+          image: ghcr.io/immich-app/immich-machine-learning:v3.4.1
+          env:
+            - name: MACHINE_LEARNING_MODEL_REVISION
+              value: v2
+          ports:
+            - containerPort: 3003
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1Gi
+            limits:
+              memory: 6Gi
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: immich-model-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+spec:
+  selector:
+    app.kubernetes.io/name: immich-machine-learning
+  ports:
+    - name: main
+      port: 3003
+      targetPort: 3003
