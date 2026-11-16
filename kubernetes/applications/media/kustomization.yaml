@@ -8,5 +8,5 @@ resources:
   - sonarr.yaml
   - radarr.yaml
   - prowlarr.yaml
-  # Public stream.0xbf.ch. Uncomment after the Jellyfin wizard is done.
-  # - httproute-public.yaml
+  # Public stream.0xbf.ch (wizard done 2026-11-16).
+  - httproute-public.yaml
