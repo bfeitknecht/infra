@@ -9,7 +9,7 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **rbpi storage migrated** to `ExistingVolumeConfig` (`/var/mnt/storage-nvme0|1`). Data kept in place.
 - **Public apps live:** apex `0xbf.ch` (site), exhib `gallery.0xbf.ch` (6 collections uploaded), forgejo `git.0xbf.ch` (SSH `2223`), pds, atuin.
 - **Internal apps live:** AGH, knot/kresd, homepage, devil, jellyfin (GPU), sonarr, radarr, prowlarr, ollama (GPU, qwen2.5-coder:7b, cluster-internal). GPU is time-sliced (4 slots).
-- **Prepared, suspended** (wait for owner secrets, see `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty, Time Machine (`10.10.20.145`), forgejo runner, opencode web.
+- **Prepared, suspended** (wait for owner secrets, see `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty, Time Machine (`10.10.20.145`), forgejo runner, opencode web, authentik (`auth.0xbf.ch`).
 - **Broken on purpose until thyme is on Typst Universe:** glob (ImagePullBackOff), apex-tui SSH (CrashLoop).
 - **Monitoring off** (Prometheus, Grafana, Gatus commented out). metrics-server stays.
 - **Backup:** relay pod runs since 2026-11-16. Garage on friend NAS refuses `3900` on its tailnet IP. Nothing is backed up yet.
@@ -22,7 +22,7 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [ ] **Jellyfin public:** finish wizard at `jellyfin.internal`, then public HTTPRoute (name TBD).
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Forgejo Actions:** enable `[actions]`, runner secret, push mirrors to GitHub.
-- [ ] **Identity:** decide IdP (`docs/IDENTITY.md`).
+- [ ] **Authentik** (decided): secret, un-suspend, own admin + passkey, then connect forgejo, immich, jellyfin (`docs/AUTHENTIK.md`).
 - [ ] **Homepage:** remove grafana/gatus widgets from `homepage-services` (sops) while monitoring is off.
 
 ## NEXT
