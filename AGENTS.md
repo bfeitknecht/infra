@@ -19,6 +19,7 @@ edit manifests -> git commit -> push vX.Y.Z tag -> CI publishes to ghcr.io/bfeit
 - Do not run `kubectl apply`. Dry-run is allowed.
 - OCIRepository tracks `semver >=1.0.0`. Re-tagging same commit does nothing. Check tag content with `git show <tag>:<path>`.
 - A broken tag breaks reconcile until next tag.
+- `docs/web/index.html` is the interactive atlas (open in a browser, no build). When you change cluster state, update its DATA block (NODES, SERVICES, NEEDS, TAGS, SECRETS) in the same PR.
 
 ## Layout
 
