@@ -115,7 +115,7 @@ kubectl create secret generic qbittorrent-secrets -n media --from-literal=$"WIRE
 sops --encrypt --in-place kubernetes/applications/qbittorrent/qbittorrent-secrets.sops.yaml
 ```
 
-3. After the first start: qBittorrent Web UI at `qbittorrent.internal`. The temporary admin password is in the pod log (`kubectl -n media logs deploy/qbittorrent -c qbittorrent`). Set a password. Options > Web UI: enable **Bypass authentication for clients on localhost** (gluetun pushes the forwarded port through it). Options > Downloads: default path `/data/downloads`.
+3. After the first start: qBittorrent Web UI at `qbittorrent.internal`. The temporary admin password is in the pod log (`kubectl -n media logs deploy/qbittorrent -c qbittorrent`). Set a password. Options > Web UI: enable **Bypass authentication for clients on localhost** (gluetun pushes the forwarded port through it). Options > Downloads: default path `/data/torrents`, category paths `/data/torrents/movies` and `/data/torrents/tv`.
 4. In sonarr and radarr: Settings > Download Clients > qBittorrent, host `qbittorrent.media.svc.cluster.local`, port 80.
 5. Check the tunnel: `kubectl -n media exec deploy/qbittorrent -c gluetun -- wget -qO- https://ipinfo.io/ip` must not print the home IP `31.164.81.63`.
 
@@ -133,6 +133,17 @@ sops --encrypt --in-place kubernetes/applications/forgejo-runner/forgejo-runner-
 Also enable Actions in Forgejo: `[actions] ENABLED = true` in `app.ini` (the live file is on the PVC). Runner labels: `docker` (node:22) and `ubuntu-latest` (catthehacker act image). Jobs run in a privileged docker:dind sidecar on rzbl.
 
 GitHub as mirror: per repo on Forgejo, Settings > Repository > Mirror settings > Push mirror to `https://github.com/bfeitknecht/<repo>.git` with a GitHub fine-grained PAT (contents: write).
+
+## Media folder layout (TRaSH Guides)
+
+One volume `media-files`, mounted at `/data` in jellyfin, sonarr, radarr and qbittorrent:
+
+```
+/data/torrents/{movies,tv}   qBittorrent downloads (categories radarr, sonarr)
+/data/media/{movies,tv}      Jellyfin libraries, *arr root folders
+```
+
+Jellyfin libraries: Movies `/data/media/movies`, Shows `/data/media/tv`. Sonarr root folder `/data/media/tv`, Radarr `/data/media/movies`.
 
 ## Public access (decision for the owner)
 

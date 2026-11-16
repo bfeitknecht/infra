@@ -73,8 +73,11 @@ spec:
               mountPath: /config
             - name: cache
               mountPath: /cache
+            # Same /data path in every media container (TRaSH Guides layout):
+            # /data/torrents/{movies,tv}, /data/media/{movies,tv}. Hardlinks and
+            # instant moves work only with one volume and one path.
             - name: library
-              mountPath: /media
+              mountPath: /data
       volumes:
         - name: config
           persistentVolumeClaim:
