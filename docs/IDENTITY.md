@@ -1,6 +1,6 @@
 # Identity provider: options and recommendation
 
-Draft 2026-11-16 for the owner. No decision is made. Nothing is deployed.
+Draft 2026-11-16. **Decision 2026-11-16: option A, authentik from the start** (owner). Setup: `docs/AUTHENTIK.md`.
 
 ## Needs
 

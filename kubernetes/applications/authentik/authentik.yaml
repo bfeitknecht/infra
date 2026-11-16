@@ -1,0 +1,55 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: authentik
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://charts.goauthentik.io
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik
+  namespace: flux-system
+spec:
+  interval: 30m
+  # Fixed release name so Services are authentik-server, not authentik-authentik-server.
+  releaseName: authentik
+  chart:
+    spec:
+      chart: authentik
+      version: "2026.8.5"
+      sourceRef:
+        kind: HelmRepository
+        name: authentik
+        namespace: flux-system
+  targetNamespace: authentik
+  values:
+    global:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      # Non-secret config. The Secret authentik-secrets holds the rest.
+      env:
+        - name: AUTHENTIK_POSTGRESQL__HOST
+          value: authentik-postgresql
+        - name: AUTHENTIK_POSTGRESQL__NAME
+          value: authentik
+        - name: AUTHENTIK_POSTGRESQL__USER
+          value: authentik
+        - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+          value: "false"
+        - name: AUTHENTIK_DISABLE_UPDATE_CHECK
+          value: "true"
+    authentik:
+      # Holds AUTHENTIK_SECRET_KEY, AUTHENTIK_POSTGRESQL__PASSWORD,
+      # AUTHENTIK_BOOTSTRAP_PASSWORD, AUTHENTIK_BOOTSTRAP_EMAIL.
+      # Bootstrap password sets akadmin on first start, so the initial-setup
+      # flow is never open on the public URL.
+      existingSecret:
+        secretName: authentik-secrets
+    blueprints:
+      configMaps:
+        - authentik-blueprints
+    postgresql:
+      enabled: false

@@ -1,0 +1,33 @@
+# Git-owned authentik config. The worker applies files from this ConfigMap
+# (mounted at /blueprints/mounted/cm-authentik-blueprints) and re-applies on change.
+# Add one blueprint per app (OIDC provider + application) here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprints
+  namespace: authentik
+data:
+  base.yaml: |
+    version: 1
+    metadata:
+      name: 0xbf base
+    entries:
+      # Access groups. App bindings check these groups.
+      - model: authentik_core.group
+        identifiers:
+          name: family
+      - model: authentik_core.group
+        identifiers:
+          name: friends
+      # Invitation-only sign-up: Directory > Invitations > Create, flow "invite".
+      # Upstream minimal example, run with our context. No open registration.
+      - model: authentik_blueprints.blueprintinstance
+        identifiers:
+          name: invitation-enrollment
+        attrs:
+          path: example/flows-invitation-enrollment-minimal.yaml
+          enabled: true
+          context:
+            flow_slug: invite
+            flow_name: Join 0xbf.ch
+            user_type: internal
