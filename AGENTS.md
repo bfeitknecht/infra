@@ -79,7 +79,7 @@ One rule per kind. New resources must follow them. Exceptions are listed below; 
 - **LB IPs:** last octet = `100 + (port mod 100)` (see cilium note).
 - **Flux Kustomization = app directory name.**
 
-Known exceptions (live data, rename on next migration): PVC `devil-pvc` (should be `devil-data`), `exhib-site` (`exhib-data`), `tailscale-relay-state` (`tailscale-relay-data`; renaming forces a new Tailscale login). Service `pds-http` (a Service named `pds` injects `PDS_PORT` and breaks the image). Service `resolver` in `dns`.
+Known exceptions (live data, rename on next migration): PVC `devil-pvc` (should be `devil-data`), `exhib-site` (`exhib-data`), `tailscale-relay-state` (`tailscale-relay-data`; renaming forces a new Tailscale login). Service `pds-http` (a Service named `pds` injects `PDS_PORT` and breaks the image). Service `resolver` in `dns`. qbittorrent runs in namespace `media` (dir `applications/qbittorrent/`): it must share PVC `media-files`.
 
 ## Kustomization dependency tree
 

@@ -15,6 +15,7 @@ Status 2026-11-16. All apps below run on rzbl (`nodeSelector: kubernetes.io/host
 | Forgejo runner 13.2.1 | `applications/forgejo-runner/` | prepared, suspended | none |
 | Ollama 0.40.16 (GPU) | `applications/ollama/` | **live** | cluster only: `ollama.ollama.svc.cluster.local:11434` |
 | opencode web 1.19.5 | `applications/opencode/` | prepared, suspended | `opencode.internal` |
+| qBittorrent 5.3.0 + gluetun v3.41.3 (Proton VPN) | `applications/qbittorrent/` (ns `media`) | prepared, suspended | `qbittorrent.internal` |
 
 Prepared apps have a Flux Kustomization with `suspend: true` in `cluster/applications.yaml`. Each needs one sops Secret from the owner. Agents do not create sops files.
 
@@ -100,6 +101,24 @@ print $"opencode web user opencode password: ($pw)"
 
 Model: `ollama/qwen2.5-coder:7b` (local, GPU). Add cloud providers in the web UI (`/connect`). Keys are stored on the PVC in `~/.local/share/opencode`.
 
+### qBittorrent over Proton VPN: `applications/qbittorrent/qbittorrent-secrets.sops.yaml`
+
+Proton Duo includes VPN Plus (P2P servers, port forwarding).
+
+1. account.protonvpn.com > Downloads > WireGuard configuration. Platform: Router. Options: **NAT-PMP (Port Forwarding) on**, VPN Accelerator on. Server: any **P2P** server in Switzerland. Download the file.
+2. Copy `PrivateKey` from the `[Interface]` section.
+
+```nu
+let key = "<PrivateKey from the .conf>"
+kubectl create secret generic qbittorrent-secrets -n media --from-literal=$"WIREGUARD_PRIVATE_KEY=($key)" --dry-run=client -o yaml
+  | save -f kubernetes/applications/qbittorrent/qbittorrent-secrets.sops.yaml
+sops --encrypt --in-place kubernetes/applications/qbittorrent/qbittorrent-secrets.sops.yaml
+```
+
+3. After the first start: qBittorrent Web UI at `qbittorrent.internal`. The temporary admin password is in the pod log (`kubectl -n media logs deploy/qbittorrent -c qbittorrent`). Set a password. Options > Web UI: enable **Bypass authentication for clients on localhost** (gluetun pushes the forwarded port through it). Options > Downloads: default path `/data/downloads`.
+4. In sonarr and radarr: Settings > Download Clients > qBittorrent, host `qbittorrent.media.svc.cluster.local`, port 80.
+5. Check the tunnel: `kubectl -n media exec deploy/qbittorrent -c gluetun -- wget -qO- https://ipinfo.io/ip` must not print the home IP `31.164.81.63`.
+
 ### Forgejo runner: `applications/forgejo-runner/forgejo-runner-secrets.sops.yaml`
 
 Get a registration token: `https://git.0xbf.ch/-/admin/actions/runners` > Create new runner.
@@ -147,6 +166,5 @@ spec:
 
 ## Not done yet
 
-- No download client (qBittorrent). Torrent traffic from the home IP needs a VPN decision.
 - No k8up Schedules for the new apps. Add them when the backup path works. Immich originals must have backups before real use.
 - GPU time-slicing: `nvidia.com/gpu: 4`. Jellyfin and Ollama use 2 slots. Immich ML can take a third: image tag `v3.4.1-cuda`, `runtimeClassName: nvidia`, limit `nvidia.com/gpu: 1`. Slots share 6 GB VRAM with no isolation.
