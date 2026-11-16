@@ -149,7 +149,7 @@ Jellyfin libraries: Movies `/data/media/movies`, Shows `/data/media/tv`. Sonarr 
 
 All apps are internal (`*.internal`, LAN + tailnet allowlist). Public needs an HTTPRoute on listener `websecure` with a `*.0xbf.ch` host. No DNS change (wildcard).
 
-- **Jellyfin**: finish the setup wizard at `jellyfin.internal` first. The wizard creates the admin with no auth, so a public wizard is open to anyone. Then add a public route, for example `media.0xbf.ch` or `jellyfin.0xbf.ch`.
+- **Jellyfin**: finish the setup wizard at `jellyfin.internal` first. The wizard creates the admin with no auth, so a public wizard is open to anyone. Then uncomment `httproute-public.yaml` in `applications/media/kustomization.yaml`: public at `stream.0xbf.ch`. Server name in Jellyfin: `0xbf`.
 - **Immich**: first sign-up becomes admin. Same rule: sign up internal, then go public (`photos.0xbf.ch`).
 - **Copyparty**: accounts come from the config, so it is safe to go public at once (`files.0xbf.ch`).
 - **\*arr, Prowlarr, Dawarich**: keep internal.
