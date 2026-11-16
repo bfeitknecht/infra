@@ -1,0 +1,11 @@
+# NVIDIA open kernel modules (GTX 1660 Ti, Turing). Without these the
+# ext-nvidia-* services wait forever and Talos stays in stage "booting".
+machine:
+  kernel:
+    modules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
+  sysctls:
+    net.core.bpf_jit_harden: "1"

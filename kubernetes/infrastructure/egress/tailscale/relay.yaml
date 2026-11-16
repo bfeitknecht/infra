@@ -45,6 +45,10 @@ spec:
               value: k8s-relay
             - name: TS_STATE_DIR
               value: /var/lib/tailscale
+            # Empty value: keep state in TS_STATE_DIR on the PVC. Default is a
+            # kube Secret "tailscale", which needs RBAC the relay does not have.
+            - name: TS_KUBE_SECRET
+              value: ""
             - name: TS_USERSPACE
               value: "false"
           securityContext:
