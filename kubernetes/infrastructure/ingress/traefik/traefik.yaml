@@ -104,7 +104,7 @@ spec:
         middlewares:
           - name: internal-allowlist
         tls:
-          secretName: wildcard-internal-tls
+          secretName: internal-hosts-tls
     gateway:
       enabled: false
     metrics:
