@@ -34,7 +34,7 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: wildcard-internal-tls
+          - name: internal-hosts-tls
     # TCP for forgejo git SSH. Port must match gitssh entrypoint. Apex
     # uses port 22 now. Gitssh uses port 2223.
     - name: gitssh

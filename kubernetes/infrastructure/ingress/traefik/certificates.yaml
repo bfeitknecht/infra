@@ -71,18 +71,35 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wildcard-internal
+  name: internal-hosts
   namespace: ingress
 spec:
-  secretName: wildcard-internal-tls
+  secretName: internal-hosts-tls
   duration: 8760h # 1y
   subject:
     organizations: ["0xbf internal"]
   issuerRef:
     name: internal-ca
     kind: ClusterIssuer
+  # Explicit names, no wildcard. Clients reject "*.internal": a wildcard
+  # directly under a top-level domain is invalid. Add every new *.internal
+  # host here (same PR as its HTTPRoute).
   dnsNames:
-    - "*.internal"
+    - agh.internal
+    - dashboard.internal
+    - dawarich.internal
+    - devil.internal
+    - files.internal
+    - grafana.internal
+    - homepage.internal
+    - immich.internal
+    - jellyfin.internal
+    - opencode.internal
+    - prowlarr.internal
+    - qbittorrent.internal
+    - radarr.internal
+    - sonarr.internal
+    - status.internal
 ---
 # Second-level wildcard for PDS handles. Pattern is <name>.pds.0xbf.ch.
 # The *.0xbf.ch cert matches one label only.
