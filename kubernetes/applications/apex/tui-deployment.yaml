@@ -23,13 +23,17 @@ spec:
             labels:
                 app.kubernetes.io/name: apex-tui
         spec:
-            # No Kubernetes API use. The token mount under /var/run (= /run in
-            # alpine) collides with the read-only /run/secrets mount.
+            # No Kubernetes API use.
             automountServiceAccountToken: false
             # Keel reads imagePullSecrets from the pod template. The default
             # ServiceAccount secret is not sufficient.
             imagePullSecrets:
                 - name: dockerconfigjson
+            securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+                fsGroup: 1000
             volumes:
                 # The host key is the server identity. Use the same key after
                 # a restart to prevent client warnings. Store the key in a
@@ -37,7 +41,8 @@ spec:
                 - name: host-key
                   secret:
                       secretName: apex-ssh-host-key
-                      defaultMode: 0400
+                      # Group-readable. fsGroup 1000 makes the image user (1000) the group.
+                      defaultMode: 0440
             containers:
                 - name: apex-ssh
                   # Use the same image tag as the site Deployment. One image
@@ -53,13 +58,13 @@ spec:
                       - name: APEX_SSH_PUBLIC
                         value: "1"
                       - name: APEX_SSH_HOST_KEY
-                        value: /run/secrets/ssh_host_ed25519_key
+                        value: /etc/apex-ssh/ssh_host_ed25519_key
                   ports:
                       - containerPort: 2222
                         name: ssh
                   volumeMounts:
                       - name: host-key
-                        mountPath: /run/secrets
+                        mountPath: /etc/apex-ssh
                         readOnly: true
                   # The process opens the port after it loads the host key.
                   # A TCP connection shows the service is ready.
