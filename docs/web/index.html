@@ -127,11 +127,11 @@ svg g.nd:hover .box{stroke:var(--accent)}
 → Zyxel AX7501 NAT: 80/443/22/2223 → rbpi 10.10.20.10
 → Traefik hostPorts (pinned to rbpi) → Gateway listener
 → HTTPRoute / TCPRoute → Service → Pod (rbpi or rzbl, Cilium VXLAN)
-TLS: LE wildcard *.0xbf.ch (cert-manager, Cloudflare DNS-01)</div>
+TLS: LE wildcard *.0xbf.ch (cert-manager, Cloudflare DNS-01); *.internal: explicit-name cert from internal CA (only .internal)</div>
       <h3>Request path (internal)</h3>
       <div class="card small mono" style="white-space:pre-wrap">LAN / tailnet client → AGH 10.10.20.153 (DNS)
 → *.internal → 10.10.20.128 (Traefik LB IP, Cilium L2 on rbpi end0)
-→ listener websecure-internal (internal CA wildcard)
+→ listener websecure-internal (cert internal-hosts: explicit names, constrained internal CA)
 → middleware internal-allowlist (10.10.0.0/16, 100.64.0.0/10) → app</div>
     </div>
     <div>
@@ -350,7 +350,7 @@ const SERVICES = [
   host:"LB 10.10.20.128 · hostPorts 80/443/22/2223 · https://dashboard.internal", image:"traefik chart 41.6.0", desc:"Gateway API implementation. Terminates TLS.",
   ports:"web 8000, websecure 8443, apexssh 22, devilssh 2222, gitssh 2223", deps:["cert-manager","gateway-api-crds","traefik-crds"], secrets:[],
   notes:["Pinned to rbpi (nodeSelector): router forwards to rbpi only.","Listeners: web, websecure, websecure-internal, websecure-pds, apexssh, devilssh, gitssh."]},
- {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + internal CA for *.internal.", ports:"—", deps:["cilium"], secrets:["cert-manager/cloudflare-dns01.sops.yaml"], notes:[]},
+ {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + name-constrained internal CA (explicit *.internal names).", ports:"—", deps:["cilium"], secrets:["cert-manager/cloudflare-dns01.sops.yaml"], notes:[]},
  {id:"cilium", name:"Cilium", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"kube-system", ks:"cilium", host:"—", image:"cilium 1.20.2", desc:"CNI, kube-proxy replacement, LB-IPAM + L2 announcements, VXLAN overlay.", ports:"—", deps:["storage","prometheus-crds"], secrets:[], notes:["L2 announce on rbpi end0 for pool 10.10.20.128/25.","Overlay to oci runs over Tailscale."]},
  {id:"tailscale-op", name:"Tailscale operator", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"tailscale", ks:"tailscale", host:"—", image:"tailscale operator 1.102.3", desc:"Tailnet ingress/egress proxies with tag:k8s.", ports:"—", deps:["traefik"], secrets:["tailscale/operator-oauth.sops.yaml"], notes:[]},
  {id:"relay", name:"tailscale-relay", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"egress", ks:"egress-tailscale",
