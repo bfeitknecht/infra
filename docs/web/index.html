@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.23.0";
+const INFRA_TAG = "v1.23.5";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -299,10 +299,10 @@ const SERVICES = [
   host:"https://auth.0xbf.ch", image:"authentik 2026.8.5 (Helm) + postgres:17.11", desc:"The one IdP for all apps (OIDC, forward auth, invitations).",
   ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml (to create)"], storage:"authentik-db 10Gi (rzbl nvme)",
   runbook:"docs/AUTHENTIK.md", notes:["Suspended until the secret exists.","Blueprints in git: groups family/friends, invitation-only enrollment (slug invite).","Bootstrap admin from secret: setup flow never public."]},
- {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media",
-  host:"https://jellyfin.internal · stream.0xbf.ch (prepared)", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
+ {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"media", ks:"media",
+  host:"https://stream.0xbf.ch · https://jellyfin.internal", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
   ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
-  runbook:"docs/RZBL_WORKLOADS.md", notes:["Public name: stream.0xbf.ch (route prepared, enable after the wizard). Server name: 0xbf.","Family logins: local users now, authentik SSO plugin later (web only)."]},
+  runbook:"docs/RZBL_WORKLOADS.md", notes:["Public at stream.0xbf.ch since 2026-11-16. Server name: 0xbf.","Family logins: local users now, authentik SSO plugin later (web only)."]},
  {id:"sonarr", name:"Sonarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://sonarr.internal", image:"lscr.io/linuxserver/sonarr:4.0.20", desc:"TV series manager.", ports:"HTTP 8989", deps:["storage"], secrets:[], storage:"sonarr-data 2Gi, media-files at /data", notes:["No login yet: set one in Settings > General or put authentik forward-auth in front."]},
  {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-data 2Gi, media-files at /data", notes:["No login yet."]},
  {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
@@ -372,7 +372,7 @@ const NEEDS = [
  {id:"zyxel-2223", prio:1, cat:"router", t:"Zyxel rule 2223/tcp → 10.10.20.10:2223", d:"Network Setting > NAT > Port Forwarding. Git SSH from WAN fails until then.", svc:"forgejo"},
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"NAS refuses 3900 on its tailnet IP (80/443 work). s3_api.bind_addr = \"[::]:3900\", Docker port, firewall on tailscale0.", svc:"k8up"},
  {id:"authentik-secret", prio:1, cat:"secret", t:"authentik secret → un-suspend", d:"docs/AUTHENTIK.md. Then own admin + passkey, deactivate akadmin.", svc:"authentik"},
- {id:"jellyfin-wizard", prio:2, cat:"decision", t:"Jellyfin wizard, then stream.0xbf.ch", d:"Finish wizard at jellyfin.internal (it runs without auth). Libraries /data/media/movies, /data/media/tv. Server name 0xbf. Then enable stream.0xbf.ch.", svc:"jellyfin"},
+ {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
  {id:"runner-secret", prio:2, cat:"secret", t:"Forgejo runner token + enable Actions", d:"Token from git.0xbf.ch admin > Actions > Runners. [actions] ENABLED = true.", svc:"runner"},
@@ -419,7 +419,7 @@ const HOSTS = [
  ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib (down)"],["git.0xbf.ch","public","forgejo"],
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik (prepared)"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
- ["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
+ ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
  ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["files.internal","internal","copyparty (prepared)"],["opencode.internal","internal","prepared"],
 ];
 const TAIL = [
@@ -461,6 +461,8 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
 * suspended: authentik immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
 const TAGS = [
+ ["v1.23.5","2026-11-16","Jellyfin public at stream.0xbf.ch"],
+ ["v1.23.4","2026-11-16","internal TLS: explicit hostnames"],
  ["v1.23.0","2026-11-16","qBittorrent + Proton VPN (suspended), media namespace privileged"],
  ["v1.22.1","2026-11-16","apex: no service account token (TUI fix)"],
  ["v1.22.0","2026-11-16","naming convention (PVCs, DB/Redis, sops files), rzbl-keyboard removed"],
