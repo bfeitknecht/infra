@@ -62,20 +62,20 @@ Three nodes. All three are enrolled in `talos/topf.yaml` (oci, rbpi, rzbl). Appl
 | 1   | Raspberry Pi 5                   | 16 GB RAM                                                                                                 | 1   | -           | -                | -            |
 | 2   | Imou microSD                     | 64 GB, microSDXC, UHS-I, U3/V30 (boot, Talos Linux 1.14.6)                                                | 1   | 15.90       | -                | Delivered    |
 | 3   | 52Pi Dual-FPC PCIe HAT (B12)     | ASMedia Gen2 PCIe switch, dual FPC out, bottlenecks to Gen 2 (accepted)                                   | 1   | 25.79       | 3050317770738061 | Mar 2, 2025  |
-| 4   | Radxa ROCK Penta SATA HAT        | For RPi 5. 4x SATA + eSATA, JMB585 (needs `pcie-32bit-dma-pi5`), ships with its own custom FFC           | 1   | 62.49       | 3050317770718061 | Mar 2, 2025  |
+| 4   | Radxa ROCK Penta SATA HAT        | For RPi 5. 4x SATA + eSATA, JMB585 (needs `pcie-32bit-dma-pi5`), ships with its own custom FFC            | 1   | 62.49       | 3050317770718061 | Mar 2, 2025  |
 | 5   | Seeed PCIe→Dual M.2 HAT          | 2x M.2 NVMe (both populated); Hailo/Coral-capable but no accelerator installed, PCIe 2.0, ASM1182E switch | 1   | 18.53       | 3052013889338061 | Mar 30, 2025 |
 | 6   | SpotPear PCIE FPC cable          | PCIE-FPC-5CM-Bend, 90R differential. For Pi 5 to Seeed M.2 HAT link                                       | 1   | 2.70        | 3076228418308061 | Sep 13, 2026 |
 | 7   | M.2 2280 NVMe heatsinks          | 6 mm, w/ thermal pad                                                                                      | 2   | 9.78        | 3076228418368061 | Sep 13, 2026 |
 | 8   | Pi 5 Active Cooler (copper)      | Heatsink + acrylic plate, without fan                                                                     | 1   | 11.49       | 3073905593408061 | Jun 1, 2026  |
-| 9   | Noctua NF-A4x20 5V PWM           | 40x40x20 mm, brown, 4-pin PWM (A2543), 5 V, max 0.1 A each. Damaged if run at 12V                        | 2   | 38.58       | -                | -            |
+| 9   | Noctua NF-A4x20 5V PWM           | 40x40x20 mm, brown, 4-pin PWM (A2543), 5 V, max 0.1 A each. Damaged if run at 12V                         | 2   | 38.58       | -                | -            |
 | 10  | ZY12PDN USB-C PD trigger         | Solder-pad ("Welding line") version, 5/9/12/15/20 V modes, set to 12V fixed                               | 1   | 1.85        | 3073944133918061 | Jun 8, 2026  |
-| 11  | Molex IDE → floppy 4-pin adapter | 18 AWG, 30 cm. Alternate HAT power path (both ends female; source needs male pins)                       | 1   | 1.71        | 3073944133938061 | Jun 8, 2026  |
+| 11  | Molex IDE → floppy 4-pin adapter | 18 AWG, 30 cm. Alternate HAT power path (both ends female; source needs male pins)                        | 1   | 1.71        | 3073944133938061 | Jun 8, 2026  |
 | 12  | 4-pin PWM Y-splitter             | 1-to-2, standard PC PWM pinout                                                                            | 1   | 1.58        | 3073944133958061 | Jun 8, 2026  |
-| 13  | SH1.0 → Dupont breakout          | SH1.0 4P, 200 mm, Dupont 1P male. For the pin reorder                                                    | 1   | 2.32        | 3073944133978061 | Jun 8, 2026  |
+| 13  | SH1.0 → Dupont breakout          | SH1.0 4P, 200 mm, Dupont 1P male. For the pin reorder                                                     | 1   | 2.32        | 3073944133978061 | Jun 8, 2026  |
 | 14  | M2.5 brass standoffs             | 6 mm thread / 5 mm, 30 pcs                                                                                | 1   | 3.15        | 3073944134018061 | Jun 8, 2026  |
 | 15  | Brass threaded rods              | M2.5 × 150 mm                                                                                             | 5   | 8.01        | 3073944133898061 | Jun 8, 2026  |
-| 16  | Zyxel AX7501 router              | 10 GbE, 10G plan. Pi 5's Ethernet is 1 GbE, so throughput through the Pi caps at 1 Gb/s                  | 1   | -           | -                | -            |
-| 17  | Razer Blade 15 Base (2019)       | i7-9750H, GTX 1660 Ti 6 GB, 16 GB DDR4-2667, TB3, GbE. Talos worker node                                 | 1   | -           | -                | -            |
+| 16  | Zyxel AX7501 router              | 10 GbE, 10G plan. Pi 5's Ethernet is 1 GbE, so throughput through the Pi caps at 1 Gb/s                   | 1   | -           | -                | -            |
+| 17  | Razer Blade 15 Base (2019)       | i7-9750H, GTX 1660 Ti 6 GB, 16 GB DDR4-2667, TB3, GbE. Talos worker node                                  | 1   | -           | -                | -            |
 
 **Known total: CHF 203.88** (plus Pi 5 16GB, AX7501, and Razer Blade. Prices not in the order data)
 
