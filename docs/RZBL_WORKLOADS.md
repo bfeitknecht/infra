@@ -11,8 +11,10 @@ Status 2026-11-16. All apps below run on rzbl (`nodeSelector: kubernetes.io/host
 | Immich v3.4.1 | `applications/immich/` | prepared, suspended | `immich.internal` |
 | Dawarich 1.23.0 | `applications/dawarich/` | prepared, suspended | `dawarich.internal` |
 | Copyparty 1.20.26 | `applications/copyparty/` | prepared, suspended | `files.internal` |
-| Time Machine (Samba) | `applications/samba/` | prepared, suspended | `smb://10.10.20.154` |
+| Time Machine (Samba) | `applications/samba/` | prepared, suspended | `smb://10.10.20.145` |
 | Forgejo runner 13.2.1 | `applications/forgejo-runner/` | prepared, suspended | none |
+| Ollama 0.40.16 (GPU) | `applications/ollama/` | **live** | cluster only: `ollama.ollama.svc.cluster.local:11434` |
+| opencode web 1.19.5 | `applications/opencode/` | prepared, suspended | `opencode.internal` |
 
 Prepared apps have a Flux Kustomization with `suspend: true` in `cluster/applications.yaml`. Each needs one sops Secret from the owner. Agents do not create sops files.
 
@@ -82,7 +84,21 @@ sops --encrypt --in-place kubernetes/applications/samba/timemachine-secrets.sops
 print $"timemachine password: ($pw)"
 ```
 
-On each Mac: System Settings > General > Time Machine > Add Backup Disk > Other. Or in Finder: Go > Connect to Server > `smb://10.10.20.154/TimeMachine`, user `timemachine`. Then pick the share in Time Machine. No mDNS: the share does not show up on its own. Keep the IP. Over Tailscale it works too (rbpi routes `10.10.20.0/24`).
+On each Mac: System Settings > General > Time Machine > Add Backup Disk > Other. Or in Finder: Go > Connect to Server > `smb://10.10.20.145/TimeMachine`, user `timemachine`. Then pick the share in Time Machine. No mDNS: the share does not show up on its own. Keep the IP. Over Tailscale it works too (rbpi routes `10.10.20.0/24`).
+
+### opencode web: `applications/opencode/opencode-secrets.sops.yaml`
+
+Basic auth user is `opencode`.
+
+```nu
+let pw = (openssl rand -hex 16)
+kubectl create secret generic opencode-secrets -n opencode --from-literal=$"OPENCODE_SERVER_PASSWORD=($pw)" --dry-run=client -o yaml
+  | save -f kubernetes/applications/opencode/opencode-secrets.sops.yaml
+sops --encrypt --in-place kubernetes/applications/opencode/opencode-secrets.sops.yaml
+print $"opencode web user opencode password: ($pw)"
+```
+
+Model: `ollama/qwen2.5-coder:7b` (local, GPU). Add cloud providers in the web UI (`/connect`). Keys are stored on the PVC in `~/.local/share/opencode`.
 
 ### Forgejo runner: `applications/forgejo-runner/forgejo-runner-secrets.sops.yaml`
 
@@ -133,4 +149,4 @@ spec:
 
 - No download client (qBittorrent). Torrent traffic from the home IP needs a VPN decision.
 - No k8up Schedules for the new apps. Add them when the backup path works. Immich originals must have backups before real use.
-- Immich ML runs on CPU. For GPU: image tag `v3.4.1-cuda`, `runtimeClassName: nvidia`, limit `nvidia.com/gpu: 1`. Jellyfin holds the only GPU slot now. GPU time-slicing in the device plugin config is needed to share it.
+- GPU time-slicing: `nvidia.com/gpu: 4`. Jellyfin and Ollama use 2 slots. Immich ML can take a third: image tag `v3.4.1-cuda`, `runtimeClassName: nvidia`, limit `nvidia.com/gpu: 1`. Slots share 6 GB VRAM with no isolation.

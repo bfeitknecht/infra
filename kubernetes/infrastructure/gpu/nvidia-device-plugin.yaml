@@ -25,6 +25,18 @@ spec:
   targetNamespace: gpu
   values:
     runtimeClassName: nvidia
+    # Time-slicing: the one GPU shows as nvidia.com/gpu: 4. Jellyfin and
+    # Ollama each take one slot. No memory isolation between slots.
+    config:
+      default: default
+      map:
+        default: |-
+          version: v1
+          sharing:
+            timeSlicing:
+              resources:
+                - name: nvidia.com/gpu
+                  replicas: 4
     # Chart default affinity needs NFD or nvidia.com/gpu.present labels.
     # rzbl is the only GPU node. Select it by hostname.
     affinity:

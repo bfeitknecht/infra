@@ -25,8 +25,7 @@ spec:
       containers:
         - name: machine-learning
           # CPU image. For GPU use tag v3.4.1-cuda, runtimeClassName nvidia and
-          # limit nvidia.com/gpu: 1. Jellyfin holds the only GPU slot. Needs
-          # time-slicing in the device plugin config first.
+          # limit nvidia.com/gpu: 1 (time-sliced, 4 slots, 6 GB VRAM shared).
           image: ghcr.io/immich-app/immich-machine-learning:v3.4.1
           env:
             - name: MACHINE_LEARNING_MODEL_REVISION

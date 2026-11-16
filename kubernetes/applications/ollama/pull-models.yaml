@@ -1,0 +1,22 @@
+# One-off pull through the Ollama API. Change the name to pull again.
+# qwen2.5-coder:7b (4.7 GB) fits the 6 GB GTX 1660 Ti.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pull-qwen2.5-coder-7b
+  namespace: ollama
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: OnFailure
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      containers:
+        - name: pull
+          image: docker.io/ollama/ollama:0.40.16
+          command: ["ollama", "pull", "qwen2.5-coder:7b"]
+          env:
+            - name: OLLAMA_HOST
+              value: http://ollama.ollama.svc.cluster.local:11434
