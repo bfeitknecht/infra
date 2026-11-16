@@ -109,7 +109,7 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-            # Same path as in sonarr/radarr: downloads in /data/downloads.
+            # Same /data path as jellyfin and the *arr apps (TRaSH layout).
             - name: files
               mountPath: /data
       volumes:
