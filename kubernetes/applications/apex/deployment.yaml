@@ -21,6 +21,8 @@ spec:
             labels:
                 app.kubernetes.io/name: apex
         spec:
+            # No Kubernetes API use.
+            automountServiceAccountToken: false
             # Keel reads imagePullSecrets from the pod template. The default
             # ServiceAccount secret is not sufficient.
             imagePullSecrets:

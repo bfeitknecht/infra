@@ -23,6 +23,9 @@ spec:
             labels:
                 app.kubernetes.io/name: apex-tui
         spec:
+            # No Kubernetes API use. The token mount under /var/run (= /run in
+            # alpine) collides with the read-only /run/secrets mount.
+            automountServiceAccountToken: false
             # Keel reads imagePullSecrets from the pod template. The default
             # ServiceAccount secret is not sufficient.
             imagePullSecrets:
