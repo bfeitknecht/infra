@@ -12,6 +12,7 @@ Goal: coding agents (opencode web, later others) run arbitrary commands. They mu
 | **gVisor (`runsc`)** | User-space kernel intercepts syscalls | Light, fast start, no VM | Talos has an official `gvisor` extension. Needs a schematic change + RuntimeClass. | Strong, but not a hardware boundary. Some syscalls/tools are slow or unsupported (heavy builds, some debuggers). Good middle ground. |
 | **bubblewrap (bwrap)** | Linux namespaces + seccomp in the same kernel | Very light | Inside a pod it needs unprivileged user namespaces (often blocked) or extra privileges. | This is what local agent CLIs use on a laptop. Inside Kubernetes it adds little over a normal container and shares the node kernel. **Not airtight.** |
 | **Plain container + hardening** | Namespaces, seccomp, no caps, read-only root | Lightest | Works today | Shares the node kernel. One kernel bug from the node. Not airtight. |
+| **Kubernetes Agent Sandbox** ([kubernetes-sigs/agent-sandbox](https://github.com/kubernetes-sigs/agent-sandbox), v1.0.11) | Orchestrator, not a boundary. Runs each sandbox as a pod on a RuntimeClass (Kata or gVisor) | One controller + CRDs | Fits directly: we have `kata-qemu`. CRDs come from the pinned upstream release (repo rule). | SIG Apps project. CRDs: `Sandbox` (one stateful pod with stable identity and storage), `SandboxTemplate`, `SandboxWarmPool` (pre-started sandboxes hide Kata start time), `SandboxClaim` (take one from the pool). Python SDK. This is the Kubernetes-native version of what Daytona or boxd give you. |
 | **Daytona (self-hosted)** | Container sandboxes managed by a control plane (API, SDK, snapshots) | Heavy: control plane + DB + runners | Possible on rzbl | A platform, not a boundary: isolation depends on the runtime under it. Useful when you want an API to create one sandbox per task. Overkill for one opencode. |
 | **boxd** ([docs](https://docs.boxd.sh/agents/agent-sandboxes)) | KVM microVM per sandbox, egress allowlist, fork/snapshot | No local weight | Hosted service (API key, console). Not self-hosted. | Very good isolation and features (fork before risky steps, `none` egress). But code and agent traffic leave home, and it costs money. |
 | **Docker Sandboxes / E2B / Firecracker** | microVM | Medium | Docker Sandboxes is a desktop product. E2B self-host needs Firecracker infra (not on Talos without work). | Not a fit for this cluster now. |
@@ -26,11 +27,16 @@ Goal: coding agents (opencode web, later others) run arbitrary commands. They mu
 
 ## Recommendation
 
-**Kata (`kata-qemu`) + Cilium egress allowlist + authentik in front.**
+**Kata (`kata-qemu`) as the boundary, Kubernetes Agent Sandbox as the manager, Cilium egress allowlist as the network wall, authentik in front.**
 
-- Kata is a hardware VM boundary, the strongest option you can run at home, and it is already installed and proven (devil). No new extension, no new platform. It is a two-line change on the opencode Deployment (`runtimeClassName: kata-qemu`, Ollama reached by pod IP / headless Service).
-- The Cilium policy closes the network side, which matters as much as the kernel wall: an agent in a perfect VM with open egress can still attack the LAN.
-- Later, if you want one throwaway sandbox per task (fork, snapshot, parallel agents), add a sandbox manager on top of Kata. Self-hosted Daytona or a small controller fits then. boxd is the easiest hosted path if you accept that code leaves home.
-- gVisor is the fallback if Kata start time or memory becomes a problem (many parallel agents).
+- **Kata** is a hardware VM boundary, the strongest option at home, and it is already installed and proven (devil). rzbl and rbpi are bare metal, so there is no nested-virtualization problem.
+- **Agent Sandbox** adds what Daytona or boxd would give you, but native to Kubernetes and in git: a `SandboxTemplate` for "opencode agent on kata-qemu", a `SandboxWarmPool` with 1-2 started sandboxes so a new task does not wait for a VM boot, and a `SandboxClaim` per task or session. No extra platform, database or hosted service. Install = upstream CRDs (pinned release) + controller, like the other CRD sources in `cluster/crds.yaml`.
+- **Cilium policy** closes the network side: deny all, allow DNS, Ollama, LLM APIs, `git.0xbf.ch`, package registries. No LAN, no tailnet, no other namespaces, no Kubernetes API, no service account token.
+- **gVisor** stays the fallback if many parallel agents make Kata memory a problem (Agent Sandbox works with both).
+- **boxd** stays the hosted option if you ever want sandboxes off your hardware.
 
-Order when you approve: opencode `runtimeClassName: kata-qemu` + headless Ollama Service, then `CiliumNetworkPolicy` (deny-all + allowlist), then authentik forward-auth, then the opencode secret and un-suspend.
+Order when you approve:
+1. opencode on `kata-qemu` + headless Ollama Service (single long-lived sandbox, simplest start).
+2. `CiliumNetworkPolicy` for the agent namespace (deny-all + allowlist).
+3. authentik forward-auth on `opencode.internal`.
+4. Agent Sandbox (CRDs + controller) with a template and a small warm pool, when you want one sandbox per task.
