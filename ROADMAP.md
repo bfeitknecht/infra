@@ -30,7 +30,6 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [ ] **Download client** (qBittorrent) for *arr. Needs VPN decision.
 - [ ] Immich ML `-cuda` image on a GPU slot.
 - [ ] Open WebUI on top of Ollama (optional; opencode web covers coding).
-- [ ] **rzbl keyboard** white: needs openrazer as custom Talos extension.
 - [ ] **Renovate** + monitoring back (Prometheus, Grafana, Gatus, alerting receiver).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
 
@@ -51,7 +50,6 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - [x] 2026-11-16 rbpi storage migration, rzbl workloads (media), GPU plugin, relay fix (PodSecurity + state on PVC).
 - [x] 2026-11-15 Talos 1.14.6 on all nodes, rzbl join, Traefik pinned to rbpi, SSH ports (apex `22`, git `2223`), exhib live with one container.
-- [x] 2026-10-24 Teleport removed. Devil uses ssh `2222` + ghostty-web.
 
 ## SOMEDAY / ideas
 

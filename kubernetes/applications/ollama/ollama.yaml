@@ -59,7 +59,7 @@ spec:
       volumes:
         - name: models
           persistentVolumeClaim:
-            claimName: ollama-models
+            claimName: ollama-cache
 ---
 # Cluster-internal only. No HTTPRoute: Ollama has no auth.
 apiVersion: v1

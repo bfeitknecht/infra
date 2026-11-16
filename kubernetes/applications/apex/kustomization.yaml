@@ -12,4 +12,4 @@ resources:
     - tui-deployment.yaml
     - tui-service.yaml
     - tui-tcproute.yaml
-    - ssh-host-key.sops.yaml
+    - apex-ssh-host-key.sops.yaml

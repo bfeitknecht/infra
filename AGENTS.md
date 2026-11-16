@@ -60,6 +60,27 @@ kubernetes/
     └── homepage/       dashboard
 ```
 
+## Naming conventions
+
+One rule per kind. New resources must follow them. Exceptions are listed below; fix them on the next migration of that app.
+
+- **Namespace = app directory name** (`applications/<app>/`). Platform parts use their component name (`ingress`, `egress`, `gpu`).
+- **Workload and Service = `<app>`** for the main component. Helpers are `<app>-<role>`: `<app>-db` (Postgres), `<app>-redis` (Redis or Valkey), `<app>-<component>` otherwise (`immich-server`, `immich-machine-learning`). File names match the role: `db.yaml`, `redis.yaml`.
+- **PVC = `<app>-<role>`**, role is one of:
+  - `data`: app state, config, SQLite (`forgejo-data`, `jellyfin-data`).
+  - `db`: Postgres data directory (`authentik-db`).
+  - `files`: bulk user content: media, photos, uploads, backups (`media-files`, `immich-files`, `timemachine-files`).
+  - `cache`: can be rebuilt or re-downloaded (`ollama-cache`, `immich-cache`).
+  - Shared volumes use the namespace as `<app>` (`media-files` is shared by jellyfin and the *arr apps).
+- **StorageClass by role:** `data`/`db`/`cache` on `local-path-nvme`, `files` on `local-path-ssd` (rzbl). rbpi apps use `local-path`.
+- **Secret = `<app>-secrets`** (env-style keys) or `<app>-config` (the whole value is a config file). **File name = `<secret-name>.sops.yaml`.** Exception by design: GHCR pull secret `dockerconfigjson` in `ghcr.sops.yaml`.
+- **ConfigMap = `<app>-config`** (from `configMapGenerator`, hash suffix).
+- **Hostnames:** public `<app>.0xbf.ch` unless a role name reads better (`git`, `auth`, `blog`, `gallery`, `files`). Internal `<app>.internal`.
+- **LB IPs:** last octet = `100 + (port mod 100)` (see cilium note).
+- **Flux Kustomization = app directory name.**
+
+Known exceptions (live data, rename on next migration): PVC `devil-pvc` (should be `devil-data`), `exhib-site` (`exhib-data`), `tailscale-relay-state` (`tailscale-relay-data`; renaming forces a new Tailscale login). Service `pds-http` (a Service named `pds` injects `PDS_PORT` and breaks the image). Service `resolver` in `dns`.
+
 ## Kustomization dependency tree
 
 ```
@@ -98,11 +119,10 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **cert-manager 1.21.2**: Set `install.crds` and `upgrade.crds` to `CreateReplace`. Set `crds.enabled: true`.
 
-- **dns (knotd + kresd on OCI)**: `resolver` pod in `dns` ns is the only workload on OCI control plane. Taint stays. It needs clean egress on port 53. Home ISP firmware hijacks DNS on home segment. Do not point router DNS to LAN resolver. That creates loop. See pi-hole discourse thread for router model. Kresd does public recursion with DNSSEC. It stubs `internal.` to knotd on loopback with `authoritative: true, dnssec: false`. Knotd is authority for `internal.` zone. Service `resolver` is pinned to `10.96.0.53`. AGH uses this IP as sole upstream. Home segment runs only AGH. Zone data is in `applications/dns/knot/internal.zone`. ConfigMap hash rolls pod on change.
+- **dns (knotd + kresd on OCI)**: `resolver` pod in `dns` ns is the only workload on OCI control plane. Taint stays. It needs clean egress on port 53. Home ISP firmware hijacks DNS on home segment. Do not point router DNS to LAN resolver. That creates loop. The router model is described in a Discourse thread on DNS hijacking. Kresd does public recursion with DNSSEC. It stubs `internal.` to knotd on loopback with `authoritative: true, dnssec: false`. Knotd is authority for `internal.` zone. Service `resolver` is pinned to `10.96.0.53`. AGH uses this IP as sole upstream. Home segment runs only AGH. Zone data is in `applications/dns/knot/internal.zone`. ConfigMap hash rolls pod on change.
 
-- **pihole 2026.07.2**: Removed. Replaced by AdGuard Home. FTL v6 blocked `*.internal` (RFC 9760 hardening). AGH does not block it.
 
-- **agh (AdGuard Home) v0.107.79**: LAN DNS edge at `10.10.20.153`. Use static LB IP from Pi-hole. Router DHCP and Tailscale split DNS use this IP. Do not let IP float. Forwards all queries to kresd. AGH handles `*.internal`. Config seed is from `agh-config.sops.yaml` Secret `agh-config`. It holds whole `AdGuardHome.yaml` as `stringData`. InitContainer copies it to PVC only if absent. AGH then owns file on PVC. UI edits persist. Seed is git intent. To re-seed, delete `conf/AdGuardHome.yaml` on PVC. Admin UI is at `agh.internal`. Middleware copy is in `agh` ns. HTTPRoute ExtensionRef is same-namespace only.
+- **agh (AdGuard Home) v0.107.79**: LAN DNS edge at `10.10.20.153`. Router DHCP and Tailscale split DNS use this IP. Do not let IP float. Forwards all queries to kresd. AGH handles `*.internal`. Config seed is from `agh-config.sops.yaml` Secret `agh-config`. It holds whole `AdGuardHome.yaml` as `stringData`. InitContainer copies it to PVC only if absent. AGH then owns file on PVC. UI edits persist. Seed is git intent. To re-seed, delete `conf/AdGuardHome.yaml` on PVC. Admin UI is at `agh.internal`. Middleware copy is in `agh` ns. HTTPRoute ExtensionRef is same-namespace only.
 
 - **forgejo 16.0.5** (`applications/forgejo/`, tier-1): Git forge at `git.0xbf.ch` on `websecure` with LE wildcard cert. Image is `codeberg.org/forgejo/forgejo:16.0.5` pinned. Use one PVC at `/data` (10Gi, local-path, `Recreate`). InitContainer creates `app.ini` from `forgejo-config` ConfigMap and `[security]` block from `forgejo-secrets.sops.yaml`. File then lives on PVC. To recreate, delete `/data/gitea/conf/app.ini`. InitContainer creates admin user. Registration is closed. Git SSH uses `gitssh` listener and entrypoint on `hostPort: 2223`. Use `ssh://git@git.0xbf.ch:2223/owner/repo.git`. Router forwards `2223` to `10.10.20.10`. Dev box keeps `2222`. Apex uses `22`. SSH host keys are at `/data/ssh` on PVC. Mailer is disabled. Plan Proton SMTP token after Proton Premium domain is live. K8up Schedule is in ns (daily `03:00` + prune). Jobs fail until NAS tailnet path is fixed.
 
@@ -124,7 +144,6 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **k8up 4.10.0** (`infrastructure/backup/k8up/`): Restic to Garage S3 on friend NAS (Garage on `3900` plain HTTP; WireGuard transport, restic encrypts at rest). Endpoint is relay Service `http://tailscale-relay.egress.svc.cluster.local:3900`. NAS `ts.net` name is MagicDNS only. Kresd and CoreDNS NXDOMAIN it. IP literal is unreachable from pods. See tailscale-relay note for why. Friend prerequisites (verified 2026-10-15): Garage `s3_api.bind_addr = "[::]:3900"`, NAS firewall allows `3900` on tailscale0, ACL `src: autogroup:shared -> 100.96.72.126:3900`. PVC discovery is namespace-scoped. K8up backs up PVCs in Schedule namespace only. App opts in by adding `k8up.io/v1` Schedule to its dir. First Schedule is in `applications/forgejo/` (monitoring/agh excluded). Operator holds backend as global env in `backup-credentials.sops.yaml` (`BACKUP_GLOBALS3ENDPOINT/BUCKET`, `BACKUP_GLOBALACCESSKEYID/SECRETACCESSKEY`, `BACKUP_GLOBALREPOPASSWORD`). Per-namespace Schedules need no backend. Times use `Europe/Zurich`. Repo password `k8up-password` is only key to backups. Do not rotate it. Verify with `.private/backup.md`.
 
-- **teleport (removed 2026-10-24)**: CE access plane (`infrastructure/teleport/`, LB `10.10.20.154`, `teleport.internal`, devil agent) was removed after friend demo. Dir and Kustomization gone. Devil agent wiring gone. `dependsOn: teleport` gone. Devil now uses ssh `2222` and ghostty-web.
 
 ## Application tiers
 

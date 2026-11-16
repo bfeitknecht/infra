@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: cache
           persistentVolumeClaim:
-            claimName: immich-model-cache
+            claimName: immich-cache
 ---
 apiVersion: v1
 kind: Service

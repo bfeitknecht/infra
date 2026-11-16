@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pull-qwen2.5-coder-7b
+  name: ollama-pull-qwen2-5-coder-7b
   namespace: ollama
 spec:
   backoffLimit: 20

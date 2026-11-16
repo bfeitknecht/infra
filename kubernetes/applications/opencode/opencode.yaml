@@ -74,7 +74,7 @@ spec:
       volumes:
         - name: home
           persistentVolumeClaim:
-            claimName: opencode-home
+            claimName: opencode-data
         - name: config
           configMap:
             name: opencode-config
