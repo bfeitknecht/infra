@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timemachine
+  namespace: samba
+  labels:
+    app.kubernetes.io/name: timemachine
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: timemachine
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: timemachine
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      enableServiceLinks: false
+      containers:
+        - name: timemachine
+          image: docker.io/mbentley/timemachine:smb-20261116
+          env:
+            - name: TM_USERNAME
+              value: timemachine
+            - name: SHARE_NAME
+              value: TimeMachine
+            # Cap for all backups on this share. macOS prunes old backups at the cap.
+            - name: VOLUME_SIZE_LIMIT
+              value: "1 T"
+            - name: SET_PERMISSIONS
+              value: "false"
+            # No mDNS. Avahi in a pod does not reach the LAN. Connect by IP.
+            - name: MIMIC_MODEL
+              value: TimeCapsule8,119
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timemachine-secrets
+                  key: PASSWORD
+          ports:
+            - containerPort: 445
+          readinessProbe:
+            tcpSocket:
+              port: 445
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /opt/timemachine
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: timemachine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: timemachine
+  namespace: samba
+spec:
+  type: LoadBalancer
+  # Static IP from lan-pool. Macs store the server address. Do not let it float.
+  loadBalancerIP: 10.10.20.154
+  selector:
+    app.kubernetes.io/name: timemachine
+  ports:
+    - name: smb
+      port: 445
+      targetPort: 445

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - middleware.yaml
+  - pvc.yaml
+  - postgres.yaml
+  - redis.yaml
+  - app.yaml
+  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
+  # - dawarich-secrets.sops.yaml
