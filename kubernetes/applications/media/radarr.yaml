@@ -58,10 +58,10 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: radarr-config
+            claimName: radarr-data
         - name: library
           persistentVolumeClaim:
-            claimName: library
+            claimName: media-files
 ---
 apiVersion: v1
 kind: Service

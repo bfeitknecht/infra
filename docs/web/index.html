@@ -15,8 +15,8 @@
 :root[data-theme=light]{--bg:#f6f7f9;--panel:#fff;--panel2:#f0f2f5;--line:#d9dde3;--fg:#1f2328;--muted:#57606a;--dim:#8c959f}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;display:grid;grid-template-columns:230px 1fr;}
-nav{border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto;background:var(--panel)}
+body{min-height:100vh;background:linear-gradient(to right,var(--panel) 230px,var(--line) 230px,var(--line) 231px,var(--bg) 231px);color:var(--fg);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;display:grid;grid-template-columns:230px 1fr;}
+nav{padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto;align-self:start;background:var(--panel)}
 nav h1{font-size:15px;margin:0 0 4px 6px}
 nav .sub{color:var(--muted);font-size:12px;margin:0 0 16px 6px}
 nav a{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:8px;color:var(--fg);text-decoration:none;cursor:pointer}
@@ -38,7 +38,7 @@ h3{font-size:15px;margin:22px 0 10px}
 .card .l{color:var(--muted);font-size:12px}
 .pill{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:550;border:1px solid transparent;white-space:nowrap}
 .pill:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.s-live{color:var(--live);background:#3fb95018}.s-prepared{color:var(--prep);background:#d2992218}.s-broken{color:var(--broken);background:#f8514918}.s-off{color:var(--off);background:#6e768118}.s-degraded{color:var(--warn);background:#e3b34118}
+.s-live{color:var(--live);background:#3fb95018}.s-prepared{color:var(--prep);background:#d2992218}.s-broken{color:var(--broken);background:#f8514918}.s-disabled{color:var(--off);background:#6e768118}
 .e-public{color:var(--public);background:#bc8cff18}.e-internal{color:var(--internal);background:#58a6ff18}.e-cluster{color:var(--cluster);background:#8b949e18}.e-lan{color:#39c5cf;background:#39c5cf18}
 .tag{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:0 6px}
 code,.mono{font-family:var(--mono);font-size:12.5px}
@@ -93,7 +93,7 @@ svg g.nd:hover .box{stroke:var(--accent)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:12px;margin:8px 0 14px}
 .legend i{display:inline-block;width:22px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:1000px){body{grid-template-columns:1fr}nav{position:static;height:auto}.twocol{grid-template-columns:1fr}}
+@media(max-width:1000px){body{grid-template-columns:1fr;background:var(--bg)}nav{position:static;height:auto}.twocol{grid-template-columns:1fr}}
 .tree{font-family:var(--mono);font-size:12.5px;white-space:pre;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;overflow:auto}
 .bar{height:8px;border-radius:99px;background:var(--panel2);overflow:hidden;margin-top:6px}
 .bar>span{display:block;height:100%;background:var(--accent)}
@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.21.0";
+const INFRA_TAG = "v1.22.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -261,25 +261,25 @@ const NODES = [
   talos:"1.14.6", schematic:"b10204b7…", ext:["tailscale","intel-ucode","nvme-cli","kata-containers","nvidia-open-gpu-kernel-modules-lts","nvidia-container-toolkit-lts"], taint:"none",
   storage:[{path:"USB SanDisk 62 GB",size:"boot, META, STATE",use:"Talos system"},{path:"/var (EPHEMERAL)",size:"107 GB NVMe",use:"images, kubelet, logs"},{path:"/var/mnt/storage-nvme0",size:"893 GB",use:"local-path-nvme: configs, DBs, models"},{path:"/var/mnt/storage-ssd0",size:"4 TB",use:"local-path-ssd: media, photos, files, Time Machine"}],
   routing:"--accept-routes + RoutingRuleConfig 5200 (10.10.0.0/16 → main), advertises 10.10.20.11/32 (approved) so oci reaches it directly. VXLAN via rbpi SNAT does not work.",
-  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","nvidia-device-plugin","tailscale-relay","k8up","glob (broken)"],
-  notes:["GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.","Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before).","Keyboard white not possible: openrazer driver is not a Talos extension."]},
+  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","nvidia-device-plugin","tailscale-relay","k8up","glob"],
+  notes:["GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.","Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before)."]},
 ];
 
-/* status: live | prepared | broken | degraded | off ; exp: public | internal | lan | cluster */
+/* status: live | prepared | broken | disabled ; exp: public | internal | lan | cluster */
 const SERVICES = [
  // ---------- public apps
  {id:"apex", name:"apex", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"https://0xbf.ch", image:"ghcr.io/bfeitknecht/apex:latest (Keel)", desc:"Personal site + WASM app.",
   ports:"HTTP 8080", deps:["traefik","keel"], secrets:["apex/ghcr.sops.yaml"], repo:"apex",
-  notes:["thyme 0.1.0 API change merged (PR #11). Next release after thyme lands on Typst Universe.","Old v1.x tags from October deleted."]},
- {id:"apex-tui", name:"apex SSH TUI", cat:"web", status:"broken", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
+  notes:["Released v0.1.0 on 2026-11-16 (thyme 0.1.0 on Typst Universe).","Old v1.x tags from October deleted."]},
+ {id:"apex-tui", name:"apex SSH TUI", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"ssh 0xbf.ch (port 22)", image:"ghcr.io/bfeitknecht/apex:latest", desc:"SSH portfolio. Any username, no client key.",
   ports:"WAN 22 → Traefik apexssh → apex-tui:2222", deps:["traefik"], secrets:["apex/apex-ssh-host-key.sops.yaml"], repo:"apex",
-  notes:["CrashLoopBackOff: current image predates the SSH binary. Fixed by the apex release after thyme."]},
- {id:"glob", name:"glob", cat:"web", status:"broken", exp:"public", node:"rzbl", tier:"2", ns:"glob", ks:"glob",
+  notes:["Live since apex v0.1.0 (2026-11-16)."]},
+ {id:"glob", name:"glob", cat:"web", status:"live", exp:"public", node:"rzbl", tier:"2", ns:"glob", ks:"glob",
   host:"https://blog.0xbf.ch", image:"ghcr.io/bfeitknecht/glob:latest", desc:"Typst blog built with thyme.",
   ports:"HTTP 8080", deps:["traefik","keel"], secrets:["glob/ghcr.sops.yaml"], repo:"glob",
-  notes:["ImagePullBackOff: no image yet. Waits for @preview/thyme:0.1.0 (typst/packages#6393), then just release v0.1.0.","Draft post posts/notes-to-agents.typ (not mounted)."]},
+  notes:["Released v0.1.0 on 2026-11-16.","Draft post posts/notes-to-agents.typ (not mounted)."]},
  {id:"exhib", name:"exhib", cat:"web", status:"broken", exp:"public", node:"rbpi", tier:"2", ns:"exhib", ks:"exhib",
   host:"https://gallery.0xbf.ch", image:"ghcr.io/bfeitknecht/exhib:latest (Keel)", desc:"Hugo gallery. SWS + upload processor in one container.",
   ports:"HTTP 8080, /health", deps:["traefik","storage","keel"], secrets:["exhib/ghcr.sops.yaml"], repo:"exhib", storage:"exhib-site 50Gi (rbpi nvme0)",
@@ -297,37 +297,37 @@ const SERVICES = [
   ports:"HTTP 8888", deps:["traefik","storage"], secrets:[], storage:"atuin-data 5Gi (rbpi nvme0)", notes:["First app tested on the migrated volume path."]},
  {id:"authentik", name:"authentik", cat:"identity", status:"prepared", exp:"public", node:"rzbl", tier:"1", ns:"authentik", ks:"authentik",
   host:"https://auth.0xbf.ch", image:"authentik 2026.8.5 (Helm) + postgres:17.11", desc:"The one IdP for all apps (OIDC, forward auth, invitations).",
-  ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml (to create)"], storage:"authentik-postgresql 10Gi (rzbl nvme)",
+  ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml (to create)"], storage:"authentik-db 10Gi (rzbl nvme)",
   runbook:"docs/AUTHENTIK.md", notes:["Suspended until the secret exists.","Blueprints in git: groups family/friends, invitation-only enrollment (slug invite).","Bootstrap admin from secret: setup flow never public."]},
  {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media",
   host:"https://jellyfin.internal", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
-  ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-config 20Gi (nvme), library 2Ti (ssd, shared)",
+  ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
   runbook:"docs/RZBL_WORKLOADS.md", notes:["Finish the setup wizard internally, then add a public HTTPRoute (name TBD).","Family logins: local users now, authentik SSO plugin later (web only)."]},
- {id:"sonarr", name:"Sonarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://sonarr.internal", image:"lscr.io/linuxserver/sonarr:4.0.20", desc:"TV series manager.", ports:"HTTP 8989", deps:["storage"], secrets:[], storage:"sonarr-config 2Gi, library /data", notes:["No login yet: set one in Settings > General or put authentik forward-auth in front."]},
- {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-config 2Gi, library /data", notes:["No login yet."]},
- {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-config 1Gi", notes:["No download client yet (needs VPN decision)."]},
+ {id:"sonarr", name:"Sonarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://sonarr.internal", image:"lscr.io/linuxserver/sonarr:4.0.20", desc:"TV series manager.", ports:"HTTP 8989", deps:["storage"], secrets:[], storage:"sonarr-data 2Gi, media-files at /data", notes:["No login yet: set one in Settings > General or put authentik forward-auth in front."]},
+ {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-data 2Gi, media-files at /data", notes:["No login yet."]},
+ {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
  {id:"ollama", name:"Ollama", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"ollama", ks:"ollama",
   host:"ollama.ollama.svc.cluster.local:11434", image:"ollama/ollama:0.40.16", desc:"Local LLM runtime on the GPU. Model qwen2.5-coder:7b (25/29 layers on GPU, 16k context).",
-  ports:"HTTP 11434 (no auth, no route)", deps:["gpu","storage"], secrets:[], storage:"ollama-models 100Gi (rzbl nvme)", notes:["Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull."]},
+  ports:"HTTP 11434 (no auth, no route)", deps:["gpu","storage"], secrets:[], storage:"ollama-cache 100Gi (rzbl nvme)", notes:["Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull."]},
  {id:"opencode", name:"opencode web", cat:"ai", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
   host:"https://opencode.internal", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"Coding agent web UI, default model Ollama.",
-  ports:"HTTP 4096 (basic auth user opencode)", deps:["ollama","traefik","storage"], secrets:["opencode/opencode-secrets.sops.yaml (to create)"], storage:"opencode-home 50Gi (rzbl nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Gives a shell in its pod: password + allowlist required."]},
+  ports:"HTTP 4096 (basic auth user opencode)", deps:["ollama","traefik","storage"], secrets:["opencode/opencode-secrets.sops.yaml (to create)"], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Gives a shell in its pod: password + allowlist required."]},
  {id:"immich", name:"Immich", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"immich", ks:"immich",
-  host:"https://immich.internal (public later: photos.0xbf.ch?)", image:"immich v3.4.1 (server, ML), vectorchord postgres, valkey 9", desc:"Photo library with ML search.",
-  ports:"HTTP 2283", deps:["traefik","storage"], secrets:["immich/immich-secrets.sops.yaml (to create)"], storage:"library 1Ti (ssd), postgres 20Gi, model cache 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md",
+  host:"https://immich.internal (public later: photos.0xbf.ch?)", image:"immich v3.4.1 (server, ML), immich-db (vectorchord postgres), immich-redis (valkey 9)", desc:"Photo library with ML search.",
+  ports:"HTTP 2283", deps:["traefik","storage"], secrets:["immich/immich-secrets.sops.yaml (to create)"], storage:"immich-files 1Ti (ssd), immich-db 20Gi, immich-cache 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md",
   notes:["GATE: no real photos before backups work.","ML on CPU. GPU: -cuda tag + one GPU slot."]},
  {id:"dawarich", name:"Dawarich", cat:"apps", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"dawarich", ks:"dawarich",
   host:"https://dawarich.internal", image:"freikin/dawarich:1.23.0, postgis 17-3.5, redis 8", desc:"Location history (Google Timeline alternative).",
-  ports:"HTTP 3000", deps:["traefik","storage"], secrets:["dawarich/dawarich-secrets.sops.yaml (to create)"], storage:"postgres 20Gi, storage 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:[]},
+  ports:"HTTP 3000", deps:["traefik","storage"], secrets:["dawarich/dawarich-secrets.sops.yaml (to create)"], storage:"dawarich-db 20Gi, dawarich-data 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:[]},
  {id:"copyparty", name:"Copyparty", cat:"apps", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"copyparty", ks:"copyparty",
   host:"https://files.internal (public later: files.0xbf.ch)", image:"copyparty/ac:1.20.26", desc:"File server / sharing. Accounts in its config.",
   ports:"HTTP 3923", deps:["traefik","storage"], secrets:["copyparty/copyparty-config.sops.yaml (to create)"], storage:"copyparty-files 500Gi (ssd)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Safe to make public: accounts come from the config."]},
  {id:"timemachine", name:"Time Machine (Samba)", cat:"apps", status:"prepared", exp:"lan", node:"rzbl", tier:"1", ns:"samba", ks:"samba",
   host:"smb://10.10.20.145/TimeMachine", image:"mbentley/timemachine:smb-20261116", desc:"Mac backups over SMB. LB IP .145 (= 445).",
-  ports:"SMB 445 (LoadBalancer 10.10.20.145)", deps:["storage"], secrets:["samba/timemachine-secrets.sops.yaml (to create)"], storage:"timemachine 1Ti (ssd), cap 1 T", runbook:"docs/RZBL_WORKLOADS.md", notes:["No mDNS: add the server by IP on each Mac."]},
+  ports:"SMB 445 (LoadBalancer 10.10.20.145)", deps:["storage"], secrets:["samba/timemachine-secrets.sops.yaml (to create)"], storage:"timemachine-files 1Ti (ssd), cap 1 T", runbook:"docs/RZBL_WORKLOADS.md", notes:["No mDNS: add the server by IP on each Mac."]},
  {id:"runner", name:"Forgejo runner", cat:"dev", status:"prepared", exp:"cluster", node:"rzbl", tier:"1", ns:"forgejo-runner", ks:"forgejo-runner",
   host:"—", image:"code.forgejo.org/forgejo/runner:13.2.1 + docker:28-dind", desc:"CI runner for Forgejo Actions (labels docker, ubuntu-latest).",
-  ports:"—", deps:["forgejo","storage"], secrets:["forgejo-runner/forgejo-runner-secrets.sops.yaml (to create)"], storage:"runner-data 5Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Enable [actions] in Forgejo app.ini.","GitHub becomes a push mirror."]},
+  ports:"—", deps:["forgejo","storage"], secrets:["forgejo-runner/forgejo-runner-secrets.sops.yaml (to create)"], storage:"forgejo-runner-data 5Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Enable [actions] in Forgejo app.ini.","GitHub becomes a push mirror."]},
  // ---------- internal platform apps
  {id:"agh", name:"AdGuard Home", cat:"network", status:"live", exp:"lan", node:"rbpi", tier:"1", ns:"agh", ks:"agh",
   host:"10.10.20.153 (DNS) · https://agh.internal", image:"adguard/adguardhome:v0.107.79", desc:"LAN DNS edge. Upstream: kresd 10.96.0.53.",
@@ -335,7 +335,7 @@ const SERVICES = [
  {id:"dns", name:"knotd + kresd", cat:"network", status:"live", exp:"cluster", node:"oci", tier:"1", ns:"dns", ks:"dns",
   host:"10.96.0.53 (Service resolver)", image:"knot + knot-resolver", desc:"Authoritative internal. zone + recursive resolver with DNSSEC.",
   ports:"DNS 53", deps:[], secrets:[], notes:["Only workload on the tainted control plane.","Zone: applications/dns/knot/internal.zone."]},
- {id:"homepage", name:"Homepage", cat:"network", status:"degraded", exp:"internal", node:"any", tier:"1", ns:"homepage", ks:"homepage",
+ {id:"homepage", name:"Homepage", cat:"network", status:"live", exp:"internal", node:"any", tier:"1", ns:"homepage", ks:"homepage",
   host:"https://homepage.internal", image:"homepage v2.4.0", desc:"Dashboard with cluster stats.", ports:"HTTP 3000", deps:["traefik","metrics-server"], secrets:["homepage/homepage-services (sops)"],
   notes:["Grafana and Gatus widgets fail while monitoring is off. Remove them from services.yaml (sops)."]},
  {id:"devil", name:"devil", cat:"dev", status:"live", exp:"internal", node:"rbpi", tier:"1", ns:"devil", ks:"devil",
@@ -349,10 +349,10 @@ const SERVICES = [
  {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + internal CA for *.internal.", ports:"—", deps:["cilium"], secrets:["cert-manager/cloudflare-dns01.sops.yaml"], notes:[]},
  {id:"cilium", name:"Cilium", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"kube-system", ks:"cilium", host:"—", image:"cilium 1.20.2", desc:"CNI, kube-proxy replacement, LB-IPAM + L2 announcements, VXLAN overlay.", ports:"—", deps:["storage","prometheus-crds"], secrets:[], notes:["L2 announce on rbpi end0 for pool 10.10.20.128/25.","Overlay to oci runs over Tailscale."]},
  {id:"tailscale-op", name:"Tailscale operator", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"tailscale", ks:"tailscale", host:"—", image:"tailscale operator 1.102.3", desc:"Tailnet ingress/egress proxies with tag:k8s.", ports:"—", deps:["traefik"], secrets:["tailscale/operator-oauth.sops.yaml"], notes:[]},
- {id:"relay", name:"tailscale-relay", cat:"platform", status:"degraded", exp:"cluster", node:"rzbl", tier:"infra", ns:"egress", ks:"egress-tailscale",
+ {id:"relay", name:"tailscale-relay", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"egress", ks:"egress-tailscale",
   host:"tailscale-relay.egress.svc:3900 → 100.96.72.126:3900", image:"tailscale v1.104.1 + socat", desc:"Untagged user device that can reach the friend's shared-in NAS.",
   ports:"3900", deps:[], secrets:["egress/relay-authkey.sops.yaml"], notes:["Pod runs since 2026-11-16 (PodSecurity + TS_KUBE_SECRET fixes).","Target refuses 3900: Garage on the NAS is not listening on its tailnet IP.","Alternative later: tailcat (tailscale.com/tailcat)."]},
- {id:"k8up", name:"k8up", cat:"platform", status:"degraded", exp:"cluster", node:"rzbl", tier:"infra", ns:"k8up", ks:"backup", host:"—", image:"k8up 4.10.0", desc:"Restic backups of PVCs to Garage S3 on the friend's NAS.", ports:"—", deps:["k8up-crds"], secrets:["backup/k8up/backup-credentials.sops.yaml"],
+ {id:"k8up", name:"k8up", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"k8up", ks:"backup", host:"—", image:"k8up 4.10.0", desc:"Restic backups of PVCs to Garage S3 on the friend's NAS.", ports:"—", deps:["k8up-crds"], secrets:["backup/k8up/backup-credentials.sops.yaml"],
   notes:["No backup has ever succeeded. Gate for immich.","Schedules: forgejo 03:00, pds 03:30, atuin 04:30, authentik 05:00 (pg_dump)."]},
  {id:"gpu", name:"NVIDIA device plugin", cat:"platform", status:"live", exp:"cluster", node:"rzbl", tier:"infra", ns:"gpu", ks:"gpu", host:"—", image:"nvidia-device-plugin 0.20.1", desc:"Exposes nvidia.com/gpu. Time-slicing 4. RuntimeClass nvidia.", ports:"—", deps:[], secrets:[], notes:["Talos loads nvidia, nvidia_uvm, nvidia_drm, nvidia_modeset (patch 07-nvidia)."]},
  {id:"keel", name:"Keel", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"keel", ks:"keel", host:"—", image:"keel", desc:"Polls :latest digests for tier-2 apps and restarts them.", ports:"—", deps:[], secrets:[], notes:["Flux ignores the image field of tier-2 Deployments."]},
@@ -360,9 +360,7 @@ const SERVICES = [
  {id:"storage", name:"local-path-provisioner", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"local-path-storage", ks:"storage", host:"—", image:"rancher/local-path-provisioner v0.0.28", desc:"Node-local volumes. Classes local-path, local-path-nvme, local-path-ssd.", ports:"—", deps:[], secrets:[], notes:[]},
  {id:"metrics", name:"metrics-server", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"monitoring", ks:"monitoring", host:"—", image:"metrics-server 3.14.0", desc:"kubectl top, homepage stats.", ports:"—", deps:[], secrets:[], notes:[]},
  {id:"kata", name:"Kata Containers", cat:"platform", status:"live", exp:"cluster", node:"rbpi", tier:"infra", ns:"—", ks:"kata", host:"—", image:"kata 3.32.0 (Talos ext)", desc:"RuntimeClass kata-qemu for VM pods (devil).", ports:"—", deps:[], secrets:[], notes:[]},
- {id:"rzbl-kbd", name:"rzbl keyboard", cat:"platform", status:"degraded", exp:"cluster", node:"rzbl", tier:"infra", ns:"rzbl-keyboard", ks:"rzbl-keyboard", host:"—", image:"alpine (DaemonSet)", desc:"Tries to set the keyboard white.", ports:"—", deps:[], secrets:[], notes:["No effect: needs openrazer driver (custom Talos extension)."]},
- {id:"monitoring", name:"Prometheus / Grafana / Gatus", cat:"platform", status:"off", exp:"internal", node:"—", tier:"infra", ns:"monitoring", ks:"monitoring", host:"status.internal, grafana (was)", image:"kube-prometheus-stack 91.4.1, gatus v5.36.0", desc:"Turned off 2026-11-15. Config kept, commented out.", ports:"—", deps:[], secrets:["monitoring/grafana-credentials.sops.yaml"], notes:["Re-enable together with Renovate."]},
- {id:"teleport", name:"Teleport", cat:"platform", status:"off", exp:"internal", node:"—", tier:"—", ns:"—", ks:"—", host:"—", image:"—", desc:"Removed 2026-10-24.", ports:"—", deps:[], secrets:[], notes:[]},
+ {id:"monitoring", name:"Prometheus / Grafana / Gatus", cat:"platform", status:"disabled", exp:"internal", node:"—", tier:"infra", ns:"monitoring", ks:"monitoring", host:"status.internal, grafana (was)", image:"kube-prometheus-stack 91.4.1, gatus v5.36.0", desc:"Turned off 2026-11-15. Config kept, commented out.", ports:"—", deps:[], secrets:["monitoring/grafana-credentials.sops.yaml"], notes:["Re-enable together with Renovate."]},
 ];
 
 const NEEDS = [
@@ -370,7 +368,6 @@ const NEEDS = [
  {id:"zyxel-2223", prio:1, cat:"router", t:"Zyxel rule 2223/tcp → 10.10.20.10:2223", d:"Network Setting > NAT > Port Forwarding. Git SSH from WAN fails until then.", svc:"forgejo"},
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"NAS refuses 3900 on its tailnet IP (80/443 work). s3_api.bind_addr = \"[::]:3900\", Docker port, firewall on tailscale0.", svc:"k8up"},
  {id:"authentik-secret", prio:1, cat:"secret", t:"authentik secret → un-suspend", d:"docs/AUTHENTIK.md. Then own admin + passkey, deactivate akadmin.", svc:"authentik"},
- {id:"thyme", prio:2, cat:"external", t:"thyme on Typst Universe, then release glob + apex", d:"typst/packages#6393. Then just release v0.1.0 in glob and apex.", svc:"glob"},
  {id:"jellyfin-wizard", prio:2, cat:"decision", t:"Jellyfin wizard + public name", d:"Finish wizard at jellyfin.internal first (it runs without auth). Then public HTTPRoute, e.g. media.0xbf.ch.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
@@ -414,7 +411,7 @@ const PORTS = [
  ["41641","UDP","oci VCN","Tailscale WireGuard (only open port on oci)"],
 ];
 const HOSTS = [
- ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob (broken)"],["gallery.0xbf.ch","public","exhib (down)"],["git.0xbf.ch","public","forgejo"],
+ ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib (down)"],["git.0xbf.ch","public","forgejo"],
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik (prepared)"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
  ["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],
@@ -435,15 +432,15 @@ const SCS = [
 ];
 const PVS = [
  ["forgejo","forgejo-data","10Gi","rbpi","storage-nvme1","live"],["pds","pds-data","10Gi","rbpi","storage-nvme0","live"],
- ["exhib","exhib-site","50Gi","rbpi","storage-nvme0","live"],["devil","devil-pvc","20Gi","rbpi","storage-nvme0","live"],
+ ["exhib","exhib-site (exception)","50Gi","rbpi","storage-nvme0","live"],["devil","devil-pvc (exception)","20Gi","rbpi","storage-nvme0","live"],
  ["agh","agh-data","1Gi","rbpi","storage-nvme0","live"],["atuin","atuin-data","5Gi","rbpi","storage-nvme0","live"],
- ["media","library","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-config","20Gi","rzbl","storage-nvme0","live"],
- ["media","sonarr/radarr/prowlarr-config","2/2/1Gi","rzbl","storage-nvme0","live"],["ollama","ollama-models","100Gi","rzbl","storage-nvme0","live"],
- ["egress","tailscale-relay-state","1Gi","rzbl","—","live"],
- ["immich","library / postgres / model-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","prepared"],
- ["dawarich","postgres / storage","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","prepared"],
- ["samba","timemachine","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","runner-data","5Gi","rzbl","storage-nvme0","prepared"],
- ["opencode","opencode-home","50Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-postgresql","10Gi","rzbl","storage-nvme0","prepared"],
+ ["media","media-files","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-data","20Gi","rzbl","storage-nvme0","live"],
+ ["media","sonarr-data / radarr-data / prowlarr-data","2/2/1Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
+ ["egress","tailscale-relay-state (exception)","1Gi","rzbl","—","broken"],
+ ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","prepared"],
+ ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","prepared"],
+ ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","prepared"],
+ ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","prepared"],
 ];
 const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   (pinned GitRepositories)
 storage
@@ -456,9 +453,10 @@ storage
              └─ apps: apex glob exhib forgejo pds atuin homepage devil agh(dns) media* …
 gpu ── media, ollama ── opencode*
 backup (k8up) ← egress-tailscale
-kata, keel, knative-operator → knative-serving, rzbl-keyboard, ddns, dns
+kata, keel, knative-operator → knative-serving, ddns, dns
 * suspended: authentik immich dawarich copyparty samba forgejo-runner opencode`;
 const TAGS = [
+ ["v1.22.0","2026-11-16","naming convention (PVCs, DB/Redis, sops files), rzbl-keyboard removed"],
  ["v1.21.0","2026-11-16","authentik prepared (suspended)"],
  ["v1.20.0","2026-11-16","ollama, opencode (suspended), GPU time-slicing, LB IP rule (.145)"],
  ["v1.19.1","2026-11-16","prepared immich, dawarich, copyparty, Time Machine, runner"],
@@ -479,7 +477,7 @@ const SECRETS = [
  ["monitoring/grafana-credentials.sops.yaml","monitoring","exists (unused)","Grafana admin"],
  ["applications/agh/agh-config.sops.yaml","agh","exists","whole AdGuardHome.yaml seed"],
  ["applications/apex/ghcr.sops.yaml","apex","exists","GHCR pull (tier 2; can go if images become public)"],
- ["applications/apex/apex-ssh-host-key.sops.yaml","apex","exists","SSH host key, keep stable"],
+ ["applications/apex/apex-ssh-host-key.sops.yaml","apex","exists","SSH host key, keep stable (renamed from ssh-host-key.sops.yaml)"],
  ["applications/glob/ghcr.sops.yaml","glob","exists","GHCR pull"],
  ["applications/exhib/ghcr.sops.yaml","exhib","exists","GHCR pull"],
  ["applications/forgejo/forgejo-secrets.sops.yaml","forgejo","exists","[security] block, admin"],
@@ -504,7 +502,6 @@ const DOCS = [
  ["docs/IDENTITY.md","IdP options and decision"],
  ["docs/WORKSPACE.md","justfile verbs, nix shells, per-repo gaps"],
  ["docs/BACKUP_NAS_OUTLINE.md","friend NAS backup path"],
- ["docs/GO_LIVE*.md","historic go-live notes"],
  ["HARDWARE.md","node hardware and assembly"],
  ["talos/topf.yaml","nodes, versions, schematics"],
  [".private/pv-backup-2026-11-15/","PV objects before the rbpi migration"],
@@ -530,7 +527,7 @@ cd ../exhib; just upload uploads/<slug>; just logs`;
    RENDER
    ============================================================ */
 const $=s=>document.querySelector(s), h=(t,a={},...c)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(k==="html")e.innerHTML=v;else e.setAttribute(k,v)}for(const x of c.flat())if(x!=null)e.append(x.nodeType?x:document.createTextNode(x));return e};
-const STATE_LABEL={live:"live",prepared:"prepared",broken:"broken",degraded:"degraded",off:"off"};
+const STATE_LABEL={live:"live",prepared:"prepared",broken:"broken",disabled:"disabled"};
 const EXP_LABEL={public:"public",internal:"internal",lan:"LAN",cluster:"cluster"};
 const pill=(cls,txt)=>h("span",{class:"pill "+cls},txt);
 const sp=s=>pill("s-"+s.status,STATE_LABEL[s.status]), ep=s=>pill("e-"+s.exp,EXP_LABEL[s.exp]);
@@ -551,10 +548,10 @@ if(localStorage.getItem("atlas-theme"))document.documentElement.dataset.theme=lo
 function renderOverview(){
  const by=k=>SERVICES.filter(s=>s.status===k).length;
  const apps=SERVICES.filter(s=>!["platform"].includes(s.cat));
- const cards=[["Nodes",NODES.length,"oci · rbpi · rzbl","nodes"],["Live",by("live"),"running as intended","services"],["Prepared",by("prepared"),"waiting for a secret","services"],["Broken / degraded",by("broken")+by("degraded"),"see Needs you","needs"],
+ const cards=[["Nodes",NODES.length,"oci · rbpi · rzbl","nodes"],["Live",by("live"),"running as intended","services"],["Prepared",by("prepared"),"waiting for a secret","services"],["Broken",by("broken"),"see Needs you","needs"],
   ["Public endpoints",SERVICES.filter(s=>s.exp==="public"&&s.status==="live").length,"live on *.0xbf.ch","network"],["Needs you",NEEDS.filter(n=>!done(n.id)).length,"open items","needs"],["Secrets to create",SECRETS.filter(s=>s[2]==="TO CREATE").length,"sops files","secrets"],["GPU slots",4,"GTX 1660 Ti, 2 used","nodes"]];
  $("#stats").replaceChildren(...cards.map(([l,n,s,go])=>h("div",{class:"card",style:"cursor:pointer",onclick:()=>location.hash=go},h("div",{class:"n"},String(n)),h("div",{},l),h("div",{class:"l"},s))));
- const tot=SERVICES.length; const col={live:"var(--live)",prepared:"var(--prep)",broken:"var(--broken)",degraded:"var(--warn)",off:"var(--off)"};
+ const tot=SERVICES.length; const col={live:"var(--live)",prepared:"var(--prep)",broken:"var(--broken)",disabled:"var(--off)"};
  $("#statebars").replaceChildren(...Object.keys(col).map(k=>h("div",{style:"margin:6px 0"},h("div",{style:"display:flex;justify-content:space-between"},sp({status:k}),h("span",{class:"small"},`${by(k)} / ${tot}`)),h("div",{class:"bar"},h("span",{style:`width:${by(k)/tot*100}%;background:${col[k]}`})))));
  $("#topneeds").replaceChildren(...NEEDS.filter(n=>!done(n.id)&&n.prio===1).map(needRow));
 }
@@ -574,7 +571,7 @@ function renderServices(){
  $("#expchips").replaceChildren(...Object.keys(EXP_LABEL).map(k=>h("span",{class:"chip"+(F.ex.has(k)?" on":""),onclick:()=>{F.ex.has(k)?F.ex.delete(k):F.ex.add(k);renderServices()}},EXP_LABEL[k])));
  const q=F.q.toLowerCase();
  const list=SERVICES.filter(s=>(!F.node||s.node===F.node)&&(!F.cat||s.cat===F.cat)&&(!F.st.size||F.st.has(s.status))&&(!F.ex.size||F.ex.has(s.exp))&&(!q||JSON.stringify(s).toLowerCase().includes(q)));
- const order={broken:0,degraded:1,prepared:2,live:3,off:4};
+ const order={broken:0,prepared:1,live:2,disabled:3};
  list.sort((a,b)=>order[a.status]-order[b.status]||a.name.localeCompare(b.name));
  $("#svcgrid").replaceChildren(...list.map(s=>h("div",{class:"card svc",onclick:()=>openSvc(s.id)},
   h("div",{class:"top"},h("div",{class:"name"},s.name),sp(s)),h("div",{class:"desc"},s.desc),h("div",{class:"small mono",style:"word-break:break-all"},s.host),
@@ -593,7 +590,7 @@ function openSvc(id){const s=SERVICES.find(x=>x.id===id)||NODES.find(x=>x.id===i
    ["Storage",s.storage||"—"],["Depends on",(s.deps||[]).join(", ")||"—"],["Secrets",(s.secrets||[]).length?h("div",{},...s.secrets.map(x=>h("div",{class:"mono small"},x))):"—"],["Runbook",s.runbook?h("a",{class:"link",href:"../"+s.runbook.replace(/^docs\//,"")},s.runbook):"—"],["App repo",s.repo||"—"]];
   b.append(h("h2",{},s.name),h("p",{class:"lead"},s.desc),h("div",{class:"kv"},...kv.flatMap(([k,v])=>[h("div",{},k),h("div",{},v)])));
   if(needs.length)b.append(h("h3",{},"Needs you"),h("div",{class:"card",style:"padding:0"},...needs.map(needRow)));
-  if(s.notes&&s.notes.length)b.append(h("h3",{},"Notes"),...s.notes.map(n=>h("div",{class:"note"+(s.status==="broken"?" bad":s.status==="degraded"?" warn":"")},n)));
+  if(s.notes&&s.notes.length)b.append(h("h3",{},"Notes"),...s.notes.map(n=>h("div",{class:"note"+(s.status==="broken"?" bad":"")},n)));
   const users=SERVICES.filter(x=>(x.deps||[]).includes(s.id)||(x.deps||[]).includes(s.ks));
   if(users.length)b.append(h("h3",{},"Used by"),h("div",{class:"chips"},...users.map(u=>h("span",{class:"chip",onclick:()=>openSvc(u.id)},u.name))));
  }
@@ -649,7 +646,7 @@ const TN=[ // id,label,sub,x,y,w,ref
  ["pds","PDS","pds.0xbf.ch",365,375,100,"pds"],
  ["atuin","atuin","",475,375,105,"atuin"],
  ["exhib","exhib","gallery (down)",60,440,110,"exhib"],
- ["apex","apex","0xbf.ch + TUI",180,440,110,"apex"],
+ ["apex","apex","0xbf.ch + ssh :22",180,440,110,"apex"],
  ["devil","devil","kata VM",300,440,100,"devil"],
  ["aghpod","AGH pod","",410,440,80,"agh"],
  ["nv0","nvme0/nvme1","256+250 GB",500,440,90,null],
@@ -667,7 +664,7 @@ const TN=[ // id,label,sub,x,y,w,ref
  ["tm","Time Machine",".145 prepared",1080,440,110,"timemachine"],
  ["relay","ts-relay","→ NAS :3900",1200,440,80,"relay"],
  ["disks","NVMe 893 GB · SSD 4 TB","/var on NVMe, boot USB",670,505,260,null],
- ["glob","glob","blog (broken)",940,505,90,"glob"],
+ ["glob","glob","blog.0xbf.ch",940,505,90,"glob"],
  ["k8up","k8up","backups (failing)",1040,505,110,"k8up"],
  // oci
  ["oci","oci (Oracle Cloud)","control plane · 10.20.20.10 · 100.73.186.19",40,640,700,"oci"],
@@ -693,7 +690,7 @@ function renderTopo(){const svg=$("#topo");svg.innerHTML="";const NS="http://www
  TN.filter(n=>groups.includes(n[0])).forEach(([id,l,s,x,y,w,ref])=>{const p=pos[id];const g=el("g",{class:"nd","data-id":id});g.append(el("rect",{class:"grp",x,y,width:w,height:p.h,rx:12}));const t=el("text",{x:x+12,y:y+18,"font-weight":"650"});t.textContent=l;const t2=el("text",{x:x+12+l.length*7.6+10,y:y+18,class:"sub"});t2.textContent=s;g.append(t,t2);g.onclick=()=>ref&&openSvc(ref);svg.append(g)});
  const edgeEls=TE.map(([a,b,t])=>{const A=pos[a],B=pos[b];const ay=groups.includes(a)?A.y+A.h:A.cy, by=groups.includes(b)?B.y:B.cy;const path=el("path",{class:"edge "+t,d:`M${A.cx},${ay} C${A.cx},${(ay+by)/2} ${B.cx},${(ay+by)/2} ${B.cx},${by}`});eg.append(path);return{a,b,path}});
  TN.filter(n=>!groups.includes(n[0])).forEach(([id,l,s,x,y,w,ref])=>{const p=pos[id];const g=el("g",{class:"nd","data-id":id});
-  const svc=ref&&SERVICES.find(z=>z.id===ref);const col=svc?{live:"var(--live)",prepared:"var(--prep)",broken:"var(--broken)",degraded:"var(--warn)",off:"var(--off)"}[svc.status]:"var(--line)";
+  const svc=ref&&SERVICES.find(z=>z.id===ref);const col=svc?{live:"var(--live)",prepared:"var(--prep)",broken:"var(--broken)",disabled:"var(--off)"}[svc.status]:"var(--line)";
   g.append(el("rect",{class:"box",x,y,width:w,height:p.h,rx:8}),el("rect",{x,y,width:4,height:p.h,rx:2,fill:col}));
   const t=el("text",{x:x+11,y:y+19,"font-weight":"600"});t.textContent=l;g.append(t);if(s){const t2=el("text",{x:x+11,y:y+35,class:"sub"});t2.textContent=s;g.append(t2)}
   g.onmouseenter=()=>{const linked=new Set([id]);edgeEls.forEach(e=>{if(e.a===id||e.b===id){e.path.classList.add("hl");linked.add(e.a);linked.add(e.b)}});svg.querySelectorAll("g.nd").forEach(n=>{if(!linked.has(n.dataset.id)&&!groups.includes(n.dataset.id))n.classList.add("dim")})};

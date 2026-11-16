@@ -4,8 +4,8 @@ resources:
   - namespace.yaml
   - middleware.yaml
   - pvc.yaml
-  - postgres.yaml
-  - valkey.yaml
+  - db.yaml
+  - redis.yaml
   - server.yaml
   - machine-learning.yaml
   # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.

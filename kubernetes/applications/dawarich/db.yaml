@@ -1,48 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: immich-postgres
-  namespace: immich
+  name: dawarich-db
+  namespace: dawarich
   labels:
-    app.kubernetes.io/name: immich-postgres
+    app.kubernetes.io/name: dawarich-db
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app.kubernetes.io/name: immich-postgres
+      app.kubernetes.io/name: dawarich-db
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: immich-postgres
+        app.kubernetes.io/name: dawarich-db
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
       enableServiceLinks: false
       containers:
         - name: postgres
-          # Image and digest are from the immich v3.4.1 docker-compose.yml.
-          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+          image: docker.io/postgis/postgis:17-3.5-alpine
           env:
             - name: POSTGRES_USER
               value: postgres
             - name: POSTGRES_DB
-              value: immich
-            - name: POSTGRES_INITDB_ARGS
-              value: --data-checksums
+              value: dawarich
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: immich-secrets
-                  key: DB_PASSWORD
+                  name: dawarich-secrets
+                  key: POSTGRES_PASSWORD
           ports:
             - containerPort: 5432
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "postgres", "-d", "immich"]
+              command: ["pg_isready", "-U", "postgres", "-d", "dawarich"]
             periodSeconds: 10
           resources:
             requests:
@@ -58,20 +55,20 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: immich-postgres
+            claimName: dawarich-db
         - name: shm
           emptyDir:
             medium: Memory
-            sizeLimit: 128Mi
+            sizeLimit: 1Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: immich-postgres
-  namespace: immich
+  name: dawarich-db
+  namespace: dawarich
 spec:
   selector:
-    app.kubernetes.io/name: immich-postgres
+    app.kubernetes.io/name: dawarich-db
   ports:
     - name: main
       port: 5432

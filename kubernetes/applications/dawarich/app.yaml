@@ -31,7 +31,7 @@ spec:
             - name: REDIS_URL
               value: redis://dawarich-redis:6379
             - name: DATABASE_HOST
-              value: dawarich-postgres
+              value: dawarich-db
             - name: DATABASE_PORT
               value: "5432"
             - name: DATABASE_USERNAME
@@ -94,7 +94,7 @@ spec:
       volumes:
         - name: storage
           persistentVolumeClaim:
-            claimName: dawarich-storage
+            claimName: dawarich-data
 ---
 apiVersion: v1
 kind: Service

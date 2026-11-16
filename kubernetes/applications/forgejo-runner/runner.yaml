@@ -84,6 +84,6 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: runner-data
+            claimName: forgejo-runner-data
         - name: docker
           emptyDir: {}

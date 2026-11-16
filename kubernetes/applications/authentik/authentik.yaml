@@ -32,7 +32,7 @@ spec:
       # Non-secret config. The Secret authentik-secrets holds the rest.
       env:
         - name: AUTHENTIK_POSTGRESQL__HOST
-          value: authentik-postgresql
+          value: authentik-db
         - name: AUTHENTIK_POSTGRESQL__NAME
           value: authentik
         - name: AUTHENTIK_POSTGRESQL__USER

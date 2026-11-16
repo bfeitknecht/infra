@@ -1,9 +1,0 @@
-# No SysfsConfig here. razerkbd (openrazer) is out-of-tree and has no Talos
-# extension, so its sysfs paths never exist. SysfsConfig on missing paths
-# loops errors in KernelParamSpecController.
-apiVersion: v1alpha1
-kind: UdevRulesConfig
-rules:
-  - 'SUBSYSTEM=="leds", KERNEL=="*kbd_backlight", ATTR{brightness}="255"'
-  - 'SUBSYSTEM=="hid", ATTRS{idVendor}=="1532", TAG+="uaccess"'
-  - 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", TAG+="uaccess"'
