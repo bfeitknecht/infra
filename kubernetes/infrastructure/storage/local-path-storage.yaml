@@ -125,6 +125,29 @@ volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 
 ---
+# nodePath selects one path from nodePathMap. Class local-path picks at random.
+# storage-nvme0 exists on rbpi and rzbl. storage-ssd0 exists on rzbl only.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-path-nvme
+provisioner: rancher.io/local-path
+parameters:
+  nodePath: /var/mnt/storage-nvme0
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-path-ssd
+provisioner: rancher.io/local-path
+parameters:
+  nodePath: /var/mnt/storage-ssd0
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+
+---
 kind: ConfigMap
 apiVersion: v1
 metadata:

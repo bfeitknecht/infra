@@ -1,0 +1,66 @@
+# One library volume on the rzbl 4 TB SSD. Jellyfin and the *arr apps share
+# it, so imports are moves on one filesystem. Config volumes are on NVMe.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: library
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-ssd
+  resources:
+    requests:
+      storage: 2Ti
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-nvme
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-nvme
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: radarr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-nvme
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prowlarr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-nvme
+  resources:
+    requests:
+      storage: 1Gi
