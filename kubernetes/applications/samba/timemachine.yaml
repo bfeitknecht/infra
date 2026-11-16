@@ -68,8 +68,9 @@ metadata:
   namespace: samba
 spec:
   type: LoadBalancer
-  # Static IP from lan-pool. Macs store the server address. Do not let it float.
-  loadBalancerIP: 10.10.20.154
+  # Static IP from lan-pool: .145 = 100 + (445 mod 100). Macs store the
+  # server address. Do not let it float.
+  loadBalancerIP: 10.10.20.145
   selector:
     app.kubernetes.io/name: timemachine
   ports:
