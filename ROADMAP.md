@@ -27,7 +27,8 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NEXT
 
-- [ ] **Download client** (qBittorrent) for *arr. Needs VPN decision.
+- [ ] **qBittorrent over Proton VPN** (prepared): WireGuard key secret, then un-suspend (`docs/RZBL_WORKLOADS.md`).
+- [ ] **Agent isolation** for opencode: decide (`docs/AGENT_ISOLATION.md`).
 - [ ] Immich ML `-cuda` image on a GPU slot.
 - [ ] Open WebUI on top of Ollama (optional; opencode web covers coding).
 - [ ] **Renovate** + monitoring back (Prometheus, Grafana, Gatus, alerting receiver).

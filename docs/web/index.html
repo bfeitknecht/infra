@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.22.0";
+const INFRA_TAG = "v1.23.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -306,6 +306,10 @@ const SERVICES = [
  {id:"sonarr", name:"Sonarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://sonarr.internal", image:"lscr.io/linuxserver/sonarr:4.0.20", desc:"TV series manager.", ports:"HTTP 8989", deps:["storage"], secrets:[], storage:"sonarr-data 2Gi, media-files at /data", notes:["No login yet: set one in Settings > General or put authentik forward-auth in front."]},
  {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-data 2Gi, media-files at /data", notes:["No login yet."]},
  {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
+ {id:"qbittorrent", name:"qBittorrent (Proton VPN)", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"qbittorrent",
+  host:"https://qbittorrent.internal", image:"linuxserver/qbittorrent:5.3.0 + qmcgaw/gluetun:v3.41.3", desc:"Torrent client. All traffic through Proton VPN WireGuard (P2P, port forwarding, kill switch).",
+  ports:"HTTP 8080, forwarded port via NAT-PMP", deps:["media"], secrets:["qbittorrent/qbittorrent-secrets.sops.yaml (to create)"], storage:"qbittorrent-data 1Gi (nvme), media-files at /data", runbook:"docs/RZBL_WORKLOADS.md",
+  notes:["Namespace media (shares media-files with the *arr apps).","Verify the exit IP is not 31.164.81.63."]},
  {id:"ollama", name:"Ollama", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"ollama", ks:"ollama",
   host:"ollama.ollama.svc.cluster.local:11434", image:"ollama/ollama:0.40.16", desc:"Local LLM runtime on the GPU. Model qwen2.5-coder:7b (25/29 layers on GPU, 16k context).",
   ports:"HTTP 11434 (no auth, no route)", deps:["gpu","storage"], secrets:[], storage:"ollama-cache 100Gi (rzbl nvme)", notes:["Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull."]},
@@ -378,7 +382,8 @@ const NEEDS = [
  {id:"homepage-widgets", prio:3, cat:"secret", t:"Homepage: drop grafana/gatus widgets", d:"Edit homepage-services (sops) while monitoring is off.", svc:"homepage"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
- {id:"vpn", prio:3, cat:"decision", t:"Download client + VPN", d:"qBittorrent for the *arr apps needs a VPN choice.", svc:"sonarr"},
+ {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
+ {id:"agent-iso", prio:2, cat:"decision", t:"Agent isolation for opencode", d:"Recommendation: kata-qemu + Cilium egress allowlist + authentik. docs/AGENT_ISOLATION.md.", svc:"opencode"},
  {id:"smtp", prio:3, cat:"decision", t:"SMTP (Proton)", d:"Blocks authentik email invites/resets and PDS email.", svc:"authentik"},
  {id:"autoapprove", prio:3, cat:"decision", t:"Tailscale autoApprovers (optional)", d:"Auto-approve 10.10.0.0/16 and 10.20.20.0/24 for tag:infra.", svc:null},
  {id:"exhib-media", prio:3, cat:"manual", t:"exhib: uncommitted processor/media.py", d:"Local change not committed (not by the agent).", svc:"exhib"},
@@ -414,7 +419,7 @@ const HOSTS = [
  ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib (down)"],["git.0xbf.ch","public","forgejo"],
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik (prepared)"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
- ["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],
+ ["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
  ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["files.internal","internal","copyparty (prepared)"],["opencode.internal","internal","prepared"],
 ];
 const TAIL = [
@@ -440,7 +445,7 @@ const PVS = [
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","prepared"],
  ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","prepared"],
  ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","prepared"],
- ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","prepared"],
+ ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","prepared"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","prepared"],
 ];
 const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   (pinned GitRepositories)
 storage
@@ -454,8 +459,10 @@ storage
 gpu ── media, ollama ── opencode*
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
-* suspended: authentik immich dawarich copyparty samba forgejo-runner opencode`;
+* suspended: authentik immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
 const TAGS = [
+ ["v1.23.0","2026-11-16","qBittorrent + Proton VPN (suspended), media namespace privileged"],
+ ["v1.22.1","2026-11-16","apex: no service account token (TUI fix)"],
  ["v1.22.0","2026-11-16","naming convention (PVCs, DB/Redis, sops files), rzbl-keyboard removed"],
  ["v1.21.0","2026-11-16","authentik prepared (suspended)"],
  ["v1.20.0","2026-11-16","ollama, opencode (suspended), GPU time-slicing, LB IP rule (.145)"],
@@ -493,10 +500,12 @@ const SECRETS = [
  ["applications/samba/timemachine-secrets.sops.yaml","samba","TO CREATE","PASSWORD"],
  ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","TO CREATE","RUNNER_TOKEN"],
  ["applications/opencode/opencode-secrets.sops.yaml","opencode","TO CREATE","OPENCODE_SERVER_PASSWORD"],
+ ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","TO CREATE","WIREGUARD_PRIVATE_KEY (Proton)"],
 ];
 const DOCS = [
  ["AGENTS.md","Rules, component notes, debugging playbook (source of truth)"],
  ["ROADMAP.md","Work queue: NOW / NEXT / LATER"],
+ ["docs/AGENT_ISOLATION.md","Agent sandbox options and recommendation"],
  ["docs/RZBL_WORKLOADS.md","rzbl apps, secrets commands, public access"],
  ["docs/AUTHENTIK.md","authentik setup, invites, app connection pattern"],
  ["docs/IDENTITY.md","IdP options and decision"],
