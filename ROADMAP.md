@@ -5,8 +5,9 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## Where things stand
 
 - **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. Infra tag `v1.29.0`. Placement roles (AGENTS.md "Workload placement"): oci = control plane + DNS, rbpi = edge + always-on core + platform controllers (preferred), rzbl = GPU, bulk storage, Postgres apps, Kata agents.
-- **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.7, Polyring member; `?plain` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
-- **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
+- **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.8, Polyring member; `?static` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
+- **Agent:** opencode at `agent.0xbf.ch` (public) and `opencode.internal`, Kata + CNP + authentik (group developers).
+- **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
 - **Prepared, suspended** (owner secrets, `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty (`files.0xbf.ch` + `copyparty.internal`), Time Machine (`10.10.20.145`), forgejo runner, qbittorrent.
 - **Off:** monitoring (except metrics-server), homepage.
 - **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
@@ -14,7 +15,8 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **authentik lockout:** `ak create_recovery_key 30 bf`, set password + passkey (`docs/AUTHENTIK.md` "Locked out"). Then test Forgejo "Sign in with authentik" and `opencode.internal`.
+- [ ] **authentik passkey** for `bf` (password is set). Needed before `agent.0xbf.ch` is used.
+- [ ] **Forgejo login:** reset the local password (`forgejo admin user change-password`), then "Sign in with authentik" and link once. Add `LANDING_PAGE = /bf` to the live `app.ini`.
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one. qBittorrent first (Proton WireGuard key).
 - [ ] **Forgejo Actions:** enable `[actions]`, runner secret, push mirrors to GitHub.
@@ -23,7 +25,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NEXT
 
-- [ ] Agent sandboxes: a way in (per-claim HTTPRoute behind authentik, or the upstream sandbox router).
+- [ ] Agent sandboxes: a way in (per-claim route under `agent.0xbf.ch` behind authentik, or the upstream sandbox router).
 - [ ] Immich ML `-cuda` image on a GPU slot.
 - [ ] **Renovate** + monitoring back (Prometheus, Grafana, Gatus, alerting receiver).
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
