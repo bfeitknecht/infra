@@ -8,9 +8,11 @@ spec:
     matchNames:
       - ingress
   selector:
+    # The metrics Service (ingress-traefik-metrics). Its instance label is
+    # ingress-traefik-ingress (Flux release name), so match on component.
     matchLabels:
       app.kubernetes.io/name: traefik
-      app.kubernetes.io/instance: ingress-traefik
+      app.kubernetes.io/component: metrics
   endpoints:
     - port: metrics
       interval: 30s
