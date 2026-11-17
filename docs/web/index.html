@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.25.0";
+const INFRA_TAG = "v1.25.1";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -295,10 +295,10 @@ const SERVICES = [
  {id:"atuin", name:"atuin", cat:"dev", status:"live", exp:"public", node:"rbpi", tier:"1", ns:"atuin", ks:"atuin",
   host:"https://atuin.0xbf.ch", image:"ghcr.io/atuinsh/atuin:18.24.2", desc:"Shell history sync (client-side encrypted).",
   ports:"HTTP 8888", deps:["traefik","storage"], secrets:[], storage:"atuin-data 5Gi (rbpi nvme0)", notes:["First app tested on the migrated volume path."]},
- {id:"authentik", name:"authentik", cat:"identity", status:"prepared", exp:"public", node:"rzbl", tier:"1", ns:"authentik", ks:"authentik",
+ {id:"authentik", name:"authentik", cat:"identity", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"authentik", ks:"authentik",
   host:"https://auth.0xbf.ch", image:"authentik 2026.8.5 (Helm) + postgres:17.11", desc:"The one IdP for all apps (OIDC, forward auth, invitations).",
   ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml (to create)"], storage:"authentik-db 10Gi (rzbl nvme)",
-  runbook:"docs/AUTHENTIK.md", notes:["Suspended until the secret exists.","Blueprints in git: groups family/friends, invitation-only enrollment (slug invite).","Bootstrap admin from secret: setup flow never public."]},
+  runbook:"docs/AUTHENTIK.md", notes:["Live since 2026-11-17 (v1.25.1).","Blueprints in git: groups family/friends, invitation-only enrollment (slug invite).","Bootstrap admin from secret: setup flow never public."]},
  {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"media", ks:"media",
   host:"https://stream.0xbf.ch · https://jellyfin.internal", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
   ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
@@ -370,7 +370,7 @@ const SERVICES = [
 const NEEDS = [
  {id:"exhib-down", prio:1, cat:"fix", t:"exhib is down (v0.3.0)", d:"Hugo build fails: WebPEncode OUT_OF_MEMORY on collection bw. Release a fix or roll back the image to v0.2.0.", svc:"exhib"},
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
- {id:"authentik-secret", prio:1, cat:"secret", t:"authentik secret → un-suspend", d:"docs/AUTHENTIK.md. Then own admin + passkey, deactivate akadmin.", svc:"authentik"},
+ {id:"authentik-admin", prio:1, cat:"manual", t:"authentik: own admin + passkey, deactivate akadmin", d:"Log in at auth.0xbf.ch as akadmin (bootstrap password). Then connect Forgejo and Jellyfin (docs/AUTHENTIK.md).", svc:"authentik"},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
@@ -457,8 +457,9 @@ storage
 gpu ── media, ollama ── opencode*
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
-* suspended: authentik immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
+* suspended: immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
 const TAGS = [
+ ["v1.25.1","2026-11-17","authentik live (auth.0xbf.ch)"],
  ["v1.25.0","2026-11-17","secret migration to <app>-secrets, pull secrets removed (public images), exhib-data rename"],
  ["v1.24.0","2026-11-17","PVC renames devil-data, tailscale-relay-data (rebind, no copy); homepage off"],
  ["v1.23.5","2026-11-16","Jellyfin public at stream.0xbf.ch"],
