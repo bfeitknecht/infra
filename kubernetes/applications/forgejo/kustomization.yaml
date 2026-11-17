@@ -15,3 +15,12 @@ configMapGenerator:
     files:
       - app.ini
       - init.sh
+  # Logo, favicon and theme. Mounted at /data/gitea/public/assets (custom path).
+  - name: forgejo-branding
+    files:
+      - branding/logo.svg
+      - branding/logo.png
+      - branding/favicon.svg
+      - branding/favicon.png
+      - branding/apple-touch-icon.png
+      - branding/theme-0xbf.css

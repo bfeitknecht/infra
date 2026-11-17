@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BrandingOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <LoginDisclaimer>0xbf · invite only</LoginDisclaimer>
+  <CustomCss>/* 0xbf branding: monochrome palette of exhib and glob (dark values). */
+:root {
+  --0xbf-bg: oklch(17% 0 0);
+  --0xbf-fg: oklch(95% 0 0);
+  --0xbf-muted: oklch(70% 0 0);
+}
+html, body, .backgroundContainer, .skinHeader, .mainDrawer, .dialog, .formDialogHeader, .formDialogFooter {
+  background-color: var(--0xbf-bg) !important;
+}
+/* Logo: header, drawer, login. */
+.pageTitleWithDefaultLogo {
+  background-image: url(&quot;data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzIgMzIiIHdpZHRoPSIzMnB0IiBoZWlnaHQ9IjMycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOmg1PSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sIj48cGF0aCBmaWxsPSIjMDAwMDAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGQ9Ik0gMCAwdiAzMmggMzJ2IC0zMlogIi8+PGc+PHBhdGggZmlsbD0iIzAwMDAwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBkPSJNIDAgMHYgMzJoIDMydiAtMzJaICIvPjxnIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIC0xIDEgMjQuNzUpIj48dXNlIHhsaW5rOmhyZWY9IiNnNzU5MkNCMUQ5ODEzRTY0MzE4MDQxQzcyMkJCQzA5OUQiIHg9IjAiIHk9IjAiIGZpbGw9IiNmZmZmZmYiIGZpbGwtcnVsZT0ibm9uemVybyIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNiA3LjI1KSI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1ydWxlPSJub256ZXJvIiBkPSJNIDAgMHYgMTcuNWggMTV2IC0xNy41WiAiLz48ZyB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAtMSAwIDE3LjUpIj48dXNlIHhsaW5rOmhyZWY9IiNnRkZGMzAzQzU2OEM3NUYwOTExNjNFQTREMkIzNkUzNiIgeD0iMCIgeT0iMCIgZmlsbD0iIzAwMDAwMCIgZmlsbC1ydWxlPSJub256ZXJvIi8+PC9nPjwvZz48L2c+PGRlZnM+PHN5bWJvbCBpZD0iZzc1OTJDQjFEOTgxM0U2NDMxODA0MUM3MjJCQkMwOTlEIiBvdmVyZmxvdz0idmlzaWJsZSI+PHBhdGggZD0iTSAwIDBtIDIuMDc1IDkuNDVoIDIuMTVsIDMuMjc1IDYuMTc1bCAzLjI3NSAtNi4xNzVoIDIuMTVsIC00LjIyNSA4LjA1aCAtMi40WiAiLz48L3N5bWJvbD48c3ltYm9sIGlkPSJnRkZGMzAzQzU2OEM3NUYwOTExNjNFQTREMkIzNkUzNiIgb3ZlcmZsb3c9InZpc2libGUiPjxwYXRoIGQ9Ik0gMCAwbSA5LjEgMy4yNWMgMS4xNSAwIDIuMTUgMC41NzUgMi44MjUgMS41NWggMC4xbCAtMC4wNzUgLTEuNGggMS44MjVsIDAuMzc1IDcuMTc1YyAwLjIgMy43IC0yLjAyNSA2LjE3NSAtNS41NzUgNi4xNzVjIC00LjQ3NSAwIC03Ljg1IC0zLjk3NSAtNy44NSAtOS4yMjVjIDAgLTUuMTI1IDMuMjI1IC04Ljc3NSA3Ljc3NSAtOC43NzVjIDEuOTUgMCAzLjY3NSAwLjY3NSA0Ljg3NSAxLjkyNWwgLTEuMTUgMS4xNWMgLTAuODUgLTAuODc1IC0yLjIyNSAtMS40IC0zLjY3NSAtMS40YyAtMy41MjUgMCAtNi4wMjUgMi45NzUgLTYuMDI1IDcuMTI1YyAwIDQuMjc1IDIuNjI1IDcuNTUgNi4wNSA3LjU1YyAyLjQ1IDAgMy45NzUgLTEuNjUgMy44NzUgLTQuMTI1aCAtMC4wNzVjIC0wLjU3NSAxLjA3NSAtMS41NSAxLjcgLTIuNzc1IDEuN2MgLTIuMjc1IDAgLTQuMDUgLTIuMTc1IC00LjA1IC00Ljk3NWMgMCAtMi41NzUgMS41IC00LjQ1IDMuNTUgLTQuNDVaIG0gMC41NzUgMS42NzVjIC0xLjI3NSAwIC0yLjIgMS4yIC0yLjIgMi44MjVjIDAgMS43NzUgMS4xMjUgMy4yMjUgMi41MjUgMy4yMjVjIDEuMjc1IDAgMi4xNzUgLTEuMiAyLjE3NSAtMi44NWMgMCAtMS43NzUgLTEuMSAtMy4yIC0yLjUgLTMuMlogIi8+PC9zeW1ib2w+PC9kZWZzPjwvc3ZnPg==&quot;) !important;
+  background-size: contain !important;
+  background-position: left center !important;
+  width: 2.2em !important;
+}
+.adminDrawerLogo img, img.imgLogoIcon, .loginPage .loginLogo, .headerLeft img {
+  content: url(&quot;data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzIgMzIiIHdpZHRoPSIzMnB0IiBoZWlnaHQ9IjMycHQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOmg1PSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sIj48cGF0aCBmaWxsPSIjMDAwMDAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGQ9Ik0gMCAwdiAzMmggMzJ2IC0zMlogIi8+PGc+PHBhdGggZmlsbD0iIzAwMDAwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBkPSJNIDAgMHYgMzJoIDMydiAtMzJaICIvPjxnIHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIC0xIDEgMjQuNzUpIj48dXNlIHhsaW5rOmhyZWY9IiNnNzU5MkNCMUQ5ODEzRTY0MzE4MDQxQzcyMkJCQzA5OUQiIHg9IjAiIHk9IjAiIGZpbGw9IiNmZmZmZmYiIGZpbGwtcnVsZT0ibm9uemVybyIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNiA3LjI1KSI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1ydWxlPSJub256ZXJvIiBkPSJNIDAgMHYgMTcuNWggMTV2IC0xNy41WiAiLz48ZyB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAtMSAwIDE3LjUpIj48dXNlIHhsaW5rOmhyZWY9IiNnRkZGMzAzQzU2OEM3NUYwOTExNjNFQTREMkIzNkUzNiIgeD0iMCIgeT0iMCIgZmlsbD0iIzAwMDAwMCIgZmlsbC1ydWxlPSJub256ZXJvIi8+PC9nPjwvZz48L2c+PGRlZnM+PHN5bWJvbCBpZD0iZzc1OTJDQjFEOTgxM0U2NDMxODA0MUM3MjJCQkMwOTlEIiBvdmVyZmxvdz0idmlzaWJsZSI+PHBhdGggZD0iTSAwIDBtIDIuMDc1IDkuNDVoIDIuMTVsIDMuMjc1IDYuMTc1bCAzLjI3NSAtNi4xNzVoIDIuMTVsIC00LjIyNSA4LjA1aCAtMi40WiAiLz48L3N5bWJvbD48c3ltYm9sIGlkPSJnRkZGMzAzQzU2OEM3NUYwOTExNjNFQTREMkIzNkUzNiIgb3ZlcmZsb3c9InZpc2libGUiPjxwYXRoIGQ9Ik0gMCAwbSA5LjEgMy4yNWMgMS4xNSAwIDIuMTUgMC41NzUgMi44MjUgMS41NWggMC4xbCAtMC4wNzUgLTEuNGggMS44MjVsIDAuMzc1IDcuMTc1YyAwLjIgMy43IC0yLjAyNSA2LjE3NSAtNS41NzUgNi4xNzVjIC00LjQ3NSAwIC03Ljg1IC0zLjk3NSAtNy44NSAtOS4yMjVjIDAgLTUuMTI1IDMuMjI1IC04Ljc3NSA3Ljc3NSAtOC43NzVjIDEuOTUgMCAzLjY3NSAwLjY3NSA0Ljg3NSAxLjkyNWwgLTEuMTUgMS4xNWMgLTAuODUgLTAuODc1IC0yLjIyNSAtMS40IC0zLjY3NSAtMS40YyAtMy41MjUgMCAtNi4wMjUgMi45NzUgLTYuMDI1IDcuMTI1YyAwIDQuMjc1IDIuNjI1IDcuNTUgNi4wNSA3LjU1YyAyLjQ1IDAgMy45NzUgLTEuNjUgMy44NzUgLTQuMTI1aCAtMC4wNzVjIC0wLjU3NSAxLjA3NSAtMS41NSAxLjcgLTIuNzc1IDEuN2MgLTIuMjc1IDAgLTQuMDUgLTIuMTc1IC00LjA1IC00Ljk3NWMgMCAtMi41NzUgMS41IC00LjQ1IDMuNTUgLTQuNDVaIG0gMC41NzUgMS42NzVjIC0xLjI3NSAwIC0yLjIgMS4yIC0yLjIgMi44MjVjIDAgMS43NzUgMS4xMjUgMy4yMjUgMi41MjUgMy4yMjVjIDEuMjc1IDAgMi4xNzUgLTEuMiAyLjE3NSAtMi44NWMgMCAtMS43NzUgLTEuMSAtMy4yIC0yLjUgLTMuMlogIi8+PC9zeW1ib2w+PC9kZWZzPjwvc3ZnPg==&quot;) !important;
+}
+/* Accent: no Jellyfin blue. */
+.button-submit:not(.button-flat), .raised.button-submit, .emby-button.button-submit {
+  background: var(--0xbf-fg) !important;
+  color: var(--0xbf-bg) !important;
+}
+.emby-checkbox:checked + span + .checkboxOutline {
+  background-color: var(--0xbf-fg) !important;
+  border-color: var(--0xbf-fg) !important;
+}
+.emby-input:focus, .emby-textarea:focus, .emby-select-withcolor:focus {
+  border-color: var(--0xbf-fg) !important;
+}
+.itemProgressBarForeground, .mdl-slider-background-lower, .sliderBubble, .playedIndicator, .countIndicator {
+  background-color: var(--0xbf-fg) !important;
+  color: var(--0xbf-bg) !important;
+}
+.emby-tab-button-active, .emby-tab-button:focus, a:hover, .button-link {
+  color: var(--0xbf-fg) !important;
+}
+.emby-tab-button-active { border-color: var(--0xbf-fg) !important; }
+.headerTabs .emby-tab-button-active::after { background: var(--0xbf-fg) !important; }
+</CustomCss>
+  <SplashscreenEnabled>false</SplashscreenEnabled>
+</BrandingOptions>

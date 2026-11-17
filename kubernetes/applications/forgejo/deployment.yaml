@@ -60,6 +60,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: branding
+              mountPath: /data/gitea/public/assets
+              readOnly: true
           resources:
             requests:
               cpu: 100m
@@ -79,6 +82,16 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
       volumes:
+        - name: branding
+          configMap:
+            name: forgejo-branding
+            items:
+              - {key: logo.svg, path: img/logo.svg}
+              - {key: logo.png, path: img/logo.png}
+              - {key: favicon.svg, path: img/favicon.svg}
+              - {key: favicon.png, path: img/favicon.png}
+              - {key: apple-touch-icon.png, path: img/apple-touch-icon.png}
+              - {key: theme-0xbf.css, path: css/theme-0xbf.css}
         - name: data
           persistentVolumeClaim:
             claimName: forgejo-data
