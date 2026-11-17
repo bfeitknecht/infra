@@ -1,6 +1,6 @@
 # rzbl workloads: status and owner steps
 
-Status 2026-11-17. All apps below run on rzbl (`nodeSelector: kubernetes.io/hostname: rzbl`).
+Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernetes.io/hostname: rzbl`).
 
 | App                                              | Dir                                      | State               | Access                                                |
 | ------------------------------------------------ | ---------------------------------------- | ------------------- | ----------------------------------------------------- |
@@ -8,9 +8,9 @@ Status 2026-11-17. All apps below run on rzbl (`nodeSelector: kubernetes.io/host
 | Sonarr 4.0.20                                    | `applications/media/`                    | **live**            | `sonarr.internal`                                     |
 | Radarr 7.0.3                                     | `applications/media/`                    | **live**            | `radarr.internal`                                     |
 | Prowlarr 2.7.0                                   | `applications/media/`                    | **live**            | `prowlarr.internal`                                   |
-| Immich v3.4.1                                    | `applications/immich/`                   | prepared, suspended | `immich.internal`                                     |
+| Immich v3.4.1 (ML on GPU, `-cuda`)               | `applications/immich/`                   | **live**            | `immich.internal`                                     |
 | Dawarich 1.23.0                                  | `applications/dawarich/`                 | prepared, suspended | `dawarich.internal`                                   |
-| Copyparty 1.20.26                                | `applications/copyparty/`                | prepared, suspended | `copyparty.internal`, public `files.0xbf.ch`          |
+| Copyparty 1.20.26                                | `applications/copyparty/`                | **live**            | `copyparty.internal`, public `files.0xbf.ch`          |
 | Time Machine (Samba)                             | `applications/samba/`                    | prepared, suspended | `smb://10.10.20.145`                                  |
 | Forgejo runner 13.2.1                            | `applications/forgejo-runner/`           | prepared, suspended | none                                                  |
 | Ollama 0.40.16 (GPU)                             | `applications/ollama/`                   | **live**            | cluster only: `ollama.ollama.svc.cluster.local:11434` |
@@ -30,6 +30,8 @@ Storage classes: `local-path-nvme` (rzbl NVMe, rbpi nvme0) and `local-path-ssd` 
 4. Commit, tag, push.
 
 ## Secrets (nushell)
+
+Seeded by the agent on 2026-11-17 (random values piped straight into `sops --encrypt`, never printed): `immich-secrets`, `copyparty-config`. Read a value: `sops -d kubernetes/applications/copyparty/copyparty-config.sops.yaml | from yaml | get data."copyparty.conf" | decode base64 | decode`.
 
 Generate random values with `openssl rand -hex 32`.
 
@@ -179,4 +181,4 @@ spec:
 ## Not done yet
 
 - No k8up Schedules for the new apps. Add them when the backup path works. Immich originals must have backups before real use.
-- GPU time-slicing: `nvidia.com/gpu: 4`. Jellyfin and Ollama use 2 slots. Immich ML can take a third: image tag `v3.4.1-cuda`, `runtimeClassName: nvidia`, limit `nvidia.com/gpu: 1`. Slots share 6 GB VRAM with no isolation.
+- GPU time-slicing: `nvidia.com/gpu: 4`. Jellyfin, Ollama and Immich ML use 3 slots. Slots share 6 GB VRAM with no isolation. The GPU exporter (monitoring) takes no slot.

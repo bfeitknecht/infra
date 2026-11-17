@@ -23,6 +23,7 @@ endpoints:
   - {<<: *public, name: atuin, url: https://atuin.0xbf.ch/healthz}
   - {<<: *public, name: auth, url: https://auth.0xbf.ch/-/health/live/}
   - {<<: *public, name: stream, url: https://stream.0xbf.ch/health}
+  - {<<: *public, name: files, url: https://files.0xbf.ch/?ls, conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]}
   - name: apex ssh
     group: public
     url: tcp://0xbf.ch:22
@@ -45,6 +46,7 @@ endpoints:
   - {<<: *internal, name: prowlarr, url: http://prowlarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: ollama, url: http://ollama.ollama.svc.cluster.local:11434/}
   - {<<: *internal, name: agh, url: http://agh.agh.svc.cluster.local/}
+  - {<<: *internal, name: immich, url: http://immich-server.immich.svc.cluster.local/api/server/ping}
   # ---- platform
   - name: gateway lan
     group: platform
@@ -72,9 +74,11 @@ endpoints:
   - {<<: *dns, name: dns edge, url: 10.10.20.153}
   - {<<: *internal, name: grafana, group: platform, url: http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health}
   - {<<: *internal, name: prometheus, group: platform, url: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/-/healthy}
-  # ---- backup: the relay to Garage on the friend's NAS (red until it listens)
+  # ---- backup: Garage on the friend's NAS through the relay. HTTP, not TCP:
+  # a TCP connect only reaches socat in the relay pod. Garage answers an
+  # anonymous request with 403. Red until it listens on 3900.
   - name: garage via relay
     group: backup
-    url: tcp://tailscale-relay.egress.svc.cluster.local:3900
+    url: http://tailscale-relay.egress.svc.cluster.local:3900/
     interval: 5m
-    conditions: ["[CONNECTED] == true"]
+    conditions: ["[STATUS] == 403"]

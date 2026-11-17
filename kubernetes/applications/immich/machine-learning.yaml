@@ -21,13 +21,18 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
+      # GPU: one time-slice of the GTX 1660 Ti (4 slots, 6 GB VRAM shared with
+      # jellyfin and ollama, no isolation).
+      runtimeClassName: nvidia
       enableServiceLinks: false
       containers:
         - name: machine-learning
-          # CPU image. For GPU use tag v3.4.1-cuda, runtimeClassName nvidia and
-          # limit nvidia.com/gpu: 1 (time-sliced, 4 slots, 6 GB VRAM shared).
-          image: ghcr.io/immich-app/immich-machine-learning:v3.4.1
+          image: ghcr.io/immich-app/immich-machine-learning:v3.4.1-cuda
           env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: compute,utility
             - name: MACHINE_LEARNING_MODEL_REVISION
               value: v2
           ports:
@@ -38,6 +43,7 @@ spec:
               memory: 1Gi
             limits:
               memory: 6Gi
+              nvidia.com/gpu: 1
           volumeMounts:
             - name: cache
               mountPath: /cache

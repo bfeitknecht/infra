@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-17";
-const INFRA_TAG = "v1.31.0";
+const INFRA_TAG = "v1.32.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -321,14 +321,14 @@ const SERVICES = [
  {id:"opencode", name:"opencode web", cat:"ai", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
   host:"https://opencode.internal", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"Coding agent web UI, default model Ollama.",
   ports:"HTTP 4096 (basic auth user opencode)", deps:["ollama","traefik","storage"], secrets:[], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik only), authentik forward auth (group developers), no SA token."]},
- {id:"immich", name:"Immich", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"immich", ks:"immich",
+ {id:"immich", name:"Immich", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"immich", ks:"immich",
   host:"https://immich.internal (public later: photos.0xbf.ch?)", image:"immich v3.4.1 (server, ML), immich-db (vectorchord postgres), immich-redis (valkey 9)", desc:"Photo library with ML search.",
   ports:"HTTP 2283", deps:["traefik","storage"], secrets:["immich/immich-secrets.sops.yaml (to create)"], storage:"immich-files 1Ti (ssd), immich-db 20Gi, immich-cache 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md",
-  notes:["GATE: no real photos before backups work.","ML on CPU. GPU: -cuda tag + one GPU slot."]},
+  notes:["Live 2026-11-17 (v1.32.0). ML on the GPU (v3.4.1-cuda, one time-slice).","GATE: no real photo library before backups work. First sign-up becomes admin: sign up at immich.internal."]},
  {id:"dawarich", name:"Dawarich", cat:"apps", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"dawarich", ks:"dawarich",
   host:"https://dawarich.internal", image:"freikin/dawarich:1.23.0, postgis 17-3.5, redis 8", desc:"Location history (Google Timeline alternative).",
   ports:"HTTP 3000", deps:["traefik","storage"], secrets:["dawarich/dawarich-secrets.sops.yaml (to create)"], storage:"dawarich-db 20Gi, dawarich-data 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:[]},
- {id:"copyparty", name:"Copyparty", cat:"apps", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"copyparty", ks:"copyparty",
+ {id:"copyparty", name:"Copyparty", cat:"apps", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"copyparty", ks:"copyparty",
   host:"https://files.0xbf.ch · https://copyparty.internal", image:"copyparty/ac:1.20.26", desc:"File server / sharing. Accounts in its config.",
   ports:"HTTP 3923", deps:["traefik","storage"], secrets:["copyparty/copyparty-config.sops.yaml (to create)"], storage:"copyparty-files 500Gi (ssd)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Safe to make public: accounts come from the config."]},
  {id:"timemachine", name:"Time Machine (Samba)", cat:"apps", status:"prepared", exp:"lan", node:"rzbl", tier:"1", ns:"samba", ks:"samba",
@@ -377,10 +377,8 @@ const SERVICES = [
 const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
- {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
  {id:"runner-secret", prio:2, cat:"secret", t:"Forgejo runner token + enable Actions", d:"Token from git.0xbf.ch admin > Actions > Runners. [actions] ENABLED = true.", svc:"runner"},
- {id:"copyparty-secret", prio:3, cat:"secret", t:"copyparty config (accounts)", d:"Whole copyparty.conf as secret.", svc:"copyparty"},
  {id:"dawarich-secret", prio:3, cat:"secret", t:"dawarich secret", d:"POSTGRES_PASSWORD, SECRET_KEY_BASE.", svc:"dawarich"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
@@ -420,7 +418,7 @@ const HOSTS = [
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["grafana.internal","internal","Grafana (home: 0xbf)"],["status.internal","internal","Gatus"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
  ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
- ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty (prepared)"],["files.0xbf.ch","public","copyparty (prepared)"],["opencode.internal","internal","opencode (authentik)"],
+ ["immich.internal","internal","Immich"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],
 ];
 const TAIL = [
  ["oci","100.73.186.19","tag:infra","advertises 10.20.20.0/24, accepts routes"],
@@ -442,8 +440,8 @@ const PVS = [
  ["media","media-files","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-data","20Gi","rzbl","storage-nvme0","live"],
  ["media","sonarr-data / radarr-data / prowlarr-data","2/2/1Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
  ["egress","tailscale-relay-data","1Gi","rzbl","storage-nvme0","broken"],
- ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","prepared"],
- ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","prepared"],
+ ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","live"],
+ ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","live"],
  ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","prepared"],
  ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
 ];
@@ -460,8 +458,10 @@ gpu ── media, ollama ── opencode
 agent-sandbox-crds ── agent-sandbox ── agents (+kata)
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
-* suspended: immich dawarich copyparty samba forgejo-runner qbittorrent`;
+* suspended: dawarich samba forgejo-runner qbittorrent`;
 const TAGS = [
+ ["v1.32.0","2026-11-17","copyparty live (files.0xbf.ch), Immich live with GPU ML; secrets seeded by agent; Gatus garage HTTP check"],
+ ["v1.31.2","2026-11-17","monitoring fixes: Traefik ServiceMonitor, GPU exporter fields"],
  ["v1.31.0","2026-11-17","monitoring v2: curated dashboards, 0xbf home, Gatus, GPU exporter, authentik SSO for Grafana; Cilium/cert-manager metrics"],
  ["v1.30.1","2026-11-17","opencode internal only again (agent.0xbf.ch route and authentik app removed); glob favicon"],
  ["v1.30.0","2026-11-17","authentik grant_types (Forgejo/Jellyfin SSO fixed), Forgejo landing = /bf, circle mark in Forgejo + Jellyfin"],
@@ -507,9 +507,9 @@ const SECRETS = [
  ["applications/homepage/homepage-services.sops.yaml","homepage","exists (disabled)","widget creds"],
  ["talos/secrets.sops.yaml","talos","exists","Talos secrets bundle"],
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
- ["applications/immich/immich-secrets.sops.yaml","immich","TO CREATE","DB_PASSWORD"],
+ ["applications/immich/immich-secrets.sops.yaml","immich","exists","DB_PASSWORD (seeded by agent)"],
  ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","TO CREATE","POSTGRES_PASSWORD, SECRET_KEY_BASE"],
- ["applications/copyparty/copyparty-config.sops.yaml","copyparty","TO CREATE","copyparty.conf with accounts"],
+ ["applications/copyparty/copyparty-config.sops.yaml","copyparty","exists","copyparty.conf, account bf (seeded by agent)"],
  ["applications/samba/timemachine-secrets.sops.yaml","samba","TO CREATE","PASSWORD"],
  ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","TO CREATE","RUNNER_TOKEN"],
  ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","TO CREATE","WIREGUARD_PRIVATE_KEY (Proton)"],
@@ -682,9 +682,9 @@ const TN=[ // id,label,sub,x,y,w,ref
  ["opencode","opencode","kata VM",1100,375,95,"opencode"],
  ["gpu","GPU plugin","4 slots",1205,375,75,"gpu"],
  ["auth","authentik","auth.0xbf.ch",670,440,100,"authentik"],
- ["immich","immich","prepared",780,440,90,"immich"],
+ ["immich","immich","GPU ML",780,440,90,"immich"],
  ["daw","dawarich","prepared",880,440,90,"dawarich"],
- ["cp","copyparty","prepared",980,440,90,"copyparty"],
+ ["cp","copyparty","files.0xbf.ch",980,440,90,"copyparty"],
  ["tm","Time Machine",".145 prepared",1080,440,110,"timemachine"],
  ["relay","ts-relay","→ NAS :3900",1200,440,80,"relay"],
  ["disks","NVMe 893 GB · SSD 4 TB","/var on NVMe, boot USB",670,505,260,null],

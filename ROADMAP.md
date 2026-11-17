@@ -7,7 +7,8 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. Infra tag `v1.29.0`. Placement roles (AGENTS.md "Workload placement"): oci = control plane + DNS, rbpi = edge + always-on core + platform controllers (preferred), rzbl = GPU, bulk storage, Postgres apps, Kata agents.
 - **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.8, Polyring member; `?static` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
 - **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik, internal only), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
-- **Prepared, suspended** (owner secrets, `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty (`files.0xbf.ch` + `copyparty.internal`), Time Machine (`10.10.20.145`), forgejo runner, qbittorrent.
+- **Live since 2026-11-17 evening:** copyparty `files.0xbf.ch`, Immich `immich.internal` (ML on GPU; no real library until backups).
+- **Prepared, suspended:** dawarich, Time Machine (`10.10.20.145`), forgejo runner, qbittorrent (waits for the Proton WireGuard config).
 - **Monitoring:** Grafana `grafana.internal` (home dashboard `0xbf`, authentik SSO), Gatus `status.internal`, Prometheus on rbpi. Homepage off (Grafana home replaces it).
 - **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
 - **Release:** apex, exhib, glob, thyme all use `just release` (version from manifest, `--check`, no tag argument).
@@ -22,7 +23,6 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## NEXT
 
 - [ ] Agent sandboxes: a way in (per-claim route under `opencode.internal` behind authentik, or the upstream sandbox router).
-- [ ] Immich ML `-cuda` image on a GPU slot.
 - [ ] **Renovate** on the Forgejo runner.
 - [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).

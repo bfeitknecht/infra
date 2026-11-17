@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+    copyparty.conf: ENC[AES256_GCM,data:Ij+IeM63iqxsv+H/jjD47sZVsMNBRFMMGmN+yfC4x36/RKLxXa6+oMHa4uG4Eci6xW80WMuG9r6u59wrQ7JWwSpqmLuo5SqRZc2WqWgKmLsGuuje+OlWOEMluWSr0FVt967IevGMIgbmLy+cltIxkjzir2AYs6LV+Fa/QxqSlBH99TxLki+1fUMORn1x4Fx5qKANX76pgrJCyYkKUVR8cYD65nB10QfZkGil1NMzLMjPayLyLPuZXw/aC8l9ytXLHhpxXvmatLChRsUvaA4MTfRMgtI=,iv:v/KN0OzMuBWXSlnDqFJQcENUa1us2r0+TxMjURCBxPE=,tag:SJBjBuOidAw5NbbZbAKe6g==,type:str]
+kind: Secret
+metadata:
+    name: copyparty-config
+    namespace: copyparty
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB2RnFrbDYveEJvalJ0QjFt
+            L2V5Qko5YmxLSjRhN1VVUm4vUUZCUTBzM1ZjCk9XM3dQNXlvVGRSMFVQbU5ITFZY
+            dnhPZGkrY0NiY1pMTzZnVlBrTGpZNG8KLS0tIG1WZmxyV2UwYmRDeHJhb1d6eVZn
+            Q3Rmc1Jub25ISlVBWmlTQjZDSnJoNFUK8Nbv5VkzRqkxCZj7JNbAkMB4r3KW5X0w
+            DRxlZYQX6QHYc7unCIgTy3TSAEv+k6Boq5ppxiBn3ICG5nRtFytq/w==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-17T19:47:20Z"
+    mac: ENC[AES256_GCM,data:9obXbWfrF0bDko3+GeeubPPkK472HVqaa0+sgVaiESc39BrTCz443DhnhLduD30NTABW8JPr1ex3rgutdnRzFnSeO2QPZcASZ/obxedU4sAhF5HmzBZe0dSRWj8x/TFWhfdcFkERYCeiVhBcC1++8BT4mzWjFMNlvnNXKvg629o=,iv:CsApOVdvRNke01ppBF8Z2Q37X33DA8a40cY1DPeqDos=,tag:3SsicbUGpDyaSk94rIy1hg==,type:str]
+    version: 3.13.3
