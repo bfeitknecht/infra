@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: tailscale-relay-state
+  name: tailscale-relay-data
   namespace: egress
 spec:
   accessModes: ["ReadWriteOnce"]
@@ -85,7 +85,7 @@ spec:
       volumes:
         - name: state
           persistentVolumeClaim:
-            claimName: tailscale-relay-state
+            claimName: tailscale-relay-data
         - name: tun
           hostPath:
             path: /dev/net/tun

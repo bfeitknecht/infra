@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.23.5";
+const INFRA_TAG = "v1.24.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -339,12 +339,12 @@ const SERVICES = [
  {id:"dns", name:"knotd + kresd", cat:"network", status:"live", exp:"cluster", node:"oci", tier:"1", ns:"dns", ks:"dns",
   host:"10.96.0.53 (Service resolver)", image:"knot + knot-resolver", desc:"Authoritative internal. zone + recursive resolver with DNSSEC.",
   ports:"DNS 53", deps:[], secrets:[], notes:["Only workload on the tainted control plane.","Zone: applications/dns/knot/internal.zone."]},
- {id:"homepage", name:"Homepage", cat:"network", status:"live", exp:"internal", node:"any", tier:"1", ns:"homepage", ks:"homepage",
+ {id:"homepage", name:"Homepage", cat:"network", status:"disabled", exp:"internal", node:"any", tier:"1", ns:"homepage", ks:"homepage",
   host:"https://homepage.internal", image:"homepage v2.4.0", desc:"Dashboard with cluster stats.", ports:"HTTP 3000", deps:["traefik","metrics-server"], secrets:["homepage/homepage-services (sops)"],
-  notes:["Grafana and Gatus widgets fail while monitoring is off. Remove them from services.yaml (sops)."]},
+  notes:["Off since 2026-11-17 (Kustomization commented out). Config kept."]},
  {id:"devil", name:"devil", cat:"dev", status:"live", exp:"internal", node:"rbpi", tier:"1", ns:"devil", ks:"devil",
   host:"https://devil.internal · ssh -p 2222 devil.internal", image:"omni flake NixOS VM (kata-qemu)", desc:"Personal dev VM in a Kata pod. ttyd + ghostty-web, PAM login.",
-  ports:"SSH 2222, ttyd 7681 (headless Service)", deps:["kata","traefik","storage"], secrets:[], storage:"devil-pvc 20Gi (rbpi nvme0)", notes:["Headless Service required: Kata bypasses Cilium service translation."]},
+  ports:"SSH 2222, ttyd 7681 (headless Service)", deps:["kata","traefik","storage"], secrets:[], storage:"devil-data 20Gi (rbpi nvme0)", notes:["Headless Service required: Kata bypasses Cilium service translation."]},
  {id:"ddns", name:"cloudflare-ddns", cat:"network", status:"live", exp:"cluster", node:"any", tier:"1", ns:"ddns", ks:"ddns", host:"0xbf.ch, *.0xbf.ch, *.pds.0xbf.ch → WAN IP", image:"favonia/cloudflare-ddns", desc:"Keeps grey-cloud A records on the home WAN IP.", ports:"—", deps:[], secrets:["ddns/cloudflare-ddns.sops.yaml"], notes:["IPv4 only. Galaxus has no IPv6."]},
  {id:"traefik", name:"Traefik", cat:"platform", status:"live", exp:"public", node:"rbpi", tier:"infra", ns:"ingress", ks:"traefik",
   host:"LB 10.10.20.128 · hostPorts 80/443/22/2223 · https://dashboard.internal", image:"traefik chart 41.6.0", desc:"Gateway API implementation. Terminates TLS.",
@@ -379,7 +379,6 @@ const NEEDS = [
  {id:"opencode-secret", prio:3, cat:"secret", t:"opencode web password", d:"OPENCODE_SERVER_PASSWORD.", svc:"opencode"},
  {id:"copyparty-secret", prio:3, cat:"secret", t:"copyparty config (accounts)", d:"Whole copyparty.conf as secret.", svc:"copyparty"},
  {id:"dawarich-secret", prio:3, cat:"secret", t:"dawarich secret", d:"POSTGRES_PASSWORD, SECRET_KEY_BASE.", svc:"dawarich"},
- {id:"homepage-widgets", prio:3, cat:"secret", t:"Homepage: drop grafana/gatus widgets", d:"Edit homepage-services (sops) while monitoring is off.", svc:"homepage"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
  {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
@@ -437,11 +436,11 @@ const SCS = [
 ];
 const PVS = [
  ["forgejo","forgejo-data","10Gi","rbpi","storage-nvme1","live"],["pds","pds-data","10Gi","rbpi","storage-nvme0","live"],
- ["exhib","exhib-site (exception)","50Gi","rbpi","storage-nvme0","live"],["devil","devil-pvc (exception)","20Gi","rbpi","storage-nvme0","live"],
+ ["exhib","exhib-site (exception)","50Gi","rbpi","storage-nvme0","live"],["devil","devil-data","20Gi","rbpi","storage-nvme0","live"],
  ["agh","agh-data","1Gi","rbpi","storage-nvme0","live"],["atuin","atuin-data","5Gi","rbpi","storage-nvme0","live"],
  ["media","media-files","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-data","20Gi","rzbl","storage-nvme0","live"],
  ["media","sonarr-data / radarr-data / prowlarr-data","2/2/1Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
- ["egress","tailscale-relay-state (exception)","1Gi","rzbl","—","broken"],
+ ["egress","tailscale-relay-data","1Gi","rzbl","storage-nvme0","broken"],
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","prepared"],
  ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","prepared"],
  ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","prepared"],
@@ -461,6 +460,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
 * suspended: authentik immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
 const TAGS = [
+ ["v1.24.0","2026-11-17","PVC renames devil-data, tailscale-relay-data (rebind, no copy); homepage off"],
  ["v1.23.5","2026-11-16","Jellyfin public at stream.0xbf.ch"],
  ["v1.23.4","2026-11-16","internal TLS: explicit hostnames"],
  ["v1.23.0","2026-11-16","qBittorrent + Proton VPN (suspended), media namespace privileged"],

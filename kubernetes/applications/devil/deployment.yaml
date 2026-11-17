@@ -87,4 +87,4 @@ spec:
                 path: index.html
         - name: state
           persistentVolumeClaim:
-            claimName: devil-pvc
+            claimName: devil-data
