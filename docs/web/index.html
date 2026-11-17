@@ -276,7 +276,7 @@ const SERVICES = [
  {id:"apex", name:"apex", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"https://0xbf.ch", image:"ghcr.io/bfeitknecht/apex:latest (Keel)", desc:"Personal site + WASM app.",
   ports:"HTTP 8080", deps:["traefik","keel"], secrets:[], repo:"apex",
-  notes:["v0.1.6 (2026-11-17): Firefox froze scroll and hover after a link opened a new tab (RefCell borrow held across window.open). Fixed.","just release takes no tag: version from Cargo.toml."]},
+  notes:["v0.1.7 (2026-11-17): Polyring in the footer (O << ?? >>, snapshot content/polyring.txt via just polyring), stepped top-bar labels, smooth touch scroll, light-mode cursor, iOS dvh. ?plain shows the static page.","v0.1.6: Firefox froze scroll and hover after a link opened a new tab. Fixed.","just release takes no tag: version from Cargo.toml."]},
  {id:"apex-tui", name:"apex SSH TUI", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"ssh 0xbf.ch (port 22)", image:"ghcr.io/bfeitknecht/apex:latest", desc:"SSH portfolio. Any username, no client key.",
   ports:"WAN 22 → Traefik apexssh → apex-tui:2222", deps:["traefik"], secrets:["apex/apex-ssh-host-key.sops.yaml"], repo:"apex",
