@@ -349,3 +349,45 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 2
+  opencode.yaml: |
+    # Forward auth (single app) for opencode.internal, group developers.
+    # The embedded outpost serves it. Add later forward-auth providers to the
+    # same outpost list here.
+    version: 1
+    metadata:
+      name: 0xbf app opencode
+    entries:
+      - model: authentik_core.group
+        id: group-developers
+        identifiers:
+          name: developers
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider
+        identifiers:
+          name: opencode
+        attrs:
+          mode: forward_single
+          external_host: https://opencode.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app
+        identifiers:
+          slug: opencode
+        attrs:
+          name: opencode
+          provider: !KeyOf provider
+          meta_launch_url: https://opencode.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app
+          group: !KeyOf group-developers
+        attrs:
+          order: 0
+      - model: authentik_outposts.outpost
+        identifiers:
+          managed: goauthentik.io/outposts/embedded
+        attrs:
+          providers:
+            - !KeyOf provider
