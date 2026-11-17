@@ -376,8 +376,7 @@ const SERVICES = [
 
 const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
- {id:"forgejo-login", prio:1, cat:"manual", t:"Forgejo: reset local password, then link SSO", d:"Local login fails (password invalid). Reset it with forgejo admin user change-password, then Sign in with authentik and link (asks local password + 2FA once). Also add LANDING_PAGE = /bf to the live app.ini.", svc:"forgejo"},
- {id:"authentik-mfa", prio:2, cat:"manual", t:"authentik: passkey for bf", d:"bf has a password but no passkey. Add one in authentik user settings.", svc:"authentik"},
+ {id:"forgejo-landing", prio:3, cat:"manual", t:"Forgejo: LANDING_PAGE = /bf on the PVC", d:"In git since v1.30.0. The live app.ini on the PVC needs the line, then a restart.", svc:"forgejo"},
  {id:"flux-placement", prio:3, cat:"manual", t:"Flux controllers prefer rbpi", d:"Flux is installed out of tree, so the agent cannot pin it. Re-run the Flux install with a nodeAffinity patch (prefer rbpi).", svc:null},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
