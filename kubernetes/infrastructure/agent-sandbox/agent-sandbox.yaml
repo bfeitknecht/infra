@@ -1,6 +1,8 @@
 # Agent Sandbox controller (kubernetes-sigs, SIG Apps) with the extensions
 # (SandboxTemplate, SandboxWarmPool, SandboxClaim). Chart and CRDs come from the
 # pinned GitRepository agent-sandbox in cluster/crds.yaml. Bump both there.
+# Default reconcileStrategy (ChartVersion): Revision adds +<sha> to the chart
+# version, and the chart puts it in a label, which the API rejects.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -11,7 +13,6 @@ spec:
   chart:
     spec:
       chart: ./helm
-      reconcileStrategy: Revision
       sourceRef:
         kind: GitRepository
         name: agent-sandbox
