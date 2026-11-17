@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-17";
-const INFRA_TAG = "v1.30.0";
+const INFRA_TAG = "v1.30.1";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -318,8 +318,8 @@ const SERVICES = [
  {id:"ollama", name:"Ollama", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"ollama", ks:"ollama",
   host:"ollama.ollama.svc.cluster.local:11434", image:"ollama/ollama:0.40.16", desc:"Local LLM runtime on the GPU. Model qwen2.5-coder:7b (25/29 layers on GPU, 16k context).",
   ports:"HTTP 11434 (no auth, no route)", deps:["gpu","storage"], secrets:[], storage:"ollama-cache 100Gi (rzbl nvme)", notes:["Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull."]},
- {id:"opencode", name:"opencode web", cat:"ai", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
-  host:"https://agent.0xbf.ch · https://opencode.internal", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"Coding agent web UI, default model Ollama.",
+ {id:"opencode", name:"opencode web", cat:"ai", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
+  host:"https://opencode.internal", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"Coding agent web UI, default model Ollama.",
   ports:"HTTP 4096 (basic auth user opencode)", deps:["ollama","traefik","storage"], secrets:[], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik only), authentik forward auth (group developers), no SA token."]},
  {id:"immich", name:"Immich", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"immich", ks:"immich",
   host:"https://immich.internal (public later: photos.0xbf.ch?)", image:"immich v3.4.1 (server, ML), immich-db (vectorchord postgres), immich-redis (valkey 9)", desc:"Photo library with ML search.",
@@ -377,7 +377,7 @@ const SERVICES = [
 const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
  {id:"forgejo-login", prio:1, cat:"manual", t:"Forgejo: reset local password, then link SSO", d:"Local login fails (password invalid). Reset it with forgejo admin user change-password, then Sign in with authentik and link (asks local password + 2FA once). Also add LANDING_PAGE = /bf to the live app.ini.", svc:"forgejo"},
- {id:"authentik-mfa", prio:2, cat:"manual", t:"authentik: passkey for bf", d:"bf has a password but no passkey. agent.0xbf.ch exposes a shell behind authentik: add the passkey before you use it.", svc:"authentik"},
+ {id:"authentik-mfa", prio:2, cat:"manual", t:"authentik: passkey for bf", d:"bf has a password but no passkey. Add one in authentik user settings.", svc:"authentik"},
  {id:"flux-placement", prio:3, cat:"manual", t:"Flux controllers prefer rbpi", d:"Flux is installed out of tree, so the agent cannot pin it. Re-run the Flux install with a nodeAffinity patch (prefer rbpi).", svc:null},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
@@ -423,7 +423,7 @@ const HOSTS = [
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
  ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
- ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty (prepared)"],["files.0xbf.ch","public","copyparty (prepared)"],["opencode.internal","internal","opencode (authentik)"],["agent.0xbf.ch","public","opencode (authentik, group developers)"],
+ ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty (prepared)"],["files.0xbf.ch","public","copyparty (prepared)"],["opencode.internal","internal","opencode (authentik)"],
 ];
 const TAIL = [
  ["oci","100.73.186.19","tag:infra","advertises 10.20.20.0/24, accepts routes"],
@@ -465,7 +465,8 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: immich dawarich copyparty samba forgejo-runner qbittorrent`;
 const TAGS = [
- ["v1.30.0","2026-11-17","authentik grant_types (Forgejo/Jellyfin SSO fixed), agent.0xbf.ch (opencode public behind authentik), Forgejo landing = /bf, circle mark in Forgejo + Jellyfin"],
+ ["v1.30.1","2026-11-17","opencode internal only again (agent.0xbf.ch route and authentik app removed); glob favicon"],
+ ["v1.30.0","2026-11-17","authentik grant_types (Forgejo/Jellyfin SSO fixed), Forgejo landing = /bf, circle mark in Forgejo + Jellyfin"],
  ["v1.29.1","2026-11-17","agent-sandbox chart: default reconcileStrategy (label with +sha was invalid)"],
  ["v1.29.0","2026-11-17","Agent Sandbox v1.0.11 (controller + agents warm pool on kata); platform controllers prefer rbpi; atlas pan/zoom"],
  ["v1.28.0","2026-11-17","agent isolation: opencode in Kata + Cilium policy + authentik forward auth; devil clean stop"],

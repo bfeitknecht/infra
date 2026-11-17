@@ -78,7 +78,7 @@ One blueprint per app in `blueprints.yaml`: OAuth2 provider + application + grou
 
 OAuth2 providers in a blueprint **must** set `grant_types: [authorization_code, refresh_token]`. The field defaults to empty there, and authentik then rejects every login with `invalid_request` ("Invalid grant_type for provider" in the server log). Forgejo SSO broke this way until 2026-11-17.
 
-Forward auth (`forward_single`) serves one host per provider. A second hostname for the same app (opencode.internal and agent.0xbf.ch) needs a second provider and application, both on the embedded outpost.
+Forward auth (`forward_single`) serves one host per provider. A second hostname for the same app needs a second provider and application, both on the embedded outpost.
 
 | App                       | Method                          | Notes                                                                                                                                         |
 | ------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
