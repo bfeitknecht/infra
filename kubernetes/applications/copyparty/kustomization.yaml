@@ -5,5 +5,4 @@ resources:
   - middleware.yaml
   - pvc.yaml
   - copyparty.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
-  # - copyparty-config.sops.yaml
+  - copyparty-config.sops.yaml

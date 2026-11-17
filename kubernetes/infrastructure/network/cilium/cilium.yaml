@@ -50,6 +50,8 @@ spec:
     # up by the Grafana sidecar in every namespace).
     dashboards:
       enabled: true
+      annotations:
+        grafana_folder: Cilium
 
     operator:
       prometheus:
@@ -58,6 +60,8 @@ spec:
           enabled: true
       dashboards:
         enabled: true
+        annotations:
+          grafana_folder: Cilium
 
     hubble:
       metrics:
@@ -72,6 +76,8 @@ spec:
           enabled: true
         dashboards:
           enabled: true
+          annotations:
+            grafana_folder: Cilium
 
     k8sServiceHost: localhost
     k8sServicePort: 7445

@@ -8,5 +8,4 @@ resources:
   - redis.yaml
   - server.yaml
   - machine-learning.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
-  # - immich-secrets.sops.yaml
+  - immich-secrets.sops.yaml
