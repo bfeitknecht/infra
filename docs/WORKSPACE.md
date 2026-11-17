@@ -26,10 +26,10 @@ Every repository has:
 
 | Repo  | flake dev shell                 | fmt --check                                | check            | release form                                             | CI lint                   |
 | ----- | ------------------------------- | ------------------------------------------ | ---------------- | -------------------------------------------------------- | ------------------------- |
-| apex  | **missing** (cargo not on host) | yes (2026-11-16)                           | yes              | `release vX.Y.Z` (tag arg, must match Cargo.toml)        | yes                       |
+| apex  | **missing** (cargo not on host) | yes (2026-11-16)                           | yes              | `release` (from Cargo.toml, 2026-11-17)                  | yes                       |
 | exhib | **missing**                     | yes (2026-11-16)                           | yes (2026-11-16) | `release` (from pyproject.toml)                          | yes (2026-11-16)          |
-| glob  | **missing**                     | `fmt` formats the justfile only, not Typst | yes              | `release vX.Y.Z "msg"`, **stages and commits all files** | **missing**               |
-| thyme | **missing**                     | `fmt args="--inplace"` (typstyle)          | yes + `lint`     | `release X.Y.Z`                                          | yes                       |
+| glob  | **missing**                     | `fmt` formats the justfile only, not Typst | yes              | `release` (from `VERSION`, no commit, 2026-11-17)        | **missing**               |
+| thyme | **missing**                     | `fmt args="--inplace"` (typstyle)          | yes + `lint`     | `release` (from typst.toml; commits built artefacts)     | yes                       |
 | omni  | is the flake                    | no justfile                                |                  |                                                          | no CI                     |
 | infra | **missing**                     | no justfile                                |                  | tags by hand                                             | no CI lint (only publish) |
 
@@ -37,5 +37,5 @@ Every repository has:
 
 1. One shared dev shell: omni exposes `devShells` per language (rust, python, typst). Each repo's `flake.nix` imports it. Then `cargo`, `uv`, `typst`, `typstyle`, `just`, `kubectl` come from one place.
 2. glob: `fmt` runs typstyle with the thyme settings (`--line-width 120`). `release` stops auto-committing and reads the version from one file.
-3. Unify `release` arguments: no argument, version from manifest, `--check` flag. apex and thyme need one small change each.
+3. ~~Unify `release` arguments~~: done 2026-11-17. All four take no argument, read the manifest, support `--check`. thyme still commits its rebuilt manual and thumbnail by design.
 4. infra: `justfile` with `check` (kustomize build of every dir + yamllint) and `release` (next semver tag). CI runs `check` on pull requests.

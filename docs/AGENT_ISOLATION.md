@@ -1,6 +1,6 @@
 # Agent isolation for opencode: options and recommendation
 
-Status 2026-11-17. **Implemented** (steps 1-3): opencode in a Kata VM, CiliumNetworkPolicy `agent-isolation`, authentik forward auth (group `developers`). Step 4 (Agent Sandbox per task) is next. Prerequisite found on the way: Cilium needed `socketLB.hostNamespaceOnly: true`, otherwise Kata VMs cannot reach ClusterIPs.
+Status 2026-11-17. **Implemented** (steps 1-4): opencode in a Kata VM, CiliumNetworkPolicy `agent-isolation`, authentik forward auth (group `developers`), and Agent Sandbox v1.0.11 with template `opencode` and a warm pool of 1 in ns `agents` (infra v1.29.0). Next: a way to reach a claimed sandbox (per-claim route behind authentik, or the sandbox router). Prerequisite found on the way: Cilium needed `socketLB.hostNamespaceOnly: true`, otherwise Kata VMs cannot reach ClusterIPs.
 
 Goal: coding agents (opencode web, later others) run arbitrary commands. They must not reach the cluster, the home LAN, secrets, or other workloads. "Airtight" means two walls: a **compute wall** (the agent cannot escape to the node kernel) and a **network wall** (the agent can reach only what it needs).
 
@@ -41,3 +41,21 @@ Order when you approve:
 2. `CiliumNetworkPolicy` for the agent namespace (deny-all + allowlist).
 3. authentik forward-auth on `opencode.internal`.
 4. Agent Sandbox (CRDs + controller) with a template and a small warm pool, when you want one sandbox per task.
+
+## Step 4 as built (2026-11-17)
+
+- Controller: `infrastructure/agent-sandbox/` (chart from the pinned GitRepository, extensions on). CRDs: `agent-sandbox-crds` in `cluster/crds.yaml`.
+- `applications/agents/`: `SandboxTemplate opencode` (Kata, rzbl, emptyDir HOME, no SA token, restricted PodSecurity), `SandboxWarmPool opencode` (1), CNP `agent-isolation` (copy of opencode's).
+- `networkPolicyManagement: Unmanaged`. The Managed default allows all public egress, and Cilium adds that to the allowlist.
+- Take a sandbox:
+
+```nu
+"apiVersion: extensions.agents.x-k8s.io/v1beta1
+kind: SandboxClaim
+metadata: {name: task-1, namespace: agents}
+spec: {warmPoolRef: {name: opencode}}" | kubectl apply -f -
+kubectl -n agents get sandboxclaims,sandboxes,pods
+kubectl -n agents port-forward pod/<sandbox-pod> 4096:4096
+```
+
+Claims are runtime state, like whims: not in git. Delete the claim to end the VM.

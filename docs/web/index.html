@@ -77,7 +77,12 @@ ul.clean{list-style:none;padding:0;margin:0}
 .todo .d{color:var(--muted);font-size:12.5px}
 .prio{font-size:11px;border-radius:5px;padding:0 6px;font-weight:600}
 .p1{background:#f8514922;color:var(--broken)}.p2{background:#d2992222;color:var(--prep)}.p3{background:#58a6ff22;color:var(--internal)}
-.svgwrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:auto}
+.svgwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+#topo{display:block;width:100%;height:min(78vh,820px);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+#topo.panning{cursor:grabbing}
+.mapctl{position:absolute;right:10px;top:10px;display:flex;gap:4px}
+.mapctl button{background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:8px;min-width:30px;height:30px;padding:0 8px;cursor:pointer;font:inherit}
+.mapctl button:hover{border-color:var(--accent)}
 svg text{fill:var(--fg);font:12px system-ui,sans-serif}
 svg .sub{fill:var(--muted);font-size:10.5px}
 svg .box{fill:var(--panel2);stroke:var(--line);stroke-width:1.2}
@@ -169,14 +174,14 @@ talos:  topf apply / topf upgrade (not Flux)</div>
 
 <section id="topology">
   <h2>Topology</h2>
-  <p class="lead">Hover a box to highlight its links. Click to open details.</p>
+  <p class="lead">Hover a box to highlight its links. Click to open details. Drag to pan, scroll or pinch to zoom, double-click to reset.</p>
   <div class="legend">
     <span><i style="border-color:var(--accent)"></i>WAN / public</span>
     <span><i style="border-color:#39c5cf"></i>LAN 10.10.0.0/16</span>
     <span><i style="border-color:#c297ff;border-top-style:dashed"></i>Tailscale</span>
     <span><i style="border-color:var(--dim)"></i>in-cluster</span>
   </div>
-  <div class="svgwrap"><svg id="topo" viewBox="0 0 1320 820" width="1320" height="820"></svg></div>
+  <div class="svgwrap"><svg id="topo" viewBox="0 0 1320 820"></svg><div class="mapctl"><button id="zin" title="Zoom in">+</button><button id="zout" title="Zoom out">−</button><button id="zreset" title="Reset view">reset</button></div></div>
 </section>
 
 <section id="nodes">
@@ -241,8 +246,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 /* ============================================================
    DATA. Update this block when the cluster changes.
    ============================================================ */
-const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.28.0";
+const ASOF = "2026-11-17";
+const INFRA_TAG = "v1.29.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -255,14 +260,14 @@ const NODES = [
   talos:"1.14.6", schematic:"9cfcb7bd…", ext:["tailscale","nvme-cli","kata-containers","rpi_5 overlay"], taint:"none",
   storage:[{path:"/var/mnt/storage-nvme0",size:"256 GB",use:"agh, pds, atuin, devil, exhib"},{path:"/var/mnt/storage-nvme1",size:"250 GB",use:"forgejo"}],
   routing:"Tailscale subnet router for 10.10.10.0/24 and 10.10.20.0/24. Cilium L2 announcements for LB IPs on end0. Router forwards WAN 80/443/22/2223 here.",
-  runs:["Traefik (pinned, hostPorts)","agh","forgejo","pds","atuin","devil (kata)","exhib"],
-  notes:["Storage: ExistingVolumeConfig by fs UUID (2026-11-16). Data kept in place, PVs recreated with new paths.","Router only forwards to DHCP-known IPs, so Traefik uses hostPorts here."]},
+  runs:["Traefik (pinned, hostPorts)","agh","forgejo","pds","atuin","devil (kata)","exhib","apex + apex-tui","glob (floats)","ddns (floats)","cert-manager, keel, tailscale operator, local-path (preferred)"],
+  notes:["Storage: ExistingVolumeConfig by fs UUID (2026-11-16). Data kept in place, PVs recreated with new paths.","Router only forwards to DHCP-known IPs, so Traefik uses hostPorts here.","Role: edge + always-on core. Platform controllers prefer rbpi (fate-share with the edge; rzbl boots from USB)."]},
  {id:"rzbl", name:"rzbl", role:"worker", where:"home", hw:"Razer Blade 15 Base 2019: i7-9750H (12 threads), 16 GB, GTX 1660 Ti 6 GB, NVMe 1 TB, SATA SSD 4 TB", ip:"10.10.20.11", ts:"100.104.242.45", pub:"—",
   talos:"1.14.6", schematic:"b10204b7…", ext:["tailscale","intel-ucode","nvme-cli","kata-containers","nvidia-open-gpu-kernel-modules-lts","nvidia-container-toolkit-lts"], taint:"none",
   storage:[{path:"USB SanDisk 62 GB",size:"boot, META, STATE",use:"Talos system"},{path:"/var (EPHEMERAL)",size:"107 GB NVMe",use:"images, kubelet, logs"},{path:"/var/mnt/storage-nvme0",size:"893 GB",use:"local-path-nvme: configs, DBs, models"},{path:"/var/mnt/storage-ssd0",size:"4 TB",use:"local-path-ssd: media, photos, files, Time Machine"}],
   routing:"--accept-routes + RoutingRuleConfig 5200 (10.10.0.0/16 → main), advertises 10.10.20.11/32 (approved) so oci reaches it directly. VXLAN via rbpi SNAT does not work.",
-  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","nvidia-device-plugin","tailscale-relay","k8up","glob"],
-  notes:["GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.","Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before)."]},
+  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","opencode (kata)","agent sandboxes (kata, warm pool 1)","authentik","nvidia-device-plugin","tailscale-relay","k8up","Flux (floats, owner pins to rbpi)","knative-serving"],
+  notes:["GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.","Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before).","Role: heavy, GPU, bulk storage, agent VMs. Not for controllers the cluster needs to heal."]},
 ];
 
 /* status: live | prepared | broken | disabled ; exp: public | internal | lan | cluster */
@@ -271,19 +276,19 @@ const SERVICES = [
  {id:"apex", name:"apex", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"https://0xbf.ch", image:"ghcr.io/bfeitknecht/apex:latest (Keel)", desc:"Personal site + WASM app.",
   ports:"HTTP 8080", deps:["traefik","keel"], secrets:[], repo:"apex",
-  notes:["Released v0.1.0 on 2026-11-16 (thyme 0.1.0 on Typst Universe).","Old v1.x tags from October deleted."]},
+  notes:["v0.1.6 (2026-11-17): Firefox froze scroll and hover after a link opened a new tab (RefCell borrow held across window.open). Fixed.","just release takes no tag: version from Cargo.toml."]},
  {id:"apex-tui", name:"apex SSH TUI", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"ssh 0xbf.ch (port 22)", image:"ghcr.io/bfeitknecht/apex:latest", desc:"SSH portfolio. Any username, no client key.",
   ports:"WAN 22 → Traefik apexssh → apex-tui:2222", deps:["traefik"], secrets:["apex/apex-ssh-host-key.sops.yaml"], repo:"apex",
   notes:["Live since apex v0.1.0 (2026-11-16)."]},
- {id:"glob", name:"glob", cat:"web", status:"live", exp:"public", node:"rzbl", tier:"2", ns:"glob", ks:"glob",
+ {id:"glob", name:"glob", cat:"web", status:"live", exp:"public", node:"any", tier:"2", ns:"glob", ks:"glob",
   host:"https://blog.0xbf.ch", image:"ghcr.io/bfeitknecht/glob:latest", desc:"Typst blog built with thyme.",
   ports:"HTTP 8080", deps:["traefik","keel"], secrets:[], repo:"glob",
-  notes:["Released v0.1.0 on 2026-11-16.","Draft post posts/notes-to-agents.typ (not mounted)."]},
- {id:"exhib", name:"exhib", cat:"web", status:"broken", exp:"public", node:"rbpi", tier:"2", ns:"exhib", ks:"exhib",
+  notes:["Released v0.1.0 on 2026-11-16.","just release reads VERSION, never commits (2026-11-17).","Draft post posts/notes-to-agents.typ (not mounted)."]},
+ {id:"exhib", name:"exhib", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"exhib", ks:"exhib",
   host:"https://gallery.0xbf.ch", image:"ghcr.io/bfeitknecht/exhib:latest (Keel)", desc:"Hugo gallery. SWS + upload processor in one container.",
   ports:"HTTP 8080, /health", deps:["traefik","storage","keel"], secrets:[], repo:"exhib", storage:"exhib-data 50Gi (rbpi nvme0)",
-  notes:["DOWN since v0.3.0 (responsive images): Hugo build fails with WebPEncode OUT_OF_MEMORY on collection bw. Owner fixes it.","6 collections uploaded 2026-11-16 (init, char, colors, cal, bw, three).","Uploads: just upload uploads/<slug> in the exhib repo. Memory limit 3Gi."]},
+  notes:["v0.5.6 (2026-11-17): viewer pauses a video when you leave it (next, previous, close, back).","Uploads: just upload uploads/<slug> in the exhib repo. Memory limit 3Gi."]},
  {id:"forgejo", name:"Forgejo", cat:"dev", status:"live", exp:"public", node:"rbpi", tier:"1", ns:"forgejo", ks:"forgejo",
   host:"https://git.0xbf.ch · ssh://git@git.0xbf.ch:2223", image:"codeberg.org/forgejo/forgejo:16.0.5", desc:"Git forge.",
   ports:"HTTP 3000, SSH 22 (WAN/LB 2223)", deps:["traefik","storage"], secrets:["forgejo/forgejo-secrets.sops.yaml"], storage:"forgejo-data 10Gi (rbpi nvme1)",
@@ -297,8 +302,8 @@ const SERVICES = [
   ports:"HTTP 8888", deps:["traefik","storage"], secrets:[], storage:"atuin-data 5Gi (rbpi nvme0)", notes:["First app tested on the migrated volume path."]},
  {id:"authentik", name:"authentik", cat:"identity", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"authentik", ks:"authentik",
   host:"https://auth.0xbf.ch", image:"authentik 2026.8.5 (Helm) + postgres:17.11", desc:"The one IdP for all apps (OIDC, forward auth, invitations).",
-  ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml (to create)"], storage:"authentik-db 10Gi (rzbl nvme)",
-  runbook:"docs/AUTHENTIK.md", notes:["Live since 2026-11-17 (v1.25.1).","Blueprints in git: groups family/friends, invitation-only enrollment (slug invite).","Bootstrap admin from secret: setup flow never public."]},
+  ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml"], storage:"authentik-db 10Gi (rzbl nvme)",
+  runbook:"docs/AUTHENTIK.md", notes:["Live since 2026-11-17 (v1.25.1).","Blueprints in git: groups family/friends/developers, invite flow, OIDC forgejo + jellyfin, forward auth opencode.","2026-11-17: akadmin deactivated before bf had a password. Recover with ak create_recovery_key (docs/AUTHENTIK.md)."]},
  {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"media", ks:"media",
   host:"https://stream.0xbf.ch · https://jellyfin.internal", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
   ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
@@ -324,7 +329,7 @@ const SERVICES = [
   host:"https://dawarich.internal", image:"freikin/dawarich:1.23.0, postgis 17-3.5, redis 8", desc:"Location history (Google Timeline alternative).",
   ports:"HTTP 3000", deps:["traefik","storage"], secrets:["dawarich/dawarich-secrets.sops.yaml (to create)"], storage:"dawarich-db 20Gi, dawarich-data 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:[]},
  {id:"copyparty", name:"Copyparty", cat:"apps", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"copyparty", ks:"copyparty",
-  host:"https://files.internal (public later: files.0xbf.ch)", image:"copyparty/ac:1.20.26", desc:"File server / sharing. Accounts in its config.",
+  host:"https://files.0xbf.ch · https://copyparty.internal", image:"copyparty/ac:1.20.26", desc:"File server / sharing. Accounts in its config.",
   ports:"HTTP 3923", deps:["traefik","storage"], secrets:["copyparty/copyparty-config.sops.yaml (to create)"], storage:"copyparty-files 500Gi (ssd)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Safe to make public: accounts come from the config."]},
  {id:"timemachine", name:"Time Machine (Samba)", cat:"apps", status:"prepared", exp:"lan", node:"rzbl", tier:"1", ns:"samba", ks:"samba",
   host:"smb://10.10.20.145/TimeMachine", image:"mbentley/timemachine:smb-20261116", desc:"Mac backups over SMB. LB IP .145 (= 445).",
@@ -350,27 +355,29 @@ const SERVICES = [
   host:"LB 10.10.20.128 · hostPorts 80/443/22/2223 · https://dashboard.internal", image:"traefik chart 41.6.0", desc:"Gateway API implementation. Terminates TLS.",
   ports:"web 8000, websecure 8443, apexssh 22, devilssh 2222, gitssh 2223", deps:["cert-manager","gateway-api-crds","traefik-crds"], secrets:[],
   notes:["Pinned to rbpi (nodeSelector): router forwards to rbpi only.","Listeners: web, websecure, websecure-internal, websecure-pds, apexssh, devilssh, gitssh."]},
- {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + name-constrained internal CA (explicit *.internal names).", ports:"—", deps:["cilium"], secrets:["cert-manager/cert-manager-secrets.sops.yaml"], notes:[]},
+ {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"rbpi (preferred)", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + name-constrained internal CA (explicit *.internal names).", ports:"—", deps:["cilium"], secrets:["cert-manager/cert-manager-secrets.sops.yaml"], notes:[]},
  {id:"cilium", name:"Cilium", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"kube-system", ks:"cilium", host:"—", image:"cilium 1.20.2", desc:"CNI, kube-proxy replacement, LB-IPAM + L2 announcements, VXLAN overlay.", ports:"—", deps:["storage","prometheus-crds"], secrets:[], notes:["L2 announce on rbpi end0 for pool 10.10.20.128/25.","Overlay to oci runs over Tailscale."]},
- {id:"tailscale-op", name:"Tailscale operator", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"tailscale", ks:"tailscale", host:"—", image:"tailscale operator 1.102.3", desc:"Tailnet ingress/egress proxies with tag:k8s.", ports:"—", deps:["traefik"], secrets:["tailscale/operator-oauth.sops.yaml"], notes:[]},
+ {id:"tailscale-op", name:"Tailscale operator", cat:"platform", status:"live", exp:"cluster", node:"rbpi (preferred)", tier:"infra", ns:"tailscale", ks:"tailscale", host:"—", image:"tailscale operator 1.102.3", desc:"Tailnet ingress/egress proxies with tag:k8s.", ports:"—", deps:["traefik"], secrets:["tailscale/operator-oauth.sops.yaml"], notes:[]},
  {id:"relay", name:"tailscale-relay", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"egress", ks:"egress-tailscale",
   host:"tailscale-relay.egress.svc:3900 → 100.96.72.126:3900", image:"tailscale v1.104.1 + socat", desc:"Untagged user device that can reach the friend's shared-in NAS.",
   ports:"3900", deps:[], secrets:["egress/tailscale-relay-secrets.sops.yaml"], notes:["Pod runs since 2026-11-16 (PodSecurity + TS_KUBE_SECRET fixes).","Target refuses 3900: Garage on the NAS is not listening on its tailnet IP.","Alternative later: tailcat (tailscale.com/tailcat)."]},
  {id:"k8up", name:"k8up", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"k8up", ks:"backup", host:"—", image:"k8up 4.10.0", desc:"Restic backups of PVCs to Garage S3 on the friend's NAS.", ports:"—", deps:["k8up-crds"], secrets:["backup/k8up/k8up-secrets.sops.yaml"],
   notes:["No backup has ever succeeded. Gate for immich.","Schedules: forgejo 03:00, pds 03:30, atuin 04:30, authentik 05:00 (pg_dump)."]},
  {id:"gpu", name:"NVIDIA device plugin", cat:"platform", status:"live", exp:"cluster", node:"rzbl", tier:"infra", ns:"gpu", ks:"gpu", host:"—", image:"nvidia-device-plugin 0.20.1", desc:"Exposes nvidia.com/gpu. Time-slicing 4. RuntimeClass nvidia.", ports:"—", deps:[], secrets:[], notes:["Talos loads nvidia, nvidia_uvm, nvidia_drm, nvidia_modeset (patch 07-nvidia)."]},
- {id:"keel", name:"Keel", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"keel", ks:"keel", host:"—", image:"keel", desc:"Polls :latest digests for tier-2 apps and restarts them.", ports:"—", deps:[], secrets:[], notes:["Flux ignores the image field of tier-2 Deployments."]},
+ {id:"keel", name:"Keel", cat:"platform", status:"live", exp:"cluster", node:"rbpi (preferred)", tier:"infra", ns:"keel", ks:"keel", host:"—", image:"keel", desc:"Polls :latest digests for tier-2 apps and restarts them.", ports:"—", deps:[], secrets:[], notes:["Flux ignores the image field of tier-2 Deployments."]},
  {id:"knative", name:"Knative Serving", cat:"platform", status:"live", exp:"public", node:"any", tier:"3", ns:"knative-serving", ks:"knative-serving", host:"https://<ksvc>.0xbf.ch (whimsy ns)", image:"operator v1.23.1, serving 1.23.0", desc:"Scale-to-zero whims via kn, net-gateway-api on Traefik.", ports:"—", deps:["knative-operator"], secrets:["whimsy GHCR (sops)"], notes:["PDBs block drains: use topf upgrade --delete-if-eviction-fails."]},
- {id:"storage", name:"local-path-provisioner", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"local-path-storage", ks:"storage", host:"—", image:"rancher/local-path-provisioner v0.0.28", desc:"Node-local volumes. Classes local-path, local-path-nvme, local-path-ssd.", ports:"—", deps:[], secrets:[], notes:[]},
+ {id:"storage", name:"local-path-provisioner", cat:"platform", status:"live", exp:"cluster", node:"rbpi (preferred)", tier:"infra", ns:"local-path-storage", ks:"storage", host:"—", image:"rancher/local-path-provisioner v0.0.28", desc:"Node-local volumes. Classes local-path, local-path-nvme, local-path-ssd.", ports:"—", deps:[], secrets:[], notes:[]},
+ {id:"agent-sandbox", name:"Agent Sandbox", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"agent-sandbox-system", ks:"agent-sandbox", host:"—", image:"agent-sandbox-controller v1.0.11 (chart from pinned GitRepository)", desc:"kubernetes-sigs controller: Sandbox, SandboxTemplate, SandboxWarmPool, SandboxClaim.", ports:"—", deps:["agent-sandbox-crds"], secrets:[], runbook:"docs/AGENT_ISOLATION.md", notes:["CRDs from the same GitRepository (crds.yaml, prune false). Chart skips its crds/."]},
+ {id:"agents", name:"agent sandboxes", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"agents", ks:"agents", host:"— (SandboxClaim, no route)", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"One throwaway opencode Kata VM per task. Warm pool of 1.", ports:"HTTP 4096 (Traefik only, no route yet)", deps:["agent-sandbox","kata"], secrets:[], runbook:"docs/AGENT_ISOLATION.md", notes:["Template Unmanaged: the controller default policy would add public egress. CNP agent-isolation is the only wall.","Take one: SandboxClaim with warmPoolRef.name opencode in ns agents."]},
  {id:"metrics", name:"metrics-server", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"monitoring", ks:"monitoring", host:"—", image:"metrics-server 3.14.0", desc:"kubectl top, homepage stats.", ports:"—", deps:[], secrets:[], notes:[]},
- {id:"kata", name:"Kata Containers", cat:"platform", status:"live", exp:"cluster", node:"rbpi", tier:"infra", ns:"—", ks:"kata", host:"—", image:"kata 3.32.0 (Talos ext)", desc:"RuntimeClass kata-qemu for VM pods (devil).", ports:"—", deps:[], secrets:[], notes:[]},
+ {id:"kata", name:"Kata Containers", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"—", ks:"kata", host:"—", image:"kata 3.32.0 (Talos ext, rbpi + rzbl)", desc:"RuntimeClass kata-qemu for VM pods (devil, opencode, agent sandboxes).", ports:"—", deps:[], secrets:[], notes:[]},
  {id:"monitoring", name:"Prometheus / Grafana / Gatus", cat:"platform", status:"disabled", exp:"internal", node:"—", tier:"infra", ns:"monitoring", ks:"monitoring", host:"status.internal, grafana (was)", image:"kube-prometheus-stack 91.4.1, gatus v5.36.0", desc:"Turned off 2026-11-15. Config kept, commented out.", ports:"—", deps:[], secrets:["monitoring/grafana-credentials.sops.yaml"], notes:["Re-enable together with Renovate."]},
 ];
 
 const NEEDS = [
- {id:"exhib-down", prio:1, cat:"fix", t:"exhib is down (v0.3.0)", d:"Hugo build fails: WebPEncode OUT_OF_MEMORY on collection bw. Release a fix or roll back the image to v0.2.0.", svc:"exhib"},
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
- {id:"authentik-admin", prio:1, cat:"manual", t:"authentik: own admin + passkey, deactivate akadmin", d:"Log in at auth.0xbf.ch as akadmin (bootstrap password). Then connect Forgejo and Jellyfin (docs/AUTHENTIK.md).", svc:"authentik"},
+ {id:"authentik-recover", prio:1, cat:"manual", t:"authentik: recover bf, set password + passkey", d:"bf has no usable password and akadmin is inactive. Run ak create_recovery_key 30 bf in authentik-server, open the link, set password and passkey (docs/AUTHENTIK.md).", svc:"authentik"},
+ {id:"flux-placement", prio:3, cat:"manual", t:"Flux controllers prefer rbpi", d:"Flux is installed out of tree, so the agent cannot pin it. Re-run the Flux install with a nodeAffinity patch (prefer rbpi).", svc:null},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
@@ -382,7 +389,6 @@ const NEEDS = [
  {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
  {id:"smtp", prio:3, cat:"decision", t:"SMTP (Proton)", d:"Blocks authentik email invites/resets and PDS email.", svc:"authentik"},
  {id:"autoapprove", prio:3, cat:"decision", t:"Tailscale autoApprovers (optional)", d:"Auto-approve 10.10.0.0/16 and 10.20.20.0/24 for tag:infra.", svc:null},
- {id:"exhib-media", prio:3, cat:"manual", t:"exhib: uncommitted processor/media.py", d:"Local change not committed (not by the agent).", svc:"exhib"},
  {id:"nix-shells", prio:3, cat:"decision", t:"Nix dev shells per repo", d:"No repo has flake.nix except omni. See docs/WORKSPACE.md.", svc:null},
 ];
 
@@ -405,18 +411,18 @@ const PORTS = [
  ["80","TCP","WAN + LB","Traefik web 8000 → redirect to 443"],
  ["443","TCP","WAN + LB","Traefik websecure 8443 (all *.0xbf.ch) + websecure-internal (*.internal)"],
  ["22","TCP","WAN + LB","apex SSH TUI (ssh 0xbf.ch)"],
- ["2223","TCP","WAN (rule pending) + LB","Forgejo git SSH"],
+ ["2223","TCP","WAN + LB","Forgejo git SSH"],
  ["2222","TCP","LB + tailnet only","devil SSH. WAN 2222 reserved for a dev box."],
  ["53","UDP/TCP","LB .153","AdGuard Home"],
  ["445","TCP","LB .145","Time Machine (prepared)"],
  ["41641","UDP","oci VCN","Tailscale WireGuard (only open port on oci)"],
 ];
 const HOSTS = [
- ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib (down)"],["git.0xbf.ch","public","forgejo"],
- ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik (prepared)"],["<ksvc>.0xbf.ch","public","Knative whims"],
+ ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib"],["git.0xbf.ch","public","forgejo"],
+ ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
  ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
- ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["files.internal","internal","copyparty (prepared)"],["opencode.internal","internal","prepared"],
+ ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty (prepared)"],["files.0xbf.ch","public","copyparty (prepared)"],["opencode.internal","internal","opencode (authentik)"],
 ];
 const TAIL = [
  ["oci","100.73.186.19","tag:infra","advertises 10.20.20.0/24, accepts routes"],
@@ -441,9 +447,9 @@ const PVS = [
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","prepared"],
  ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","prepared"],
  ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","prepared"],
- ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","prepared"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","prepared"],
+ ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
 ];
-const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   (pinned GitRepositories)
+const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   agent-sandbox-crds   (pinned GitRepositories)
 storage
  └─ cilium  (+prometheus-crds)
      ├─ ipam
@@ -452,11 +458,13 @@ storage
              ├─ tailscale
              ├─ monitoring (metrics-server only)
              └─ apps: apex glob exhib forgejo pds atuin homepage devil agh(dns) media* …
-gpu ── media, ollama ── opencode*
+gpu ── media, ollama ── opencode
+agent-sandbox-crds ── agent-sandbox ── agents (+kata)
 backup (k8up) ← egress-tailscale
-kata, keel, knative-operator → knative-serving, ddns, dns
+kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: immich dawarich copyparty samba forgejo-runner qbittorrent`;
 const TAGS = [
+ ["v1.29.0","2026-11-17","Agent Sandbox v1.0.11 (controller + agents warm pool on kata); platform controllers prefer rbpi; atlas pan/zoom"],
  ["v1.28.0","2026-11-17","agent isolation: opencode in Kata + Cilium policy + authentik forward auth; devil clean stop"],
  ["v1.27.0","2026-11-17","Cilium socketLB.hostNamespaceOnly (Kata ClusterIP), devil cluster DNS"],
  ["v1.26.0","2026-11-17","Forgejo SSO + theme 0xbf + logo; Jellyfin branding"],
@@ -524,7 +532,7 @@ kubectl get pods -A | where ($it | str contains "Running" | not $in)   # quick v
 # fresh kubeconfig (24 h)
 cd talos; topf kubeconfig | save -f ../kubeconfig
 # release infra
-git tag -a v1.21.1 -m "…"; git push origin v1.21.1
+git tag -a v1.29.1 -m "…"; git push origin v1.29.1
 flux reconcile source oci flux-system
 # talos
 $env.TALOSCONFIG = ("talos/talosconfig" | path expand)
@@ -616,7 +624,7 @@ function nodeBody(n){
   h("h3",{},"Routing"),h("div",{class:"note"},n.routing),
   h("h3",{},"Runs"),h("div",{class:"chips"},...n.runs.map(r=>h("span",{class:"chip"},r))),
   ...(n.notes.length?[h("h3",{},"Notes"),...n.notes.map(x=>h("div",{class:"note"},x))]:[]));
- const svcs=SERVICES.filter(s=>s.node===n.id);
+ const svcs=SERVICES.filter(s=>s.node===n.id||s.node.startsWith(n.id+" "));
  if(svcs.length)wrap.append(h("h3",{},`Services pinned here (${svcs.length})`),h("div",{class:"chips"},...svcs.map(s=>h("span",{class:"chip",onclick:()=>openSvc(s.id)},s.name+" · "+s.status))));
  return wrap;}
 function renderNodes(){$("#nodecards").replaceChildren(...NODES.map(n=>h("div",{class:"card"},h("div",{style:"display:flex;justify-content:space-between;align-items:center"},h("h3",{style:"margin:0"},n.name),pill("s-live",n.role)),h("div",{class:"small"},n.where),nodeBody(n))));}
@@ -656,46 +664,49 @@ const TN=[ // id,label,sub,x,y,w,ref
  ["forgejo","Forgejo","git.0xbf.ch",250,375,105,"forgejo"],
  ["pds","PDS","pds.0xbf.ch",365,375,100,"pds"],
  ["atuin","atuin","",475,375,105,"atuin"],
- ["exhib","exhib","gallery (down)",60,440,110,"exhib"],
+ ["exhib","exhib","gallery.0xbf.ch",60,440,110,"exhib"],
  ["apex","apex","0xbf.ch + ssh :22",180,440,110,"apex"],
  ["devil","devil","kata VM",300,440,100,"devil"],
  ["aghpod","AGH pod","",410,440,80,"agh"],
  ["nv0","nvme0/nvme1","256+250 GB",500,440,90,null],
+ ["glob","glob","blog.0xbf.ch",60,505,110,"glob"],
+ ["ddns","ddns","→ Cloudflare",180,505,100,"ddns"],
+ ["ctl","platform controllers","cert-manager · keel · ts-operator · local-path",290,505,300,"cert-manager"],
  // rzbl
  ["rzbl","rzbl","Blade · 10.10.20.11 · GTX 1660 Ti",650,330,640,"rzbl"],
  ["jelly","Jellyfin","GPU",670,375,100,"jellyfin"],
  ["arr","*arr","sonarr radarr prowlarr",780,375,150,"sonarr"],
  ["ollama","Ollama","GPU · qwen2.5-coder",940,375,150,"ollama"],
- ["opencode","opencode","prepared",1100,375,95,"opencode"],
+ ["opencode","opencode","kata VM",1100,375,95,"opencode"],
  ["gpu","GPU plugin","4 slots",1205,375,75,"gpu"],
- ["auth","authentik","prepared",670,440,100,"authentik"],
+ ["auth","authentik","auth.0xbf.ch",670,440,100,"authentik"],
  ["immich","immich","prepared",780,440,90,"immich"],
  ["daw","dawarich","prepared",880,440,90,"dawarich"],
  ["cp","copyparty","prepared",980,440,90,"copyparty"],
  ["tm","Time Machine",".145 prepared",1080,440,110,"timemachine"],
  ["relay","ts-relay","→ NAS :3900",1200,440,80,"relay"],
  ["disks","NVMe 893 GB · SSD 4 TB","/var on NVMe, boot USB",670,505,260,null],
- ["glob","glob","blog.0xbf.ch",940,505,90,"glob"],
- ["k8up","k8up","backups (failing)",1040,505,110,"k8up"],
+ ["agents","sandboxes","kata · warm pool 1",940,505,120,"agents"],
+ ["k8up","k8up","backups (failing)",1070,505,100,"k8up"],
+ ["flux","Flux","floats · OCI semver",1180,505,100,null],
  // oci
  ["oci","oci (Oracle Cloud)","control plane · 10.20.20.10 · 100.73.186.19",40,640,700,"oci"],
  ["api","kube-apiserver + etcd","endpoint via tailnet",60,690,200,null],
  ["resolver","kresd + knotd","10.96.0.53",280,690,150,"dns"],
  ["coredns","CoreDNS","10.96.0.10",450,690,120,null],
- ["flux","Flux","OCIRepository semver",590,690,130,null],
 ];
 const TE=[ // from,to,type
  ["inet","cf","wan"],["inet","zy","wan"],["zy","traefik","wan"],["cf","zy","wan"],["le","traefik","wan"],["ghcr","flux","wan"],
  ["mac","tsc","tail"],["mac","agh","lan"],["mac","lb","lan"],["agh","aghpod","lan"],["lb","traefik","lan"],
  ["traefik","forgejo",""],["traefik","pds",""],["traefik","atuin",""],["traefik","exhib",""],["traefik","apex",""],["traefik","devil",""],
  ["traefik","jelly",""],["traefik","arr",""],["traefik","auth",""],["traefik","immich",""],["traefik","daw",""],["traefik","cp",""],["traefik","opencode",""],["traefik","glob",""],
- ["opencode","ollama",""],["gpu","jelly",""],["gpu","ollama",""],["jelly","arr",""],
+ ["opencode","ollama",""],["agents","ollama",""],["ddns","cf","wan"],["ctl","le","wan"],["gpu","jelly",""],["gpu","ollama",""],["jelly","arr",""],
  ["aghpod","resolver","tail"],["k8up","relay",""],["relay","nas","tail"],
  ["rbpi","oci","tail"],["rzbl","oci","tail"],["rbpi","rzbl","lan"],["tsc","rbpi","tail"],["tsc","rzbl","tail"],["tsc","oci","tail"],
  ["flux","api",""],["lb","tm","lan"],
 ];
 function renderTopo(){const svg=$("#topo");svg.innerHTML="";const NS="http://www.w3.org/2000/svg";const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
- const pos={};TN.forEach(([id,l,s,x,y,w])=>{const hgt=["rbpi","rzbl","oci"].includes(id)?(id==="oci"?120:id==="rbpi"?175:250):46;pos[id]={x,y,w,h:hgt,cx:x+w/2,cy:y+hgt/2}});
+ const pos={};TN.forEach(([id,l,s,x,y,w])=>{const hgt=["rbpi","rzbl","oci"].includes(id)?(id==="oci"?120:250):46;pos[id]={x,y,w,h:hgt,cx:x+w/2,cy:y+hgt/2}});
  const eg=el("g",{});svg.append(eg);
  const groups=["rbpi","rzbl","oci"];
  TN.filter(n=>groups.includes(n[0])).forEach(([id,l,s,x,y,w,ref])=>{const p=pos[id];const g=el("g",{class:"nd","data-id":id});g.append(el("rect",{class:"grp",x,y,width:w,height:p.h,rx:12}));const t=el("text",{x:x+12,y:y+18,"font-weight":"650"});t.textContent=l;const t2=el("text",{x:x+12+l.length*7.6+10,y:y+18,class:"sub"});t2.textContent=s;g.append(t,t2);g.onclick=()=>ref&&openSvc(ref);svg.append(g)});
@@ -709,8 +720,37 @@ function renderTopo(){const svg=$("#topo");svg.innerHTML="";const NS="http://www
   g.onclick=()=>ref&&openSvc(ref);svg.append(g)});
 }
 
+/* Pan and zoom by moving the viewBox. Drag pans, wheel or pinch zooms around
+   the pointer, a click without movement still opens the box under it. */
+function panZoom(svg){
+ const base={x:0,y:0,w:1320,h:820};let vb={...base};
+ const apply=()=>svg.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+ const scale=()=>{const r=svg.getBoundingClientRect();return Math.max(vb.w/r.width,vb.h/r.height)};
+ const toSvg=(cx,cy)=>new DOMPoint(cx,cy).matrixTransform(svg.getScreenCTM().inverse());
+ function zoom(f,cx,cy){const w=Math.min(base.w*2,Math.max(base.w/8,vb.w*f)),k=w/vb.w;
+  const p=cx==null?{x:vb.x+vb.w/2,y:vb.y+vb.h/2}:toSvg(cx,cy);
+  vb={x:p.x-(p.x-vb.x)*k,y:p.y-(p.y-vb.y)*k,w:vb.w*k,h:vb.h*k};apply()}
+ svg.addEventListener("wheel",e=>{e.preventDefault();const d=e.deltaMode===1?e.deltaY*16:e.deltaMode===2?e.deltaY*400:e.deltaY;zoom(Math.exp(Math.max(-1,Math.min(1,d*(e.ctrlKey?0.01:0.002)))),e.clientX,e.clientY)},{passive:false});
+ const pts=new Map();let start=null,moved=false,pinch=null;
+ svg.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){start={x:e.clientX,y:e.clientY,vb:{...vb},s:scale()};moved=false}
+  else if(pts.size===2){const[a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),w:vb.w};start=null}});
+ svg.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&pts.size===2){const[a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>0){zoom(pinch.w*pinch.d/d/vb.w,(a.x+b.x)/2,(a.y+b.y)/2);moved=true}return}
+  if(!start)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;
+  if(!moved){if(Math.hypot(dx,dy)<4)return;moved=true;svg.setPointerCapture(e.pointerId);svg.classList.add("panning")}
+  vb.x=start.vb.x-dx*start.s;vb.y=start.vb.y-dy*start.s;apply()});
+ const end=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size){start=null;svg.classList.remove("panning")}};
+ svg.addEventListener("pointerup",end);svg.addEventListener("pointercancel",end);
+ // A drag ends with a click on the box under the pointer. Swallow it.
+ svg.addEventListener("click",e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false}},true);
+ svg.addEventListener("dblclick",e=>{e.preventDefault();vb={...base};apply()});
+ $("#zin").onclick=()=>zoom(1/1.25);$("#zout").onclick=()=>zoom(1.25);$("#zreset").onclick=()=>{vb={...base};apply()};
+}
+
 function all(){nav();renderOverview();renderNeeds();renderServices();renderNodes();renderTables();renderTopo();}
 all();
+panZoom($("#topo"));
 </script>
 </body>
 </html>

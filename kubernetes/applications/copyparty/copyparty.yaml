@@ -87,7 +87,7 @@ spec:
       namespace: ingress
       sectionName: websecure-internal
   hostnames:
-    - files.internal
+    - copyparty.internal
   rules:
     - filters:
         - type: ExtensionRef
@@ -96,5 +96,24 @@ spec:
             kind: Middleware
             name: internal-allowlist
       backendRefs:
+        - name: copyparty
+          port: 80
+---
+# Public by purpose (files), internal by software (copyparty). Accounts come
+# from copyparty-config, so public is safe from the first start.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: copyparty-public
+  namespace: copyparty
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure
+  hostnames:
+    - files.0xbf.ch
+  rules:
+    - backendRefs:
         - name: copyparty
           port: 80
