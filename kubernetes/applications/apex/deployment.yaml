@@ -21,6 +21,9 @@ spec:
             labels:
                 app.kubernetes.io/name: apex
         spec:
+            # The image is arm64 only (rbpi). rzbl is amd64.
+            nodeSelector:
+                kubernetes.io/hostname: rbpi
             # No Kubernetes API use.
             automountServiceAccountToken: false
             containers:

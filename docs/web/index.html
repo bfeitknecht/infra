@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-17";
-const INFRA_TAG = "v1.34.0";
+const INFRA_TAG = "v1.34.1";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -459,6 +459,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: dawarich samba qbittorrent`;
 const TAGS = [
+ ["v1.34.1","2026-11-17","Gatus config fix, apex pinned to rbpi (arm64 image), journey page"],
  ["v1.34.0","2026-11-17","agent sandbox slots sandbox-1..3.internal + scripts/sandbox.nu"],
  ["v1.33.1","2026-11-17","runner dind on localhost only"],
  ["v1.33.0","2026-11-17","Forgejo Actions on, runner live (rzbl)"],
@@ -519,6 +520,7 @@ const SECRETS = [
 ];
 const DOCS = [
  ["AGENTS.md","Rules, component notes, debugging playbook (source of truth)"],
+ ["docs/web/journey.html","History: activity, releases, roadmap over time (python3 scripts/journey.py)"],
  ["ROADMAP.md","Work queue: NOW / NEXT / LATER"],
  ["docs/AGENT_ISOLATION.md","Agent sandbox options and recommendation"],
  ["docs/RZBL_WORKLOADS.md","rzbl apps, secrets commands, public access"],
