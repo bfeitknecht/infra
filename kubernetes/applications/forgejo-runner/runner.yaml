@@ -66,7 +66,11 @@ spec:
         # Jobs run as containers in this Docker daemon. It is not shared with the node.
         - name: dind
           image: docker.io/docker:28-dind
-          args: ["--host=tcp://127.0.0.1:2375", "--tls=false"]
+          # First arg `dockerd`: the entrypoint then uses these flags as they
+          # are (through the dind wrapper). Flags alone make it prepend its own
+          # --host=tcp://0.0.0.0:2375, which collided with ours and would expose
+          # a privileged Docker to every pod. Localhost only.
+          args: ["dockerd", "--host=tcp://127.0.0.1:2375", "--tls=false"]
           env:
             - name: DOCKER_TLS_CERTDIR
               value: ""
