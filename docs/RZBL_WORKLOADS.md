@@ -12,7 +12,7 @@ Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernet
 | Dawarich 1.23.0                                  | `applications/dawarich/`                 | prepared, suspended | `dawarich.internal`                                   |
 | Copyparty 1.20.26                                | `applications/copyparty/`                | **live**            | `copyparty.internal`, public `files.0xbf.ch`          |
 | Time Machine (Samba)                             | `applications/samba/`                    | prepared, suspended | `smb://10.10.20.145`                                  |
-| Forgejo runner 13.2.1                            | `applications/forgejo-runner/`           | prepared, suspended | none                                                  |
+| Forgejo runner 13.2.1                            | `applications/forgejo-runner/`           | **live**            | none                                                  |
 | Ollama 0.40.16 (GPU)                             | `applications/ollama/`                   | **live**            | cluster only: `ollama.ollama.svc.cluster.local:11434` |
 | opencode web 1.19.5 (Kata)                       | `applications/opencode/`                 | **live**            | `opencode.internal` (authentik, group developers)     |
 | Agent sandboxes (Kata, warm pool 1)              | `applications/agents/`                   | **live** (v1.29.0)  | none (SandboxClaim, port-forward)                     |

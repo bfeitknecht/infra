@@ -4,5 +4,4 @@ resources:
   - namespace.yaml
   - pvc.yaml
   - runner.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
-  # - forgejo-runner-secrets.sops.yaml
+  - forgejo-runner-secrets.sops.yaml
