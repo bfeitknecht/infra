@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - k8up.yaml
-  - backup-credentials.sops.yaml
+  - k8up-secrets.sops.yaml

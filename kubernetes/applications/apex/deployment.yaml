@@ -23,10 +23,6 @@ spec:
         spec:
             # No Kubernetes API use.
             automountServiceAccountToken: false
-            # Keel reads imagePullSecrets from the pod template. The default
-            # ServiceAccount secret is not sufficient.
-            imagePullSecrets:
-                - name: dockerconfigjson
             containers:
                 - name: apex
                   # Use :latest. Keel tracks the image digest.

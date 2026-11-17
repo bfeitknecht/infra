@@ -38,16 +38,16 @@ spec:
         - name: BACKUP_GLOBALACCESSKEYID
           valueFrom:
             secretKeyRef:
-              name: garage-s3-credentials
+              name: k8up-secrets
               key: access-key-id
         - name: BACKUP_GLOBALSECRETACCESSKEY
           valueFrom:
             secretKeyRef:
-              name: garage-s3-credentials
+              name: k8up-secrets
               key: secret-access-key
         - name: BACKUP_GLOBALREPOPASSWORD
           valueFrom:
             secretKeyRef:
-              name: k8up-password
+              name: k8up-secrets
               key: password
   targetNamespace: k8up

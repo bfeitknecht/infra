@@ -20,9 +20,6 @@ spec:
             labels:
                 app.kubernetes.io/name: glob
         spec:
-            # Keel reads imagePullSecrets from the pod template.
-            imagePullSecrets:
-                - name: dockerconfigjson
             containers:
                 - name: glob
                   # Use :latest. Keel tracks the image digest.

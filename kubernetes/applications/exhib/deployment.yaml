@@ -22,9 +22,6 @@ spec:
       labels:
         app.kubernetes.io/name: exhib
     spec:
-      # Keel reads imagePullSecrets from the pod template.
-      imagePullSecrets:
-        - name: dockerconfigjson
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -86,4 +83,4 @@ spec:
       volumes:
         - name: site
           persistentVolumeClaim:
-            claimName: exhib-site
+            claimName: exhib-data

@@ -5,8 +5,6 @@ resources:
     - deployment.yaml
     - service.yaml
     - httproute.yaml
-    - serviceaccount.yaml
-    - ghcr.sops.yaml
     # SSH portfolio uses a separate Deployment. A broken host key or a
     # crashed session does not affect the static site.
     - tui-deployment.yaml

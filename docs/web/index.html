@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.24.0";
+const INFRA_TAG = "v1.25.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -270,7 +270,7 @@ const SERVICES = [
  // ---------- public apps
  {id:"apex", name:"apex", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"https://0xbf.ch", image:"ghcr.io/bfeitknecht/apex:latest (Keel)", desc:"Personal site + WASM app.",
-  ports:"HTTP 8080", deps:["traefik","keel"], secrets:["apex/ghcr.sops.yaml"], repo:"apex",
+  ports:"HTTP 8080", deps:["traefik","keel"], secrets:[], repo:"apex",
   notes:["Released v0.1.0 on 2026-11-16 (thyme 0.1.0 on Typst Universe).","Old v1.x tags from October deleted."]},
  {id:"apex-tui", name:"apex SSH TUI", cat:"web", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"apex", ks:"apex",
   host:"ssh 0xbf.ch (port 22)", image:"ghcr.io/bfeitknecht/apex:latest", desc:"SSH portfolio. Any username, no client key.",
@@ -278,11 +278,11 @@ const SERVICES = [
   notes:["Live since apex v0.1.0 (2026-11-16)."]},
  {id:"glob", name:"glob", cat:"web", status:"live", exp:"public", node:"rzbl", tier:"2", ns:"glob", ks:"glob",
   host:"https://blog.0xbf.ch", image:"ghcr.io/bfeitknecht/glob:latest", desc:"Typst blog built with thyme.",
-  ports:"HTTP 8080", deps:["traefik","keel"], secrets:["glob/ghcr.sops.yaml"], repo:"glob",
+  ports:"HTTP 8080", deps:["traefik","keel"], secrets:[], repo:"glob",
   notes:["Released v0.1.0 on 2026-11-16.","Draft post posts/notes-to-agents.typ (not mounted)."]},
  {id:"exhib", name:"exhib", cat:"web", status:"broken", exp:"public", node:"rbpi", tier:"2", ns:"exhib", ks:"exhib",
   host:"https://gallery.0xbf.ch", image:"ghcr.io/bfeitknecht/exhib:latest (Keel)", desc:"Hugo gallery. SWS + upload processor in one container.",
-  ports:"HTTP 8080, /health", deps:["traefik","storage","keel"], secrets:["exhib/ghcr.sops.yaml"], repo:"exhib", storage:"exhib-site 50Gi (rbpi nvme0)",
+  ports:"HTTP 8080, /health", deps:["traefik","storage","keel"], secrets:[], repo:"exhib", storage:"exhib-data 50Gi (rbpi nvme0)",
   notes:["DOWN since v0.3.0 (responsive images): Hugo build fails with WebPEncode OUT_OF_MEMORY on collection bw. Owner fixes it.","6 collections uploaded 2026-11-16 (init, char, colors, cal, bw, three).","Uploads: just upload uploads/<slug> in the exhib repo. Memory limit 3Gi."]},
  {id:"forgejo", name:"Forgejo", cat:"dev", status:"live", exp:"public", node:"rbpi", tier:"1", ns:"forgejo", ks:"forgejo",
   host:"https://git.0xbf.ch · ssh://git@git.0xbf.ch:2223", image:"codeberg.org/forgejo/forgejo:16.0.5", desc:"Git forge.",
@@ -345,18 +345,18 @@ const SERVICES = [
  {id:"devil", name:"devil", cat:"dev", status:"live", exp:"internal", node:"rbpi", tier:"1", ns:"devil", ks:"devil",
   host:"https://devil.internal · ssh -p 2222 devil.internal", image:"omni flake NixOS VM (kata-qemu)", desc:"Personal dev VM in a Kata pod. ttyd + ghostty-web, PAM login.",
   ports:"SSH 2222, ttyd 7681 (headless Service)", deps:["kata","traefik","storage"], secrets:[], storage:"devil-data 20Gi (rbpi nvme0)", notes:["Headless Service required: Kata bypasses Cilium service translation."]},
- {id:"ddns", name:"cloudflare-ddns", cat:"network", status:"live", exp:"cluster", node:"any", tier:"1", ns:"ddns", ks:"ddns", host:"0xbf.ch, *.0xbf.ch, *.pds.0xbf.ch → WAN IP", image:"favonia/cloudflare-ddns", desc:"Keeps grey-cloud A records on the home WAN IP.", ports:"—", deps:[], secrets:["ddns/cloudflare-ddns.sops.yaml"], notes:["IPv4 only. Galaxus has no IPv6."]},
+ {id:"ddns", name:"cloudflare-ddns", cat:"network", status:"live", exp:"cluster", node:"any", tier:"1", ns:"ddns", ks:"ddns", host:"0xbf.ch, *.0xbf.ch, *.pds.0xbf.ch → WAN IP", image:"favonia/cloudflare-ddns", desc:"Keeps grey-cloud A records on the home WAN IP.", ports:"—", deps:[], secrets:["ddns/ddns-secrets.sops.yaml"], notes:["IPv4 only. Galaxus has no IPv6."]},
  {id:"traefik", name:"Traefik", cat:"platform", status:"live", exp:"public", node:"rbpi", tier:"infra", ns:"ingress", ks:"traefik",
   host:"LB 10.10.20.128 · hostPorts 80/443/22/2223 · https://dashboard.internal", image:"traefik chart 41.6.0", desc:"Gateway API implementation. Terminates TLS.",
   ports:"web 8000, websecure 8443, apexssh 22, devilssh 2222, gitssh 2223", deps:["cert-manager","gateway-api-crds","traefik-crds"], secrets:[],
   notes:["Pinned to rbpi (nodeSelector): router forwards to rbpi only.","Listeners: web, websecure, websecure-internal, websecure-pds, apexssh, devilssh, gitssh."]},
- {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + name-constrained internal CA (explicit *.internal names).", ports:"—", deps:["cilium"], secrets:["cert-manager/cloudflare-dns01.sops.yaml"], notes:[]},
+ {id:"cert-manager", name:"cert-manager", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"cert-manager", ks:"cert-manager", host:"—", image:"cert-manager 1.21.2", desc:"LE wildcard via Cloudflare DNS-01 + name-constrained internal CA (explicit *.internal names).", ports:"—", deps:["cilium"], secrets:["cert-manager/cert-manager-secrets.sops.yaml"], notes:[]},
  {id:"cilium", name:"Cilium", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"kube-system", ks:"cilium", host:"—", image:"cilium 1.20.2", desc:"CNI, kube-proxy replacement, LB-IPAM + L2 announcements, VXLAN overlay.", ports:"—", deps:["storage","prometheus-crds"], secrets:[], notes:["L2 announce on rbpi end0 for pool 10.10.20.128/25.","Overlay to oci runs over Tailscale."]},
  {id:"tailscale-op", name:"Tailscale operator", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"tailscale", ks:"tailscale", host:"—", image:"tailscale operator 1.102.3", desc:"Tailnet ingress/egress proxies with tag:k8s.", ports:"—", deps:["traefik"], secrets:["tailscale/operator-oauth.sops.yaml"], notes:[]},
  {id:"relay", name:"tailscale-relay", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"egress", ks:"egress-tailscale",
   host:"tailscale-relay.egress.svc:3900 → 100.96.72.126:3900", image:"tailscale v1.104.1 + socat", desc:"Untagged user device that can reach the friend's shared-in NAS.",
-  ports:"3900", deps:[], secrets:["egress/relay-authkey.sops.yaml"], notes:["Pod runs since 2026-11-16 (PodSecurity + TS_KUBE_SECRET fixes).","Target refuses 3900: Garage on the NAS is not listening on its tailnet IP.","Alternative later: tailcat (tailscale.com/tailcat)."]},
- {id:"k8up", name:"k8up", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"k8up", ks:"backup", host:"—", image:"k8up 4.10.0", desc:"Restic backups of PVCs to Garage S3 on the friend's NAS.", ports:"—", deps:["k8up-crds"], secrets:["backup/k8up/backup-credentials.sops.yaml"],
+  ports:"3900", deps:[], secrets:["egress/tailscale-relay-secrets.sops.yaml"], notes:["Pod runs since 2026-11-16 (PodSecurity + TS_KUBE_SECRET fixes).","Target refuses 3900: Garage on the NAS is not listening on its tailnet IP.","Alternative later: tailcat (tailscale.com/tailcat)."]},
+ {id:"k8up", name:"k8up", cat:"platform", status:"broken", exp:"cluster", node:"rzbl", tier:"infra", ns:"k8up", ks:"backup", host:"—", image:"k8up 4.10.0", desc:"Restic backups of PVCs to Garage S3 on the friend's NAS.", ports:"—", deps:["k8up-crds"], secrets:["backup/k8up/k8up-secrets.sops.yaml"],
   notes:["No backup has ever succeeded. Gate for immich.","Schedules: forgejo 03:00, pds 03:30, atuin 04:30, authentik 05:00 (pg_dump)."]},
  {id:"gpu", name:"NVIDIA device plugin", cat:"platform", status:"live", exp:"cluster", node:"rzbl", tier:"infra", ns:"gpu", ks:"gpu", host:"—", image:"nvidia-device-plugin 0.20.1", desc:"Exposes nvidia.com/gpu. Time-slicing 4. RuntimeClass nvidia.", ports:"—", deps:[], secrets:[], notes:["Talos loads nvidia, nvidia_uvm, nvidia_drm, nvidia_modeset (patch 07-nvidia)."]},
  {id:"keel", name:"Keel", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"keel", ks:"keel", host:"—", image:"keel", desc:"Polls :latest digests for tier-2 apps and restarts them.", ports:"—", deps:[], secrets:[], notes:["Flux ignores the image field of tier-2 Deployments."]},
@@ -369,8 +369,7 @@ const SERVICES = [
 
 const NEEDS = [
  {id:"exhib-down", prio:1, cat:"fix", t:"exhib is down (v0.3.0)", d:"Hugo build fails: WebPEncode OUT_OF_MEMORY on collection bw. Release a fix or roll back the image to v0.2.0.", svc:"exhib"},
- {id:"zyxel-2223", prio:1, cat:"router", t:"Zyxel rule 2223/tcp → 10.10.20.10:2223", d:"Network Setting > NAT > Port Forwarding. Git SSH from WAN fails until then.", svc:"forgejo"},
- {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"NAS refuses 3900 on its tailnet IP (80/443 work). s3_api.bind_addr = \"[::]:3900\", Docker port, firewall on tailscale0.", svc:"k8up"},
+ {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
  {id:"authentik-secret", prio:1, cat:"secret", t:"authentik secret → un-suspend", d:"docs/AUTHENTIK.md. Then own admin + passkey, deactivate akadmin.", svc:"authentik"},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
@@ -436,7 +435,7 @@ const SCS = [
 ];
 const PVS = [
  ["forgejo","forgejo-data","10Gi","rbpi","storage-nvme1","live"],["pds","pds-data","10Gi","rbpi","storage-nvme0","live"],
- ["exhib","exhib-site (exception)","50Gi","rbpi","storage-nvme0","live"],["devil","devil-data","20Gi","rbpi","storage-nvme0","live"],
+ ["exhib","exhib-data","50Gi","rbpi","storage-nvme0","live"],["devil","devil-data","20Gi","rbpi","storage-nvme0","live"],
  ["agh","agh-data","1Gi","rbpi","storage-nvme0","live"],["atuin","atuin-data","5Gi","rbpi","storage-nvme0","live"],
  ["media","media-files","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-data","20Gi","rzbl","storage-nvme0","live"],
  ["media","sonarr-data / radarr-data / prowlarr-data","2/2/1Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
@@ -460,6 +459,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
 * suspended: authentik immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
 const TAGS = [
+ ["v1.25.0","2026-11-17","secret migration to <app>-secrets, pull secrets removed (public images), exhib-data rename"],
  ["v1.24.0","2026-11-17","PVC renames devil-data, tailscale-relay-data (rebind, no copy); homepage off"],
  ["v1.23.5","2026-11-16","Jellyfin public at stream.0xbf.ch"],
  ["v1.23.4","2026-11-16","internal TLS: explicit hostnames"],
@@ -479,23 +479,22 @@ const TAGS = [
 ];
 const SECRETS = [
  ["cluster/ghcr-pat.sops.yaml","flux-system","exists","GHCR pull for the infra OCI artifact"],
- ["ingress/cert-manager/cloudflare-dns01.sops.yaml","cert-manager","exists","LE DNS-01"],
- ["ingress/tailscale/operator-oauth.sops.yaml","tailscale","exists","operator OAuth (tag:k8s, tag:k8s-operator)"],
- ["egress/tailscale/relay-authkey.sops.yaml","egress","exists","untagged authkey for k8s-relay"],
- ["backup/k8up/backup-credentials.sops.yaml","k8up","exists","Garage S3 keys + restic password. Do not rotate k8up-password."],
- ["monitoring/grafana-credentials.sops.yaml","monitoring","exists (unused)","Grafana admin"],
+ ["ingress/cert-manager/cert-manager-secrets.sops.yaml","cert-manager","exists","Cloudflare DNS-01 token"],
+ ["ingress/tailscale/operator-oauth.sops.yaml","tailscale","exists","operator OAuth (name required by the operator)"],
+ ["egress/tailscale/tailscale-relay-secrets.sops.yaml","egress","exists","untagged authkey for k8s-relay"],
+ ["backup/k8up/k8up-secrets.sops.yaml","k8up","exists","Garage S3 keys + restic password. Do not rotate the password."],
+ ["knative/operator/ghcr.sops.yaml","whimsy","exists","whimsy namespace, SA, GHCR pull secret"],
+ ["monitoring/grafana-credentials.sops.yaml","monitoring","exists (disabled)","Grafana admin"],
  ["applications/agh/agh-config.sops.yaml","agh","exists","whole AdGuardHome.yaml seed"],
- ["applications/apex/ghcr.sops.yaml","apex","exists","GHCR pull (tier 2; can go if images become public)"],
- ["applications/apex/apex-ssh-host-key.sops.yaml","apex","exists","SSH host key, keep stable (renamed from ssh-host-key.sops.yaml)"],
- ["applications/glob/ghcr.sops.yaml","glob","exists","GHCR pull"],
- ["applications/exhib/ghcr.sops.yaml","exhib","exists","GHCR pull"],
+ ["applications/apex/apex-ssh-host-key.sops.yaml","apex","exists","SSH host key, keep stable"],
+ ["applications/devil/ghcr.sops.yaml","devil","exists","GHCR pull (devil image is private)"],
+ ["applications/ddns/ddns-secrets.sops.yaml","ddns","exists","Cloudflare zone token"],
  ["applications/forgejo/forgejo-secrets.sops.yaml","forgejo","exists","[security] block, admin"],
  ["applications/pds/pds-secrets.sops.yaml","pds","exists","JWT, admin password, PLC rotation key"],
- ["applications/ddns/cloudflare-ddns.sops.yaml","ddns","exists","Cloudflare zone token"],
- ["applications/homepage (homepage-services)","homepage","exists","widget creds (AGH, Grafana token)"],
+ ["applications/authentik/authentik-secrets.sops.yaml","authentik","exists","secret key, DB pw, bootstrap admin"],
+ ["applications/homepage/homepage-services.sops.yaml","homepage","exists (disabled)","widget creds"],
  ["talos/secrets.sops.yaml","talos","exists","Talos secrets bundle"],
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
- ["applications/authentik/authentik-secrets.sops.yaml","authentik","TO CREATE","secret key, DB pw, bootstrap admin"],
  ["applications/immich/immich-secrets.sops.yaml","immich","TO CREATE","DB_PASSWORD"],
  ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","TO CREATE","POSTGRES_PASSWORD, SECRET_KEY_BASE"],
  ["applications/copyparty/copyparty-config.sops.yaml","copyparty","TO CREATE","copyparty.conf with accounts"],
