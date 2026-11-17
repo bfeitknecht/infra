@@ -7,5 +7,4 @@ resources:
   - authentik.yaml
   - httproute.yaml
   - backup-schedule.yaml
-  # Owner creates this file (docs/AUTHENTIK.md), then uncomments it.
-  # - authentik-secrets.sops.yaml
+  - authentik-secrets.sops.yaml

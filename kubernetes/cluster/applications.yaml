@@ -434,9 +434,6 @@ metadata:
   name: authentik
   namespace: flux-system
 spec:
-  # Prepared, not deployed. Owner creates the sops Secret first.
-  # See docs/AUTHENTIK.md. Then remove this line.
-  suspend: true
   dependsOn:
     - name: storage
     - name: traefik
