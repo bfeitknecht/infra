@@ -5,8 +5,8 @@ resources:
   - middleware.yaml
   - pvc.yaml
   - opencode.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
-  # - opencode-secrets.sops.yaml
+  - authentik.yaml
+  - networkpolicy.yaml
 configMapGenerator:
   - name: opencode-config
     namespace: opencode

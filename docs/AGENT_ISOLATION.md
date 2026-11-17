@@ -1,6 +1,6 @@
 # Agent isolation for opencode: options and recommendation
 
-Status 2026-11-16. Research only. Nothing is implemented.
+Status 2026-11-17. **Implemented** (steps 1-3): opencode in a Kata VM, CiliumNetworkPolicy `agent-isolation`, authentik forward auth (group `developers`). Step 4 (Agent Sandbox per task) is next. Prerequisite found on the way: Cilium needed `socketLB.hostNamespaceOnly: true`, otherwise Kata VMs cannot reach ClusterIPs.
 
 Goal: coding agents (opencode web, later others) run arbitrary commands. They must not reach the cluster, the home LAN, secrets, or other workloads. "Airtight" means two walls: a **compute wall** (the agent cannot escape to the node kernel) and a **network wall** (the agent can reach only what it needs).
 

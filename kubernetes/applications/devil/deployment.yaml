@@ -41,6 +41,12 @@ spec:
           # The image has no entrypoint. The boot command is here. /init
           # registers the store and boots systemd.
           command: ["/init"]
+          # systemd as PID 1 ignores SIGTERM. SIGRTMIN+3 makes it power off
+          # cleanly, so the Kata VM stops instead of hanging in Terminating.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "kill -s RTMIN+3 1"]
           # Systemd as PID1 needs write access to /sys/fs/cgroup. The OCI spec
           # mounts this path read-only. The pod needs privileged mode.
           securityContext:

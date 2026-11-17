@@ -1,5 +1,6 @@
-# opencode web gives a shell in this pod. It needs OPENCODE_SERVER_PASSWORD
-# (HTTP basic auth, user "opencode") and the LAN/tailnet allowlist.
+# opencode web gives agents a shell. Isolation (docs/AGENT_ISOLATION.md):
+# Kata VM (own kernel), CiliumNetworkPolicy (egress allowlist, ingress from
+# Traefik only), authentik forward auth (group developers), no SA token.
 # No official image: the npm package runs on node. HOME is on the PVC, so the
 # npx cache, git clones and sessions survive restarts.
 apiVersion: apps/v1
@@ -23,7 +24,9 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
+      runtimeClassName: kata-qemu
       enableServiceLinks: false
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -42,11 +45,6 @@ spec:
               value: /home/node
             - name: OPENCODE_CONFIG
               value: /etc/opencode/opencode.json
-            - name: OPENCODE_SERVER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: opencode-secrets
-                  key: OPENCODE_SERVER_PASSWORD
           ports:
             - name: http
               containerPort: 4096
@@ -105,12 +103,32 @@ spec:
   hostnames:
     - opencode.internal
   rules:
+    # authentik forward auth callback (sign-in, sign-out) on this host.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
     - filters:
         - type: ExtensionRef
           extensionRef:
             group: traefik.io
             kind: Middleware
             name: internal-allowlist
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
       backendRefs:
         - name: opencode
           port: 80

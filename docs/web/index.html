@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.26.0";
+const INFRA_TAG = "v1.28.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -313,9 +313,9 @@ const SERVICES = [
  {id:"ollama", name:"Ollama", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"ollama", ks:"ollama",
   host:"ollama.ollama.svc.cluster.local:11434", image:"ollama/ollama:0.40.16", desc:"Local LLM runtime on the GPU. Model qwen2.5-coder:7b (25/29 layers on GPU, 16k context).",
   ports:"HTTP 11434 (no auth, no route)", deps:["gpu","storage"], secrets:[], storage:"ollama-cache 100Gi (rzbl nvme)", notes:["Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull."]},
- {id:"opencode", name:"opencode web", cat:"ai", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
+ {id:"opencode", name:"opencode web", cat:"ai", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
   host:"https://opencode.internal", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"Coding agent web UI, default model Ollama.",
-  ports:"HTTP 4096 (basic auth user opencode)", deps:["ollama","traefik","storage"], secrets:["opencode/opencode-secrets.sops.yaml (to create)"], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Gives a shell in its pod: password + allowlist required."]},
+  ports:"HTTP 4096 (basic auth user opencode)", deps:["ollama","traefik","storage"], secrets:[], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik only), authentik forward auth (group developers), no SA token."]},
  {id:"immich", name:"Immich", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"immich", ks:"immich",
   host:"https://immich.internal (public later: photos.0xbf.ch?)", image:"immich v3.4.1 (server, ML), immich-db (vectorchord postgres), immich-redis (valkey 9)", desc:"Photo library with ML search.",
   ports:"HTTP 2283", deps:["traefik","storage"], secrets:["immich/immich-secrets.sops.yaml (to create)"], storage:"immich-files 1Ti (ssd), immich-db 20Gi, immich-cache 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md",
@@ -375,13 +375,11 @@ const NEEDS = [
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
  {id:"runner-secret", prio:2, cat:"secret", t:"Forgejo runner token + enable Actions", d:"Token from git.0xbf.ch admin > Actions > Runners. [actions] ENABLED = true.", svc:"runner"},
- {id:"opencode-secret", prio:3, cat:"secret", t:"opencode web password", d:"OPENCODE_SERVER_PASSWORD.", svc:"opencode"},
  {id:"copyparty-secret", prio:3, cat:"secret", t:"copyparty config (accounts)", d:"Whole copyparty.conf as secret.", svc:"copyparty"},
  {id:"dawarich-secret", prio:3, cat:"secret", t:"dawarich secret", d:"POSTGRES_PASSWORD, SECRET_KEY_BASE.", svc:"dawarich"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
  {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
- {id:"agent-iso", prio:2, cat:"decision", t:"Agent isolation for opencode", d:"Recommendation: kata-qemu + Cilium egress allowlist + authentik. docs/AGENT_ISOLATION.md.", svc:"opencode"},
  {id:"smtp", prio:3, cat:"decision", t:"SMTP (Proton)", d:"Blocks authentik email invites/resets and PDS email.", svc:"authentik"},
  {id:"autoapprove", prio:3, cat:"decision", t:"Tailscale autoApprovers (optional)", d:"Auto-approve 10.10.0.0/16 and 10.20.20.0/24 for tag:infra.", svc:null},
  {id:"exhib-media", prio:3, cat:"manual", t:"exhib: uncommitted processor/media.py", d:"Local change not committed (not by the agent).", svc:"exhib"},
@@ -457,8 +455,10 @@ storage
 gpu ── media, ollama ── opencode*
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
-* suspended: immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
+* suspended: immich dawarich copyparty samba forgejo-runner qbittorrent`;
 const TAGS = [
+ ["v1.28.0","2026-11-17","agent isolation: opencode in Kata + Cilium policy + authentik forward auth; devil clean stop"],
+ ["v1.27.0","2026-11-17","Cilium socketLB.hostNamespaceOnly (Kata ClusterIP), devil cluster DNS"],
  ["v1.26.0","2026-11-17","Forgejo SSO + theme 0xbf + logo; Jellyfin branding"],
  ["v1.25.1","2026-11-17","authentik live (auth.0xbf.ch)"],
  ["v1.25.0","2026-11-17","secret migration to <app>-secrets, pull secrets removed (public images), exhib-data rename"],
@@ -502,7 +502,6 @@ const SECRETS = [
  ["applications/copyparty/copyparty-config.sops.yaml","copyparty","TO CREATE","copyparty.conf with accounts"],
  ["applications/samba/timemachine-secrets.sops.yaml","samba","TO CREATE","PASSWORD"],
  ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","TO CREATE","RUNNER_TOKEN"],
- ["applications/opencode/opencode-secrets.sops.yaml","opencode","TO CREATE","OPENCODE_SERVER_PASSWORD"],
  ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","TO CREATE","WIREGUARD_PRIVATE_KEY (Proton)"],
 ];
 const DOCS = [

@@ -6,5 +6,6 @@ resources:
   - blueprints.yaml
   - authentik.yaml
   - httproute.yaml
+  - referencegrant.yaml
   - backup-schedule.yaml
   - authentik-secrets.sops.yaml
