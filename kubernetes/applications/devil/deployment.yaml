@@ -19,12 +19,6 @@ spec:
       # VM boots with one vCPU. This is too slow for nix builds.
       runtimeClassName: kata-qemu
       hostname: devil
-      # Cluster DNS does not work from the kata VM. The VM bypasses ClusterIP.
-      # Use the resolver pod IP for DNS.
-      dnsPolicy: None
-      dnsConfig:
-        nameservers:
-          - 10.244.0.242
       # Devil does not use the Kubernetes API. Do not mount a service account token.
       automountServiceAccountToken: false
       imagePullSecrets:
