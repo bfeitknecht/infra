@@ -1,0 +1,80 @@
+# Gatus endpoints (status.internal). Groups: public = what visitors see,
+# through the real edge (DNS, WAN, Traefik, TLS); internal = services in the
+# cluster; platform = DNS, gateway, monitoring; backup = the path to the NAS.
+metrics: true
+storage:
+  type: sqlite
+  path: /data/gatus.db
+ui:
+  title: 0xbf status
+  header: 0xbf status
+endpoints:
+  # ---- public: through the edge, with certificate expiry
+  - &public
+    name: apex
+    group: public
+    url: https://0xbf.ch
+    interval: 2m
+    conditions: ["[STATUS] == 200", "[CERTIFICATE_EXPIRATION] > 240h"]
+  - {<<: *public, name: blog, url: https://blog.0xbf.ch}
+  - {<<: *public, name: gallery, url: https://gallery.0xbf.ch}
+  - {<<: *public, name: git, url: https://git.0xbf.ch/api/healthz}
+  - {<<: *public, name: pds, url: https://pds.0xbf.ch/xrpc/_health}
+  - {<<: *public, name: atuin, url: https://atuin.0xbf.ch/healthz}
+  - {<<: *public, name: auth, url: https://auth.0xbf.ch/-/health/live/}
+  - {<<: *public, name: stream, url: https://stream.0xbf.ch/health}
+  - name: apex ssh
+    group: public
+    url: tcp://0xbf.ch:22
+    interval: 2m
+    conditions: ["[CONNECTED] == true"]
+  - name: git ssh
+    group: public
+    url: tcp://git.0xbf.ch:2223
+    interval: 2m
+    conditions: ["[CONNECTED] == true"]
+  # ---- internal: cluster services
+  - &internal
+    name: jellyfin
+    group: internal
+    url: http://jellyfin.media.svc.cluster.local/health
+    interval: 1m
+    conditions: ["[STATUS] == 200"]
+  - {<<: *internal, name: sonarr, url: http://sonarr.media.svc.cluster.local/ping}
+  - {<<: *internal, name: radarr, url: http://radarr.media.svc.cluster.local/ping}
+  - {<<: *internal, name: prowlarr, url: http://prowlarr.media.svc.cluster.local/ping}
+  - {<<: *internal, name: ollama, url: http://ollama.ollama.svc.cluster.local:11434/}
+  - {<<: *internal, name: agh, url: http://agh.agh.svc.cluster.local/}
+  # ---- platform
+  - name: gateway lan
+    group: platform
+    url: https://10.10.20.128
+    interval: 1m
+    client:
+      insecure: true
+    conditions: ["[STATUS] == 404"]
+  - &dns
+    name: dns internal
+    group: platform
+    url: 10.96.0.53
+    interval: 1m
+    dns:
+      query-name: dashboard.internal
+      query-type: A
+    conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
+  - <<: *dns
+    name: dns public
+    dns:
+      query-name: example.com
+      query-type: A
+    conditions: ["[DNS_RCODE] == NOERROR"]
+  # Edge resolver: AGH forwards to kresd.
+  - {<<: *dns, name: dns edge, url: 10.10.20.153}
+  - {<<: *internal, name: grafana, group: platform, url: http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health}
+  - {<<: *internal, name: prometheus, group: platform, url: http://monitoring-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/-/healthy}
+  # ---- backup: the relay to Garage on the friend's NAS (red until it listens)
+  - name: garage via relay
+    group: backup
+    url: tcp://tailscale-relay.egress.svc.cluster.local:3900
+    interval: 5m
+    conditions: ["[CONNECTED] == true"]

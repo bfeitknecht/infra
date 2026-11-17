@@ -1,14 +1,37 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# Prometheus, Grafana, alertmanager and Gatus are off until monitoring is
-# set up again (with Renovate). Files stay. Uncomment to re-enable.
-# metrics-server stays: homepage cluster stats and kubectl top need it.
-# prometheus-crds Kustomization stays: Cilium and Traefik ServiceMonitors need the CRDs.
+# Monitoring v2 (2026-11-17): kube-prometheus-stack with curated dashboards and
+# the 0xbf home dashboard, Gatus at status.internal, GPU exporter. All on rbpi
+# except the GPU exporter (rzbl).
 resources:
   - namespace.yaml
   - metrics-server.yaml
-  # - kube-prometheus-stack.yaml
-  # - gatus.yaml
-  # - grafana.yaml
-  # - servicemonitors.yaml
-  # - grafana-credentials.sops.yaml
+  - grafana-credentials.sops.yaml
+  - kube-prometheus-stack.yaml
+  - grafana.yaml
+  - gatus.yaml
+  - gpu-exporter.yaml
+  - servicemonitors.yaml
+configMapGenerator:
+  - name: gatus-config
+    namespace: monitoring
+    files:
+      - config.yaml=gatus-config.yaml
+  - name: flux-kube-state-metrics
+    namespace: flux-system
+    files:
+      - values.yaml=flux-ksm-values.yaml
+  # The Grafana sidecar loads ConfigMaps with this label from every namespace.
+  # The folder annotation puts it at /tmp/dashboards/0xbf/home.json, which is
+  # Grafana's default home dashboard.
+  - name: grafana-dashboard-home
+    namespace: monitoring
+    files:
+      - home.json=dashboards/home.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "0xbf"
+configurations:
+  - kustomizeconfig.yaml

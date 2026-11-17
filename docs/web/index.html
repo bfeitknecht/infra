@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-17";
-const INFRA_TAG = "v1.30.1";
+const INFRA_TAG = "v1.31.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -260,13 +260,13 @@ const NODES = [
   talos:"1.14.6", schematic:"9cfcb7bd…", ext:["tailscale","nvme-cli","kata-containers","rpi_5 overlay"], taint:"none",
   storage:[{path:"/var/mnt/storage-nvme0",size:"256 GB",use:"agh, pds, atuin, devil, exhib"},{path:"/var/mnt/storage-nvme1",size:"250 GB",use:"forgejo"}],
   routing:"Tailscale subnet router for 10.10.10.0/24 and 10.10.20.0/24. Cilium L2 announcements for LB IPs on end0. Router forwards WAN 80/443/22/2223 here.",
-  runs:["Traefik (pinned, hostPorts)","agh","forgejo","pds","atuin","devil (kata)","exhib","apex + apex-tui","glob (floats)","ddns (floats)","cert-manager, keel, tailscale operator, local-path (preferred)"],
+  runs:["Traefik (pinned, hostPorts)","agh","forgejo","pds","atuin","devil (kata)","exhib","apex + apex-tui","glob (floats)","ddns (floats)","Flux, cert-manager, keel, tailscale operator, local-path (preferred)","Prometheus, Alertmanager, Grafana, Gatus"],
   notes:["Storage: ExistingVolumeConfig by fs UUID (2026-11-16). Data kept in place, PVs recreated with new paths.","Router only forwards to DHCP-known IPs, so Traefik uses hostPorts here.","Role: edge + always-on core. Platform controllers prefer rbpi (fate-share with the edge; rzbl boots from USB)."]},
  {id:"rzbl", name:"rzbl", role:"worker", where:"home", hw:"Razer Blade 15 Base 2019: i7-9750H (12 threads), 16 GB, GTX 1660 Ti 6 GB, NVMe 1 TB, SATA SSD 4 TB", ip:"10.10.20.11", ts:"100.104.242.45", pub:"—",
   talos:"1.14.6", schematic:"b10204b7…", ext:["tailscale","intel-ucode","nvme-cli","kata-containers","nvidia-open-gpu-kernel-modules-lts","nvidia-container-toolkit-lts"], taint:"none",
   storage:[{path:"USB SanDisk 62 GB",size:"boot, META, STATE",use:"Talos system"},{path:"/var (EPHEMERAL)",size:"107 GB NVMe",use:"images, kubelet, logs"},{path:"/var/mnt/storage-nvme0",size:"893 GB",use:"local-path-nvme: configs, DBs, models"},{path:"/var/mnt/storage-ssd0",size:"4 TB",use:"local-path-ssd: media, photos, files, Time Machine"}],
   routing:"--accept-routes + RoutingRuleConfig 5200 (10.10.0.0/16 → main), advertises 10.10.20.11/32 (approved) so oci reaches it directly. VXLAN via rbpi SNAT does not work.",
-  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","opencode (kata)","agent sandboxes (kata, warm pool 1)","authentik","nvidia-device-plugin","tailscale-relay","k8up","Flux (floats, owner pins to rbpi)","knative-serving"],
+  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","opencode (kata)","agent sandboxes (kata, warm pool 1)","authentik","nvidia-device-plugin","tailscale-relay","k8up","GPU exporter","knative-serving"],
   notes:["GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.","Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before).","Role: heavy, GPU, bulk storage, agent VMs. Not for controllers the cluster needs to heal."]},
 ];
 
@@ -371,13 +371,11 @@ const SERVICES = [
  {id:"agents", name:"agent sandboxes", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"agents", ks:"agents", host:"— (SandboxClaim, no route)", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"One throwaway opencode Kata VM per task. Warm pool of 1.", ports:"HTTP 4096 (Traefik only, no route yet)", deps:["agent-sandbox","kata"], secrets:[], runbook:"docs/AGENT_ISOLATION.md", notes:["Template Unmanaged: the controller default policy would add public egress. CNP agent-isolation is the only wall.","Take one: SandboxClaim with warmPoolRef.name opencode in ns agents."]},
  {id:"metrics", name:"metrics-server", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"monitoring", ks:"monitoring", host:"—", image:"metrics-server 3.14.0", desc:"kubectl top, homepage stats.", ports:"—", deps:[], secrets:[], notes:[]},
  {id:"kata", name:"Kata Containers", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"—", ks:"kata", host:"—", image:"kata 3.32.0 (Talos ext, rbpi + rzbl)", desc:"RuntimeClass kata-qemu for VM pods (devil, opencode, agent sandboxes).", ports:"—", deps:[], secrets:[], notes:[]},
- {id:"monitoring", name:"Prometheus / Grafana / Gatus", cat:"platform", status:"disabled", exp:"internal", node:"—", tier:"infra", ns:"monitoring", ks:"monitoring", host:"status.internal, grafana (was)", image:"kube-prometheus-stack 91.4.1, gatus v5.36.0", desc:"Turned off 2026-11-15. Config kept, commented out.", ports:"—", deps:[], secrets:["monitoring/grafana-credentials.sops.yaml"], notes:["Re-enable together with Renovate."]},
+ {id:"monitoring", name:"Grafana / Prometheus / Gatus", cat:"platform", status:"live", exp:"internal", node:"rbpi", tier:"infra", ns:"monitoring", ks:"monitoring", host:"https://grafana.internal · https://status.internal", image:"kube-prometheus-stack 91.4.1, gatus v5.36.0, nvidia_gpu_exporter 1.2.1", desc:"One place: Grafana home dashboard 0xbf (health, checks, nodes, disks, GPU, traffic, Flux) + curated dashboards. Gatus status page.", ports:"—", deps:["prometheus-crds","traefik"], secrets:["monitoring/grafana-credentials.sops.yaml"], notes:["v2 since 2026-11-17 (v1.31.0). authentik SSO (developers; authentik Admins = Grafana Admin).","Stock dashboards off; curated set pinned. Flux metrics via kube-state-metrics custom resource state.","Alert receiver pending (ntfy)."]},
 ];
 
 const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
- {id:"forgejo-landing", prio:3, cat:"manual", t:"Forgejo: LANDING_PAGE = /bf on the PVC", d:"In git since v1.30.0. The live app.ini on the PVC needs the line, then a restart.", svc:"forgejo"},
- {id:"flux-placement", prio:3, cat:"manual", t:"Flux controllers prefer rbpi", d:"Flux is installed out of tree, so the agent cannot pin it. Re-run the Flux install with a nodeAffinity patch (prefer rbpi).", svc:null},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"immich-secret", prio:2, cat:"secret", t:"immich secret", d:"DB_PASSWORD. Do not store real photos before backups work.", svc:"immich"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
@@ -420,7 +418,7 @@ const PORTS = [
 const HOSTS = [
  ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib"],["git.0xbf.ch","public","forgejo"],
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
- ["agh.internal","internal","AdGuard UI"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
+ ["agh.internal","internal","AdGuard UI"],["grafana.internal","internal","Grafana (home: 0xbf)"],["status.internal","internal","Gatus"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
  ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
  ["immich.internal","internal","prepared"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty (prepared)"],["files.0xbf.ch","public","copyparty (prepared)"],["opencode.internal","internal","opencode (authentik)"],
 ];
@@ -464,6 +462,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: immich dawarich copyparty samba forgejo-runner qbittorrent`;
 const TAGS = [
+ ["v1.31.0","2026-11-17","monitoring v2: curated dashboards, 0xbf home, Gatus, GPU exporter, authentik SSO for Grafana; Cilium/cert-manager metrics"],
  ["v1.30.1","2026-11-17","opencode internal only again (agent.0xbf.ch route and authentik app removed); glob favicon"],
  ["v1.30.0","2026-11-17","authentik grant_types (Forgejo/Jellyfin SSO fixed), Forgejo landing = /bf, circle mark in Forgejo + Jellyfin"],
  ["v1.29.1","2026-11-17","agent-sandbox chart: default reconcileStrategy (label with +sha was invalid)"],

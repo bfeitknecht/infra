@@ -46,11 +46,18 @@ spec:
       serviceMonitor:
         enabled: true
 
+    # Grafana dashboards that match this Cilium version (ConfigMaps, picked
+    # up by the Grafana sidecar in every namespace).
+    dashboards:
+      enabled: true
+
     operator:
       prometheus:
         enabled: true
         serviceMonitor:
           enabled: true
+      dashboards:
+        enabled: true
 
     hubble:
       metrics:
@@ -62,6 +69,8 @@ spec:
           - icmp
           - http
         serviceMonitor:
+          enabled: true
+        dashboards:
           enabled: true
 
     k8sServiceHost: localhost

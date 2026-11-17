@@ -28,3 +28,40 @@ spec:
     - port: http
       path: /metrics
       interval: 60s
+---
+# Flux controller metrics (reconcile duration, errors). From
+# fluxcd/flux2-monitoring-example; image-automation controllers not installed.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flux-system
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - flux-system
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - helm-controller
+          - source-controller
+          - kustomize-controller
+          - notification-controller
+  podMetricsEndpoints:
+    - port: http-prom
+---
+# GPU exporter (gpu-exporter.yaml).
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gpu-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gpu-exporter
+  endpoints:
+    - port: metrics
+      interval: 30s
