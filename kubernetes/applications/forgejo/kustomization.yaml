@@ -10,6 +10,7 @@ resources:
   - tcproute.yaml
   - backup-schedule.yaml
   - forgejo-secrets.sops.yaml
+  - branding-png.yaml
 configMapGenerator:
   - name: forgejo-config
     files:
@@ -19,8 +20,5 @@ configMapGenerator:
   - name: forgejo-branding
     files:
       - branding/logo.svg
-      - branding/logo.png
       - branding/favicon.svg
-      - branding/favicon.png
-      - branding/apple-touch-icon.png
       - branding/theme-0xbf.css
