@@ -195,7 +195,7 @@ Note: Keel cannot update Knative Services (it handles Deployment/StatefulSet/Dae
 
 ## Cluster access
 
-- `kubectl --kubeconfig kubeconfig ...` (repo root, gitignored). Server is K8s 1.35.3; local kubectl 1.33 is older. Skew warning is cosmetic.
+- `kubectl --kubeconfig kubeconfig ...` (repo root, gitignored). Server is K8s 1.37.2 (upgraded 2026-11-17 one minor at a time; etcd snapshots in `.private/`); local kubectl 1.33 is older. `talos/topf.yaml` `kubernetesVersion` must match the cluster, or `topf apply` rolls it back. Skew warning is cosmetic.
 - Endpoint is oci tailscale IP `100.73.186.19:6443` (kubeconfig for it). VCN allows only UDP `41641` (Tailscale WireGuard). No cluster ports are exposed. Manage from tailnet device only. Disable key expiry for node tailscale identities in admin console. Expired key takes endpoint down. Fallback: change `clusterEndpoint` to public IP, open security list, run `topf apply`.
 - `talosctl --talosconfig talosconfig -e 10.20.20.10 -n <node-ip>` for node work.
 - Nodes: `oci` control-plane tainted; no workloads except resolver and CoreDNS; `rbpi` and `rzbl` workers run workloads. Talos 1.14.6.

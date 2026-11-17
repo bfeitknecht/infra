@@ -1,0 +1,72 @@
+{
+  // Renovate for the infra tree. Pull requests only, never automerge: every
+  // change still goes PR -> merge -> tag (AGENTS.md). Runs on the Forgejo
+  // runner (applications/forgejo-runner) once its token secret exists.
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", ":dependencyDashboard", ":semanticCommitsDisabled"],
+  timezone: "Europe/Zurich",
+  schedule: ["before 7am on monday"],
+  prConcurrentLimit: 5,
+  // Manifests live under kubernetes/; Flux HelmRelease, HelmRepository,
+  // GitRepository and OCIRepository are read by the flux manager.
+  flux: { managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"] },
+  kubernetes: { managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"] },
+  "helm-values": { managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"] },
+  ignorePaths: ["**/*.sops.yaml", "docs/**", ".private/**"],
+  customManagers: [
+    {
+      // talos/topf.yaml: talosVersion and kubernetesVersion.
+      customType: "regex",
+      managerFilePatterns: ["/^talos/topf\\.yaml$/"],
+      matchStrings: ["talosVersion: (?<currentValue>\\S+)"],
+      datasourceTemplate: "github-releases",
+      depNameTemplate: "siderolabs/talos",
+      extractVersionTemplate: "^v(?<version>.*)$",
+    },
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^talos/topf\\.yaml$/"],
+      matchStrings: ["kubernetesVersion: (?<currentValue>\\S+)"],
+      datasourceTemplate: "github-releases",
+      depNameTemplate: "kubernetes/kubernetes",
+      extractVersionTemplate: "^v(?<version>.*)$",
+    },
+  ],
+  packageRules: [
+    {
+      // Tier-2 apps run :latest and are rolled by Keel, not Renovate.
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/bfeitknecht/**"],
+      enabled: false,
+    },
+    {
+      // A chart and its pinned CRD GitRepository move together (AGENTS.md).
+      groupName: "kube-prometheus-stack",
+      matchPackageNames: ["kube-prometheus-stack", "prometheus-community/helm-charts"],
+    },
+    {
+      groupName: "traefik",
+      matchPackageNames: ["traefik", "traefik/traefik-helm-chart"],
+    },
+    {
+      groupName: "gateway-api",
+      matchPackageNames: ["kubernetes-sigs/gateway-api"],
+    },
+    {
+      groupName: "agent-sandbox",
+      matchPackageNames: ["kubernetes-sigs/agent-sandbox"],
+    },
+    {
+      groupName: "talos and kubernetes",
+      matchPackageNames: ["siderolabs/talos", "kubernetes/kubernetes"],
+      // One minor at a time, after a etcd snapshot: see the debugging playbook.
+      separateMinorPatch: true,
+    },
+    {
+      // Patch updates of everything else in one weekly PR.
+      groupName: "patch updates",
+      matchUpdateTypes: ["patch", "digest"],
+      matchPackageNames: ["*"],
+    },
+  ],
+}
