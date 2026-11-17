@@ -425,6 +425,23 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: agents
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: agent-sandbox
+    - name: kata
+  interval: 10m0s
+  path: ./kubernetes/applications/agents
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: authentik
   namespace: flux-system
 spec:

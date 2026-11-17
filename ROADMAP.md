@@ -1,37 +1,33 @@
 # Roadmap
 
-Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file.
+Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file.
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. `oci` control plane, `rbpi` (Pi 5) and `rzbl` (Razer Blade, GTX 1660 Ti) workers. Infra tag `v1.20.0`.
-- **rzbl joined 2026-11-15.** Talos on USB stick, `/var` on NVMe, NVMe + 4 TB SSD as user volumes. Direct tailnet path to oci (rule 5200 + own `/32` route). GPU via NVIDIA device plugin (`nvidia.com/gpu: 1`).
-- **rbpi storage migrated** to `ExistingVolumeConfig` (`/var/mnt/storage-nvme0|1`). Data kept in place.
-- **Public apps live:** apex `0xbf.ch` (site), exhib `gallery.0xbf.ch` (6 collections uploaded), forgejo `git.0xbf.ch` (SSH `2223`), pds, atuin.
-- **Internal apps live:** AGH, knot/kresd, homepage, devil, jellyfin (GPU), sonarr, radarr, prowlarr, ollama (GPU, qwen2.5-coder:7b, cluster-internal). GPU is time-sliced (4 slots).
-- **Prepared, suspended** (wait for owner secrets, see `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty, Time Machine (`10.10.20.145`), forgejo runner, opencode web, authentik (`auth.0xbf.ch`).
-- **Broken on purpose until thyme is on Typst Universe:** glob (ImagePullBackOff), apex-tui SSH (CrashLoop).
-- **Monitoring off** (Prometheus, Grafana, Gatus commented out). metrics-server stays.
-- **Backup:** relay pod runs since 2026-11-16. Garage on friend NAS refuses `3900` on its tailnet IP. Nothing is backed up yet.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. Infra tag `v1.29.0`. Placement roles (AGENTS.md "Workload placement"): oci = control plane + DNS, rbpi = edge + always-on core + platform controllers (preferred), rzbl = GPU, bulk storage, Postgres apps, Kata agents.
+- **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.6), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
+- **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
+- **Prepared, suspended** (owner secrets, `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty (`files.0xbf.ch` + `copyparty.internal`), Time Machine (`10.10.20.145`), forgejo runner, qbittorrent.
+- **Off:** monitoring (except metrics-server), homepage.
+- **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
+- **Release:** apex, exhib, glob, thyme all use `just release` (version from manifest, `--check`, no tag argument).
 
 ## NOW
 
-- [ ] **Router:** Zyxel rule `2223/tcp` to `10.10.20.10:2223` (git SSH from WAN).
-- [ ] **thyme on Typst Universe** (typst/packages#6393), then `just release v0.1.0` in glob and apex.
-- [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one.
-- [ ] **Jellyfin public:** finish wizard at `jellyfin.internal`, then public HTTPRoute (name TBD).
+- [ ] **authentik lockout:** `ak create_recovery_key 30 bf`, set password + passkey (`docs/AUTHENTIK.md` "Locked out"). Then test Forgejo "Sign in with authentik" and `opencode.internal`.
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
+- [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one. qBittorrent first (Proton WireGuard key).
 - [ ] **Forgejo Actions:** enable `[actions]`, runner secret, push mirrors to GitHub.
-- [ ] **Authentik** (decided): secret, un-suspend, own admin + passkey, then connect forgejo, immich, jellyfin (`docs/AUTHENTIK.md`).
-- [ ] **Homepage:** remove grafana/gatus widgets from `homepage-services` (sops) while monitoring is off.
+- [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
+- [ ] **Flux on rbpi:** re-run the Flux install with a preferred nodeAffinity for rbpi (out of tree, owner).
 
 ## NEXT
 
-- [ ] **qBittorrent over Proton VPN** (prepared): WireGuard key secret, then un-suspend (`docs/RZBL_WORKLOADS.md`).
-- [ ] **Agent isolation** for opencode: decide (`docs/AGENT_ISOLATION.md`).
+- [ ] Agent sandboxes: a way in (per-claim HTTPRoute behind authentik, or the upstream sandbox router).
 - [ ] Immich ML `-cuda` image on a GPU slot.
-- [ ] Open WebUI on top of Ollama (optional; opencode web covers coding).
 - [ ] **Renovate** + monitoring back (Prometheus, Grafana, Gatus, alerting receiver).
+- [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
+- [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
 
 ### omni: pre-reset parity (macbook reset gate)
@@ -42,14 +38,17 @@ Status as of 2026-11-16. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## LATER
 
-- [ ] Identity rollout (forgejo, jellyfin, immich OIDC; blog comments).
+- [ ] Identity rollout: immich OIDC, blog comments, atproto login source. Jellyfin SSO when the plugin supports 12.x.
+- [ ] Proton SMTP (authentik mail, PDS mail, Forgejo mail).
 - [ ] Upgrades: k8s `1.35.3` to `1.37` (`talosctl upgrade-k8s`).
-- [ ] Daytona agent sandbox; opencode kata container.
+- [ ] Tailscale autoApprovers for `tag:infra` routes.
 - [ ] Macbook factory reset to omni bootstrap.
 
 ## Done (recent)
 
-- [x] 2026-11-16 rbpi storage migration, rzbl workloads (media), GPU plugin, relay fix (PodSecurity + state on PVC).
+- [x] 2026-11-17 Agent Sandbox (v1.29.0), placement review (controllers prefer rbpi), atlas pan/zoom, copyparty hosts, release unification (apex, glob, thyme), exhib v0.5.6 (video pauses on navigation), apex v0.1.6 (Firefox freeze after new tab).
+- [x] 2026-11-17 authentik live + blueprints, Forgejo SSO + theme, Jellyfin public + branding, opencode in Kata with CNP + forward auth, Cilium `socketLB.hostNamespaceOnly`, devil clean stop.
+- [x] 2026-11-16 rbpi storage migration, rzbl workloads (media), GPU plugin, relay fix, thyme on Typst Universe, Zyxel `2223`.
 - [x] 2026-11-15 Talos 1.14.6 on all nodes, rzbl join, Traefik pinned to rbpi, SSH ports (apex `22`, git `2223`), exhib live with one container.
 
 ## SOMEDAY / ideas
@@ -73,7 +72,7 @@ Domain template is `{{.Name}}.0xbf.ch`. KSvc name sets subdomain. Pull secrets a
 | ---- | ------------------------ | ------------- | ------------------------------------------------------------------------------ |
 | rbpi | `/var/mnt/storage-nvme0` | NVMe 256 GB   | agh, pds, atuin, devil, exhib                                                  |
 | rbpi | `/var/mnt/storage-nvme1` | NVMe 250 GB   | forgejo                                                                        |
-| rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, immich db/models, dawarich, runner (class `local-path-nvme`)    |
+| rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, authentik db, ollama, opencode, immich db/models, dawarich, runner |
 | rzbl | `/var/mnt/storage-ssd0`  | SATA SSD 4 TB | media library, immich photos, copyparty, Time Machine (class `local-path-ssd`) |
 
 ## Conventions for every new application

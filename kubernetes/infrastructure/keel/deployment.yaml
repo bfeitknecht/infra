@@ -16,6 +16,15 @@ spec:
                 app: keel
         spec:
             serviceAccountName: keel
+            affinity:
+                nodeAffinity:
+                    preferredDuringSchedulingIgnoredDuringExecution:
+                        - weight: 100
+                          preference:
+                              matchExpressions:
+                                  - key: kubernetes.io/hostname
+                                    operator: In
+                                    values: [rbpi]
             containers:
                 - name: keel
                   image: ghcr.io/keel-hq/keel:0.22.3

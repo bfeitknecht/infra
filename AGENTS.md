@@ -28,12 +28,14 @@ kubernetes/
 ├── flux/               source.yaml (OCIRepository), sync.yaml (root Kustomization)
 ├── cluster/            root Kustomizations
 │   ├── crds.yaml       GitRepository + Kustomization for CRDs from pinned tags
-│   │                   gateway-api v1.6.2, traefik chart v41.6.0, kube-prometheus-stack 91.4.1
+│   │                   gateway-api v1.6.2, traefik chart v41.6.0, kube-prometheus-stack 91.4.1,
+│   │                   agent-sandbox v1.0.11 (CRDs + Helm chart source)
 │   ├── infrastructure.yaml  dependency tree
 │   ├── applications.yaml    per-app Kustomizations
 │   └── ghcr-pat.sops.yaml
 ├── infrastructure/
 │   ├── storage/        local-path-provisioner
+│   ├── agent-sandbox/  Agent Sandbox controller (HelmRelease from pinned GitRepository)
 │   ├── backup/         k8up (restic to Garage S3 via egress relay)
 │   ├── egress/         tailscale-relay (user-owned egress for shared-in targets)
 │   ├── keel/           Keel updater for tier-2 :latest apps
@@ -55,6 +57,8 @@ kubernetes/
     ├── ddns/           favonia/cloudflare-ddns (0xbf.ch to home IP)
     ├── dns/            knotd + kresd (internal. zone, resolver on OCI)
     ├── devil/          kata VM pod: ssh 2222, ghostty-web at devil.internal
+    ├── opencode/       opencode web in Kata at opencode.internal (authentik)
+    ├── agents/         SandboxTemplate + SandboxWarmPool: one opencode Kata VM per task
     ├── forgejo/        tier-1 git forge at git.0xbf.ch
     ├── pds/            tier-1 ATProto PDS at pds.0xbf.ch
     └── homepage/       dashboard
@@ -81,6 +85,17 @@ One rule per kind. New resources must follow them. Exceptions are listed below; 
 
 No PVC exceptions left. Rename method without copying: set PV `Retain`, suspend + scale to 0, delete the PVC, set PV `claimRef` to the new name (no uid), tag the renamed manifest, resume. The disk directory keeps the old PVC name (cosmetic). Service `pds-http` (a Service named `pds` injects `PDS_PORT` and breaks the image). Service `resolver` in `dns`. qbittorrent runs in namespace `media` (dir `applications/qbittorrent/`): it must share PVC `media-files`.
 
+## Workload placement
+
+Reviewed 2026-11-17. Three roles. One node failure must take down one role only.
+
+- **oci**: control plane + `dns` resolver. Taint stays. No other workloads.
+- **rbpi** (always-on edge): Traefik (pinned), AGH (L2 announce), tier-1 small-state apps (forgejo, pds, atuin), tier-2 sites, devil. **Platform controllers prefer rbpi** (`preferredDuringScheduling`, weight 100): cert-manager, Keel, tailscale operator, local-path-provisioner. If rbpi is down, the edge is down anyway; the controllers then fall back to rzbl. New cluster-healing controllers get the same affinity.
+- **rzbl** (heavy): GPU (jellyfin, ollama), bulk storage on `local-path-ssd`, Postgres-backed apps (authentik, immich, dawarich), Kata agents (opencode, agent sandboxes), CI runner. Boots from USB stick: do not make the cluster depend on it to heal.
+- Floating is fine for stateless apps and for knative-serving.
+- Flux is installed out of tree. Pinning it to rbpi is an owner step (re-run the install with the same affinity patch).
+- Stateful apps follow their PVC. local-path PVs are node-bound: moving an app means moving data.
+
 ## Kustomization dependency tree
 
 ```
@@ -90,6 +105,7 @@ cilium also dependsOn prometheus-crds
 monitoring also dependsOn prometheus-crds, traefik
 traefik also dependsOn gateway-api-crds, traefik-crds
 backup dependsOn k8up-crds
+agent-sandbox dependsOn agent-sandbox-crds; agents dependsOn agent-sandbox, kata
 ```
 
 Dry-run validates all manifests in a Kustomization before apply. A CR without its CRD fails dry-run. No manifest in that Kustomization applies. This includes the HelmRelease that would create the CRD. So:
@@ -142,6 +158,8 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 - **tailscale-relay** (`infrastructure/egress/tailscale/`, ns `egress`): User-owned egress for shared-in targets. Tailscale link shares are user-scoped. Shared-in machine is visible only to recipient user devices. Tagged machines cannot reach shared-in machines. Tags are stripped across shares. Node `tag:infra` and operator `tag:k8s` cannot reach shared-in targets. Relay uses untagged authkey. Device is owned by user and is inside share scope. TUN mode uses `/dev/net/tun` hostPath and `NET_ADMIN`. Socat sidecar forwards listeners to tailnet targets (now `3900` to `100.96.72.126:3900` for Garage). Add targets with extra `TCP-LISTEN` args in `relay.yaml`. State is on 1Gi local-path PVC. Key survives restart. Authkey needed only on first join `TS_AUTH_ONCE`. Disable key expiry on `k8s-relay` device after join. Authkey is in `tailscale-relay-secrets.sops.yaml` (key `authkey`). It must stay untagged. Workloads reach target via `tailscale-relay.egress.svc.cluster.local:<port>`. For non-shared tailnet targets, use operator egress Services with `tag:k8s`.
 
 - **devil (kata VM, `applications/devil/`)**: NixOS VM image is from omni flake. This repo owns pod, routing, terminal page. Access via one hostname `devil.internal` (knot wildcard to gateway LB). No DNS record. **ssh 2222** via `devilssh` entrypoint/listener (no hostPort, LAN + tailnet only; WAN `2222` reserved for dev box) to TCPRoute `ssh` to headless Service to VM sshd (pubkey-only, host keys on PVC). **ghostty-web** via HTTPRoute `devil` (`websecure-internal` with `internal-allowlist` copy in `devil` ns; only middleware, no basic-auth) to headless Service `7681` to ttyd in VM (`-I /srv/ghostty-web/index.html login`). Page is `ghostty-web/index.html` (ConfigMap `devil-ghostty-web`, hash-rolled; ghostty-web from esm.sh CDN, ttyd wire protocol). Auth is `login` prompt. PAM checks bf password (omni sops `login/devil`). Shell has full home config. Service is headless (historic: before `socketLB.hostNamespaceOnly` Kata VMs could not use ClusterIPs). Since 2026-11-17 Kata pods use normal cluster DNS and ClusterIPs. State is on `devil-data` (subPaths `home`/`ssh`).
+
+- **agent-sandbox v1.0.11** (`infrastructure/agent-sandbox/`, `applications/agents/`): kubernetes-sigs controller with extensions. One GitRepository `agent-sandbox` (tag `v1.0.11`, in `cluster/crds.yaml`) feeds both CRDs (Kustomization `agent-sandbox-crds`, path `./k8s/crds`, `prune: false`) and the chart (HelmRelease `chart: ./helm`, `crds: Skip`). Bump the tag and `image.tag` together. Template `opencode` in ns `agents`: same pod as `applications/opencode` but on `emptyDir`, Kata, rzbl, no SA token. **`networkPolicyManagement: Unmanaged` is load-bearing**: Managed with no rules creates a NetworkPolicy that allows all public egress, and Cilium unions it with the CNP. CNP `agent-isolation` is a copy of the opencode one. Keep both in sync. ConfigMap hash reaches the template via `kustomizeconfig.yaml`. Warm pool `replicas: 1` (each is a VM). Use: `SandboxClaim` with `warmPoolRef.name: opencode` in ns `agents`. No route yet.
 
 - **k8up 4.10.0** (`infrastructure/backup/k8up/`): Restic to Garage S3 on friend NAS (Garage on `3900` plain HTTP; WireGuard transport, restic encrypts at rest). Endpoint is relay Service `http://tailscale-relay.egress.svc.cluster.local:3900`. NAS `ts.net` name is MagicDNS only. Kresd and CoreDNS NXDOMAIN it. IP literal is unreachable from pods. See tailscale-relay note for why. Friend prerequisites (verified 2026-10-15): Garage `s3_api.bind_addr = "[::]:3900"`, NAS firewall allows `3900` on tailscale0, ACL `src: autogroup:shared -> 100.96.72.126:3900`. PVC discovery is namespace-scoped. K8up backs up PVCs in Schedule namespace only. App opts in by adding `k8up.io/v1` Schedule to its dir. First Schedule is in `applications/forgejo/` (monitoring/agh excluded). Operator holds backend as global env from Secret `k8up-secrets` (`BACKUP_GLOBALACCESSKEYID/SECRETACCESSKEY`, `BACKUP_GLOBALREPOPASSWORD`). Per-namespace Schedules need no backend. Times use `Europe/Zurich`. Repo password (`k8up-secrets` key `password`) is only key to backups. Do not rotate it. Verify with `.private/backup.md`.
 

@@ -1,0 +1,7 @@
+# The ConfigMap hash suffix also reaches the pod template inside SandboxTemplate.
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - kind: SandboxTemplate
+        path: spec/podTemplate/spec/volumes/configMap/name

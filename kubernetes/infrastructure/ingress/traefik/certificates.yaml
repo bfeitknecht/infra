@@ -89,7 +89,7 @@ spec:
     - dashboard.internal
     - dawarich.internal
     - devil.internal
-    - files.internal
+    - copyparty.internal
     - grafana.internal
     - homepage.internal
     - immich.internal

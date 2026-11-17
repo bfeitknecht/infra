@@ -39,6 +39,18 @@ Do not rotate `AUTHENTIK_SECRET_KEY` later. It signs sessions and tokens.
     - Create your own user, add it to group `authentik Admins`, set up a passkey. Deactivate `akadmin`.
     - Optional: remove `AUTHENTIK_BOOTSTRAP_*` from the secret. They only act on first start.
 
+## Locked out (no admin can log in)
+
+Happened 2026-11-17: `akadmin` was deactivated before the new user had a password or passkey. A recovery link logs in as a user once, with no password:
+
+```nu
+kubectl -n authentik exec deploy/authentik-server -- ak create_recovery_key 30 bf
+```
+
+`30` is minutes. The command prints a path. Open `https://auth.0xbf.ch` + that path. Then User settings > Password: set one. MFA devices: add a passkey. Check with `kubectl -n authentik exec deploy/authentik-db -- psql -U authentik -c "select username, is_active, left(password,1) from authentik_core_user"`: a password that starts with `!` is unusable.
+
+Order for the first admin: create user, **set password**, add to `authentik Admins`, log out, log in as the new user, add a passkey, then deactivate `akadmin`.
+
 ## Invite family and friends
 
 Admin > Directory > Invitations > Create. Flow: `invite`. Single use. Send the link. They pick a username and password, then can add a passkey. Add them to `family` or `friends`.

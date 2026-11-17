@@ -1,6 +1,6 @@
 # rzbl workloads: status and owner steps
 
-Status 2026-11-16. All apps below run on rzbl (`nodeSelector: kubernetes.io/hostname: rzbl`).
+Status 2026-11-17. All apps below run on rzbl (`nodeSelector: kubernetes.io/hostname: rzbl`).
 
 | App                                              | Dir                                      | State               | Access                                                |
 | ------------------------------------------------ | ---------------------------------------- | ------------------- | ----------------------------------------------------- |
@@ -10,11 +10,12 @@ Status 2026-11-16. All apps below run on rzbl (`nodeSelector: kubernetes.io/host
 | Prowlarr 2.7.0                                   | `applications/media/`                    | **live**            | `prowlarr.internal`                                   |
 | Immich v3.4.1                                    | `applications/immich/`                   | prepared, suspended | `immich.internal`                                     |
 | Dawarich 1.23.0                                  | `applications/dawarich/`                 | prepared, suspended | `dawarich.internal`                                   |
-| Copyparty 1.20.26                                | `applications/copyparty/`                | prepared, suspended | `files.internal`                                      |
+| Copyparty 1.20.26                                | `applications/copyparty/`                | prepared, suspended | `copyparty.internal`, public `files.0xbf.ch`          |
 | Time Machine (Samba)                             | `applications/samba/`                    | prepared, suspended | `smb://10.10.20.145`                                  |
 | Forgejo runner 13.2.1                            | `applications/forgejo-runner/`           | prepared, suspended | none                                                  |
 | Ollama 0.40.16 (GPU)                             | `applications/ollama/`                   | **live**            | cluster only: `ollama.ollama.svc.cluster.local:11434` |
-| opencode web 1.19.5                              | `applications/opencode/`                 | prepared, suspended | `opencode.internal`                                   |
+| opencode web 1.19.5 (Kata)                       | `applications/opencode/`                 | **live**            | `opencode.internal` (authentik, group developers)     |
+| Agent sandboxes (Kata, warm pool 1)              | `applications/agents/`                   | **live** (v1.29.0)  | none (SandboxClaim, port-forward)                     |
 | qBittorrent 5.3.0 + gluetun v3.41.3 (Proton VPN) | `applications/qbittorrent/` (ns `media`) | prepared, suspended | `qbittorrent.internal`                                |
 
 Prepared apps have a Flux Kustomization with `suspend: true` in `cluster/applications.yaml`. Each needs one sops Secret from the owner. Agents do not create sops files.
@@ -151,7 +152,7 @@ All apps are internal (`*.internal`, LAN + tailnet allowlist). Public needs an H
 
 - **Jellyfin**: finish the setup wizard at `jellyfin.internal` first. The wizard creates the admin with no auth, so a public wizard is open to anyone. Then uncomment `httproute-public.yaml` in `applications/media/kustomization.yaml`: public at `stream.0xbf.ch`. Server name in Jellyfin: `0xbf`.
 - **Immich**: first sign-up becomes admin. Same rule: sign up internal, then go public (`photos.0xbf.ch`).
-- **Copyparty**: accounts come from the config, so it is safe to go public at once (`files.0xbf.ch`).
+- **Copyparty**: accounts come from the config, so it is public at once at `files.0xbf.ch` (route `copyparty-public`, live on un-suspend).
 - **\*arr, Prowlarr, Dawarich**: keep internal.
 
 Public route example (put into the app dir, add to `kustomization.yaml`):
