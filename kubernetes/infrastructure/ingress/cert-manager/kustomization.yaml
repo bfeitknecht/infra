@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - cert-manager.yaml
-  - cloudflare-dns01.sops.yaml
+  - cert-manager-secrets.sops.yaml

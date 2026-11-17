@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - relay.yaml
-  - relay-authkey.sops.yaml
+  - tailscale-relay-secrets.sops.yaml

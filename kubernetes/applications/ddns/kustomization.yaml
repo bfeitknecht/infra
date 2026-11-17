@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
     - namespace.yaml
     - deployment.yaml
-    - cloudflare-ddns.sops.yaml
+    - ddns-secrets.sops.yaml

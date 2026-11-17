@@ -4,4 +4,4 @@ kind: Kustomization
 # applies first. The Serving CR (serving/) depends on this Kustomization.
 resources:
     - operator.yaml
-    - whimsy.sops.yaml
+    - ghcr.sops.yaml
