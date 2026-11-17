@@ -71,7 +71,7 @@ endpoints:
   # Edge resolver: AGH forwards to kresd.
   - {<<: *dns, name: dns edge, url: 10.10.20.153}
   - {<<: *internal, name: grafana, group: platform, url: http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health}
-  - {<<: *internal, name: prometheus, group: platform, url: http://monitoring-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/-/healthy}
+  - {<<: *internal, name: prometheus, group: platform, url: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/-/healthy}
   # ---- backup: the relay to Garage on the friend's NAS (red until it listens)
   - name: garage via relay
     group: backup
