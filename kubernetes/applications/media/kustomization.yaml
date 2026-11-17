@@ -14,5 +14,6 @@ configMapGenerator:
   # Jellyfin branding (logo, monochrome CSS, login note). Git owns it: the
   # initContainer copies it on every start, UI edits are overwritten.
   - name: jellyfin-branding
+    namespace: media
     files:
       - jellyfin-branding/branding.xml
