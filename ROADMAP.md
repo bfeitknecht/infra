@@ -4,7 +4,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.35.3. Infra tag `v1.29.0`. Placement roles (AGENTS.md "Workload placement"): oci = control plane + DNS, rbpi = edge + always-on core + platform controllers (preferred), rzbl = GPU, bulk storage, Postgres apps, Kata agents.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2. Infra tag `v1.35.0`. Placement roles (AGENTS.md "Workload placement"): oci = control plane + DNS, rbpi = edge + always-on core + platform controllers (preferred), rzbl = GPU, bulk storage, Postgres apps, Kata agents.
 - **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.8, Polyring member; `?static` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
 - **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik, internal only), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
 - **Live since 2026-11-17 evening:** copyparty `files.0xbf.ch`, Immich `immich.internal` (ML on GPU; no real library until backups).
@@ -22,7 +22,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NEXT
 
-- [ ] **Renovate** on the Forgejo runner.
+- [ ] **Renovate** on the Forgejo runner: `renovate.json5` is ready (validated); needs a token for the platform the repos live on.
 - [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
 - [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
@@ -38,12 +38,12 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - [ ] Identity rollout: immich OIDC, blog comments, atproto login source. Jellyfin SSO when the plugin supports 12.x.
 - [ ] Proton SMTP (authentik mail, PDS mail, Forgejo mail).
-- [ ] Upgrades: k8s `1.35.3` to `1.37` (`talosctl upgrade-k8s`).
 - [ ] Tailscale autoApprovers for `tag:infra` routes.
 - [ ] Macbook factory reset to omni bootstrap.
 
 ## Done (recent)
 
+- [x] 2026-11-17 Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2; journey page + deck.
 - [x] 2026-11-17 copyparty (files.0xbf.ch), Immich with GPU ML, Forgejo Actions + runner, agent sandbox slots (scripts/sandbox.nu).
 - [x] 2026-11-17 monitoring v2 (curated dashboards, 0xbf home, Gatus, GPU exporter), Flux on rbpi, Forgejo landing /bf, apex one-line footer (0.1.9).
 - [x] 2026-11-17 authentik admin with passkey, Forgejo SSO linked (grant_types fix v1.30.0), circle mark everywhere.
