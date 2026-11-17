@@ -1,93 +1,12 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: gatus-config
-  namespace: monitoring
-data:
-  config.yaml: |
-    storage:
-      type: sqlite
-      path: /data/gatus.db
-    ui:
-      title: Infra Status
-    endpoints:
-      - name: grafana
-        url: http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      - name: traefik-metrics
-        # Metrics use a dedicated Service.
-        url: http://ingress-traefik-metrics.ingress.svc.cluster.local:9100/metrics
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      - name: gateway-lan
-        url: https://10.10.20.128
-        interval: 1m
-        client:
-          insecure: true
-        conditions: ["[STATUS] == 404"]
-      # kresd ClusterIP (see applications/dns)
-      - name: dns-internal
-        url: 10.96.0.53
-        interval: 1m
-        dns:
-          query-name: dashboard.internal
-          query-type: A
-        conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
-      # kresd on OCI does public recursion.
-      - name: dns-public
-        url: 10.96.0.53
-        interval: 1m
-        dns:
-          query-name: example.com
-          query-type: A
-        conditions: ["[DNS_RCODE] == NOERROR"]
-      # Edge resolver. AGH forwards to kresd and knotd via LB IP.
-      - name: dns-edge
-        url: 10.10.20.153
-        interval: 1m
-        dns:
-          query-name: dashboard.internal
-          query-type: A
-        conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
-      - name: homepage
-        url: http://homepage.homepage.svc.cluster.local
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      - name: forgejo
-        url: http://forgejo.forgejo.svc.cluster.local/api/healthz
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      - name: pds
-        url: http://pds-http.pds.svc.cluster.local/xrpc/_health
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      - name: apex
-        url: http://apex.apex.svc.cluster.local
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      # SSH check uses TCP connect. A successful connection shows the
-      # listener is active and the host key is present.
-      - name: apex-ssh
-        url: tcp://apex-tui.apex.svc.cluster.local:2222
-        interval: 1m
-        conditions: ["[CONNECTED] == true"]
-      - name: glob
-        url: http://glob.glob.svc.cluster.local
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
-      - name: exhib
-        url: http://exhib.exhib.svc.cluster.local
-        interval: 1m
-        conditions: ["[STATUS] == 200"]
----
+# Gatus status page at status.internal. Config: gatus-config.yaml (generated
+# ConfigMap: a change rolls the pod). Pinned to rbpi with the rest of monitoring.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gatus-data
   namespace: monitoring
 spec:
-  storageClassName: local-path
+  storageClassName: local-path-nvme
   accessModes:
     - ReadWriteOnce
   resources:
@@ -109,6 +28,9 @@ spec:
       labels:
         app: gatus
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: rbpi
+      automountServiceAccountToken: false
       volumes:
         - name: config
           configMap:
@@ -136,7 +58,7 @@ spec:
               memory: 128Mi
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: 8080
             initialDelaySeconds: 5
 ---

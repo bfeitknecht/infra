@@ -1,0 +1,62 @@
+# GPU metrics for Grafana (dashboard 14574): nvidia_gpu_exporter reads
+# nvidia-smi. The RuntimeClass nvidia injects nvidia-smi and the driver libs;
+# the upstream chart mounts /usr/bin/nvidia-smi from the host, which Talos does
+# not have. No nvidia.com/gpu request: it only reads, so it takes no time slot.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: gpu-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gpu-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gpu-exporter
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      runtimeClassName: nvidia
+      automountServiceAccountToken: false
+      containers:
+        - name: gpu-exporter
+          image: docker.io/utkuozdemir/nvidia_gpu_exporter:1.2.1
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: utility
+          ports:
+            - name: metrics
+              containerPort: 9835
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: gpu-exporter
+spec:
+  selector:
+    app.kubernetes.io/name: gpu-exporter
+  ports:
+    - name: metrics
+      port: 9835
+      targetPort: metrics

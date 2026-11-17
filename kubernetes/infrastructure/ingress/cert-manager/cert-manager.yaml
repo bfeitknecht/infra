@@ -31,6 +31,11 @@ spec:
   values:
     crds:
       enabled: true
+    # Certificate expiry metrics for the Grafana home dashboard.
+    prometheus:
+      enabled: true
+      servicemonitor:
+        enabled: true
     # Placement: platform controllers prefer rbpi (fate-share with the edge, see AGENTS.md).
     affinity:
       nodeAffinity:

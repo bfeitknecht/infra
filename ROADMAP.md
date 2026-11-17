@@ -8,24 +8,23 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.8, Polyring member; `?static` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
 - **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik, internal only), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
 - **Prepared, suspended** (owner secrets, `docs/RZBL_WORKLOADS.md`): immich, dawarich, copyparty (`files.0xbf.ch` + `copyparty.internal`), Time Machine (`10.10.20.145`), forgejo runner, qbittorrent.
-- **Off:** monitoring (except metrics-server), homepage.
+- **Monitoring:** Grafana `grafana.internal` (home dashboard `0xbf`, authentik SSO), Gatus `status.internal`, Prometheus on rbpi. Homepage off (Grafana home replaces it).
 - **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
 - **Release:** apex, exhib, glob, thyme all use `just release` (version from manifest, `--check`, no tag argument).
 
 ## NOW
 
-- [ ] **Forgejo landing:** add `LANDING_PAGE = /bf` to the live `app.ini` on the PVC (in git since v1.30.0).
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one. qBittorrent first (Proton WireGuard key).
 - [ ] **Forgejo Actions:** enable `[actions]`, runner secret, push mirrors to GitHub.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
-- [ ] **Flux on rbpi:** re-run the Flux install with a preferred nodeAffinity for rbpi (out of tree, owner).
 
 ## NEXT
 
 - [ ] Agent sandboxes: a way in (per-claim route under `opencode.internal` behind authentik, or the upstream sandbox router).
 - [ ] Immich ML `-cuda` image on a GPU slot.
-- [ ] **Renovate** + monitoring back (Prometheus, Grafana, Gatus, alerting receiver).
+- [ ] **Renovate** on the Forgejo runner.
+- [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
 - [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
@@ -46,6 +45,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-17 monitoring v2 (curated dashboards, 0xbf home, Gatus, GPU exporter), Flux on rbpi, Forgejo landing /bf, apex one-line footer (0.1.9).
 - [x] 2026-11-17 authentik admin with passkey, Forgejo SSO linked (grant_types fix v1.30.0), circle mark everywhere.
 - [x] 2026-11-17 Agent Sandbox (v1.29.0), placement review (controllers prefer rbpi), atlas pan/zoom, copyparty hosts, release unification (apex, glob, thyme), exhib v0.5.6 (video pauses on navigation), apex v0.1.6 (Firefox freeze after new tab), apex v0.1.7 (Polyring, mobile nav + touch scroll, light cursor, iOS dvh).
 - [x] 2026-11-17 authentik live + blueprints, Forgejo SSO + theme, Jellyfin public + branding, opencode in Kata with CNP + forward auth, Cilium `socketLB.hostNamespaceOnly`, devil clean stop.

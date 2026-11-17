@@ -93,7 +93,18 @@ Reviewed 2026-11-17. Three roles. One node failure must take down one role only.
 - **rbpi** (always-on edge): Traefik (pinned), AGH (L2 announce), tier-1 small-state apps (forgejo, pds, atuin), tier-2 sites, devil. **Platform controllers prefer rbpi** (`preferredDuringScheduling`, weight 100): cert-manager, Keel, tailscale operator, local-path-provisioner. If rbpi is down, the edge is down anyway; the controllers then fall back to rzbl. New cluster-healing controllers get the same affinity.
 - **rzbl** (heavy): GPU (jellyfin, ollama), bulk storage on `local-path-ssd`, Postgres-backed apps (authentik, immich, dawarich), Kata agents (opencode, agent sandboxes), CI runner. Boots from USB stick: do not make the cluster depend on it to heal.
 - Floating is fine for stateless apps and for knative-serving.
-- Flux is installed out of tree. Pinning it to rbpi is an owner step (re-run the install with the same affinity patch).
+- Flux is installed out of tree. Its four controllers carry the same preference as a `kubectl patch` (2026-11-17). A new `flux install` drops it: re-apply the patch.
+
+Placement per app (target state):
+
+| Node | Role | Apps |
+| ---- | ---- | ---- |
+| oci | control plane, DNS | kube-apiserver/etcd, `dns` (kresd + knotd), CoreDNS |
+| rbpi | edge, always-on core, observers | Traefik, AGH, cert-manager, Flux, Keel, tailscale operator, local-path; forgejo, pds, atuin, apex, glob, exhib, devil; Prometheus, Alertmanager, Grafana, Gatus |
+| rzbl | heavy, GPU, bulk storage | jellyfin, *arr, qbittorrent, ollama, immich (+ ML on GPU), copyparty, Time Machine, dawarich, authentik (+ Postgres), opencode, agent sandboxes, forgejo runner + Renovate, GPU exporter |
+| floating | stateless, cheap | knative-serving, agent-sandbox controller, metrics-server, ddns, tailscale-relay |
+
+Monitoring sits on rbpi so it can report a failing rzbl. Authentik stays on rzbl (Postgres on NVMe, RAM); if rzbl is down, SSO is down but local logins (Forgejo admin, Grafana admin) still work.
 - Stateful apps follow their PVC. local-path PVs are node-bound: moving an app means moving data.
 
 ## Kustomization dependency tree
@@ -131,7 +142,7 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **tailscale on nodes**: Nodes run `ext-tailscale` Talos extension. Config is in `talos/patches/all/02-tailscale.sops.yaml`. Nodes use `tag:infra`. This is different from operator identity. rbpi is subnet router for `10.10.10.0/24,10.10.20.0/24`. oci is subnet router for `10.20.20.0/24`. Other home nodes (rzbl) must not reach oci through rbpi: VXLAN between oci and a node behind rbpi does not survive the rbpi hop (SNAT). So each extra home node: `--accept-routes=true --advertise-routes=<own-ip>/32` (approve route in admin console), plus `RoutingRuleConfig` priority `5200` `dst: 10.10.0.0/16 table: main`. Without the rule, rbpi's `10.10.20.0/24` in table 52 hijacks LAN traffic. See `talos/patches/node/rzbl/02-network.yaml`, `03-tailscale.yaml`.
 
-- **monitoring** (`infrastructure/monitoring/`): **Off since 2026-11-15** except metrics-server. `kustomization.yaml` comments out kube-prometheus-stack, gatus, grafana route, ServiceMonitors and Grafana credentials. Files stay. Re-enable together with Renovate. `prometheus-crds` stays (Cilium and Traefik ServiceMonitors need CRDs). Homepage grafana and gatus widgets fail until re-enabled. Previous setup: kube-prometheus-stack 91.4.1, metrics-server 3.14.0, Gatus v5.36.0 at `status.internal`. Disable kubeControllerManager, kubeScheduler, kubeEtcd, kubeProxy scrapes. They are unreachable on Talos or replaced by Cilium KPR. Metrics-server needs `--kubelet-insecure-tls`. Keep Prometheus retention 7d/8GB on local-path. Grafana admin is in `monitoring-credentials.sops.yaml`. Set selectors `NilUsesHelmValues: false` so new ServiceMonitors are picked up. Alertmanager receiver is pending (ntfy/Discord/Telegram).
+- **monitoring** (`infrastructure/monitoring/`, v2 since 2026-11-17): kube-prometheus-stack 91.4.1 on rbpi (Prometheus 15d/15GB on `local-path-nvme`, Alertmanager without receiver yet), Grafana at `grafana.internal` with authentik SSO (public client + PKCE, `developers` may log in, `authentik Admins` = Grafana Admin; local admin from `grafana-credentials`). The stock kube-prometheus dashboards are off (`defaultDashboardsEnabled: false`). Curated set, pinned: Kubernetes Views (15757-15760), Node Exporter Full (1860), Traefik (17346), GPU (14574), Flux (flux2-monitoring-example @7ab65dc), Cilium (from the Cilium chart, `dashboards.enabled`). **Home dashboard `0xbf`** (`dashboards/home.json`, sidecar ConfigMap, folder `0xbf`, `default_home_dashboard_path`): health stats, Gatus table, nodes, disks, GPU, traffic, top pods, Flux not-ready. Flux status comes from kube-state-metrics custom resource state (`flux-ksm-values.yaml`, via HelmRelease `valuesFrom`; the upstream file's `collectors: []` would kill normal metrics). node-exporter `instance` = node name. Gatus at `status.internal` (`gatus-config.yaml`, generated ConfigMap, `metrics: true`): groups public (through the edge, cert expiry), internal, platform, backup. GPU exporter on rzbl via RuntimeClass `nvidia`, no GPU slot. Alert receiver still pending (ntfy). Homepage stays off: Grafana home is the one place.
 
 - **cert-manager 1.21.2**: Set `install.crds` and `upgrade.crds` to `CreateReplace`. Set `crds.enabled: true`.
 
