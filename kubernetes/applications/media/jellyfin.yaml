@@ -32,6 +32,20 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: branding
+          image: docker.io/library/busybox:1.37.0
+          command: ["sh", "-c", "mkdir -p /config/config && cp /branding/branding.xml /config/config/branding.xml"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: branding
+              mountPath: /branding
+              readOnly: true
       containers:
         - name: jellyfin
           image: docker.io/jellyfin/jellyfin:12.4
@@ -79,6 +93,9 @@ spec:
             - name: library
               mountPath: /data
       volumes:
+        - name: branding
+          configMap:
+            name: jellyfin-branding
         - name: config
           persistentVolumeClaim:
             claimName: jellyfin-data

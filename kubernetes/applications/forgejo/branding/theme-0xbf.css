@@ -1,0 +1,108 @@
+/* 0xbf theme: monochrome, same palette as exhib and glob (oklch, zero chroma).
+   Builds on forgejo-auto (follows the OS light/dark setting) and replaces only
+   the neutral and primary colors. Status colors (red, green, ...) stay. */
+@import "./theme-forgejo-auto.css";
+
+gitea-theme-meta-info {
+  --theme-display-name: "0xbf";
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary: oklch(21% 0 0);
+    --color-primary-contrast: oklch(96% 0 0);
+    --color-primary-hover: oklch(30% 0 0);
+    --color-primary-active: oklch(14% 0 0);
+    --color-primary-dark-1: oklch(19% 0 0);
+    --color-primary-dark-2: oklch(17% 0 0);
+    --color-primary-dark-3: oklch(15% 0 0);
+    --color-primary-dark-4: oklch(13% 0 0);
+    --color-primary-dark-5: oklch(11% 0 0);
+    --color-primary-dark-6: oklch(9% 0 0);
+    --color-primary-dark-7: oklch(7% 0 0);
+    --color-primary-light-1: oklch(30% 0 0);
+    --color-primary-light-2: oklch(40% 0 0);
+    --color-primary-light-3: oklch(50% 0 0);
+    --color-primary-light-4: oklch(60% 0 0);
+    --color-primary-light-5: oklch(72% 0 0);
+    --color-primary-light-6: oklch(84% 0 0);
+    --color-primary-light-7: oklch(92% 0 0);
+    --color-primary-alpha-10: oklch(21% 0 0 / 0.1);
+    --color-primary-alpha-20: oklch(21% 0 0 / 0.2);
+    --color-primary-alpha-30: oklch(21% 0 0 / 0.3);
+    --color-primary-alpha-40: oklch(21% 0 0 / 0.4);
+    --color-primary-alpha-50: oklch(21% 0 0 / 0.5);
+    --color-primary-alpha-60: oklch(21% 0 0 / 0.6);
+    --color-primary-alpha-70: oklch(21% 0 0 / 0.7);
+    --color-primary-alpha-80: oklch(21% 0 0 / 0.8);
+    --color-primary-alpha-90: oklch(21% 0 0 / 0.9);
+    --color-accent: oklch(21% 0 0);
+    --color-body: oklch(96% 0 0);
+    --color-box-body: oklch(98% 0 0);
+    --color-box-body-highlight: oklch(94% 0 0);
+    --color-box-header: oklch(93% 0 0);
+    --color-header-wrapper: oklch(93% 0 0);
+    --color-nav-bg: oklch(93% 0 0);
+    --color-footer: oklch(93% 0 0);
+    --color-menu: oklch(98% 0 0);
+    --color-input-background: oklch(98% 0 0);
+    --color-button: oklch(93% 0 0);
+    --color-hover: oklch(21% 0 0 / 0.06);
+    --color-active: oklch(21% 0 0 / 0.1);
+    --color-text: oklch(21% 0 0);
+    --color-text-light: oklch(30% 0 0);
+    --color-text-light-1: oklch(38% 0 0);
+    --color-text-light-2: oklch(47% 0 0);
+    --color-text-light-3: oklch(55% 0 0);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: oklch(95% 0 0);
+    --color-primary-contrast: oklch(17% 0 0);
+    --color-primary-hover: oklch(85% 0 0);
+    --color-primary-active: oklch(100% 0 0);
+    --color-primary-dark-1: oklch(88% 0 0);
+    --color-primary-dark-2: oklch(82% 0 0);
+    --color-primary-dark-3: oklch(76% 0 0);
+    --color-primary-dark-4: oklch(70% 0 0);
+    --color-primary-dark-5: oklch(62% 0 0);
+    --color-primary-dark-6: oklch(54% 0 0);
+    --color-primary-dark-7: oklch(46% 0 0);
+    --color-primary-light-1: oklch(80% 0 0);
+    --color-primary-light-2: oklch(68% 0 0);
+    --color-primary-light-3: oklch(56% 0 0);
+    --color-primary-light-4: oklch(44% 0 0);
+    --color-primary-light-5: oklch(34% 0 0);
+    --color-primary-light-6: oklch(26% 0 0);
+    --color-primary-light-7: oklch(21% 0 0);
+    --color-primary-alpha-10: oklch(95% 0 0 / 0.1);
+    --color-primary-alpha-20: oklch(95% 0 0 / 0.2);
+    --color-primary-alpha-30: oklch(95% 0 0 / 0.3);
+    --color-primary-alpha-40: oklch(95% 0 0 / 0.4);
+    --color-primary-alpha-50: oklch(95% 0 0 / 0.5);
+    --color-primary-alpha-60: oklch(95% 0 0 / 0.6);
+    --color-primary-alpha-70: oklch(95% 0 0 / 0.7);
+    --color-primary-alpha-80: oklch(95% 0 0 / 0.8);
+    --color-primary-alpha-90: oklch(95% 0 0 / 0.9);
+    --color-accent: oklch(95% 0 0);
+    --color-body: oklch(17% 0 0);
+    --color-box-body: oklch(20% 0 0);
+    --color-box-body-highlight: oklch(24% 0 0);
+    --color-box-header: oklch(22% 0 0);
+    --color-header-wrapper: oklch(22% 0 0);
+    --color-nav-bg: oklch(14% 0 0);
+    --color-footer: oklch(14% 0 0);
+    --color-menu: oklch(20% 0 0);
+    --color-input-background: oklch(20% 0 0);
+    --color-button: oklch(24% 0 0);
+    --color-hover: oklch(95% 0 0 / 0.06);
+    --color-active: oklch(95% 0 0 / 0.1);
+    --color-text: oklch(95% 0 0);
+    --color-text-light: oklch(85% 0 0);
+    --color-text-light-1: oklch(78% 0 0);
+    --color-text-light-2: oklch(70% 0 0);
+    --color-text-light-3: oklch(62% 0 0);
+  }
+}

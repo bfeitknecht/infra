@@ -242,7 +242,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-16";
-const INFRA_TAG = "v1.25.1";
+const INFRA_TAG = "v1.26.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -287,7 +287,7 @@ const SERVICES = [
  {id:"forgejo", name:"Forgejo", cat:"dev", status:"live", exp:"public", node:"rbpi", tier:"1", ns:"forgejo", ks:"forgejo",
   host:"https://git.0xbf.ch · ssh://git@git.0xbf.ch:2223", image:"codeberg.org/forgejo/forgejo:16.0.5", desc:"Git forge.",
   ports:"HTTP 3000, SSH 22 (WAN/LB 2223)", deps:["traefik","storage"], secrets:["forgejo/forgejo-secrets.sops.yaml"], storage:"forgejo-data 10Gi (rbpi nvme1)",
-  notes:["SSH moved 22 → 2223 (apex took 22). WAN needs Zyxel rule 2223.","Actions not enabled yet. Runner prepared (forgejo-runner).","k8up Schedule 03:00 (fails until backup path works)."]},
+  notes:["SSO via authentik (login source authentik, group developers). Sign-up only through authentik.","Theme 0xbf (exhib/glob grayscale) and ^@ logo.","SSH on 2223 (Zyxel rule done).","Actions not enabled yet. Runner prepared (forgejo-runner)."]},
  {id:"pds", name:"ATProto PDS", cat:"identity", status:"live", exp:"public", node:"rbpi", tier:"1", ns:"pds", ks:"pds",
   host:"https://pds.0xbf.ch · *.pds.0xbf.ch", image:"ghcr.io/bluesky-social/pds:0.4.5034", desc:"Bluesky/atproto personal data server. Handles <name>.pds.0xbf.ch.",
   ports:"HTTP 3000 (Service pds-http)", deps:["traefik","storage"], secrets:["pds/pds-secrets.sops.yaml"], storage:"pds-data 10Gi (rbpi nvme0)",
@@ -302,7 +302,7 @@ const SERVICES = [
  {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"media", ks:"media",
   host:"https://stream.0xbf.ch · https://jellyfin.internal", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
   ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
-  runbook:"docs/RZBL_WORKLOADS.md", notes:["Public at stream.0xbf.ch since 2026-11-16. Server name: 0xbf.","Family logins: local users now, authentik SSO plugin later (web only)."]},
+  runbook:"docs/RZBL_WORKLOADS.md", notes:["Public at stream.0xbf.ch since 2026-11-16. Server name: 0xbf.","Branding: ^@ logo, monochrome CSS, login note (git-owned branding.xml).","No SSO yet: the SSO plugin does not support Jellyfin 12. Local users."]},
  {id:"sonarr", name:"Sonarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://sonarr.internal", image:"lscr.io/linuxserver/sonarr:4.0.20", desc:"TV series manager.", ports:"HTTP 8989", deps:["storage"], secrets:[], storage:"sonarr-data 2Gi, media-files at /data", notes:["No login yet: set one in Settings > General or put authentik forward-auth in front."]},
  {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-data 2Gi, media-files at /data", notes:["No login yet."]},
  {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
@@ -459,6 +459,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns
 * suspended: immich dawarich copyparty samba forgejo-runner opencode qbittorrent`;
 const TAGS = [
+ ["v1.26.0","2026-11-17","Forgejo SSO + theme 0xbf + logo; Jellyfin branding"],
  ["v1.25.1","2026-11-17","authentik live (auth.0xbf.ch)"],
  ["v1.25.0","2026-11-17","secret migration to <app>-secrets, pull secrets removed (public images), exhib-data rename"],
  ["v1.24.0","2026-11-17","PVC renames devil-data, tailscale-relay-data (rebind, no copy); homepage off"],
