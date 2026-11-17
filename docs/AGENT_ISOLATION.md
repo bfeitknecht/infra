@@ -47,15 +47,16 @@ Order when you approve:
 - Controller: `infrastructure/agent-sandbox/` (chart from the pinned GitRepository, extensions on). CRDs: `agent-sandbox-crds` in `cluster/crds.yaml`.
 - `applications/agents/`: `SandboxTemplate opencode` (Kata, rzbl, emptyDir HOME, no SA token, restricted PodSecurity), `SandboxWarmPool opencode` (1), CNP `agent-isolation` (copy of opencode's).
 - `networkPolicyManagement: Unmanaged`. The Managed default allows all public egress, and Cilium adds that to the allowlist.
-- Take a sandbox:
+- Take a sandbox with `scripts/sandbox.nu` (nushell, from the infra root):
 
 ```nu
-"apiVersion: extensions.agents.x-k8s.io/v1beta1
-kind: SandboxClaim
-metadata: {name: task-1, namespace: agents}
-spec: {warmPoolRef: {name: opencode}}" | kubectl apply -f -
-kubectl -n agents get sandboxclaims,sandboxes,pods
-kubectl -n agents port-forward pod/<sandbox-pod> 4096:4096
+use scripts/sandbox.nu *
+sandbox new          # claims a warm VM, binds it to a free slot, prints https://sandbox-N.internal
+sandbox ls
+sandbox rm task-ab12c
 ```
+
+- Slots: `sandbox-1..3.internal`, explicit names in `internal-hosts`, one authentik `forward_single` provider each (group `developers`), plus the LAN/tailnet allowlist. The helper creates a Service (selector `agents.x-k8s.io/claim-uid`) and an HTTPRoute labelled `0xbf.ch/slot`, both owned by the claim, so `sandbox rm` removes them.
+- `kubectl port-forward` does not work: it dials localhost in the pod network namespace, and opencode listens inside the Kata VM.
 
 Claims are runtime state, like whims: not in git. Delete the claim to end the VM.

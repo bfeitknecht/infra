@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - networkpolicy.yaml
+  - middleware.yaml
+  - authentik.yaml
   - sandbox.yaml
 configMapGenerator:
   - name: agents-config
