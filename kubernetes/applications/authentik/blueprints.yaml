@@ -257,6 +257,9 @@ data:
           name: forgejo
         attrs:
           client_type: confidential
+          # Required: the per-provider allowlist defaults to empty in blueprints,
+          # and authentik then rejects every flow ("Invalid grant_type").
+          grant_types: [authorization_code, refresh_token]
           client_id: forgejo
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
@@ -310,6 +313,9 @@ data:
           name: jellyfin
         attrs:
           client_type: confidential
+          # Required: the per-provider allowlist defaults to empty in blueprints,
+          # and authentik then rejects every flow ("Invalid grant_type").
+          grant_types: [authorization_code, refresh_token]
           client_id: jellyfin
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
@@ -350,8 +356,10 @@ data:
         attrs:
           order: 2
   opencode.yaml: |
-    # Forward auth (single app) for opencode.internal, group developers.
-    # The embedded outpost serves it. Add later forward-auth providers to the
+    # Forward auth (single app), group developers: opencode.internal (by
+    # software) and agent.0xbf.ch (public, by purpose). forward_single serves
+    # one host per provider, so each host has its own provider and app. The
+    # embedded outpost serves both. Add later forward-auth providers to the
     # same outpost list here.
     version: 1
     metadata:
@@ -385,9 +393,34 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 0
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-agent
+        identifiers:
+          name: agent
+        attrs:
+          mode: forward_single
+          external_host: https://agent.0xbf.ch
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-agent
+        identifiers:
+          slug: agent
+        attrs:
+          name: agent (opencode)
+          provider: !KeyOf provider-agent
+          meta_launch_url: https://agent.0xbf.ch
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-agent
+          group: !KeyOf group-developers
+        attrs:
+          order: 0
       - model: authentik_outposts.outpost
         identifiers:
           managed: goauthentik.io/outposts/embedded
         attrs:
           providers:
             - !KeyOf provider
+            - !KeyOf provider-agent
