@@ -23,7 +23,12 @@ endpoints:
   - {<<: *public, name: atuin, url: https://atuin.0xbf.ch/healthz}
   - {<<: *public, name: auth, url: https://auth.0xbf.ch/-/health/live/}
   - {<<: *public, name: stream, url: https://stream.0xbf.ch/health}
-  - {<<: *public, name: files, url: https://files.0xbf.ch/?ls, conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]}
+  # copyparty answers 401/403 without login; any non-5xx is up.
+  - name: files
+    group: public
+    url: https://files.0xbf.ch/
+    interval: 2m
+    conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]
   - name: apex ssh
     group: public
     url: tcp://0xbf.ch:22
