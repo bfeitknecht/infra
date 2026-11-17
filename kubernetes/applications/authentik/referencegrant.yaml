@@ -9,6 +9,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: opencode
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: agents
   to:
     - group: ""
       kind: Service
