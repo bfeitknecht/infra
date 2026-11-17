@@ -14,8 +14,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **authentik passkey** for `bf` (password is set).
-- [ ] **Forgejo login:** reset the local password (`forgejo admin user change-password`), then "Sign in with authentik" and link once. Add `LANDING_PAGE = /bf` to the live `app.ini`.
+- [ ] **Forgejo landing:** add `LANDING_PAGE = /bf` to the live `app.ini` on the PVC (in git since v1.30.0).
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one. qBittorrent first (Proton WireGuard key).
 - [ ] **Forgejo Actions:** enable `[actions]`, runner secret, push mirrors to GitHub.
@@ -47,6 +46,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-17 authentik admin with passkey, Forgejo SSO linked (grant_types fix v1.30.0), circle mark everywhere.
 - [x] 2026-11-17 Agent Sandbox (v1.29.0), placement review (controllers prefer rbpi), atlas pan/zoom, copyparty hosts, release unification (apex, glob, thyme), exhib v0.5.6 (video pauses on navigation), apex v0.1.6 (Firefox freeze after new tab), apex v0.1.7 (Polyring, mobile nav + touch scroll, light cursor, iOS dvh).
 - [x] 2026-11-17 authentik live + blueprints, Forgejo SSO + theme, Jellyfin public + branding, opencode in Kata with CNP + forward auth, Cilium `socketLB.hostNamespaceOnly`, devil clean stop.
 - [x] 2026-11-16 rbpi storage migration, rzbl workloads (media), GPU plugin, relay fix, thyme on Typst Universe, Zyxel `2223`.
