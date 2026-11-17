@@ -43,6 +43,21 @@ Do not rotate `AUTHENTIK_SECRET_KEY` later. It signs sessions and tokens.
 
 Admin > Directory > Invitations > Create. Flow: `invite`. Single use. Send the link. They pick a username and password, then can add a passkey. Add them to `family` or `friends`.
 
+## Prepared apps: Forgejo and Jellyfin
+
+Blueprints `forgejo.yaml` and `jellyfin.yaml` in `blueprints.yaml` create the OIDC provider, the application and the group bindings. After authentik runs:
+
+**Forgejo** (group `developers`):
+1. Add yourself to `developers` in authentik.
+2. Admin > Providers > forgejo: copy the client secret.
+3. Forgejo `https://git.0xbf.ch/-/admin/auths/new`: type **OAuth2**, provider **OpenID Connect**, name **`authentik`** (must match the redirect URL), client ID `forgejo`, client secret (pasted), auto-discovery URL `https://auth.0xbf.ch/application/o/forgejo/.well-known/openid-configuration`.
+4. Link your existing Forgejo account on first SSO login (Forgejo asks).
+
+**Jellyfin** (groups `family`, `friends`, `developers`):
+1. Dashboard > Plugins > Repositories: add `https://raw.githubusercontent.com/9p4/jellyfin-plugin-sso/manifest-release/manifest.json`. Catalog: install **SSO Authentication**, restart.
+2. Plugin settings, add provider name **`authentik`**: endpoint `https://auth.0xbf.ch/application/o/jellyfin/`, client ID `jellyfin`, client secret (from authentik), enabled, "Enable Authorization by Plugin" on.
+3. Login link for users: `https://stream.0xbf.ch/sso/OID/start/authentik`. Web only: TV and phone apps keep Jellyfin passwords or Quick Connect.
+
 ## Connect an app (pattern)
 
 One blueprint per app in `blueprints.yaml`: OAuth2 provider + application + group binding. The client secret lives in authentik and in the app's sops secret.
