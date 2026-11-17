@@ -32,7 +32,14 @@ spec:
         - name: copyparty
           image: docker.io/copyparty/ac:1.20.26
           # Accounts and volumes are in copyparty.conf (Secret, it holds passwords).
-          args: ["-c", "/cfg/copyparty.conf"]
+          # No args: the image runs `-c /z/initcfg`, which includes every file
+          # in /cfg (`% /cfg`). A second `-c /cfg/copyparty.conf` mounted the
+          # volume twice and copyparty refused to start.
+          env:
+            # Writable config home on the volume: file and dir keys (share
+            # links) survive restarts.
+            - name: XDG_CONFIG_HOME
+              value: /w/.hist/config
           ports:
             - containerPort: 3923
           readinessProbe:
