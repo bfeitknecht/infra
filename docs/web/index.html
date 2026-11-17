@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-17";
-const INFRA_TAG = "v1.32.0";
+const INFRA_TAG = "v1.33.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -334,7 +334,7 @@ const SERVICES = [
  {id:"timemachine", name:"Time Machine (Samba)", cat:"apps", status:"prepared", exp:"lan", node:"rzbl", tier:"1", ns:"samba", ks:"samba",
   host:"smb://10.10.20.145/TimeMachine", image:"mbentley/timemachine:smb-20261116", desc:"Mac backups over SMB. LB IP .145 (= 445).",
   ports:"SMB 445 (LoadBalancer 10.10.20.145)", deps:["storage"], secrets:["samba/timemachine-secrets.sops.yaml (to create)"], storage:"timemachine-files 1Ti (ssd), cap 1 T", runbook:"docs/RZBL_WORKLOADS.md", notes:["No mDNS: add the server by IP on each Mac."]},
- {id:"runner", name:"Forgejo runner", cat:"dev", status:"prepared", exp:"cluster", node:"rzbl", tier:"1", ns:"forgejo-runner", ks:"forgejo-runner",
+ {id:"runner", name:"Forgejo runner", cat:"dev", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"forgejo-runner", ks:"forgejo-runner",
   host:"—", image:"code.forgejo.org/forgejo/runner:13.2.1 + docker:28-dind", desc:"CI runner for Forgejo Actions (labels docker, ubuntu-latest).",
   ports:"—", deps:["forgejo","storage"], secrets:["forgejo-runner/forgejo-runner-secrets.sops.yaml (to create)"], storage:"forgejo-runner-data 5Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Enable [actions] in Forgejo app.ini.","GitHub becomes a push mirror."]},
  // ---------- internal platform apps
@@ -378,7 +378,6 @@ const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
- {id:"runner-secret", prio:2, cat:"secret", t:"Forgejo runner token + enable Actions", d:"Token from git.0xbf.ch admin > Actions > Runners. [actions] ENABLED = true.", svc:"runner"},
  {id:"dawarich-secret", prio:3, cat:"secret", t:"dawarich secret", d:"POSTGRES_PASSWORD, SECRET_KEY_BASE.", svc:"dawarich"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
@@ -442,7 +441,7 @@ const PVS = [
  ["egress","tailscale-relay-data","1Gi","rzbl","storage-nvme0","broken"],
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","live"],
  ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","live"],
- ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","prepared"],
+ ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","live"],
  ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
 ];
 const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   agent-sandbox-crds   (pinned GitRepositories)
@@ -458,8 +457,10 @@ gpu ── media, ollama ── opencode
 agent-sandbox-crds ── agent-sandbox ── agents (+kata)
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
-* suspended: dawarich samba forgejo-runner qbittorrent`;
+* suspended: dawarich samba qbittorrent`;
 const TAGS = [
+ ["v1.33.0","2026-11-17","Forgejo Actions on, runner live (rzbl)"],
+ ["v1.32.1","2026-11-17","copyparty start fix (duplicate -c), password rotated"],
  ["v1.32.0","2026-11-17","copyparty live (files.0xbf.ch), Immich live with GPU ML; secrets seeded by agent; Gatus garage HTTP check"],
  ["v1.31.2","2026-11-17","monitoring fixes: Traefik ServiceMonitor, GPU exporter fields"],
  ["v1.31.0","2026-11-17","monitoring v2: curated dashboards, 0xbf home, Gatus, GPU exporter, authentik SSO for Grafana; Cilium/cert-manager metrics"],
@@ -511,7 +512,7 @@ const SECRETS = [
  ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","TO CREATE","POSTGRES_PASSWORD, SECRET_KEY_BASE"],
  ["applications/copyparty/copyparty-config.sops.yaml","copyparty","exists","copyparty.conf, account bf (seeded by agent)"],
  ["applications/samba/timemachine-secrets.sops.yaml","samba","TO CREATE","PASSWORD"],
- ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","TO CREATE","RUNNER_TOKEN"],
+ ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","exists","RUNNER_TOKEN (minted by agent)"],
  ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","TO CREATE","WIREGUARD_PRIVATE_KEY (Proton)"],
 ];
 const DOCS = [

@@ -8,7 +8,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.8, Polyring member; `?static` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
 - **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik, internal only), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
 - **Live since 2026-11-17 evening:** copyparty `files.0xbf.ch`, Immich `immich.internal` (ML on GPU; no real library until backups).
-- **Prepared, suspended:** dawarich, Time Machine (`10.10.20.145`), forgejo runner, qbittorrent (waits for the Proton WireGuard config).
+- **Prepared, suspended:** dawarich, Time Machine (`10.10.20.145`), qbittorrent (waits for the Proton WireGuard config).
 - **Monitoring:** Grafana `grafana.internal` (home dashboard `0xbf`, authentik SSO), Gatus `status.internal`, Prometheus on rbpi. Homepage off (Grafana home replaces it).
 - **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
 - **Release:** apex, exhib, glob, thyme all use `just release` (version from manifest, `--check`, no tag argument).
@@ -17,7 +17,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one. qBittorrent first (Proton WireGuard key).
-- [ ] **Forgejo Actions:** enable `[actions]`, runner secret, push mirrors to GitHub.
+- [ ] **Forgejo:** Actions + runner live (v1.33.0). Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
 
 ## NEXT
