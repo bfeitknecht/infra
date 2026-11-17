@@ -26,6 +26,11 @@ spec:
       containers:
         - name: gpu-exporter
           image: docker.io/utkuozdemir/nvidia_gpu_exporter:1.2.1
+          # Explicit fields: AUTO also picks up fields whose names contain
+          # brackets (power_smoothing ... [ms]) on newer drivers, and the
+          # exporter panics on them.
+          args:
+            - --query-field-names=uuid,name,driver_version,pstate,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.used,memory.free,power.draw,power.limit,fan.speed,clocks.current.graphics,clocks.current.sm,clocks.current.memory,clocks.max.graphics,encoder.stats.sessionCount,encoder.stats.averageFps
           env:
             - name: NVIDIA_VISIBLE_DEVICES
               value: all
