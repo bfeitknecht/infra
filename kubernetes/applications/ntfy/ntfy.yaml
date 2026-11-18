@@ -1,0 +1,130 @@
+# Push notifications: alerts from Alertmanager and Gatus to the phone.
+# Config is Secret ntfy-config (server.yml: deny-all, provisioned users bf
+# (admin) and publisher (write-only to alerts*), tokens for alertmanager and
+# gatus). On rbpi with monitoring, so it can report a failing rzbl.
+# iOS gets instant pushes through upstream-base-url ntfy.sh (it only sees a
+# hash of the message id, not the content).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ntfy
+  namespace: ntfy
+  labels:
+    app.kubernetes.io/name: ntfy
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ntfy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ntfy
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rbpi
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ntfy
+          image: docker.io/binwiederhier/ntfy:v2.38.1
+          args: ["serve", "--config", "/etc/ntfy/server.yml"]
+          env:
+            - name: TZ
+              value: Europe/Zurich
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/ntfy
+            - name: config
+              mountPath: /etc/ntfy
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ntfy-data
+        - name: config
+          secret:
+            secretName: ntfy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ntfy
+  namespace: ntfy
+spec:
+  selector:
+    app.kubernetes.io/name: ntfy
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+# Public by purpose (notify), so the phone gets pushes away from home.
+# deny-all: nothing is readable or writable without a login or token.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ntfy-public
+  namespace: ntfy
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure
+  hostnames:
+    - notify.0xbf.ch
+  rules:
+    - backendRefs:
+        - name: ntfy
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ntfy
+  namespace: ntfy
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure-internal
+  hostnames:
+    - ntfy.internal
+  rules:
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+      backendRefs:
+        - name: ntfy
+          port: 80

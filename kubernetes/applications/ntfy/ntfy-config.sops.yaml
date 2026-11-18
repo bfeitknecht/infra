@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: ntfy-config
+    namespace: ntfy
+type: Opaque
+stringData:
+    server.yml: ENC[AES256_GCM,data:P2AthxhZ85zCRTRh2H65mz8dAZFHGs1KEzT6K/1TBFpEfw47RyqEN4FvFQ+aK03rzQL/tkU6ruQv17mZ6gpdClxKN2REJWG5ZELiF+qBI2HcYnB6NEU9NMTJEV1wJuuO3hamUU7zLEk9NqysmPlwDk5XwWZZElT1bn9V5PsKe6qCE84ks53sIJeglc3BMiIHRqMIrqTWrJaZ2WpDxoQ2atNc7F+VZaG0ztHzeQv9cqyZVsk4bvZtV+8M189I3frtlFH1vPi5UnNgoQX9+iQgQRNrwu92FIP8wy2OJLOFkC3YsYqRZdlRKDGKcTgorM1fQIr9LyPC+1W/YX5lm6YIj5MECpoAi8B37dJiP/UI9HHAqFIxupfJUQ4sjJ6P7WAVjJRlqFOE+GtWorL5ZSIP2ks1DAJX3SPgw5GZh9wYfN/rKgthPLtcJpb6UsX3zeU9gbRO77johxGxRpErdS6lm1mdk3ydqiUqFzi4mJCjj0YyKsmbyaQz4RyHe2+CdXq4qHeM5N4dW9Qli9gxeh2w67jzE3HtjaOBbMAFKlINc+RxDffsUiBpeRKejCmVGmIGGf3BPBGkg2s7g86y7biFJaFu35WT3suHqLywmYMk4uvryjAqb96pPYxQYJbtEa4r3m6Jfwc8amq/ZLlctDFdLvfv1Z7eOJ+orY7gNIbDxJr2ZPpvwDvdzqdT24MRJBwIXYSOcYE0sABo1VQhlggGc4JzVrYnalIB5rDt3T+EJTNUh+azUONxNXBUgVdKJN7Bcv5Hng45FBb7QkTIGYU4t70xX70=,iv:DKy++D4laEUdK6akcwZjeVyoMMBoPfSwM9Pbhh5mvOY=,tag:2bYF4vthb5fidee30pOS6w==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBVUjBEVitpOGVYOXFkOCtE
+            L2lxa2R3anI3VWxZcktTblBEMlVXMG96d3pJCkxVYkVRcTl6clNZR0ZDNnhYZlRM
+            Z0F5WUJqNHBEZC9scmZNaWk1K3FLN2cKLS0tIGwvWHByc0p4bnQvZDVDUTEvbDI4
+            blJ5bUhZV1lVOEc0R3FjdFpjaG5XbTAKlJFyTnKXjE2pYrGBGWXA7KDccKQ+E7xT
+            /n/ySjuJ7VS/nqk8b+NjjGQ/o1Mcn7JLpbCzNnEXtL+dhxKi60c2aQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-18T01:03:35Z"
+    mac: ENC[AES256_GCM,data:/6qkwJVdiitkL+6DaC/3mpVz7ATQmJ/3Jcl7dclBW16qMzr5+n1JeRoEe0LHw0D5ppnjsOO2ALuv7SkxdGcue0a1lVwf66VQz4B7fw9qRspx0WF5RiaheN8mKJtx39h/cIyeKwflTKzgOsrh6omLyR4cKzchUf/KzGEEWzVkoFs=,iv:LbzehSh6UsPaH/TtfGZkXVv94KTJSahNl33bXf0eU+g=,tag:jXYBWd5VxKO2EMVx+p8wDA==,type:str]
+    version: 3.13.3

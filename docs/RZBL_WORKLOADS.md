@@ -18,7 +18,7 @@ Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernet
 | Ollama 0.40.16 (GPU)                             | `applications/ollama/`                   | **live**            | cluster only: `ollama.ollama.svc.cluster.local:11434` |
 | opencode web 1.19.5 (Kata)                       | `applications/opencode/`                 | **live**            | `opencode.internal` (authentik, group developers)     |
 | Agent sandboxes (Kata, warm pool 1)              | `applications/agents/`                   | **live** (v1.29.0)  | none (SandboxClaim, port-forward)                     |
-| qBittorrent 5.3.0 + gluetun v3.41.3 (Proton VPN) | `applications/qbittorrent/` (ns `media`) | prepared, suspended | `qbittorrent.internal`                                |
+| qBittorrent 5.3.0 + gluetun v3.41.3 (Proton VPN) | `applications/qbittorrent/` (ns `media`) | **live**            | `qbittorrent.internal`                                |
 
 Prepared apps have a Flux Kustomization with `suspend: true` in `cluster/applications.yaml`. Each needs one sops Secret from the owner. Agents do not create sops files.
 
@@ -150,11 +150,15 @@ kubectl create secret generic renovate-secrets -n renovate --from-literal=$"RENO
   | sops --encrypt --filename-override $f --input-type yaml --output-type yaml /dev/stdin | save -f $f
 ```
 
-Then uncomment the file in `applications/renovate/kustomization.yaml` and remove `suspend: true` for `renovate` in `cluster/applications.yaml` (or ask the agent). Renovate runs Mondays 05:00 on rzbl and opens pull requests on `bfeitknecht/infra` (config `renovate.json5`).
+Done 2026-11-18 (owner created the token; agent enabled Renovate in v1.39.0). Renovate runs Mondays 05:00 on rzbl and opens pull requests on `bfeitknecht/infra` (config `renovate.json5`).
 
 ### Dawarich admin
 
 Dawarich creates `demo@dawarich.app` (admin) with the documented password `password` on first start. Rotated by the agent on 2026-11-18; the new value is in `.private/dawarich-admin.sops.yaml`: `sops -d .private/dawarich-admin.sops.yaml | from yaml | get data.password | decode base64 | decode`. Log in at `dawarich.internal`, change the email to yours. Dawarich supports OIDC with PKCE (authentik) later.
+
+### ntfy on the phone
+
+Install ntfy (App Store / F-Droid / Play). Settings > Default server: `https://notify.0xbf.ch`. Users: add `bf` with the password from `sops -d .private/ntfy-bf.sops.yaml | from yaml | get stringData.password`. Subscribe to topic `alerts`. Alertmanager and Gatus publish there.
 
 ## Media folder layout (TRaSH Guides)
 

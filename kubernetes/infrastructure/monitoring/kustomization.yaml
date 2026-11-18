@@ -7,6 +7,8 @@ resources:
   - namespace.yaml
   - metrics-server.yaml
   - grafana-credentials.sops.yaml
+  - alertmanager-secrets.sops.yaml
+  - gatus-secrets.sops.yaml
   - kube-prometheus-stack.yaml
   - grafana.yaml
   - gatus.yaml
