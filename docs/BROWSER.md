@@ -21,6 +21,26 @@ One pod, two fronts, all squeezed through Arachnidium first:
 All upstream traffic goes through the Arachnidium proxy in the pod, so the
 Firefox behind browsh downloads less too.
 
+## Using it: `ssh browser.0xbf.ch`
+
+SSH never transmits the hostname, so a bare `ssh browser.0xbf.ch` would hit
+the mux as the local username (`bf`) and land in apex. The name becomes real
+with one client-side alias (any machine, GUI SSH clients have the same three
+fields):
+
+```
+# ~/.ssh/config
+Host browser.0xbf.ch
+    HostName 0xbf.ch
+    User browser
+    HostKeyAlias 0xbf.ch      # one known_hosts entry for the mux key
+```
+
+`ssh browser.0xbf.ch` then opens browsh. `Host devil.0xbf.ch` follows the
+same pattern later. The alias carries the username to the mux; the mux does
+the rest. Nothing on the server knows the hostname — that is SSH, not a
+design gap; the 443 SNI option below is the only real name-aware variant.
+
 ## The SSH port question
 
 SSH sends no hostname before the handshake: there is no SNI, so true
