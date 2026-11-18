@@ -1,6 +1,6 @@
 ---
 title: "GENESIS: a homelab journey"
-sub_title: "From one Pi to a three-node Talos cluster, in 66 days"
+sub_title: "From one Pi to a three-node Talos cluster, in 68 days"
 author: Basil Feitknecht
 theme:
   override:
@@ -51,12 +51,12 @@ By the numbers
 
 |              |                                              |
 | ------------ | -------------------------------------------- |
-| days         | **66** calendar, **38** active               |
+| days         | **68** calendar, **39** active               |
 | repositories | **6**: infra, apex, exhib, glob, thyme, omni |
-| commits      | **449** (plus **107** merged pull requests)  |
-| releases     | **153** tags, **122** of them infra          |
-| lines        | **+166,725 / −114,750**                      |
-| roadmap      | **52** items done, **17** open               |
+| commits      | **480** (plus **123** merged pull requests)  |
+| releases     | **177** tags, **142** of them infra          |
+| lines        | **+169,811 / −115,194**                      |
+| roadmap      | **56** items done, **19** open               |
 
 Source: `python3 scripts/journey.py` -> `docs/web/journey.html`
 
@@ -208,6 +208,18 @@ Then the rest of the night
 
 <!-- end_slide -->
 
+Phase 7: one SSH port (Nov 18 to 19)
+===
+<!-- font_size: 2 -->
+
+- git on the clean **22**: `ssh://git@git.0xbf.ch/owner/repo.git`
+- one WAN port **2222** for every SSH TUI, routed by **username**
+- `ssh -p 2222 0xbf.ch` is the apex TUI, `browser@` is browsh
+- the web front of browsh dropped: one browsh per pod
+- thyme **0.1.2** to Typst Universe: reading time on entry cards
+
+<!-- end_slide -->
+
 What went wrong (and what it taught)
 ===
 <!-- font_size: 2 -->
@@ -218,6 +230,8 @@ What went wrong (and what it taught)
 - copyparty printed its config, password included, on a parse error: rotate
 - an arm64-only image scheduled on an amd64 node
 - `0xbf` unquoted in YAML is a hex number
+- sshd refuses world-readable keys, and Secret volumes are world-writable dirs
+- browsh hard-codes its Firefox port: two in one pod cannot work
 
 <!-- end_slide -->
 
@@ -225,14 +239,13 @@ Next
 ===
 <!-- font_size: 2 -->
 
-1. **backups**: Garage on a friend's NAS, then restore drills
-2. qBittorrent over Proton VPN
-3. Renovate on the Forgejo runner
-4. alerts to the phone (ntfy)
-5. the MacBook reset to omni
+1. **backups**: Garage on a friend's NAS must answer on 3900, then restore drills
+2. the MacBook reset to omni
+3. rex on devil
+4. glob 0.1.2 when thyme 0.1.2 is on Universe
 
 <!-- pause -->
 
 Thank you.
 
-`git.0xbf.ch` · `0xbf.ch` · `ssh 0xbf.ch`
+`git.0xbf.ch` · `0xbf.ch` · `ssh -p 2222 0xbf.ch`

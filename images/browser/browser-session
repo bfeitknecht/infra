@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# One interactive browsh per SSH session: fresh HOME, fresh Firefox profile
-# (proxy + mitm CA via prepare-profile), a 12h guard. One session at a time:
+# One interactive browsh per SSH session: fresh HOME and Firefox profile, a
+# 12h guard. One session at a time:
 # browsh hard-codes Marionette 2828 and exits beside another headless
 # Firefox.
 set -euo pipefail
@@ -26,9 +26,14 @@ export XDG_CONFIG_HOME="$HOME/.config"
 # browsh unpacks its webext to $TMPDIR/browsh-webext-addon.
 export TMPDIR="$HOME"
 
-# Browsh keeps its Firefox profile inside its config dir (XDG_CONFIG_HOME/
-# browsh/firefox_profile); the fresh XDG_CONFIG_HOME makes it session-private.
-prepare-profile "$XDG_CONFIG_HOME/browsh/firefox_profile" /config/.mitmproxy/mitmproxy-ca-cert.pem
+# Browsh keeps its Firefox profile in XDG_CONFIG_HOME/browsh/firefox_profile;
+# the fresh XDG_CONFIG_HOME makes it session-private.
+install -d -m 700 "$XDG_CONFIG_HOME/browsh/firefox_profile"
+cat > "$XDG_CONFIG_HOME/browsh/firefox_profile/user.js" <<'JS'
+user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("browser.aboutwelcome.enabled", false);
+user_pref("datareporting.policy.dataSubmissionEnabled", false);
+JS
 install -d -m 700 "$XDG_CONFIG_HOME/browsh"
 install -m 644 /etc/browsh/config.toml "$XDG_CONFIG_HOME/browsh/config.toml"
 

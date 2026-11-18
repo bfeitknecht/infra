@@ -27,14 +27,11 @@ spec:
           # it with the same tag; this pin must match the release tag
           # (`just release` checks). sshd (22) is mux-only: the sshmux
           # ForceCommands in with its key.
-          image: ghcr.io/bfeitknecht/browser:v1.43.0
+          image: ghcr.io/bfeitknecht/browser:v1.44.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: ssh
               containerPort: 22
-          env:
-            - name: HOME
-              value: /config
           resources:
             # One session Firefox at most (browser-session holds a lock).
             requests:
@@ -53,8 +50,6 @@ spec:
               port: ssh
             periodSeconds: 60
           volumeMounts:
-            - name: config
-              mountPath: /config
             - name: tmp
               mountPath: /tmp
             - name: sshd-config
@@ -68,8 +63,6 @@ spec:
               subPath: authorized_keys
               readOnly: true
       volumes:
-        - name: config
-          emptyDir: {}
         - name: tmp
           emptyDir: {}
         - name: sshd-config

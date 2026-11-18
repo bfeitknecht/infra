@@ -3,7 +3,8 @@
 **Update 2026-11-18 (v1.43.0): the web front is dropped. The browser is SSH
 only.** browsh hard-codes Marionette `2828` and refuses to start beside
 another headless Firefox, so one pod runs one browsh. The owner chose the
-TUI. Sections below about `browser.0xbf.ch`, `text.browser.0xbf.ch`, port
+TUI. **2026-11-19 (v1.44.0): Arachnidium is removed too** (browsh already
+sends only text frames; the proxy only degraded pages). Sections below about Arachnidium, `browser.0xbf.ch`, `text.browser.0xbf.ch`, port
 `4333` and the HTTP server are history. Live state: AGENTS.md (browser).
 
 Status: implemented 2026-11-18. Both images are in-tree

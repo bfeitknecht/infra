@@ -82,12 +82,12 @@ Domain template is `{{.Name}}.0xbf.ch`. KSvc name sets subdomain. Pull secrets a
 
 ## PVC layout
 
-| Node | Path                     | Disk          | Users                                                                          |
-| ---- | ------------------------ | ------------- | ------------------------------------------------------------------------------ |
-| rbpi | `/var/mnt/storage-nvme0` | NVMe 256 GB   | agh, pds, atuin, devil, exhib                                                  |
-| rbpi | `/var/mnt/storage-nvme1` | NVMe 250 GB   | forgejo                                                                        |
+| Node | Path                     | Disk          | Users                                                                             |
+| ---- | ------------------------ | ------------- | --------------------------------------------------------------------------------- |
+| rbpi | `/var/mnt/storage-nvme0` | NVMe 256 GB   | agh, pds, atuin, devil, exhib                                                     |
+| rbpi | `/var/mnt/storage-nvme1` | NVMe 250 GB   | forgejo                                                                           |
 | rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, authentik db, ollama, opencode, immich db/models, dawarich, runner |
-| rzbl | `/var/mnt/storage-ssd0`  | SATA SSD 4 TB | media library, immich photos, copyparty, Time Machine (class `local-path-ssd`) |
+| rzbl | `/var/mnt/storage-ssd0`  | SATA SSD 4 TB | media library, immich photos, copyparty, Time Machine (class `local-path-ssd`)    |
 
 ## Conventions for every new application
 
