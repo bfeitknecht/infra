@@ -1,13 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-    - namespace.yaml
-    - deployment.yaml
-    - service.yaml
-    - httproute.yaml
-    # SSH portfolio uses a separate Deployment. A broken host key or a
-    # crashed session does not affect the static site.
-    - tui-deployment.yaml
-    - tui-service.yaml
-    - tui-tcproute.yaml
-    - apex-ssh-host-key.sops.yaml
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - httproute.yaml
+  # SSH portfolio uses a separate Deployment. A broken host key or a
+  # crashed session does not affect the static site.
+  - tui-deployment.yaml
+  - tui-service.yaml
+  - tui-tcproute.yaml
+  - apex-ssh-host-key.sops.yaml

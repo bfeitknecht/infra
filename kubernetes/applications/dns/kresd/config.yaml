@@ -8,7 +8,7 @@ forward:
   # internal. has no public DNS. DNSSEC would reject it as spoof.
   # Use authoritative stub to knotd on loopback instead.
   - subtree: internal
-    servers: [ 127.0.0.1 ]
+    servers: [127.0.0.1]
     options:
       authoritative: true
       dnssec: false

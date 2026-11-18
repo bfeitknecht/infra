@@ -3,5 +3,5 @@ kind: Kustomization
 # The operator + the whimsy namespace/SA/pull secret: no CRD dependencies,
 # applies first. The Serving CR (serving/) depends on this Kustomization.
 resources:
-    - operator.yaml
-    - ghcr.sops.yaml
+  - operator.yaml
+  - ghcr.sops.yaml

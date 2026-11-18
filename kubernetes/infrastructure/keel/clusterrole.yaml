@@ -1,37 +1,37 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-    name: keel
+  name: keel
 rules:
-    # Keel inspects cluster to find workloads. It updates images.
-    - apiGroups:
-          - ""
-      resources:
-          - namespaces
-          - nodes
-      verbs:
-          - get
-          - watch
-          - list
-    # Workloads Keel watches. Core group "" holds pods. Secrets and
-    # configmaps are omitted. They belong to Helm provider which is disabled.
-    - apiGroups:
-          - ""
-          - extensions
-          - apps
-          - batch
-      resources:
-          - pods
-          - replicasets
-          - replicationcontrollers
-          - statefulsets
-          - deployments
-          - daemonsets
-          - jobs
-          - cronjobs
-      verbs:
-          - get
-          - delete
-          - watch
-          - list
-          - update
+  # Keel inspects cluster to find workloads. It updates images.
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - nodes
+    verbs:
+      - get
+      - watch
+      - list
+  # Workloads Keel watches. Core group "" holds pods. Secrets and
+  # configmaps are omitted. They belong to Helm provider which is disabled.
+  - apiGroups:
+      - ""
+      - extensions
+      - apps
+      - batch
+    resources:
+      - pods
+      - replicasets
+      - replicationcontrollers
+      - statefulsets
+      - deployments
+      - daemonsets
+      - jobs
+      - cronjobs
+    verbs:
+      - get
+      - delete
+      - watch
+      - list
+      - update

@@ -2,7 +2,7 @@ apiVersion: v1alpha1
 kind: EtcFileConfig
 name: systemd/logind.conf
 mode: 0o644
-contents: |
+contents: |-
   [Login]
   HandleLidSwitch=ignore
   HandleLidSwitchExternalPower=ignore

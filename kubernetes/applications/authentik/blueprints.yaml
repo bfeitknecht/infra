@@ -756,7 +756,7 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 1
-  opencode.yaml: |
+  opencode.yaml: |-
     # Forward auth (single app) for opencode.internal, group developers.
     # Internal only. The embedded outpost serves it. Add later forward-auth
     # providers to the same outpost list here.

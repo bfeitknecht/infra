@@ -1,49 +1,49 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: apex
-    namespace: apex
-    labels:
-        app.kubernetes.io/name: apex
-    # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
-    # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
-    annotations:
-        keel.sh/trigger: poll
-        keel.sh/policy: force
-        keel.sh/match-tag: "true"
+  name: apex
+  namespace: apex
+  labels:
+    app.kubernetes.io/name: apex
+  # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
+  # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
+  annotations:
+    keel.sh/trigger: poll
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
 spec:
-    replicas: 1
-    selector:
-        matchLabels:
-            app.kubernetes.io/name: apex
-    template:
-        metadata:
-            labels:
-                app.kubernetes.io/name: apex
-        spec:
-            # The image is arm64 only (rbpi). rzbl is amd64.
-            nodeSelector:
-                kubernetes.io/hostname: rbpi
-            # No Kubernetes API use.
-            automountServiceAccountToken: false
-            containers:
-                - name: apex
-                  # Use :latest. Keel tracks the image digest.
-                  image: ghcr.io/bfeitknecht/apex:latest
-                  imagePullPolicy: Always
-                  ports:
-                    - containerPort: 8080
-                      name: http
-                  resources:
-                    requests:
-                      cpu: 10m
-                      memory: 32Mi
-                    limits:
-                      memory: 128Mi
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    readOnlyRootFilesystem: true
-                    capabilities:
-                      drop: ["ALL"]
-                    seccompProfile:
-                      type: RuntimeDefault
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: apex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: apex
+    spec:
+      # The image is arm64 only (rbpi). rzbl is amd64.
+      nodeSelector:
+        kubernetes.io/hostname: rbpi
+      # No Kubernetes API use.
+      automountServiceAccountToken: false
+      containers:
+        - name: apex
+          # Use :latest. Keel tracks the image digest.
+          image: ghcr.io/bfeitknecht/apex:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault

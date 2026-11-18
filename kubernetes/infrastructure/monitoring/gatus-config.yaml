@@ -22,22 +22,22 @@ ui:
   title: 0xbf status
   header: 0xbf status
 endpoints:
-  # ---- public: through the edge, with certificate expiry
   - &public
+    # ---- public: through the edge, with certificate expiry
     name: apex
     group: public
     url: https://0xbf.ch
     interval: 2m
     conditions: ["[STATUS] == 200", "[CERTIFICATE_EXPIRATION] > 240h"]
     alerts: [{type: ntfy}]
-  - {<<: *public, name: blog, url: https://blog.0xbf.ch}
-  - {<<: *public, name: gallery, url: https://gallery.0xbf.ch}
-  - {<<: *public, name: git, url: https://git.0xbf.ch/api/healthz}
-  - {<<: *public, name: pds, url: https://pds.0xbf.ch/xrpc/_health}
-  - {<<: *public, name: atuin, url: https://atuin.0xbf.ch/healthz}
-  - {<<: *public, name: auth, url: https://auth.0xbf.ch/-/health/live/}
-  - {<<: *public, name: stream, url: https://stream.0xbf.ch/health}
-  - {<<: *public, name: notify, url: https://notify.0xbf.ch/v1/health}
+  - {!!merge <<: *public, name: blog, url: 'https://blog.0xbf.ch'}
+  - {!!merge <<: *public, name: gallery, url: 'https://gallery.0xbf.ch'}
+  - {!!merge <<: *public, name: git, url: 'https://git.0xbf.ch/api/healthz'}
+  - {!!merge <<: *public, name: pds, url: 'https://pds.0xbf.ch/xrpc/_health'}
+  - {!!merge <<: *public, name: atuin, url: 'https://atuin.0xbf.ch/healthz'}
+  - {!!merge <<: *public, name: auth, url: 'https://auth.0xbf.ch/-/health/live/'}
+  - {!!merge <<: *public, name: stream, url: 'https://stream.0xbf.ch/health'}
+  - {!!merge <<: *public, name: notify, url: 'https://notify.0xbf.ch/v1/health'}
   # copyparty answers 401/403 without login; any non-5xx is up.
   - name: files
     group: public
@@ -57,29 +57,29 @@ endpoints:
     interval: 2m
     conditions: ["[CONNECTED] == true"]
     alerts: [{type: ntfy}]
-  # ---- internal: cluster services
   - &internal
+    # ---- internal: cluster services
     name: jellyfin
     group: internal
     url: http://jellyfin.media.svc.cluster.local/health
     interval: 1m
     conditions: ["[STATUS] == 200"]
     alerts: [{type: ntfy}]
-  - {<<: *internal, name: sonarr, url: http://sonarr.media.svc.cluster.local/ping}
-  - {<<: *internal, name: radarr, url: http://radarr.media.svc.cluster.local/ping}
-  - {<<: *internal, name: lidarr, url: http://lidarr.media.svc.cluster.local/ping}
-  - {<<: *internal, name: navidrome, url: http://navidrome.media.svc.cluster.local/ping}
-  - {<<: *internal, name: dawarich, url: http://dawarich.dawarich.svc.cluster.local/api/v1/health}
+  - {!!merge <<: *internal, name: sonarr, url: 'http://sonarr.media.svc.cluster.local/ping'}
+  - {!!merge <<: *internal, name: radarr, url: 'http://radarr.media.svc.cluster.local/ping'}
+  - {!!merge <<: *internal, name: lidarr, url: 'http://lidarr.media.svc.cluster.local/ping'}
+  - {!!merge <<: *internal, name: navidrome, url: 'http://navidrome.media.svc.cluster.local/ping'}
+  - {!!merge <<: *internal, name: dawarich, url: 'http://dawarich.dawarich.svc.cluster.local/api/v1/health'}
   - name: time machine
     group: internal
     url: tcp://10.10.20.145:445
     interval: 2m
     conditions: ["[CONNECTED] == true"]
     alerts: [{type: ntfy}]
-  - {<<: *internal, name: prowlarr, url: http://prowlarr.media.svc.cluster.local/ping}
-  - {<<: *internal, name: ollama, url: http://ollama.ollama.svc.cluster.local:11434/}
-  - {<<: *internal, name: agh, url: http://agh.agh.svc.cluster.local/}
-  - {<<: *internal, name: immich, url: http://immich-server.immich.svc.cluster.local/api/server/ping}
+  - {!!merge <<: *internal, name: prowlarr, url: 'http://prowlarr.media.svc.cluster.local/ping'}
+  - {!!merge <<: *internal, name: ollama, url: 'http://ollama.ollama.svc.cluster.local:11434/'}
+  - {!!merge <<: *internal, name: agh, url: 'http://agh.agh.svc.cluster.local/'}
+  - {!!merge <<: *internal, name: immich, url: 'http://immich-server.immich.svc.cluster.local/api/server/ping'}
   # ---- platform
   - name: gateway lan
     group: platform
@@ -99,17 +99,17 @@ endpoints:
       query-type: A
     conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
     alerts: [{type: ntfy}]
-  - <<: *dns
+  - !!merge <<: *dns
     name: dns public
     dns:
       query-name: example.com
       query-type: A
     conditions: ["[DNS_RCODE] == NOERROR"]
   # Edge resolver: AGH forwards to kresd.
-  - {<<: *dns, name: dns edge, url: 10.10.20.153}
-  - {<<: *internal, name: ntfy, group: platform, url: http://ntfy.ntfy.svc.cluster.local/v1/health}
-  - {<<: *internal, name: grafana, group: platform, url: http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health}
-  - {<<: *internal, name: prometheus, group: platform, url: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/-/healthy}
+  - {!!merge <<: *dns, name: dns edge, url: 10.10.20.153}
+  - {!!merge <<: *internal, name: ntfy, group: platform, url: 'http://ntfy.ntfy.svc.cluster.local/v1/health'}
+  - {!!merge <<: *internal, name: grafana, group: platform, url: 'http://monitoring-kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health'}
+  - {!!merge <<: *internal, name: prometheus, group: platform, url: 'http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/-/healthy'}
   # ---- backup: Garage on the friend's NAS through the relay. HTTP, not TCP:
   # a TCP connect only reaches socat in the relay pod. Garage answers an
   # anonymous request with 403. Red until it listens on 3900.

@@ -1,91 +1,91 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: apex-tui
-    namespace: apex
-    labels:
-        app.kubernetes.io/name: apex-tui
-    # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
-    # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
-    annotations:
-        keel.sh/trigger: poll
-        keel.sh/policy: force
-        keel.sh/match-tag: "true"
+  name: apex-tui
+  namespace: apex
+  labels:
+    app.kubernetes.io/name: apex-tui
+  # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
+  # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
+  annotations:
+    keel.sh/trigger: poll
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
 spec:
-    # apex-ssh stores session state in memory. A restart ends active sessions.
-    # One replica supports 32 concurrent sessions.
-    replicas: 1
-    selector:
-        matchLabels:
-            app.kubernetes.io/name: apex-tui
-    template:
-        metadata:
-            labels:
-                app.kubernetes.io/name: apex-tui
-        spec:
-            # The image is arm64 only (rbpi). rzbl is amd64.
-            nodeSelector:
-                kubernetes.io/hostname: rbpi
-            # No Kubernetes API use.
-            automountServiceAccountToken: false
-            securityContext:
-                runAsNonRoot: true
-                runAsUser: 1000
-                runAsGroup: 1000
-                fsGroup: 1000
-            volumes:
-                # The host key is the server identity. Use the same key after
-                # a restart to prevent client warnings. Store the key in a
-                # SOPS-encrypted Secret. Do not store the key in the image.
-                - name: host-key
-                  secret:
-                      secretName: apex-ssh-host-key
-                      # Group-readable. fsGroup 1000 makes the image user (1000) the group.
-                      defaultMode: 0440
-            containers:
-                - name: apex-ssh
-                  # Use the same image tag as the site Deployment. One image
-                  # provides two entrypoints.
-                  image: ghcr.io/bfeitknecht/apex:latest
-                  imagePullPolicy: Always
-                  command: ["/usr/local/bin/apex-ssh"]
-                  env:
-                      - name: APEX_SSH_LISTEN
-                        value: "0.0.0.0:2222"
-                      # Public portfolio. Any username is valid. No client key
-                      # is necessary. Sessions are read-only.
-                      - name: APEX_SSH_PUBLIC
-                        value: "1"
-                      - name: APEX_SSH_HOST_KEY
-                        value: /etc/apex-ssh/ssh_host_ed25519_key
-                  ports:
-                      - containerPort: 2222
-                        name: ssh
-                  volumeMounts:
-                      - name: host-key
-                        mountPath: /etc/apex-ssh
-                        readOnly: true
-                  # The process opens the port after it loads the host key.
-                  # A TCP connection shows the service is ready.
-                  readinessProbe:
-                      tcpSocket:
-                          port: 2222
-                      periodSeconds: 10
-                  livenessProbe:
-                      tcpSocket:
-                          port: 2222
-                      initialDelaySeconds: 10
-                      periodSeconds: 30
-                  resources:
-                      requests:
-                          cpu: 10m
-                          memory: 24Mi
-                      limits:
-                          memory: 96Mi
-                  securityContext:
-                      allowPrivilegeEscalation: false
-                      readOnlyRootFilesystem: true
-                      capabilities:
-                          drop: ["ALL"]
-                      seccompProfile:
-                          type: RuntimeDefault
+  # apex-ssh stores session state in memory. A restart ends active sessions.
+  # One replica supports 32 concurrent sessions.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: apex-tui
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: apex-tui
+    spec:
+      # The image is arm64 only (rbpi). rzbl is amd64.
+      nodeSelector:
+        kubernetes.io/hostname: rbpi
+      # No Kubernetes API use.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      volumes:
+        # The host key is the server identity. Use the same key after
+        # a restart to prevent client warnings. Store the key in a
+        # SOPS-encrypted Secret. Do not store the key in the image.
+        - name: host-key
+          secret:
+            secretName: apex-ssh-host-key
+            # Group-readable. fsGroup 1000 makes the image user (1000) the group.
+            defaultMode: 0440
+      containers:
+        - name: apex-ssh
+          # Use the same image tag as the site Deployment. One image
+          # provides two entrypoints.
+          image: ghcr.io/bfeitknecht/apex:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/apex-ssh"]
+          env:
+            - name: APEX_SSH_LISTEN
+              value: "0.0.0.0:2222"
+            # Public portfolio. Any username is valid. No client key
+            # is necessary. Sessions are read-only.
+            - name: APEX_SSH_PUBLIC
+              value: "1"
+            - name: APEX_SSH_HOST_KEY
+              value: /etc/apex-ssh/ssh_host_ed25519_key
+          ports:
+            - containerPort: 2222
+              name: ssh
+          volumeMounts:
+            - name: host-key
+              mountPath: /etc/apex-ssh
+              readOnly: true
+          # The process opens the port after it loads the host key.
+          # A TCP connection shows the service is ready.
+          readinessProbe:
+            tcpSocket:
+              port: 2222
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 2222
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 24Mi
+            limits:
+              memory: 96Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
