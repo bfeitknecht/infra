@@ -5,12 +5,6 @@ metadata:
   namespace: browser
   labels:
     app.kubernetes.io/name: browser
-  # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
-  # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
-  annotations:
-    keel.sh/trigger: poll
-    keel.sh/policy: force
-    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
@@ -29,10 +23,12 @@ spec:
       enableServiceLinks: false
       containers:
         - name: browser
-          # Tier-2: own repo builds and publishes this image, Keel polls it.
-          # sshd (22) is mux-only: the sshmux ForceCommands in with its key.
-          image: ghcr.io/bfeitknecht/browser:latest
-          imagePullPolicy: Always
+          # In-tree image (images/browser). The infra tag vX.Y.Z publishes
+          # it with the same tag; this pin must match the release tag
+          # (`just release` checks). sshd (22) is mux-only: the sshmux
+          # ForceCommands in with its key.
+          image: ghcr.io/bfeitknecht/browser:v1.42.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 4333

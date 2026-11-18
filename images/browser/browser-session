@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# One interactive browsh per SSH session: fresh HOME, fresh Firefox profile
+# (proxy + mitm CA via prepare-profile), a 12h guard.
+set -euo pipefail
+
+export HOME="$(mktemp -d /tmp/session.XXXXXX)"
+chmod 700 "$HOME"
+export XDG_CONFIG_HOME="$HOME/.config"
+
+# Browsh keeps its Firefox profile inside its config dir (XDG_CONFIG_HOME/
+# browsh/firefox_profile); the fresh XDG_CONFIG_HOME makes it session-private.
+prepare-profile "$XDG_CONFIG_HOME/browsh/firefox_profile" /config/.mitmproxy/mitmproxy-ca-cert.pem
+install -d -m 700 "$XDG_CONFIG_HOME/browsh"
+install -m 644 /etc/browsh/config.toml "$XDG_CONFIG_HOME/browsh/config.toml"
+
+exec timeout --signal=TERM --kill-after=10 12h browsh

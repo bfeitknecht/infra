@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Default route: every username without its own Match block lands in the
+# apex portfolio TUI. apex-ssh takes any username and no credentials; keep
+# the client fully non-interactive.
+exec ssh -p 2222 \
+  -o BatchMode=yes \
+  -o StrictHostKeyChecking=accept-new \
+  -o UserKnownHostsFile=/dev/null \
+  apex@apex-tui.apex.svc.cluster.local

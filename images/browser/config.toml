@@ -1,0 +1,26 @@
+# Browsh config. The HTTP server is the public web front. HTTP requests
+# share one Firefox; each SSH session gets its own (browser-session gives
+# every session a fresh HOME and profile via prepare-profile).
+browsh_supporter = "♥"
+default_search_engine_base = "https://duckduckgo.com/?q="
+
+[browsh]
+websocket-port = 3334
+
+[firefox]
+path = "firefox"
+
+[http-server]
+port = 4333
+bind = "0.0.0.0"
+render_delay = 400
+columns = 100
+rows = 40
+jpeg_compression = 0.9
+# 10 requests per minute per client IP. X-Forwarded-For is honoured behind
+# Traefik.
+rate-limit = "10-M"
+# Render timeout in seconds. 30 (the default) is tight on first load.
+timeout = 60
+blocked-domains = []
+blocked-user-agents = []

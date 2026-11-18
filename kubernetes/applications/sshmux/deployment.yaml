@@ -5,10 +5,6 @@ metadata:
   namespace: sshmux
   labels:
     app.kubernetes.io/name: sshmux
-  annotations:
-    keel.sh/trigger: poll
-    keel.sh/policy: force
-    keel.sh/match-tag: "true"
 spec:
   replicas: 1
   selector:
@@ -25,8 +21,10 @@ spec:
       enableServiceLinks: false
       containers:
         - name: sshmux
-          image: ghcr.io/bfeitknecht/sshmux:latest
-          imagePullPolicy: Always
+          # In-tree image (images/sshmux). The pin must match the release
+          # tag (`just release` checks).
+          image: ghcr.io/bfeitknecht/sshmux:v1.42.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: ssh
               containerPort: 22

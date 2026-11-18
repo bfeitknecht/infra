@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# The browsh route. The mux client key is mounted world-readable (a Secret
+# volume); ssh refuses such private keys, so copy it to a private tmp file
+# first.
+set -euo pipefail
+keyfile=$(mktemp)
+trap 'rm -f "$keyfile"' EXIT
+cat /etc/ssh/keys/mux_browser > "$keyfile"
+chmod 600 "$keyfile"
+exec ssh -p 22 \
+  -i "$keyfile" \
+  -o IdentitiesOnly=yes \
+  -o BatchMode=yes \
+  -o StrictHostKeyChecking=accept-new \
+  -o UserKnownHostsFile=/dev/null \
+  browser@browser-ssh.browser.svc.cluster.local
