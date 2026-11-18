@@ -254,7 +254,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-18";
-const INFRA_TAG = "v1.41.0";
+const INFRA_TAG = "v1.41.1";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -472,6 +472,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: none`;
 const TAGS = [
+ ["v1.41.1","2026-11-18","authentik branding: plain background, dark button contrast, login title Welcome to 0xbf"],
  ["v1.41.0","2026-11-18","authentik branding (0xbf, mark, monochrome CSS); invitations by email documented"],
  ["v1.40.2","2026-11-18","roadmap: omni, radio + Strudel, second brain, comments; deck sizes"],
  ["v1.40.1","2026-11-18","recovery blueprint: restate identification user_fields"],
