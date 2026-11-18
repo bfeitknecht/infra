@@ -9,3 +9,4 @@ resources:
   - server.yaml
   - machine-learning.yaml
   - immich-secrets.sops.yaml
+  - immich-config.sops.yaml

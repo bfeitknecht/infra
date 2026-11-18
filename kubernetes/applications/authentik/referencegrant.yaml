@@ -12,6 +12,12 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: agents
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: media
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: monitoring
   to:
     - group: ""
       kind: Service

@@ -192,7 +192,11 @@ Note: Keel cannot update Knative Services (it handles Deployment/StatefulSet/Dae
 
 ## Mail
 
-One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the catch-all). It is the commit author of bots (Renovate) and the planned SMTP sender for authentik, Forgejo, PDS and Immich (Proton SMTP submission token, owner creates it). Do not invent per-service addresses.
+One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the catch-all). It is the commit author of bots (Renovate) and the SMTP sender for authentik, Forgejo, PDS and Immich (Proton `smtp.protonmail.ch:587` STARTTLS, user `noreply@0xbf.ch`, submission token). Token locations: `authentik-secrets` (`AUTHENTIK_EMAIL__PASSWORD`), `forgejo-secrets` (`mailer-password`, via `FORGEJO__mailer__*` env), `pds-secrets` (`PDS_EMAIL_SMTP_URL`), `immich-config` (`immich.json`). Do not invent per-service addresses.
+
+## Single sign-on
+
+authentik is the IdP for every app that supports it: table in `docs/AUTHENTIK.md` ("Who logs in where"). Blueprints: `apps-oidc.yaml` (Dawarich, Immich), `opencode.yaml` (all forward-auth providers; it owns the embedded outpost list), `recovery.yaml` (forgot-password flow). Forward-auth routes: an `/outpost.goauthentik.io` rule to `authentik-server` (ReferenceGrant `outpost-routes` lists the namespace) plus the `authentik` middleware copy in the route namespace. OAuth2 providers need `grant_types`. The *arr apps run `AuthenticationMethod=External` (config.xml on the PVC) behind forward auth. Navidrome trusts `X-authentik-username` only because CNP `navidrome-ingress` limits ingress to Traefik and Gatus.
 
 ## Secrets
 

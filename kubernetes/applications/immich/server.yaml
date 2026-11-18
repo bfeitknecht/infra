@@ -24,6 +24,10 @@ spec:
         - name: server
           image: ghcr.io/immich-app/immich-server:v3.4.1
           env:
+            # OIDC (authentik) and SMTP (Proton). Settings in this file are
+            # read-only in the admin UI; edit immich-config instead.
+            - name: IMMICH_CONFIG_FILE
+              value: /config/immich.json
             - name: TZ
               value: Europe/Zurich
             - name: DB_HOSTNAME
@@ -56,7 +60,13 @@ spec:
           volumeMounts:
             - name: library
               mountPath: /data
+            - name: config
+              mountPath: /config
+              readOnly: true
       volumes:
+        - name: config
+          secret:
+            secretName: immich-config
         - name: library
           persistentVolumeClaim:
             claimName: immich-files

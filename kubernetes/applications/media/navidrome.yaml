@@ -44,6 +44,15 @@ spec:
               value: 1h
             - name: ND_LOGLEVEL
               value: info
+            # Login through authentik forward auth: Navidrome trusts the user
+            # header from the pod network. CNP navidrome-ingress lets only
+            # Traefik and Gatus reach the pod, so the header cannot be forged.
+            # /rest (Subsonic apps) bypasses forward auth: apps use the
+            # Navidrome password of the user (set it in Navidrome > Profile).
+            - name: ND_EXTAUTH_USERHEADER
+              value: X-authentik-username
+            - name: ND_EXTAUTH_TRUSTEDSOURCES
+              value: 10.244.0.0/16
             - name: TZ
               value: Europe/Zurich
           ports:
@@ -105,12 +114,46 @@ spec:
   hostnames:
     - navidrome.internal
   rules:
+    # authentik forward auth callback (sign-in, sign-out) on this host.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    # Subsonic API for phone apps: no forward auth (Navidrome password).
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /rest
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+      backendRefs:
+        - name: navidrome
+          port: 80
     - filters:
         - type: ExtensionRef
           extensionRef:
             group: traefik.io
             kind: Middleware
             name: internal-allowlist
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
       backendRefs:
         - name: navidrome
           port: 80

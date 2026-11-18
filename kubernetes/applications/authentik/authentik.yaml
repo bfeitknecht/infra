@@ -41,6 +41,20 @@ spec:
           value: "false"
         - name: AUTHENTIK_DISABLE_UPDATE_CHECK
           value: "true"
+        # Mail via Proton SMTP as noreply@0xbf.ch (AGENTS.md "Mail").
+        # AUTHENTIK_EMAIL__PASSWORD is in authentik-secrets.
+        - name: AUTHENTIK_EMAIL__HOST
+          value: smtp.protonmail.ch
+        - name: AUTHENTIK_EMAIL__PORT
+          value: "587"
+        - name: AUTHENTIK_EMAIL__USERNAME
+          value: noreply@0xbf.ch
+        - name: AUTHENTIK_EMAIL__USE_TLS
+          value: "true"
+        - name: AUTHENTIK_EMAIL__FROM
+          value: "0xbf <noreply@0xbf.ch>"
+        - name: AUTHENTIK_EMAIL__TIMEOUT
+          value: "15"
     authentik:
       # Holds AUTHENTIK_SECRET_KEY, AUTHENTIK_POSTGRESQL__PASSWORD,
       # AUTHENTIK_BOOTSTRAP_PASSWORD, AUTHENTIK_BOOTSTRAP_EMAIL.

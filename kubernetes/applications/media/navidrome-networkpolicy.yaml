@@ -1,0 +1,23 @@
+# Navidrome trusts X-authentik-username from the pod network (ExtAuth). Only
+# Traefik (after authentik) and Gatus (health check) may reach it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: navidrome-ingress
+  namespace: media
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: navidrome
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ingress
+            app.kubernetes.io/name: traefik
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app: gatus
+      toPorts:
+        - ports:
+            - port: "4533"
+              protocol: TCP

@@ -72,6 +72,30 @@ Blueprints `forgejo.yaml` and `jellyfin.yaml` in `blueprints.yaml` create the OI
 2. Plugin settings, add provider name **`authentik`**: endpoint `https://auth.0xbf.ch/application/o/jellyfin/`, client ID `jellyfin`, client secret (from authentik), enabled, "Enable Authorization by Plugin" on.
 3. Login link for users: `https://stream.0xbf.ch/sso/OID/start/authentik`. Web only: TV and phone apps keep Jellyfin passwords or Quick Connect.
 
+## Who logs in where (2026-11-18)
+
+| App | Host | How | Groups |
+| --- | --- | --- | --- |
+| Forgejo | git.0xbf.ch | OIDC (confidential) | developers |
+| Grafana | grafana.internal | OIDC (public, PKCE) | developers; authentik Admins = Grafana Admin |
+| Immich | immich.internal | OIDC (confidential, `immich-config`) | family, developers |
+| Dawarich | dawarich.internal | OIDC (public, PKCE, env) | family, developers |
+| Navidrome | navidrome.internal | forward auth + `X-authentik-username` (ExtAuth); `/rest` open for Subsonic apps | family, friends, developers |
+| opencode, sandbox-1..3 | *.internal | forward auth | developers |
+| Sonarr, Radarr, Prowlarr, Lidarr, qBittorrent, Gatus (status) | *.internal | forward auth | authentik Admins |
+| Jellyfin | stream.0xbf.ch | none (SSO plugin does not support 12.x) | local users |
+| copyparty, PDS, atuin, AGH, Traefik dashboard | | own login | (forward auth would break share links / no header support) |
+
+Group meaning: `family` and `friends` get the media and photo apps, `developers` the dev tools, `authentik Admins` the admin tools. Put an invited person in the right group after they join.
+
+## Invitations
+
+Admin > Directory > Invitations > Create: flow `invite`, single use, optional expiry. Copy the link and send it yourself (authentik does not mail invitations). The person picks username, password, name and email. Then add them to `family` or `friends` (Directory > Users > the user > Groups).
+
+## Forgot password
+
+Login page > "Forgot password?" (flow `recover`): authentik mails a reset link from `noreply@0xbf.ch` (Proton SMTP, valid 30 min). Test mail: `kubectl -n authentik exec deploy/authentik-worker -- ak test_email <address>`.
+
 ## Connect an app (pattern)
 
 One blueprint per app in `blueprints.yaml`: OAuth2 provider + application + group binding. The client secret lives in authentik and in the app's sops secret.
