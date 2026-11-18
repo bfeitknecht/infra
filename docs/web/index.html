@@ -246,8 +246,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 /* ============================================================
    DATA. Update this block when the cluster changes.
    ============================================================ */
-const ASOF = "2026-11-17";
-const INFRA_TAG = "v1.35.0";
+const ASOF = "2026-11-18";
+const INFRA_TAG = "v1.36.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -311,6 +311,7 @@ const SERVICES = [
  {id:"sonarr", name:"Sonarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://sonarr.internal", image:"lscr.io/linuxserver/sonarr:4.0.20", desc:"TV series manager.", ports:"HTTP 8989", deps:["storage"], secrets:[], storage:"sonarr-data 2Gi, media-files at /data", notes:["No login yet: set one in Settings > General or put authentik forward-auth in front."]},
  {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-data 2Gi, media-files at /data", notes:["No login yet."]},
  {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
+ {id:"lidarr", name:"Lidarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://lidarr.internal", image:"lscr.io/linuxserver/lidarr:3.1.6", desc:"Music manager. Library /data/media/music (Jellyfin music, later Navidrome).", ports:"HTTP 8686", deps:["storage"], secrets:[], storage:"lidarr-data 2Gi, media-files at /data", notes:["Added 2026-11-18 (v1.36.0). Set a login in Settings > General.","Download client: qBittorrent once its WireGuard key exists."]},
  {id:"qbittorrent", name:"qBittorrent (Proton VPN)", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"qbittorrent",
   host:"https://qbittorrent.internal", image:"linuxserver/qbittorrent:5.3.0 + qmcgaw/gluetun:v3.41.3", desc:"Torrent client. All traffic through Proton VPN WireGuard (P2P, port forwarding, kill switch).",
   ports:"HTTP 8080, forwarded port via NAT-PMP", deps:["media"], secrets:["qbittorrent/qbittorrent-secrets.sops.yaml (to create)"], storage:"qbittorrent-data 1Gi (nvme), media-files at /data", runbook:"docs/RZBL_WORKLOADS.md",
@@ -416,7 +417,7 @@ const HOSTS = [
  ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib"],["git.0xbf.ch","public","forgejo"],
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["grafana.internal","internal","Grafana (home: 0xbf)"],["status.internal","internal","Gatus"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
- ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
+ ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
  ["immich.internal","internal","Immich"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],["sandbox-1..3.internal","internal","agent sandbox slots (scripts/sandbox.nu)"],
 ];
 const TAIL = [
@@ -437,7 +438,7 @@ const PVS = [
  ["exhib","exhib-data","50Gi","rbpi","storage-nvme0","live"],["devil","devil-data","20Gi","rbpi","storage-nvme0","live"],
  ["agh","agh-data","1Gi","rbpi","storage-nvme0","live"],["atuin","atuin-data","5Gi","rbpi","storage-nvme0","live"],
  ["media","media-files","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-data","20Gi","rzbl","storage-nvme0","live"],
- ["media","sonarr-data / radarr-data / prowlarr-data","2/2/1Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
+ ["media","sonarr-data / radarr-data / prowlarr-data / lidarr-data","2/2/1/2Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
  ["egress","tailscale-relay-data","1Gi","rzbl","storage-nvme0","broken"],
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","live"],
  ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","live"],
@@ -459,6 +460,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: dawarich samba qbittorrent`;
 const TAGS = [
+ ["v1.36.0","2026-11-18","Lidarr (lidarr.internal), music folders"],
  ["v1.35.0","2026-11-17","Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2 (talosctl upgrade-k8s, etcd snapshot before each); topf.yaml pinned; renovate.json5; deck docs/journey.md"],
  ["v1.34.1","2026-11-17","Gatus config fix, apex pinned to rbpi (arm64 image), journey page"],
  ["v1.34.0","2026-11-17","agent sandbox slots sandbox-1..3.internal + scripts/sandbox.nu"],
@@ -683,7 +685,7 @@ const TN=[ // id,label,sub,x,y,w,ref
  // rzbl
  ["rzbl","rzbl","Blade · 10.10.20.11 · GTX 1660 Ti",650,330,640,"rzbl"],
  ["jelly","Jellyfin","GPU",670,375,100,"jellyfin"],
- ["arr","*arr","sonarr radarr prowlarr",780,375,150,"sonarr"],
+ ["arr","*arr","sonarr radarr prowlarr lidarr",780,375,150,"sonarr"],
  ["ollama","Ollama","GPU · qwen2.5-coder",940,375,150,"ollama"],
  ["opencode","opencode","kata VM",1100,375,95,"opencode"],
  ["gpu","GPU plugin","4 slots",1205,375,75,"gpu"],

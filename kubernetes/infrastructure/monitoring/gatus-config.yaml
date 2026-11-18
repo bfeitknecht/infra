@@ -48,6 +48,7 @@ endpoints:
     conditions: ["[STATUS] == 200"]
   - {<<: *internal, name: sonarr, url: http://sonarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: radarr, url: http://radarr.media.svc.cluster.local/ping}
+  - {<<: *internal, name: lidarr, url: http://lidarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: prowlarr, url: http://prowlarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: ollama, url: http://ollama.ollama.svc.cluster.local:11434/}
   - {<<: *internal, name: agh, url: http://agh.agh.svc.cluster.local/}
