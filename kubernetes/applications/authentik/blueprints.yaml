@@ -535,6 +535,46 @@ data:
         model: authentik_brands.brand
         attrs:
           flow_recovery: !KeyOf flow
+  # Brand: title, the ^@ mark from apex, monochrome CSS (no background photo).
+  brand.yaml: |
+    version: 1
+    metadata:
+      name: 0xbf brand
+    entries:
+      - identifiers:
+          domain: authentik-default
+        model: authentik_brands.brand
+        attrs:
+          branding_title: "0xbf"
+          branding_logo: https://0xbf.ch/assets/favicon.svg
+          branding_favicon: https://0xbf.ch/assets/favicon.svg
+          branding_custom_css: |
+              /* 0xbf: monochrome, same palette as Forgejo, exhib and glob (oklch, zero chroma). */
+              :root {
+                --ak-global--background-image: none;
+                --pf-global--primary-color--100: oklch(21% 0 0);
+                --pf-global--primary-color--200: oklch(14% 0 0);
+                --pf-global--primary-color--300: oklch(21% 0 0);
+                --pf-global--primary-color--400: oklch(30% 0 0);
+                --pf-global--active-color--100: oklch(21% 0 0);
+                --pf-global--link--Color: oklch(21% 0 0);
+                --pf-global--link--Color--hover: oklch(40% 0 0);
+                --pf-c-button--m-primary--Color: oklch(96% 0 0);
+                --pf-c-button--m-primary--hover--Color: oklch(96% 0 0);
+                --pf-global--BackgroundColor--dark-100: oklch(96% 0 0);
+              }
+              html[data-theme="dark"], :host([theme="dark"]) {
+                --pf-global--primary-color--100: oklch(92% 0 0);
+                --pf-global--primary-color--200: oklch(84% 0 0);
+                --pf-global--primary-color--300: oklch(92% 0 0);
+                --pf-global--primary-color--400: oklch(84% 0 0);
+                --pf-global--active-color--100: oklch(92% 0 0);
+                --pf-global--link--Color: oklch(92% 0 0);
+                --pf-global--link--Color--hover: oklch(72% 0 0);
+                --pf-c-button--m-primary--Color: oklch(14% 0 0);
+                --pf-c-button--m-primary--hover--Color: oklch(14% 0 0);
+                --pf-global--BackgroundColor--dark-100: oklch(14% 0 0);
+              }
   grafana.yaml: |
     # Grafana at grafana.internal (group developers). Public client with PKCE:
     # Grafana holds no secret. authentik Admins get the Grafana Admin role
