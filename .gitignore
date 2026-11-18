@@ -3,3 +3,4 @@
 kubeconfig
 talos/talosconfig
 talos/output
+__pycache__/
