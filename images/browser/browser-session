@@ -3,6 +3,10 @@
 # (proxy + mitm CA via prepare-profile), a 12h guard.
 set -euo pipefail
 
+# sshd sessions get the default PATH, not the image ENV: browsh and its
+# Firefox live in /app/bin.
+export PATH="/app/bin:/app/bin/firefox:/usr/local/bin:/usr/bin:/bin"
+
 export HOME="$(mktemp -d /tmp/session.XXXXXX)"
 chmod 700 "$HOME"
 export XDG_CONFIG_HOME="$HOME/.config"

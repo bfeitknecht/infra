@@ -555,6 +555,7 @@ const SECRETS = [
  ["infrastructure/monitoring/gatus-secrets.sops.yaml","monitoring","exists","NTFY_TOKEN (gatus)"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-18","infra v1.42.3: browser-session sets PATH (sshd sessions do not inherit the image ENV)"],
  ["2026-11-18","infra v1.42.2: browser sshd reads the mux key from a subPath mount (Secret root is 1777, StrictModes refused it)"],
  ["2026-11-18","infra v1.42.1: sshmux fixes (host keys 0400 per item, owner key from the Secret, login shell /bin/sh for ForceCommand)"],
  ["2026-11-18","infra v1.42.0 live: port map cutover (git 22, mux 2222, devil 2223), browser + sshmux deployed"],
