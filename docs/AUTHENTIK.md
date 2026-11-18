@@ -90,7 +90,7 @@ Group meaning: `family` and `friends` get the media and photo apps, `developers`
 
 ## Invitations
 
-Admin > Directory > Invitations > Create: flow `invite`, single use, optional expiry. Copy the link and send it yourself (authentik does not mail invitations). The person picks username, password, name and email. Then add them to `family` or `friends` (Directory > Users > the user > Groups).
+Admin > Directory > Invitations > Create: flow `invite`, single use, optional expiry. Then use the invitation's send action (email): authentik mails the link from `noreply@0xbf.ch` (template `email/invitation.html`; verified 2026-11-18). Or copy the link. The person picks username, password, name and email. Then add them to `family` or `friends` (Directory > Users > the user > Groups).
 
 ## Forgot password
 

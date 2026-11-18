@@ -196,7 +196,7 @@ One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the ca
 
 ## Single sign-on
 
-authentik is the IdP for every app that supports it: table in `docs/AUTHENTIK.md` ("Who logs in where"). Blueprints: `apps-oidc.yaml` (Dawarich, Immich), `opencode.yaml` (all forward-auth providers; it owns the embedded outpost list), `recovery.yaml` (forgot-password flow). Forward-auth routes: an `/outpost.goauthentik.io` rule to `authentik-server` (ReferenceGrant `outpost-routes` lists the namespace) plus the `authentik` middleware copy in the route namespace. OAuth2 providers need `grant_types`. The *arr apps run `AuthenticationMethod=External` (config.xml on the PVC) behind forward auth. Navidrome trusts `X-authentik-username` only because CNP `navidrome-ingress` limits ingress to Traefik and Gatus.
+authentik is the IdP for every app that supports it: table in `docs/AUTHENTIK.md` ("Who logs in where"). Blueprints: `apps-oidc.yaml` (Dawarich, Immich), `opencode.yaml` (all forward-auth providers; it owns the embedded outpost list), `recovery.yaml` (forgot-password flow), `brand.yaml` (title, logo from `https://0xbf.ch/assets/favicon.svg`, monochrome custom CSS). Forward-auth routes: an `/outpost.goauthentik.io` rule to `authentik-server` (ReferenceGrant `outpost-routes` lists the namespace) plus the `authentik` middleware copy in the route namespace. OAuth2 providers need `grant_types`. The *arr apps run `AuthenticationMethod=External` (config.xml on the PVC) behind forward auth. Navidrome trusts `X-authentik-username` only because CNP `navidrome-ingress` limits ingress to Traefik and Gatus.
 
 ## Secrets
 
@@ -233,4 +233,5 @@ authentik is the IdP for every app that supports it: table in `docs/AUTHENTIK.md
 - Keep YAML comments only for load-bearing facts (listener port mapping, chart collisions, internal CA reason).
 - Do not put hardcoded IPs in Helm values. Keep cluster-specific values in git resources (ipam pool, middlewares).
 - Cluster DNS for `*.internal` is planned as Knot Resolver. Until then, `dashboard.internal` needs hosts entry or local DNS record at `10.10.20.128`.
+- Quote `"0xbf"` in YAML. Unquoted, `0xbf` is the hex number 191 (broke a Grafana annotation, a Dawarich env value and the authentik brand title).
 - Owner runs nushell. Write all owner-facing commands in nushell syntax, not POSIX sh (`let` for session-local, `$env.X` only for export, `http get`/`http post` not curl, `from json` not `jq`, quoted `"@nameserver"` args).
