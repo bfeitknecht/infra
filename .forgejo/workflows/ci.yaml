@@ -1,0 +1,38 @@
+# Mirror of .github/workflows/ci.yaml for a Forgejo runner. Differences: the
+# runner label, fully-qualified action URLs, and the pinned tool installs
+# inline (no homebrew cache magic): yamlfmt 0.21.0 via go, kubectl preinstalled
+# on the act image.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://github.com/actions/checkout@v4
+
+      - name: Install just
+        run: |
+          set -eu
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL "https://just.systems/install.sh" | bash -s -- --to "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install yamlfmt (pinned)
+        run: |
+          set -eu
+          go install github.com/google/yamlfmt/cmd/yamlfmt@v0.21.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Format check
+        run: just fmt --check
+
+      - name: Build all Kustomizations
+        run: just check
