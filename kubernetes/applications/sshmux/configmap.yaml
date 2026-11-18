@@ -10,8 +10,6 @@ data:
   users: |
     # Owner key, no password: the mux front itself.
     bf:no
-    # The browsh route. Owner key only.
-    browser:no
     # The public apex path: any of these usernames, press Enter at the
     # password prompt. Unknown usernames do not exist here: SSH cannot
     # have wildcard accounts.
@@ -41,8 +39,3 @@ data:
     MaxSessions 5
     # The default route: every username below rides the apex portfolio.
     ForceCommand /usr/local/bin/to-apex
-
-    Match User browser
-      PasswordAuthentication no
-      PermitEmptyPasswords no
-      ForceCommand /usr/local/bin/to-browser

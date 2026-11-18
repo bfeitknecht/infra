@@ -74,8 +74,8 @@ spec:
         expose:
           default: true
         exposedPort: 2222
-        # The sshmux (username router) owns WAN 2222: browser@ for browsh,
-        # default username for apex. Router forwards 2222 to rbpi:2222.
+        # The sshmux (username router) owns WAN 2222: apex is the
+        # default username. Router forwards 2222 to rbpi:2222.
         hostPort: 2222
       devilssh:
         port: 2223

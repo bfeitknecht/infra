@@ -511,32 +511,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: browser
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: traefik
-  interval: 10m0s
-  path: ./kubernetes/applications/browser
-  prune: true
-  wait: true
-  sourceRef:
-    kind: OCIRepository
-    name: flux-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
   name: sshmux
   namespace: flux-system
 spec:
   dependsOn:
     - name: traefik
-    - name: browser
   interval: 10m0s
   path: ./kubernetes/applications/sshmux
   prune: true

@@ -214,8 +214,8 @@ Phase 7: one SSH port (Nov 18 to 19)
 
 - git on the clean **22**: `ssh://git@git.0xbf.ch/owner/repo.git`
 - one WAN port **2222** for every SSH TUI, routed by **username**
-- `ssh -p 2222 0xbf.ch` is the apex TUI, `browser@` is browsh
-- the web front of browsh dropped: one browsh per pod
+- `ssh -p 2222 0xbf.ch` is the apex TUI
+- browsh over SSH tried, then removed: it looked bad and cost RAM
 - thyme **0.1.2** to Typst Universe: reading time on entry cards
 
 <!-- end_slide -->

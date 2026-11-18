@@ -1,5 +1,5 @@
 # Publishes the OCI artifact (Flux source) and, from the same tag, the two
-# in-tree images (browser, sshmux). Image tags equal the git tag, so the
+# in-tree image (sshmux). Image tags equal the git tag, so the
 # Deployment pins in-tree match what CI publishes. Images build first:
 # Flux may reconcile the artifact as soon as it exists, and a manifest whose
 # image is still pushing would crash-loop.
@@ -32,16 +32,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      # amd64 only: the browsh base image bundles x64 Firefox; the
-      # Deployment pins the pod to rzbl.
-      - name: Build and push browser image
-        uses: docker/build-push-action@v6
-        with:
-          context: images/browser
-          platforms: linux/amd64
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/browser:${{ github.ref_name }}
 
       # arm64 only: the mux runs on rbpi (Pi 5).
       - name: Build and push sshmux image

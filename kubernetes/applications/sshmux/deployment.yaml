@@ -23,7 +23,7 @@ spec:
         - name: sshmux
           # In-tree image (images/sshmux). The pin must match the release
           # tag (`just release` checks).
-          image: ghcr.io/bfeitknecht/sshmux:v1.44.0
+          image: ghcr.io/bfeitknecht/sshmux:v1.45.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: ssh
@@ -53,10 +53,7 @@ spec:
         - name: keys
           secret:
             secretName: sshmux-keys
-            # sshd refuses host keys readable by others: 0400. The
-            # to-browser chain key must stay readable by the per-session
-            # user (it copies the key to a private file before ssh accepts
-            # it): 0444. There is no shell on the mux: ForceCommand only.
+            # sshd refuses host keys readable by others: 0400.
             items:
               - key: host_ed25519
                 path: host_ed25519
@@ -64,9 +61,6 @@ spec:
               - key: host_rsa
                 path: host_rsa
                 mode: 0400
-              - key: mux_browser
-                path: mux_browser
-                mode: 0444
               - key: authorized_keys
                 path: authorized_keys
                 mode: 0444

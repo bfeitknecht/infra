@@ -45,8 +45,7 @@ endpoints:
     interval: 2m
     conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]
     alerts: [{type: ntfy}]
-  # ---- SSH fronts: git on the clean 22, the mux on 2222 (apex default
-  # username, browser@ -> browsh). Avoid probing through the mux: it would
+  # ---- SSH fronts: git on the clean 22, the mux on 2222 (apex). Avoid probing through the mux: it would
   # start real sessions. TCP connects are enough.
   - name: git ssh
     group: public

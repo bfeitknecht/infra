@@ -1,7 +1,6 @@
 # Mirror of .github/workflows/publish-manifests.yaml for a Forgejo runner.
 # Differences:
-#   - runs-on: the cluster forgejo-runner label (arm64; QEMU covers the amd64
-#     browser image)
+#   - runs-on: the cluster forgejo-runner label
 #   - the GHCR logins read the GHCR_TOKEN secret: add it in the repository
 #     settings with a GitHub PAT (write:packages). Forgejo has no implicit
 #     GITHUB_TOKEN that can push to ghcr.io.
@@ -34,16 +33,6 @@ jobs:
           registry: ghcr.io
           username: bfeitknecht
           password: ${{ secrets.GHCR_TOKEN }}
-
-      # amd64 only: the browsh base image bundles x64 Firefox; the
-      # Deployment pins the pod to rzbl.
-      - name: Build and push browser image
-        uses: https://github.com/docker/build-push-action@v6
-        with:
-          context: images/browser
-          platforms: linux/amd64
-          push: true
-          tags: ghcr.io/bfeitknecht/browser:${{ github.ref_name }}
 
       # arm64 only: the mux runs on rbpi (Pi 5).
       - name: Build and push sshmux image

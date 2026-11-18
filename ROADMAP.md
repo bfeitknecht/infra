@@ -16,7 +16,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **Browser + sshmux:** implemented 2026-11-18, images in-tree (`images/`), CI publishes them with the release tag. Left: add WAN 2222 forward in the router, tag infra (the pins say v1.42.0). See `docs/BROWSER.md`.
+- [ ] **sshmux:** live since v1.42.0 (2026-11-18). Left: WAN 2222 forward in the router. The browsh route was removed 2026-11-19.
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Forgejo:** Actions + runner live (v1.33.0). Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).

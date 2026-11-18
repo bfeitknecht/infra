@@ -44,8 +44,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    # TCP for the sshmux (username router) on WAN 2222. Browser TUI and the
-    # default (apex) ride it: ssh -p 2222 [browser@]0xbf.ch
+    # TCP for the sshmux (username router) on WAN 2222. The apex TUI rides
+    # it: ssh -p 2222 0xbf.ch
     - name: muxssh
       protocol: TCP
       port: 2222
