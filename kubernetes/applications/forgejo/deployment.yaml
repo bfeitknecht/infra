@@ -52,6 +52,26 @@ spec:
       containers:
         - name: forgejo
           image: codeberg.org/forgejo/forgejo:16.0.5
+          # The image writes FORGEJO__section__KEY env into app.ini on start,
+          # so mail needs no edit of the live file. Proton SMTP, noreply@0xbf.ch.
+          env:
+            - name: FORGEJO__mailer__ENABLED
+              value: "true"
+            - name: FORGEJO__mailer__PROTOCOL
+              value: smtp+starttls
+            - name: FORGEJO__mailer__SMTP_ADDR
+              value: smtp.protonmail.ch
+            - name: FORGEJO__mailer__SMTP_PORT
+              value: "587"
+            - name: FORGEJO__mailer__USER
+              value: noreply@0xbf.ch
+            - name: FORGEJO__mailer__FROM
+              value: "0xbf Forgejo <noreply@0xbf.ch>"
+            - name: FORGEJO__mailer__PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-secrets
+                  key: mailer-password
           ports:
             - containerPort: 3000
               name: http

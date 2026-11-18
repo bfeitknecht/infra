@@ -34,13 +34,13 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## LATER
 
-- [ ] Identity rollout: immich OIDC, blog comments, atproto login source. Jellyfin SSO when the plugin supports 12.x.
-- [ ] Proton SMTP: owner creates `noreply@0xbf.ch` (also catch-all) and an SMTP token; then wire authentik, Forgejo, PDS, Immich to it.
+- [ ] Identity: blog comments, atproto login source, Jellyfin SSO when the plugin supports 12.x.
 - [ ] Tailscale autoApprovers for `tag:infra` routes.
 - [ ] Macbook factory reset to omni bootstrap.
 
 ## Done (recent)
 
+- [x] 2026-11-18 Mail via Proton SMTP (noreply@0xbf.ch) for authentik, Forgejo, PDS, Immich; authentik SSO for Immich, Dawarich, Navidrome and the admin tools; forgot-password flow.
 - [x] 2026-11-18 qBittorrent over Proton VPN, Renovate live, ntfy with Alertmanager + Gatus alerts, omni ssh git.0xbf.ch port 2223.
 - [x] 2026-11-18 Lidarr, Navidrome, Dawarich, Time Machine live; thyme history email rewrite (bundle in `.private/`).
 - [x] 2026-11-17 Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2; journey page + deck.

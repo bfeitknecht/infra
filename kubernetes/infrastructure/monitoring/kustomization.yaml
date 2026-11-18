@@ -12,6 +12,8 @@ resources:
   - kube-prometheus-stack.yaml
   - grafana.yaml
   - gatus.yaml
+  - middleware.yaml
+  - authentik.yaml
   - gpu-exporter.yaml
   - servicemonitors.yaml
 configMapGenerator:

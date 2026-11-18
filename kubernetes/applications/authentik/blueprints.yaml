@@ -355,6 +355,182 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 2
+  # Upstream example/flows-recovery-email-verification.yaml (2026.8.5), slug
+  # "recover", mail from the global settings (noreply@0xbf.ch). Copied, not
+  # nested. Adds "Forgot password?" to the login and the brand.
+  recovery.yaml: |
+    version: 1
+    metadata:
+      name: 0xbf recovery
+    entries:
+      - identifiers:
+          slug: recover
+        id: flow
+        model: authentik_flows.flow
+        attrs:
+          name: Reset your 0xbf password
+          title: Reset your password
+          designation: recovery
+          authentication: require_unauthenticated
+      - identifiers:
+          name: 0xbf-recovery-field-password
+        id: prompt-field-password
+        model: authentik_stages_prompt.prompt
+        attrs:
+          field_key: password
+          label: Password
+          type: password
+          required: true
+          placeholder: Password
+          order: 0
+          placeholder_expression: false
+      - identifiers:
+          name: 0xbf-recovery-field-password-repeat
+        id: prompt-field-password-repeat
+        model: authentik_stages_prompt.prompt
+        attrs:
+          field_key: password_repeat
+          label: Password (repeat)
+          type: password
+          required: true
+          placeholder: Password (repeat)
+          order: 1
+          placeholder_expression: false
+      - identifiers:
+          name: 0xbf-recovery-skip-if-restored
+        id: default-recovery-skip-if-restored
+        model: authentik_policies_expression.expressionpolicy
+        attrs:
+          expression: |
+            return bool(request.context.get('is_restored', True))
+      - identifiers:
+          name: 0xbf-recovery-email
+        id: default-recovery-email
+        model: authentik_stages_email.emailstage
+        attrs:
+          use_global_settings: true
+          host: localhost
+          port: 25
+          username: ""
+          use_tls: false
+          use_ssl: false
+          timeout: 10
+          from_address: system@authentik.local
+          token_expiry: minutes=30
+          subject: Reset your 0xbf password
+          template: email/password_reset.html
+          activate_user_on_success: true
+          recovery_max_attempts: 5
+          recovery_cache_timeout: minutes=5
+      - identifiers:
+          name: 0xbf-recovery-user-write
+        id: default-recovery-user-write
+        model: authentik_stages_user_write.userwritestage
+        attrs:
+          user_creation_mode: never_create
+      - identifiers:
+          name: 0xbf-recovery-identification
+        id: default-recovery-identification
+        model: authentik_stages_identification.identificationstage
+        attrs:
+          user_fields:
+            - email
+            - username
+      - identifiers:
+          name: 0xbf-recovery-user-login
+        id: default-recovery-user-login
+        model: authentik_stages_user_login.userloginstage
+      - identifiers:
+          name: 0xbf-recovery-change-password
+        id: stages-prompt-password
+        model: authentik_stages_prompt.promptstage
+        attrs:
+          fields:
+            - !KeyOf prompt-field-password
+            - !KeyOf prompt-field-password-repeat
+          validation_policies: []
+      - identifiers:
+          target: !KeyOf flow
+          stage: !KeyOf default-recovery-identification
+          order: 10
+        model: authentik_flows.flowstagebinding
+        id: flow-binding-identification
+        attrs:
+          evaluate_on_plan: true
+          re_evaluate_policies: true
+          policy_engine_mode: any
+          invalid_response_action: retry
+      - identifiers:
+          target: !KeyOf flow
+          stage: !KeyOf default-recovery-email
+          order: 20
+        model: authentik_flows.flowstagebinding
+        id: flow-binding-email
+        attrs:
+          evaluate_on_plan: true
+          re_evaluate_policies: true
+          policy_engine_mode: any
+          invalid_response_action: retry
+      - identifiers:
+          target: !KeyOf flow
+          stage: !KeyOf stages-prompt-password
+          order: 30
+        model: authentik_flows.flowstagebinding
+        attrs:
+          evaluate_on_plan: true
+          re_evaluate_policies: false
+          policy_engine_mode: any
+          invalid_response_action: retry
+      - identifiers:
+          target: !KeyOf flow
+          stage: !KeyOf default-recovery-user-write
+          order: 40
+        model: authentik_flows.flowstagebinding
+        attrs:
+          evaluate_on_plan: true
+          re_evaluate_policies: false
+          policy_engine_mode: any
+          invalid_response_action: retry
+      - identifiers:
+          target: !KeyOf flow
+          stage: !KeyOf default-recovery-user-login
+          order: 100
+        model: authentik_flows.flowstagebinding
+        attrs:
+          evaluate_on_plan: true
+          re_evaluate_policies: false
+          policy_engine_mode: any
+          invalid_response_action: retry
+      - identifiers:
+          policy: !KeyOf default-recovery-skip-if-restored
+          target: !KeyOf flow-binding-identification
+          order: 0
+        model: authentik_policies.policybinding
+        attrs:
+          negate: false
+          enabled: true
+          timeout: 30
+      - identifiers:
+          policy: !KeyOf default-recovery-skip-if-restored
+          target: !KeyOf flow-binding-email
+          order: 0
+        state: absent
+        model: authentik_policies.policybinding
+        attrs:
+          negate: false
+          enabled: true
+          timeout: 30
+      # Show "Forgot password?" on the login, and make it the brand's recovery flow.
+      - identifiers:
+          name: default-authentication-identification
+        model: authentik_stages_identification.identificationstage
+        attrs:
+          recovery_flow: !KeyOf flow
+      - identifiers:
+          domain: authentik-default
+        model: authentik_brands.brand
+        attrs:
+          flow_recovery: !KeyOf flow
   grafana.yaml: |
     # Grafana at grafana.internal (group developers). Public client with PKCE:
     # Grafana holds no secret. authentik Admins get the Grafana Admin role
@@ -401,6 +577,110 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 0
+  # Native OIDC apps. Public clients with PKCE where the app supports it
+  # (Dawarich); Immich needs a client secret (!Env from authentik-secrets).
+  apps-oidc.yaml: |
+    version: 1
+    metadata:
+      name: 0xbf apps oidc
+    entries:
+      - model: authentik_core.group
+        id: group-family
+        identifiers:
+          name: family
+      - model: authentik_core.group
+        id: group-friends
+        identifiers:
+          name: friends
+      - model: authentik_core.group
+        id: group-developers
+        identifiers:
+          name: developers
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-dawarich
+        identifiers:
+          name: dawarich
+        attrs:
+          client_type: public
+          grant_types: [authorization_code, refresh_token]
+          client_id: dawarich
+          redirect_uris:
+            - matching_mode: strict
+              url: https://dawarich.internal/users/auth/openid_connect/callback
+              redirect_uri_type: authorization
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-profile]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+      - model: authentik_core.application
+        id: app-dawarich
+        identifiers:
+          slug: dawarich
+        attrs:
+          name: Dawarich
+          provider: !KeyOf provider-dawarich
+          meta_launch_url: https://dawarich.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-dawarich
+          group: !KeyOf group-family
+        attrs:
+          order: 0
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-dawarich
+          group: !KeyOf group-developers
+        attrs:
+          order: 1
+      - model: authentik_providers_oauth2.oauth2provider
+        id: provider-immich
+        identifiers:
+          name: immich
+        attrs:
+          client_type: confidential
+          grant_types: [authorization_code, refresh_token]
+          client_id: immich
+          client_secret: !Env IMMICH_OIDC_CLIENT_SECRET
+          redirect_uris:
+            - matching_mode: strict
+              url: https://immich.internal/auth/login
+              redirect_uri_type: authorization
+            - matching_mode: strict
+              url: https://immich.internal/user-settings
+              redirect_uri_type: authorization
+            - matching_mode: strict
+              url: app.immich:///oauth-callback
+              redirect_uri_type: authorization
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          property_mappings:
+            - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-openid]]
+            - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-email]]
+            - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-profile]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+      - model: authentik_core.application
+        id: app-immich
+        identifiers:
+          slug: immich
+        attrs:
+          name: Immich
+          provider: !KeyOf provider-immich
+          meta_launch_url: https://immich.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-immich
+          group: !KeyOf group-family
+        attrs:
+          order: 0
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-immich
+          group: !KeyOf group-developers
+        attrs:
+          order: 1
   opencode.yaml: |
     # Forward auth (single app) for opencode.internal, group developers.
     # Internal only. The embedded outpost serves it. Add later forward-auth
@@ -511,6 +791,199 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 0
+      # Internal tools behind forward auth (one forward_single provider per host).
+      - model: authentik_core.group
+        id: group-family
+        identifiers:
+          name: family
+      - model: authentik_core.group
+        id: group-friends
+        identifiers:
+          name: friends
+      - model: authentik_core.group
+        id: group-authentik-admins
+        identifiers:
+          name: authentik Admins
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-navidrome
+        identifiers:
+          name: navidrome
+        attrs:
+          mode: forward_single
+          external_host: https://navidrome.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-navidrome
+        identifiers:
+          slug: navidrome
+        attrs:
+          name: Navidrome
+          provider: !KeyOf provider-navidrome
+          meta_launch_url: https://navidrome.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-navidrome
+          group: !KeyOf group-family
+        attrs:
+          order: 0
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-navidrome
+          group: !KeyOf group-friends
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-navidrome
+          group: !KeyOf group-developers
+        attrs:
+          order: 2
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-sonarr
+        identifiers:
+          name: sonarr
+        attrs:
+          mode: forward_single
+          external_host: https://sonarr.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-sonarr
+        identifiers:
+          slug: sonarr
+        attrs:
+          name: Sonarr
+          provider: !KeyOf provider-sonarr
+          meta_launch_url: https://sonarr.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-sonarr
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-radarr
+        identifiers:
+          name: radarr
+        attrs:
+          mode: forward_single
+          external_host: https://radarr.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-radarr
+        identifiers:
+          slug: radarr
+        attrs:
+          name: Radarr
+          provider: !KeyOf provider-radarr
+          meta_launch_url: https://radarr.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-radarr
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-prowlarr
+        identifiers:
+          name: prowlarr
+        attrs:
+          mode: forward_single
+          external_host: https://prowlarr.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-prowlarr
+        identifiers:
+          slug: prowlarr
+        attrs:
+          name: Prowlarr
+          provider: !KeyOf provider-prowlarr
+          meta_launch_url: https://prowlarr.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-prowlarr
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-lidarr
+        identifiers:
+          name: lidarr
+        attrs:
+          mode: forward_single
+          external_host: https://lidarr.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-lidarr
+        identifiers:
+          slug: lidarr
+        attrs:
+          name: Lidarr
+          provider: !KeyOf provider-lidarr
+          meta_launch_url: https://lidarr.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-lidarr
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-qbittorrent
+        identifiers:
+          name: qbittorrent
+        attrs:
+          mode: forward_single
+          external_host: https://qbittorrent.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-qbittorrent
+        identifiers:
+          slug: qbittorrent
+        attrs:
+          name: qBittorrent
+          provider: !KeyOf provider-qbittorrent
+          meta_launch_url: https://qbittorrent.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-qbittorrent
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-status
+        identifiers:
+          name: status
+        attrs:
+          mode: forward_single
+          external_host: https://status.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-status
+        identifiers:
+          slug: status
+        attrs:
+          name: Status (Gatus)
+          provider: !KeyOf provider-status
+          meta_launch_url: https://status.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-status
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
       - model: authentik_outposts.outpost
         identifiers:
           managed: goauthentik.io/outposts/embedded
@@ -520,6 +993,13 @@ data:
             - !KeyOf provider-1
             - !KeyOf provider-2
             - !KeyOf provider-3
+            - !KeyOf provider-navidrome
+            - !KeyOf provider-sonarr
+            - !KeyOf provider-radarr
+            - !KeyOf provider-prowlarr
+            - !KeyOf provider-lidarr
+            - !KeyOf provider-qbittorrent
+            - !KeyOf provider-status
       # agent.0xbf.ch was public for a few hours on 2026-11-17. Removed: opencode
       # stays internal. These entries delete the objects; drop them later.
       - model: authentik_core.application

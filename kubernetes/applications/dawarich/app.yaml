@@ -48,6 +48,21 @@ spec:
               value: "true"
             - name: SELF_HOSTED
               value: "true"
+            # Login with authentik: public client, PKCE, discovery.
+            - name: OIDC_CLIENT_ID
+              value: dawarich
+            - name: OIDC_PKCE_ENABLED
+              value: "true"
+            - name: OIDC_DISCOVERY
+              value: "true"
+            - name: OIDC_ISSUER
+              value: https://auth.0xbf.ch/application/o/dawarich/
+            - name: OIDC_REDIRECT_URI
+              value: https://dawarich.internal/users/auth/openid_connect/callback
+            - name: OIDC_PROVIDER_NAME
+              value: "0xbf"
+            - name: OIDC_AUTO_REGISTER
+              value: "true"
             - name: STORE_GEODATA
               value: "true"
             # Sidekiq runs in the web process. No separate worker Deployment.

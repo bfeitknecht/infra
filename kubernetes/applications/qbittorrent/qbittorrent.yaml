@@ -150,12 +150,32 @@ spec:
   hostnames:
     - qbittorrent.internal
   rules:
+    # authentik forward auth callback (sign-in, sign-out) on this host.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
     - filters:
         - type: ExtensionRef
           extensionRef:
             group: traefik.io
             kind: Middleware
             name: internal-allowlist
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
       backendRefs:
         - name: qbittorrent
           port: 80
