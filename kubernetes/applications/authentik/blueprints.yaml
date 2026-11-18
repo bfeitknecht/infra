@@ -1050,7 +1050,7 @@ data:
         identifiers:
           slug: status
         attrs:
-          name: Status (Gatus)
+          name: Gatus
           provider: !KeyOf provider-status
           meta_launch_url: https://status.internal
       - model: authentik_policies.policybinding
