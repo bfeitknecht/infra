@@ -1,0 +1,16 @@
+# `just fmt` and CI use this config. It must live at the repo root: yamlfmt
+# discovers it there. SOPS files are excluded on purpose: sops owns their
+# layout (4-space data values, the sops metadata tree). A formatter would
+# fight every future `sops edit` and re-encryption.
+doublestar: true
+include:
+  - kubernetes/**/*.yaml
+  - talos/**/*.yaml
+exclude:
+  - "**/*.sops.yaml"
+formatter:
+  type: basic
+  indent: 2
+  trim_trailing_whitespace: true
+  eof_newline: true
+  retain_line_breaks: true

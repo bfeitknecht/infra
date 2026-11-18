@@ -1,0 +1,38 @@
+# Format and build gate. Same two checks as `just release`: the tree must be
+# canonically formatted (yamlfmt, `.yamlfmt`) and every Flux Kustomization
+# path must build. yamlfmt is pinned: the brew formula moves, and the repo
+# style must not.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install just
+        run: |
+          set -eu
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL "https://just.systems/install.sh" | bash -s -- --to "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install yamlfmt (pinned)
+        run: |
+          set -eu
+          go install github.com/google/yamlfmt/cmd/yamlfmt@v0.21.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Format check
+        run: just fmt -lint
+
+      - name: Build all Kustomizations
+        run: just check
