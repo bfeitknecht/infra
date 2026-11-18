@@ -254,7 +254,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-18";
-const INFRA_TAG = "v1.39.0";
+const INFRA_TAG = "v1.39.1";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -471,6 +471,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: none`;
 const TAGS = [
+ ["v1.39.1","2026-11-18","Renovate git author; drop committed __pycache__"],
  ["v1.39.0","2026-11-18","ntfy (notify.0xbf.ch) + Alertmanager/Gatus alerts; qBittorrent and Renovate live; atlas Done list"],
  ["v1.38.0","2026-11-18","Renovate CronJob prepared (suspended, waits for token); thyme history: basil@0xbf.ch -> bfeitknecht@ethz.ch"],
  ["v1.37.0","2026-11-18","Navidrome (navidrome.internal); Dawarich and Time Machine live (secrets seeded by agent)"],
@@ -540,6 +541,10 @@ const SECRETS = [
  ["infrastructure/monitoring/gatus-secrets.sops.yaml","monitoring","exists","NTFY_TOKEN (gatus)"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-18","ntfy at notify.0xbf.ch: deny-all, provisioned users and tokens; Alertmanager and Gatus alerts to topic alerts"],
+ ["2026-11-18","qBittorrent over Proton VPN live (exit CH, port forwarding)"],
+ ["2026-11-18","Renovate live (weekly, rzbl), token by owner, verified with a lookup dry run"],
+ ["2026-11-18","Atlas: Done list"],
  ["2026-11-18", "Lidarr"],
  ["2026-11-18", "Navidrome"],
  ["2026-11-18", "Dawarich"],
