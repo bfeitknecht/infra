@@ -49,7 +49,7 @@ spec:
                   value: info
                 # Not Mend's default author (it maps to a Mend-owned GitHub user).
                 - name: RENOVATE_GIT_AUTHOR
-                  value: Renovate <renovate@0xbf.ch>
+                  value: Renovate <noreply@0xbf.ch>
                 - name: RENOVATE_TOKEN
                   valueFrom:
                     secretKeyRef:

@@ -190,6 +190,10 @@ Edge (all tiers): `0xbf.ch` + `*.0xbf.ch` are DNS-only (grey-cloud) A records. C
 
 Note: Keel cannot update Knative Services (it handles Deployment/StatefulSet/DaemonSet only). Whims ns is registry-push power. Whim repos are personal. Pods are IPv4-only. DDNS cannot detect IPv6 prefix, so no AAAA until dual-stack. Knative config is in `KnativeServing` CR `spec.config` (operator overwrites ConfigMap edits). Domain template and Gateway wiring are there.
 
+## Mail
+
+One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the catch-all). It is the commit author of bots (Renovate) and the planned SMTP sender for authentik, Forgejo, PDS and Immich (Proton SMTP submission token, owner creates it). Do not invent per-service addresses.
+
 ## Secrets
 
 - SOPS + age. `.sops.yaml` matches `*.sops.yaml`. Flux decrypts with `sops-age` Secret in `flux-system`.

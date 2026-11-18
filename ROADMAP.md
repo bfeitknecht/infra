@@ -35,7 +35,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## LATER
 
 - [ ] Identity rollout: immich OIDC, blog comments, atproto login source. Jellyfin SSO when the plugin supports 12.x.
-- [ ] Proton SMTP (authentik mail, PDS mail, Forgejo mail).
+- [ ] Proton SMTP: owner creates `noreply@0xbf.ch` (also catch-all) and an SMTP token; then wire authentik, Forgejo, PDS, Immich to it.
 - [ ] Tailscale autoApprovers for `tag:infra` routes.
 - [ ] Macbook factory reset to omni bootstrap.
 
