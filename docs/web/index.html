@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-18";
-const INFRA_TAG = "v1.36.0";
+const INFRA_TAG = "v1.37.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -312,6 +312,7 @@ const SERVICES = [
  {id:"radarr", name:"Radarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://radarr.internal", image:"lscr.io/linuxserver/radarr:7.0.3", desc:"Movie manager.", ports:"HTTP 7878", deps:["storage"], secrets:[], storage:"radarr-data 2Gi, media-files at /data", notes:["No login yet."]},
  {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
  {id:"lidarr", name:"Lidarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://lidarr.internal", image:"lscr.io/linuxserver/lidarr:3.1.6", desc:"Music manager. Library /data/media/music (Jellyfin music, later Navidrome).", ports:"HTTP 8686", deps:["storage"], secrets:[], storage:"lidarr-data 2Gi, media-files at /data", notes:["Added 2026-11-18 (v1.36.0). Set a login in Settings > General.","Download client: qBittorrent once its WireGuard key exists."]},
+ {id:"navidrome", name:"Navidrome", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://navidrome.internal", image:"deluan/navidrome:0.64.2", desc:"Music streaming (Subsonic API). Reads /data/media/music read-only.", ports:"HTTP 4533", deps:["storage"], secrets:[], storage:"navidrome-data 2Gi (nvme), media-files/media/music (ro)", notes:["Added 2026-11-18 (v1.37.0). First login creates the admin.","Public later: music.0xbf.ch."]},
  {id:"qbittorrent", name:"qBittorrent (Proton VPN)", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"qbittorrent",
   host:"https://qbittorrent.internal", image:"linuxserver/qbittorrent:5.3.0 + qmcgaw/gluetun:v3.41.3", desc:"Torrent client. All traffic through Proton VPN WireGuard (P2P, port forwarding, kill switch).",
   ports:"HTTP 8080, forwarded port via NAT-PMP", deps:["media"], secrets:["qbittorrent/qbittorrent-secrets.sops.yaml (to create)"], storage:"qbittorrent-data 1Gi (nvme), media-files at /data", runbook:"docs/RZBL_WORKLOADS.md",
@@ -326,13 +327,13 @@ const SERVICES = [
   host:"https://immich.internal (public later: photos.0xbf.ch?)", image:"immich v3.4.1 (server, ML), immich-db (vectorchord postgres), immich-redis (valkey 9)", desc:"Photo library with ML search.",
   ports:"HTTP 2283", deps:["traefik","storage"], secrets:["immich/immich-secrets.sops.yaml (to create)"], storage:"immich-files 1Ti (ssd), immich-db 20Gi, immich-cache 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md",
   notes:["Live 2026-11-17 (v1.32.0). ML on the GPU (v3.4.1-cuda, one time-slice).","GATE: no real photo library before backups work. First sign-up becomes admin: sign up at immich.internal."]},
- {id:"dawarich", name:"Dawarich", cat:"apps", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"dawarich", ks:"dawarich",
+ {id:"dawarich", name:"Dawarich", cat:"apps", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"dawarich", ks:"dawarich",
   host:"https://dawarich.internal", image:"freikin/dawarich:1.23.0, postgis 17-3.5, redis 8", desc:"Location history (Google Timeline alternative).",
   ports:"HTTP 3000", deps:["traefik","storage"], secrets:["dawarich/dawarich-secrets.sops.yaml (to create)"], storage:"dawarich-db 20Gi, dawarich-data 20Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:[]},
  {id:"copyparty", name:"Copyparty", cat:"apps", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"copyparty", ks:"copyparty",
   host:"https://files.0xbf.ch · https://copyparty.internal", image:"copyparty/ac:1.20.26", desc:"File server / sharing. Accounts in its config.",
   ports:"HTTP 3923", deps:["traefik","storage"], secrets:["copyparty/copyparty-config.sops.yaml (to create)"], storage:"copyparty-files 500Gi (ssd)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Safe to make public: accounts come from the config."]},
- {id:"timemachine", name:"Time Machine (Samba)", cat:"apps", status:"prepared", exp:"lan", node:"rzbl", tier:"1", ns:"samba", ks:"samba",
+ {id:"timemachine", name:"Time Machine (Samba)", cat:"apps", status:"live", exp:"lan", node:"rzbl", tier:"1", ns:"samba", ks:"samba",
   host:"smb://10.10.20.145/TimeMachine", image:"mbentley/timemachine:smb-20261116", desc:"Mac backups over SMB. LB IP .145 (= 445).",
   ports:"SMB 445 (LoadBalancer 10.10.20.145)", deps:["storage"], secrets:["samba/timemachine-secrets.sops.yaml (to create)"], storage:"timemachine-files 1Ti (ssd), cap 1 T", runbook:"docs/RZBL_WORKLOADS.md", notes:["No mDNS: add the server by IP on each Mac."]},
  {id:"runner", name:"Forgejo runner", cat:"dev", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"forgejo-runner", ks:"forgejo-runner",
@@ -378,8 +379,7 @@ const SERVICES = [
 const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
- {id:"timemachine-secret", prio:2, cat:"secret", t:"Time Machine secret", d:"PASSWORD. Then add smb://10.10.20.145/TimeMachine on each Mac.", svc:"timemachine"},
- {id:"dawarich-secret", prio:3, cat:"secret", t:"dawarich secret", d:"POSTGRES_PASSWORD, SECRET_KEY_BASE.", svc:"dawarich"},
+ {id:"timemachine-mac", prio:2, cat:"manual", t:"Time Machine: add the disk on each Mac", d:"Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/RZBL_WORKLOADS.md). Then pick it in Time Machine.", svc:"timemachine"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
  {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
@@ -417,8 +417,8 @@ const HOSTS = [
  ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib"],["git.0xbf.ch","public","forgejo"],
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["grafana.internal","internal","Grafana (home: 0xbf)"],["status.internal","internal","Gatus"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
- ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal","internal","*arr"],["qbittorrent.internal","internal","prepared"],
- ["immich.internal","internal","Immich"],["dawarich.internal","internal","prepared"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],["sandbox-1..3.internal","internal","agent sandbox slots (scripts/sandbox.nu)"],
+ ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal","internal","*arr"],["navidrome.internal","internal","Navidrome"],["qbittorrent.internal","internal","prepared"],
+ ["immich.internal","internal","Immich"],["dawarich.internal","internal","Dawarich"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],["sandbox-1..3.internal","internal","agent sandbox slots (scripts/sandbox.nu)"],
 ];
 const TAIL = [
  ["oci","100.73.186.19","tag:infra","advertises 10.20.20.0/24, accepts routes"],
@@ -438,11 +438,11 @@ const PVS = [
  ["exhib","exhib-data","50Gi","rbpi","storage-nvme0","live"],["devil","devil-data","20Gi","rbpi","storage-nvme0","live"],
  ["agh","agh-data","1Gi","rbpi","storage-nvme0","live"],["atuin","atuin-data","5Gi","rbpi","storage-nvme0","live"],
  ["media","media-files","2Ti","rzbl","storage-ssd0","live"],["media","jellyfin-data","20Gi","rzbl","storage-nvme0","live"],
- ["media","sonarr-data / radarr-data / prowlarr-data / lidarr-data","2/2/1/2Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
+ ["media","sonarr-data / radarr-data / prowlarr-data / lidarr-data / navidrome-data","2/2/1/2/2Gi","rzbl","storage-nvme0","live"],["ollama","ollama-cache","100Gi","rzbl","storage-nvme0","live"],
  ["egress","tailscale-relay-data","1Gi","rzbl","storage-nvme0","broken"],
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","live"],
- ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","prepared"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","live"],
- ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","prepared"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","live"],
+ ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","live"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","live"],
+ ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","live"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","live"],
  ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
 ];
 const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   agent-sandbox-crds   (pinned GitRepositories)
@@ -458,8 +458,9 @@ gpu ── media, ollama ── opencode
 agent-sandbox-crds ── agent-sandbox ── agents (+kata)
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
-* suspended: dawarich samba qbittorrent`;
+* suspended: qbittorrent`;
 const TAGS = [
+ ["v1.37.0","2026-11-18","Navidrome (navidrome.internal); Dawarich and Time Machine live (secrets seeded by agent)"],
  ["v1.36.0","2026-11-18","Lidarr (lidarr.internal), music folders"],
  ["v1.35.0","2026-11-17","Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2 (talosctl upgrade-k8s, etcd snapshot before each); topf.yaml pinned; renovate.json5; deck docs/journey.md"],
  ["v1.34.1","2026-11-17","Gatus config fix, apex pinned to rbpi (arm64 image), journey page"],
@@ -515,9 +516,9 @@ const SECRETS = [
  ["talos/secrets.sops.yaml","talos","exists","Talos secrets bundle"],
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
  ["applications/immich/immich-secrets.sops.yaml","immich","exists","DB_PASSWORD (seeded by agent)"],
- ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","TO CREATE","POSTGRES_PASSWORD, SECRET_KEY_BASE"],
+ ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","exists","POSTGRES_PASSWORD, SECRET_KEY_BASE (seeded by agent)"],
  ["applications/copyparty/copyparty-config.sops.yaml","copyparty","exists","copyparty.conf, account bf (seeded by agent)"],
- ["applications/samba/timemachine-secrets.sops.yaml","samba","TO CREATE","PASSWORD"],
+ ["applications/samba/timemachine-secrets.sops.yaml","samba","exists","PASSWORD (seeded by agent)"],
  ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","exists","RUNNER_TOKEN (minted by agent)"],
  ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","TO CREATE","WIREGUARD_PRIVATE_KEY (Proton)"],
 ];
@@ -691,9 +692,9 @@ const TN=[ // id,label,sub,x,y,w,ref
  ["gpu","GPU plugin","4 slots",1205,375,75,"gpu"],
  ["auth","authentik","auth.0xbf.ch",670,440,100,"authentik"],
  ["immich","immich","GPU ML",780,440,90,"immich"],
- ["daw","dawarich","prepared",880,440,90,"dawarich"],
+ ["daw","dawarich","location",880,440,90,"dawarich"],
  ["cp","copyparty","files.0xbf.ch",980,440,90,"copyparty"],
- ["tm","Time Machine",".145 prepared",1080,440,110,"timemachine"],
+ ["tm","Time Machine","smb .145",1080,440,110,"timemachine"],
  ["relay","ts-relay","→ NAS :3900",1200,440,80,"relay"],
  ["disks","NVMe 893 GB · SSD 4 TB","/var on NVMe, boot USB",670,505,260,null],
  ["agents","sandboxes","kata · warm pool 1",940,505,120,"agents"],

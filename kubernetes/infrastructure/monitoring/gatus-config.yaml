@@ -49,6 +49,13 @@ endpoints:
   - {<<: *internal, name: sonarr, url: http://sonarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: radarr, url: http://radarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: lidarr, url: http://lidarr.media.svc.cluster.local/ping}
+  - {<<: *internal, name: navidrome, url: http://navidrome.media.svc.cluster.local/ping}
+  - {<<: *internal, name: dawarich, url: http://dawarich.dawarich.svc.cluster.local/api/v1/health}
+  - name: time machine
+    group: internal
+    url: tcp://10.10.20.145:445
+    interval: 2m
+    conditions: ["[CONNECTED] == true"]
   - {<<: *internal, name: prowlarr, url: http://prowlarr.media.svc.cluster.local/ping}
   - {<<: *internal, name: ollama, url: http://ollama.ollama.svc.cluster.local:11434/}
   - {<<: *internal, name: agh, url: http://agh.agh.svc.cluster.local/}

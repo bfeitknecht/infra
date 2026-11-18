@@ -9,10 +9,11 @@ Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernet
 | Radarr 7.0.3                                     | `applications/media/`                    | **live**            | `radarr.internal`                                     |
 | Prowlarr 2.7.0                                   | `applications/media/`                    | **live**            | `prowlarr.internal`                                   |
 | Lidarr 3.1.6                                     | `applications/media/`                    | **live**            | `lidarr.internal`                                     |
+| Navidrome 0.64.2                                 | `applications/media/`                    | **live**            | `navidrome.internal` (public later: `music.0xbf.ch`)  |
 | Immich v3.4.1 (ML on GPU, `-cuda`)               | `applications/immich/`                   | **live**            | `immich.internal`                                     |
-| Dawarich 1.23.0                                  | `applications/dawarich/`                 | prepared, suspended | `dawarich.internal`                                   |
+| Dawarich 1.23.0                                  | `applications/dawarich/`                 | **live**            | `dawarich.internal`                                   |
 | Copyparty 1.20.26                                | `applications/copyparty/`                | **live**            | `copyparty.internal`, public `files.0xbf.ch`          |
-| Time Machine (Samba)                             | `applications/samba/`                    | prepared, suspended | `smb://10.10.20.145`                                  |
+| Time Machine (Samba)                             | `applications/samba/`                    | **live**            | `smb://10.10.20.145`                                  |
 | Forgejo runner 13.2.1                            | `applications/forgejo-runner/`           | **live**            | none                                                  |
 | Ollama 0.40.16 (GPU)                             | `applications/ollama/`                   | **live**            | cluster only: `ollama.ollama.svc.cluster.local:11434` |
 | opencode web 1.19.5 (Kata)                       | `applications/opencode/`                 | **live**            | `opencode.internal` (authentik, group developers)     |
@@ -32,7 +33,7 @@ Storage classes: `local-path-nvme` (rzbl NVMe, rbpi nvme0) and `local-path-ssd` 
 
 ## Secrets (nushell)
 
-Seeded by the agent on 2026-11-17 (random values piped straight into `sops --encrypt`, never printed): `immich-secrets`, `copyparty-config`. Read a value: `sops -d kubernetes/applications/copyparty/copyparty-config.sops.yaml | from yaml | get data."copyparty.conf" | decode base64 | decode`.
+Seeded by the agent (random values piped straight into `sops --encrypt`, never printed): `immich-secrets`, `copyparty-config`, `forgejo-runner-secrets` (token minted by the Forgejo CLI), `dawarich-secrets`, `timemachine-secrets`. Time Machine password: `sops -d kubernetes/applications/samba/timemachine-secrets.sops.yaml | from yaml | get data.PASSWORD | decode base64 | decode`. Read a value: `sops -d kubernetes/applications/copyparty/copyparty-config.sops.yaml | from yaml | get data."copyparty.conf" | decode base64 | decode`.
 
 Generate random values with `openssl rand -hex 32`.
 
@@ -154,7 +155,7 @@ Jellyfin libraries: Movies `/data/media/movies`, Shows `/data/media/tv`. Sonarr 
 Lidarr fills `/data/media/music`. Two ways to stream it, both on rzbl over the same volume:
 
 - **Jellyfin music library** (no new app): add library Music at `/data/media/music`. Phone apps: Finamp (iOS/Android) or Symfonium against `stream.0xbf.ch`.
-- **Navidrome** (`music.0xbf.ch` by purpose, `navidrome.internal`): a Subsonic server made for music (smart playlists, scrobbling, many clients: Symfonium, play:Sub, Feishin, Supersonic). Read-only mount of `media-files`.
+- **Navidrome** (live at `navidrome.internal` since v1.37.0; public later `music.0xbf.ch`): a Subsonic server made for music (smart playlists, scrobbling, many clients: Symfonium, play:Sub, Feishin, Supersonic). Read-only mount of `media-files`.
 
 Recommendation: start with the Jellyfin library (zero setup). Add Navidrome if the Subsonic clients are better for you.
 

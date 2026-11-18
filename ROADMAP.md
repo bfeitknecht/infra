@@ -8,7 +8,8 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Public:** apex `0xbf.ch` + `ssh 0xbf.ch` (v0.1.8, Polyring member; `?static` = static page), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch` (v0.5.6), forgejo `git.0xbf.ch` (SSH `2223`, SSO via authentik), pds, atuin, jellyfin `stream.0xbf.ch`, authentik `auth.0xbf.ch`.
 - **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik, internal only), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
 - **Live since 2026-11-17 evening:** copyparty `files.0xbf.ch`, Immich `immich.internal` (ML on GPU; no real library until backups).
-- **Prepared, suspended:** dawarich, Time Machine (`10.10.20.145`), qbittorrent (waits for the Proton WireGuard config).
+- **Live since 2026-11-18:** Lidarr, Navidrome (`navidrome.internal`), Dawarich, Time Machine (`smb://10.10.20.145`).
+- **Prepared, suspended:** qbittorrent (waits for the Proton WireGuard config).
 - **Monitoring:** Grafana `grafana.internal` (home dashboard `0xbf`, authentik SSO), Gatus `status.internal`, Prometheus on rbpi. Homepage off (Grafana home replaces it).
 - **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
 - **Release:** apex, exhib, glob, thyme all use `just release` (version from manifest, `--check`, no tag argument).
@@ -22,7 +23,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NEXT
 
-- [ ] **Music streaming:** Lidarr is live (v1.36.0). Add the Jellyfin music library, or Navidrome at `music.0xbf.ch` (`docs/RZBL_WORKLOADS.md`). Needs qBittorrent for downloads.
+- [ ] **Music streaming:** Lidarr + Navidrome live (internal). Public `music.0xbf.ch` when wanted. Needs qBittorrent for downloads.
 - [ ] **Renovate** on the Forgejo runner: `renovate.json5` is ready (validated); needs a token for the platform the repos live on.
 - [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
