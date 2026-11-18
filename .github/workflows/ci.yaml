@@ -32,7 +32,7 @@ jobs:
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Format check
-        run: just fmt -lint
+        run: just fmt --check
 
       - name: Build all Kustomizations
         run: just check

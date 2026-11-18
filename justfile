@@ -24,21 +24,31 @@ check:
     done
     echo "all Kustomizations build"
 
-# Format the YAML tree. `just fmt -lint` only reports. The sops files are excluded.
+# Format the YAML tree and the justfile. `just fmt --check` only reports. Sops files excluded.
 fmt *args:
     #!/usr/bin/env sh
     set -eu
-    # `.yamlfmt` (repo root) holds the style and the exclusions.
+    # `.yamlfmt` (repo root) holds the style and the exclusions. yamlfmt has
+    # only single-dash flags, so the recipe owns them and takes just `--check`.
     if ! command -v yamlfmt >/dev/null 2>&1; then
         echo "yamlfmt not found — install it with: go install github.com/google/yamlfmt/cmd/yamlfmt@v0.21.0" >&2
         echo "(brew: brew install yamlfmt)" >&2
         exit 1
     fi
-    yamlfmt {{ args }}
-
-# Rewrite the justfile in the standard form. Not the YAML linter (`just fmt -lint`).
-jfmt *args:
-    @just --fmt {{ args }}
+    case "{{ args }}" in
+      "")
+        yamlfmt
+        just --fmt
+        ;;
+      "--check")
+        yamlfmt -lint
+        just --fmt --check
+        ;;
+      *)
+        echo "fmt: unknown flag {{ args }} (known: --check)" >&2
+        exit 1
+        ;;
+    esac
 
 # Tag vX.Y.Z and push. `--check` validates only. Never commits: tags a clean tree.
 release version *flags:
@@ -60,7 +70,7 @@ release version *flags:
       || { echo "release: HEAD differs from upstream; push or pull first" >&2; exit 1; }
 
     just check
-    just fmt -lint
+    just fmt --check
     case "$flags" in *--check*) echo "${tag} is ready"; exit 0 ;; esac
 
     # A tag publishes the OCI artifact and Flux reconciles it. A broken tag
