@@ -27,6 +27,11 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
 
+### omni (details in omni/ROADMAP.md)
+
+- [ ] **Flesh out omni:** Rex (Superlogical, beta) on devil as the always-on home terminal; opencode on devil attached to the opencode web server (needs a CNP rule from `devil`).
+- [ ] **MacBook Pro reset:** write the runbook (exports, order, restore from omni, rollback via Time Machine), then make the move.
+
 ### omni: pre-reset parity (macbook reset gate)
 
 - [ ] Back up age key (`~/.config/sops/age/keys.txt`).
@@ -34,7 +39,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## LATER
 
-- [ ] Identity: blog comments, atproto login source, Jellyfin SSO when the plugin supports 12.x.
+- [ ] Identity: atproto login source, Jellyfin SSO when the plugin supports 12.x.
 - [ ] Tailscale autoApprovers for `tag:infra` routes.
 - [ ] Macbook factory reset to omni bootstrap.
 
@@ -51,6 +56,13 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [x] 2026-11-17 authentik live + blueprints, Forgejo SSO + theme, Jellyfin public + branding, opencode in Kata with CNP + forward auth, Cilium `socketLB.hostNamespaceOnly`, devil clean stop.
 - [x] 2026-11-16 rbpi storage migration, rzbl workloads (media), GPU plugin, relay fix, thyme on Typst Universe, Zyxel `2223`.
 - [x] 2026-11-15 Talos 1.14.6 on all nodes, rzbl join, Traefik pinned to rbpi, SSH ports (apex `22`, git `2223`), exhib live with one container.
+
+## Projects (owner ideas, not scheduled)
+
+- [ ] **radio.0xbf.ch** — internet radio. Music made with **Strudel** (live-coded patterns in the browser); the station plays recorded sets and the library (Navidrome). Likely Icecast + Liquidsoap on rzbl, public by purpose (`radio`).
+- [ ] **exhib: playlist content type** (maybe) — a collection of tracks next to photos and writing, possibly fed by radio sets.
+- [ ] **Second brain** — Obsidian as the editor; a public digital garden plus a private wiki of everything known. Vault in git on Forgejo; garden published as a static site (Quartz or thyme-based), wiki internal behind authentik.
+- [ ] **Comments for blog and gallery** — own project (owner builds it), replaces the identity-rollout idea of third-party comments.
 
 ## SOMEDAY / ideas
 

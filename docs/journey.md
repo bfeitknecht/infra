@@ -2,10 +2,24 @@
 title: "GENESIS: a homelab journey"
 sub_title: "From one Pi to a three-node Talos cluster, in 66 days"
 author: Basil Feitknecht
+theme:
+  override:
+    intro_slide:
+      title:
+        font_size: 3
+    slide_title:
+      font_size: 2
 ---
+
+<!--
+Present: `presenterm docs/journey.md`. Sizes (font_size, title sizes) work in
+kitty >= 0.40 only. Elsewhere, present in a window with a large font, e.g.
+`ghostty --font-size=26 -e presenterm docs/journey.md`.
+-->
 
 The idea
 ===
+<!-- font_size: 2 -->
 
 <!-- column_layout: [3, 2] -->
 <!-- column: 0 -->
@@ -33,6 +47,7 @@ A broken tag breaks reconcile until the next one.
 
 By the numbers
 ===
+<!-- font_size: 2 -->
 
 |              |                                              |
 | ------------ | -------------------------------------------- |
@@ -49,6 +64,7 @@ Source: `python3 scripts/journey.py` -> `docs/web/journey.html`
 
 The machines
 ===
+<!-- font_size: 2 -->
 
 <!-- column_layout: [1, 1, 1] -->
 <!-- column: 0 -->
@@ -88,6 +104,7 @@ Razer Blade 15, GTX 1660 Ti, 4 TB SSD
 
 Phase 1: the foundation (Sep 13 to 30)
 ===
+<!-- font_size: 2 -->
 
 - **v1.0.0** on Sep 16: Talos, Flux, an OCI artifact as the only source
 - Flannel out, **Cilium** in (kube-proxy replacement, L2 announcements)
@@ -103,6 +120,7 @@ Phase 1: the foundation (Sep 13 to 30)
 
 Phase 2: the dev box and the quiet month (Oct)
 ===
+<!-- font_size: 2 -->
 
 - **devil**: a NixOS VM in a Kata pod, ssh on 2222, ghostty-web in the browser
 - the **tailscale-relay**: a user-owned device, because tagged nodes cannot see shared-in machines
@@ -114,6 +132,7 @@ Phase 2: the dev box and the quiet month (Oct)
 
 Phase 3: the sites (Nov 8 to 15)
 ===
+<!-- font_size: 2 -->
 
 - **thyme**: a Typst static-site package, published on Typst Universe
 - **glob**: the blog, built with thyme
@@ -127,6 +146,7 @@ The busiest day: **Nov 9**, 66 commits across five repos (thyme 23, apex 21).
 
 Phase 4: the second worker (Nov 15 to 16)
 ===
+<!-- font_size: 2 -->
 
 - **rzbl** joins: Talos boots from a USB stick, NVMe and SSD as user volumes
 - VXLAN through the Pi's SNAT fails: rzbl gets its own `/32` route and a routing rule
@@ -138,6 +158,7 @@ Phase 4: the second worker (Nov 15 to 16)
 
 Phase 5: identity and isolation (Nov 17)
 ===
+<!-- font_size: 2 -->
 
 <!-- column_layout: [1, 1] -->
 <!-- column: 0 -->
@@ -165,6 +186,7 @@ Phase 5: identity and isolation (Nov 17)
 
 Phase 6: one place to look (Nov 17)
 ===
+<!-- font_size: 2 -->
 
 - Grafana home dashboard **0xbf**: health, status checks, nodes, disks, GPU, traffic, Flux
 - curated dashboards instead of the stock forty
@@ -176,6 +198,7 @@ Phase 6: one place to look (Nov 17)
 
 Then the rest of the night
 ===
+<!-- font_size: 2 -->
 
 - copyparty at **files.0xbf.ch**
 - Immich with machine learning on the GPU
@@ -187,6 +210,7 @@ Then the rest of the night
 
 What went wrong (and what it taught)
 ===
+<!-- font_size: 2 -->
 
 - a CR next to its CRD: dry-run fails, nothing applies
 - `kubectl port-forward` cannot reach a Kata VM
@@ -199,6 +223,7 @@ What went wrong (and what it taught)
 
 Next
 ===
+<!-- font_size: 2 -->
 
 1. **backups**: Garage on a friend's NAS, then restore drills
 2. qBittorrent over Proton VPN
