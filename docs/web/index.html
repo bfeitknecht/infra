@@ -396,7 +396,7 @@ const NEEDS = [
  {id:"dawarich-email", prio:3, cat:"manual", t:"Dawarich: change the demo admin", d:"Default admin demo@dawarich.app had password 'password'; rotated, value in .private/dawarich-admin.sops.yaml. Log in, set your email.", svc:"dawarich"},
  {id:"invites", prio:2, cat:"manual", t:"Invite people", d:"authentik > Directory > Invitations > Create (flow invite) > send by email. After they join, put them in family or friends (docs/AUTHENTIK.md).", svc:"authentik"},
  {id:"proton-smtp-file", prio:3, cat:"manual", t:"Delete .private/proton-smtp.txt", d:"The token is encrypted in four secrets now.", svc:null},
- {id:"autoapprove", prio:3, cat:"decision", t:"Tailscale autoApprovers (optional)", d:"Auto-approve 10.10.0.0/16 and 10.20.20.0/24 for tag:infra.", svc:null},
+ {id:"autoapprove", prio:3, cat:"manual", t:"Tailscale autoApprovers for tag:infra", d:"Admin console > Access controls: add autoApprovers.routes for 10.10.10.0/24, 10.10.20.0/24, 10.10.20.11/32, 10.20.20.0/24 -> tag:infra (AGENTS.md, tailscale on nodes).", svc:null},
  {id:"nix-shells", prio:3, cat:"decision", t:"Nix dev shells per repo", d:"No repo has flake.nix except omni. See docs/WORKSPACE.md.", svc:null},
 ];
 
