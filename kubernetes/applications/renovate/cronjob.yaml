@@ -1,0 +1,70 @@
+# Renovate, weekly, on rzbl next to the Forgejo runner. Pull requests only, no
+# automerge (renovate.json5 in each repo). Platform is GitHub, where the repos
+# live. Token: fine-grained PAT (contents, pull requests, issues, workflows:
+# read/write; metadata: read) in Secret renovate-secrets.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: renovate
+  namespace: renovate
+spec:
+  schedule: "0 5 * * 1"
+  timeZone: Europe/Zurich
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          restartPolicy: Never
+          nodeSelector:
+            kubernetes.io/hostname: rzbl
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 12021
+            runAsGroup: 0
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: renovate
+              image: ghcr.io/renovatebot/renovate:44.251.0
+              env:
+                - name: RENOVATE_PLATFORM
+                  value: github
+                # Start with infra (it has renovate.json5). Add more repos
+                # once each has a config; requireConfig avoids onboarding PRs.
+                - name: RENOVATE_REPOSITORIES
+                  value: bfeitknecht/infra
+                - name: RENOVATE_REQUIRE_CONFIG
+                  value: required
+                - name: RENOVATE_ONBOARDING
+                  value: "false"
+                - name: RENOVATE_BASE_DIR
+                  value: /tmp/renovate
+                - name: LOG_LEVEL
+                  value: info
+                - name: RENOVATE_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: renovate-secrets
+                      key: RENOVATE_TOKEN
+              resources:
+                requests:
+                  cpu: 200m
+                  memory: 512Mi
+                limits:
+                  memory: 2Gi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}

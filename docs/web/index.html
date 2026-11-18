@@ -247,7 +247,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-18";
-const INFRA_TAG = "v1.37.0";
+const INFRA_TAG = "v1.38.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -382,6 +382,8 @@ const NEEDS = [
  {id:"timemachine-mac", prio:2, cat:"manual", t:"Time Machine: add the disk on each Mac", d:"Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/RZBL_WORKLOADS.md). Then pick it in Time Machine.", svc:"timemachine"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
+ {id:"renovate-token", prio:2, cat:"secret", t:"Renovate: GitHub fine-grained token", d:"Create in GitHub settings (contents, PRs, issues, workflows rw), then the input -s command in docs/RZBL_WORKLOADS.md. Renovate (CronJob, rzbl) is ready and suspended.", svc:null},
+ {id:"dawarich-email", prio:3, cat:"manual", t:"Dawarich: change the demo admin", d:"Default admin demo@dawarich.app had password 'password'; rotated, value in .private/dawarich-admin.sops.yaml. Log in, set your email.", svc:"dawarich"},
  {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
  {id:"smtp", prio:3, cat:"decision", t:"SMTP (Proton)", d:"Blocks authentik email invites/resets and PDS email.", svc:"authentik"},
  {id:"autoapprove", prio:3, cat:"decision", t:"Tailscale autoApprovers (optional)", d:"Auto-approve 10.10.0.0/16 and 10.20.20.0/24 for tag:infra.", svc:null},
@@ -460,6 +462,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: qbittorrent`;
 const TAGS = [
+ ["v1.38.0","2026-11-18","Renovate CronJob prepared (suspended, waits for token); thyme history: basil@0xbf.ch -> bfeitknecht@ethz.ch"],
  ["v1.37.0","2026-11-18","Navidrome (navidrome.internal); Dawarich and Time Machine live (secrets seeded by agent)"],
  ["v1.36.0","2026-11-18","Lidarr (lidarr.internal), music folders"],
  ["v1.35.0","2026-11-17","Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2 (talosctl upgrade-k8s, etcd snapshot before each); topf.yaml pinned; renovate.json5; deck docs/journey.md"],
@@ -514,6 +517,7 @@ const SECRETS = [
  ["applications/authentik/authentik-secrets.sops.yaml","authentik","exists","secret key, DB pw, bootstrap admin"],
  ["applications/homepage/homepage-services.sops.yaml","homepage","exists (disabled)","widget creds"],
  ["talos/secrets.sops.yaml","talos","exists","Talos secrets bundle"],
+ ["applications/renovate/renovate-secrets.sops.yaml","renovate","TO CREATE","RENOVATE_TOKEN (GitHub fine-grained PAT)"],
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
  ["applications/immich/immich-secrets.sops.yaml","immich","exists","DB_PASSWORD (seeded by agent)"],
  ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","exists","POSTGRES_PASSWORD, SECRET_KEY_BASE (seeded by agent)"],
