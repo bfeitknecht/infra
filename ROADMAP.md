@@ -9,7 +9,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Internal:** AGH, knot/kresd, devil (Kata), *arr, ollama (GPU), opencode (Kata + CNP + authentik, internal only), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1).
 - **Live since 2026-11-17 evening:** copyparty `files.0xbf.ch`, Immich `immich.internal` (ML on GPU; no real library until backups).
 - **Live since 2026-11-18:** Lidarr, Navidrome (`navidrome.internal`), Dawarich, Time Machine (`smb://10.10.20.145`).
-- **Prepared, suspended:** qbittorrent (waits for the Proton WireGuard config).
+- **Live since 2026-11-18 (later):** qBittorrent over Proton VPN, Renovate (weekly, rzbl), ntfy (`notify.0xbf.ch`, alerts from Alertmanager and Gatus).
 - **Monitoring:** Grafana `grafana.internal` (home dashboard `0xbf`, authentik SSO), Gatus `status.internal`, Prometheus on rbpi. Homepage off (Grafana home replaces it).
 - **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet.
 - **Release:** apex, exhib, glob, thyme all use `just release` (version from manifest, `--check`, no tag argument).
@@ -17,15 +17,12 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## NOW
 
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
-- [ ] **Secrets for prepared apps** (`docs/RZBL_WORKLOADS.md`), then un-suspend one by one. qBittorrent first (Proton WireGuard key).
 - [ ] **Forgejo:** Actions + runner live (v1.33.0). Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
 
 ## NEXT
 
-- [ ] **Music streaming:** Lidarr + Navidrome live (internal). Public `music.0xbf.ch` when wanted. Needs qBittorrent for downloads.
-- [ ] **Renovate:** CronJob ready on rzbl (suspended). Owner creates a GitHub fine-grained token (`docs/RZBL_WORKLOADS.md`).
-- [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
+- [ ] **Music streaming:** Lidarr + Navidrome + qBittorrent live. Connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
 - [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
@@ -34,7 +31,6 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - [ ] Back up age key (`~/.config/sops/age/keys.txt`).
 - [ ] Zed settings to nix. macOS defaults via nix-darwin. Brewfile parity.
-- [ ] SSH config `Host git.0xbf.ch` with `Port 2223` (so `git@git.0xbf.ch:owner/repo` works).
 
 ## LATER
 
@@ -45,6 +41,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-18 qBittorrent over Proton VPN, Renovate live, ntfy with Alertmanager + Gatus alerts, omni ssh git.0xbf.ch port 2223.
 - [x] 2026-11-18 Lidarr, Navidrome, Dawarich, Time Machine live; thyme history email rewrite (bundle in `.private/`).
 - [x] 2026-11-17 Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2; journey page + deck.
 - [x] 2026-11-17 copyparty (files.0xbf.ch), Immich with GPU ML, Forgejo Actions + runner, agent sandbox slots (scripts/sandbox.nu).

@@ -3,5 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - cronjob.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md, "Renovate"), then uncomments it.
-  # - renovate-secrets.sops.yaml
+  - renovate-secrets.sops.yaml

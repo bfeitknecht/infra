@@ -454,9 +454,6 @@ metadata:
   name: qbittorrent
   namespace: flux-system
 spec:
-  # Prepared, not deployed. Owner creates the sops Secret first.
-  # See docs/RZBL_WORKLOADS.md. Then remove this line.
-  suspend: true
   dependsOn:
     - name: media
   interval: 10m0s
@@ -477,11 +474,29 @@ metadata:
   name: renovate
   namespace: flux-system
 spec:
-  # Prepared, not deployed. Owner creates the sops Secret first.
-  # See docs/RZBL_WORKLOADS.md. Then remove this line.
-  suspend: true
   interval: 10m0s
   path: ./kubernetes/applications/renovate
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ntfy
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: storage
+    - name: traefik
+  interval: 10m0s
+  path: ./kubernetes/applications/ntfy
   prune: true
   wait: true
   sourceRef:

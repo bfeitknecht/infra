@@ -96,6 +96,7 @@ spec:
     - jellyfin.internal
     - lidarr.internal
     - navidrome.internal
+    - ntfy.internal
     - opencode.internal
     - prowlarr.internal
     - qbittorrent.internal

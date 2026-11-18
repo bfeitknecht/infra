@@ -231,6 +231,13 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
   <table id="sectable"></table>
 </section>
 
+<section id="done">
+  <h2>Done</h2>
+  <p class="lead">Every completed task, newest first. Source: ROADMAP.md history and the DONE list in this file.</p>
+  <div class="toolbar"><input id="doneq" placeholder="filter" size="30"></div>
+  <div id="donelist"></div>
+</section>
+
 <section id="docs">
   <h2>Docs &amp; runbooks</h2>
   <p class="lead">Files in this repo and the app repos.</p>
@@ -247,7 +254,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
    DATA. Update this block when the cluster changes.
    ============================================================ */
 const ASOF = "2026-11-18";
-const INFRA_TAG = "v1.38.0";
+const INFRA_TAG = "v1.39.0";
 
 const NODES = [
  {id:"oci", name:"oci", role:"control plane", where:"Oracle Cloud eu-zurich-1", hw:"Ampere A1 (arm64), free tier", ip:"10.20.20.10", ts:"100.73.186.19", pub:"140.238.213.197",
@@ -313,9 +320,9 @@ const SERVICES = [
  {id:"prowlarr", name:"Prowlarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://prowlarr.internal", image:"lscr.io/linuxserver/prowlarr:2.7.0", desc:"Indexer manager for the *arr apps.", ports:"HTTP 9696", deps:["storage"], secrets:[], storage:"prowlarr-data 1Gi", notes:["No download client yet (needs VPN decision)."]},
  {id:"lidarr", name:"Lidarr", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://lidarr.internal", image:"lscr.io/linuxserver/lidarr:3.1.6", desc:"Music manager. Library /data/media/music (Jellyfin music, later Navidrome).", ports:"HTTP 8686", deps:["storage"], secrets:[], storage:"lidarr-data 2Gi, media-files at /data", notes:["Added 2026-11-18 (v1.36.0). Set a login in Settings > General.","Download client: qBittorrent once its WireGuard key exists."]},
  {id:"navidrome", name:"Navidrome", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"media", host:"https://navidrome.internal", image:"deluan/navidrome:0.64.2", desc:"Music streaming (Subsonic API). Reads /data/media/music read-only.", ports:"HTTP 4533", deps:["storage"], secrets:[], storage:"navidrome-data 2Gi (nvme), media-files/media/music (ro)", notes:["Added 2026-11-18 (v1.37.0). First login creates the admin.","Public later: music.0xbf.ch."]},
- {id:"qbittorrent", name:"qBittorrent (Proton VPN)", cat:"media", status:"prepared", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"qbittorrent",
+ {id:"qbittorrent", name:"qBittorrent (Proton VPN)", cat:"media", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"media", ks:"qbittorrent",
   host:"https://qbittorrent.internal", image:"linuxserver/qbittorrent:5.3.0 + qmcgaw/gluetun:v3.41.3", desc:"Torrent client. All traffic through Proton VPN WireGuard (P2P, port forwarding, kill switch).",
-  ports:"HTTP 8080, forwarded port via NAT-PMP", deps:["media"], secrets:["qbittorrent/qbittorrent-secrets.sops.yaml (to create)"], storage:"qbittorrent-data 1Gi (nvme), media-files at /data", runbook:"docs/RZBL_WORKLOADS.md",
+  ports:"HTTP 8080, forwarded port via NAT-PMP", deps:["media"], secrets:["qbittorrent/qbittorrent-secrets.sops.yaml"], storage:"qbittorrent-data 1Gi (nvme), media-files at /data", runbook:"docs/RZBL_WORKLOADS.md",
   notes:["Namespace media (shares media-files with the *arr apps).","Verify the exit IP is not 31.164.81.63."]},
  {id:"ollama", name:"Ollama", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"ollama", ks:"ollama",
   host:"ollama.ollama.svc.cluster.local:11434", image:"ollama/ollama:0.40.16", desc:"Local LLM runtime on the GPU. Model qwen2.5-coder:7b (25/29 layers on GPU, 16k context).",
@@ -340,6 +347,8 @@ const SERVICES = [
   host:"—", image:"code.forgejo.org/forgejo/runner:13.2.1 + docker:28-dind", desc:"CI runner for Forgejo Actions (labels docker, ubuntu-latest).",
   ports:"—", deps:["forgejo","storage"], secrets:["forgejo-runner/forgejo-runner-secrets.sops.yaml (to create)"], storage:"forgejo-runner-data 5Gi (nvme)", runbook:"docs/RZBL_WORKLOADS.md", notes:["Enable [actions] in Forgejo app.ini.","GitHub becomes a push mirror."]},
  // ---------- internal platform apps
+ {id:"ntfy", name:"ntfy", cat:"platform", status:"live", exp:"public", node:"rbpi", tier:"1", ns:"ntfy", ks:"ntfy", host:"https://notify.0xbf.ch · https://ntfy.internal", image:"binwiederhier/ntfy:v2.38.1", desc:"Push notifications. Topic alerts gets Alertmanager and Gatus alerts.", ports:"HTTP 8080", deps:["traefik","storage"], secrets:["ntfy/ntfy-config.sops.yaml","monitoring/alertmanager-secrets.sops.yaml","monitoring/gatus-secrets.sops.yaml"], storage:"ntfy-data 1Gi (rbpi nvme)", notes:["deny-all; users bf (admin) and publisher (write-only alerts*), provisioned in server.yml.","Phone: ntfy app, server notify.0xbf.ch, login bf (password in .private/ntfy-bf.sops.yaml), subscribe to alerts.","iOS instant push via upstream ntfy.sh (sees only a message-id hash)."]},
+ {id:"renovate", name:"Renovate", cat:"dev", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"renovate", ks:"renovate", host:"—", image:"ghcr.io/renovatebot/renovate:44.251.0", desc:"Weekly dependency PRs (Mondays 05:00) on bfeitknecht/infra. No automerge.", ports:"—", deps:[], secrets:["renovate/renovate-secrets.sops.yaml"], notes:["Config renovate.json5 in the repo. Add repos via RENOVATE_REPOSITORIES once each has a config."]},
  {id:"agh", name:"AdGuard Home", cat:"network", status:"live", exp:"lan", node:"rbpi", tier:"1", ns:"agh", ks:"agh",
   host:"10.10.20.153 (DNS) · https://agh.internal", image:"adguard/adguardhome:v0.107.79", desc:"LAN DNS edge. Upstream: kresd 10.96.0.53.",
   ports:"DNS 53 (LB .153), UI 80", deps:["dns","storage"], secrets:["agh/agh-config.sops.yaml"], storage:"agh-data 1Gi (rbpi nvme0)", notes:["Config seed only on first boot; UI edits live on the PVC."]},
@@ -382,10 +391,10 @@ const NEEDS = [
  {id:"timemachine-mac", prio:2, cat:"manual", t:"Time Machine: add the disk on each Mac", d:"Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/RZBL_WORKLOADS.md). Then pick it in Time Machine.", svc:"timemachine"},
  {id:"git-remotes", prio:3, cat:"manual", t:"Update git remotes + SSH config", d:"ssh://git@git.0xbf.ch:2223/… or Host git.0xbf.ch Port 2223 in ~/.ssh/config (omni).", svc:"forgejo"},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
- {id:"renovate-token", prio:2, cat:"secret", t:"Renovate: GitHub fine-grained token", d:"Create in GitHub settings (contents, PRs, issues, workflows rw), then the input -s command in docs/RZBL_WORKLOADS.md. Renovate (CronJob, rzbl) is ready and suspended.", svc:null},
+ {id:"ntfy-phone", prio:2, cat:"manual", t:"ntfy app on the phone", d:"Install ntfy, add server https://notify.0xbf.ch, log in as bf (password: sops -d .private/ntfy-bf.sops.yaml), subscribe to topic alerts.", svc:"ntfy"},
+ {id:"wg-file", prio:3, cat:"manual", t:"Delete .private/proton-wg.conf", d:"The private key is encrypted in qbittorrent-secrets now. The plaintext file is no longer needed.", svc:"qbittorrent"},
  {id:"dawarich-email", prio:3, cat:"manual", t:"Dawarich: change the demo admin", d:"Default admin demo@dawarich.app had password 'password'; rotated, value in .private/dawarich-admin.sops.yaml. Log in, set your email.", svc:"dawarich"},
- {id:"qbit-secret", prio:2, cat:"secret", t:"qBittorrent: Proton WireGuard key", d:"Proton account > WireGuard config, P2P server, NAT-PMP on. Then un-suspend.", svc:"qbittorrent"},
- {id:"smtp", prio:3, cat:"decision", t:"SMTP (Proton)", d:"Blocks authentik email invites/resets and PDS email.", svc:"authentik"},
+ {id:"smtp", prio:3, cat:"decision", t:"SMTP (Proton)", d:"Blocks authentik email invites/resets and PDS email. ntfy covers alerts.", svc:"authentik"},
  {id:"autoapprove", prio:3, cat:"decision", t:"Tailscale autoApprovers (optional)", d:"Auto-approve 10.10.0.0/16 and 10.20.20.0/24 for tag:infra.", svc:null},
  {id:"nix-shells", prio:3, cat:"decision", t:"Nix dev shells per repo", d:"No repo has flake.nix except omni. See docs/WORKSPACE.md.", svc:null},
 ];
@@ -417,9 +426,9 @@ const PORTS = [
 ];
 const HOSTS = [
  ["0xbf.ch","public","apex"],["blog.0xbf.ch","public","glob"],["gallery.0xbf.ch","public","exhib"],["git.0xbf.ch","public","forgejo"],
- ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["<ksvc>.0xbf.ch","public","Knative whims"],
+ ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["notify.0xbf.ch","public","ntfy"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["grafana.internal","internal","Grafana (home: 0xbf)"],["status.internal","internal","Gatus"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
- ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal","internal","*arr"],["navidrome.internal","internal","Navidrome"],["qbittorrent.internal","internal","prepared"],
+ ["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal","internal","*arr"],["navidrome.internal","internal","Navidrome"],["ntfy.internal","internal","ntfy"],["qbittorrent.internal","internal","prepared"],
  ["immich.internal","internal","Immich"],["dawarich.internal","internal","Dawarich"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],["sandbox-1..3.internal","internal","agent sandbox slots (scripts/sandbox.nu)"],
 ];
 const TAIL = [
@@ -445,7 +454,7 @@ const PVS = [
  ["immich","immich-files / immich-db / immich-cache","1Ti / 20Gi / 20Gi","rzbl","ssd0 / nvme0","live"],
  ["dawarich","dawarich-db / dawarich-data","20Gi / 20Gi","rzbl","storage-nvme0","live"],["copyparty","copyparty-files","500Gi","rzbl","storage-ssd0","live"],
  ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","live"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","live"],
- ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","prepared"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
+ ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","live"],["ntfy","ntfy-data","1Gi","rbpi","storage-nvme0","live"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
 ];
 const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   agent-sandbox-crds   (pinned GitRepositories)
 storage
@@ -460,8 +469,9 @@ gpu ── media, ollama ── opencode
 agent-sandbox-crds ── agent-sandbox ── agents (+kata)
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
-* suspended: qbittorrent`;
+* suspended: none`;
 const TAGS = [
+ ["v1.39.0","2026-11-18","ntfy (notify.0xbf.ch) + Alertmanager/Gatus alerts; qBittorrent and Renovate live; atlas Done list"],
  ["v1.38.0","2026-11-18","Renovate CronJob prepared (suspended, waits for token); thyme history: basil@0xbf.ch -> bfeitknecht@ethz.ch"],
  ["v1.37.0","2026-11-18","Navidrome (navidrome.internal); Dawarich and Time Machine live (secrets seeded by agent)"],
  ["v1.36.0","2026-11-18","Lidarr (lidarr.internal), music folders"],
@@ -517,14 +527,146 @@ const SECRETS = [
  ["applications/authentik/authentik-secrets.sops.yaml","authentik","exists","secret key, DB pw, bootstrap admin"],
  ["applications/homepage/homepage-services.sops.yaml","homepage","exists (disabled)","widget creds"],
  ["talos/secrets.sops.yaml","talos","exists","Talos secrets bundle"],
- ["applications/renovate/renovate-secrets.sops.yaml","renovate","TO CREATE","RENOVATE_TOKEN (GitHub fine-grained PAT)"],
+ ["applications/renovate/renovate-secrets.sops.yaml","renovate","exists","RENOVATE_TOKEN (GitHub fine-grained PAT, by owner)"],
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
  ["applications/immich/immich-secrets.sops.yaml","immich","exists","DB_PASSWORD (seeded by agent)"],
  ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","exists","POSTGRES_PASSWORD, SECRET_KEY_BASE (seeded by agent)"],
  ["applications/copyparty/copyparty-config.sops.yaml","copyparty","exists","copyparty.conf, account bf (seeded by agent)"],
  ["applications/samba/timemachine-secrets.sops.yaml","samba","exists","PASSWORD (seeded by agent)"],
  ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","exists","RUNNER_TOKEN (minted by agent)"],
- ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","TO CREATE","WIREGUARD_PRIVATE_KEY (Proton)"],
+ ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","exists","WIREGUARD_PRIVATE_KEY (from .private/proton-wg.conf, by agent)"],
+ ["applications/ntfy/ntfy-config.sops.yaml","ntfy","exists","server.yml: bcrypt hashes, publisher tokens (seeded by agent)"],
+ ["infrastructure/monitoring/alertmanager-secrets.sops.yaml","monitoring","exists","ntfy token (alertmanager)"],
+ ["infrastructure/monitoring/gatus-secrets.sops.yaml","monitoring","exists","NTFY_TOKEN (gatus)"],
+];
+const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-18", "Lidarr"],
+ ["2026-11-18", "Navidrome"],
+ ["2026-11-18", "Dawarich"],
+ ["2026-11-18", "Time Machine live"],
+ ["2026-11-18", "thyme history email rewrite (bundle in `.private/`)"],
+ ["2026-11-18", "qBittorrent over Proton VPN"],
+ ["2026-11-18", "Renovate live"],
+ ["2026-11-18", "ntfy with Alertmanager + Gatus alerts"],
+ ["2026-11-18", "omni ssh git.0xbf.ch port 2223"],
+ ["2026-11-17", "Agent Sandbox (v1.29.0)"],
+ ["2026-11-17", "Placement review (controllers prefer rbpi)"],
+ ["2026-11-17", "Atlas pan/zoom"],
+ ["2026-11-17", "copyparty hosts"],
+ ["2026-11-17", "Release unification (apex, glob, thyme)"],
+ ["2026-11-17", "exhib v0.5.6 (video pauses on navigation)"],
+ ["2026-11-17", "apex v0.1.6 (Firefox freeze after new tab)"],
+ ["2026-11-17", "authentik live + blueprints"],
+ ["2026-11-17", "Forgejo SSO + theme"],
+ ["2026-11-17", "Jellyfin public + branding"],
+ ["2026-11-17", "opencode in Kata with CNP + forward auth"],
+ ["2026-11-17", "Cilium `socketLB.hostNamespaceOnly`"],
+ ["2026-11-17", "devil clean stop"],
+ ["2026-11-17", "apex v0.1.7 (Polyring, mobile nav + touch scroll, light cursor, iOS dvh)"],
+ ["2026-11-17", "authentik admin with passkey"],
+ ["2026-11-17", "Forgejo SSO linked (grant_types fix v1.30.0)"],
+ ["2026-11-17", "Circle mark everywhere"],
+ ["2026-11-17", "Monitoring v2 (curated dashboards, 0xbf home, Gatus, GPU exporter)"],
+ ["2026-11-17", "Flux on rbpi"],
+ ["2026-11-17", "Forgejo landing /bf"],
+ ["2026-11-17", "apex one-line footer (0.1.9)"],
+ ["2026-11-17", "copyparty (files.0xbf.ch)"],
+ ["2026-11-17", "Immich with GPU ML"],
+ ["2026-11-17", "Forgejo Actions + runner"],
+ ["2026-11-17", "Agent sandbox slots (scripts/sandbox.nu)"],
+ ["2026-11-17", "Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2; journey page + deck."],
+ ["2026-11-16", "rbpi storage migration"],
+ ["2026-11-16", "rzbl workloads (media)"],
+ ["2026-11-16", "GPU plugin"],
+ ["2026-11-16", "Relay fix (PodSecurity + state on PVC)"],
+ ["2026-11-16", "Relay fix"],
+ ["2026-11-16", "thyme on Typst Universe"],
+ ["2026-11-16", "Zyxel `2223`"],
+ ["2026-11-15", "Talos 1.14.6 on all nodes"],
+ ["2026-11-15", "rzbl join"],
+ ["2026-11-15", "Traefik pinned to rbpi"],
+ ["2026-11-15", "SSH ports (apex `22`, git `2223`)"],
+ ["2026-11-15", "exhib live with one container"],
+ ["2026-11-10", "Teleport CE. Deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey"],
+ ["2026-11-10", "`tsh login --proxy teleport.internal` works. Torn down 2026-10-24. See LATER"],
+ ["2026-11-10", "devil live. Access model switched (2026-10-20): teleport is superseded and was torn down 2026-10-24 (friend demo done). New doors"],
+ ["2026-11-10", "All via the gateway (one hostname, `devil.internal`, knot wildcard. No DNS record needed):"],
+ ["2026-11-10", "Teleport teardown. Done 2026-10-24 (friend demo done): `infrastructure/teleport/` deleted"],
+ ["2026-11-10", "The devil teleport mounts/secret/configmap + `dependsOn: teleport` removed"],
+ ["2026-11-10", "omni's teleport unit + port 3022 + `TELEPORT_SESSION` prompt special-case removed"],
+ ["2026-11-10", "AGENTS/README notes updated. Devil runs ssh (2222) + ghostty-web (ttyd + real login)"],
+ ["2026-11-10", "Teleport CE. Deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0, multiplex TLS on LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin `bf` (access/editor/auditor) registered with passkey. `tsh login --proxy teleport.internal` works. Removed 2026-10-24. See LATER"],
+ ["2026-11-10", "devil live. Access model switched (2026-10-20): Teleport is superseded and removed 2026-10-24. New doors via gateway (one hostname `devil.internal`, knot wildcard, no DNS record):"],
+ ["2026-11-10", "Teleport teardown. Done 2026-10-24 after friend demo: `infrastructure/teleport/` deleted"],
+ ["2026-11-10", "devil teleport mounts/secret/configmap + `dependsOn: teleport` removed"],
+ ["2026-11-10", "omni teleport unit + port `3022` + `TELEPORT_SESSION` prompt removed"],
+ ["2026-11-10", "AGENTS/README updated. Devil uses ssh `2222` + ghostty-web (ttyd + login)"],
+ ["2026-10-25", "Teleport CE — deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey"],
+ ["2026-10-25", "`tsh login --proxy teleport.internal` works. Torn down 2026-10-24 — see LATER"],
+ ["2026-10-25", "devil live — access model switched (2026-10-20): teleport is superseded and was torn down 2026-10-24 (friend demo done). New doors"],
+ ["2026-10-25", "All via the gateway (one hostname, `devil.internal`, knot wildcard — no DNS record needed):"],
+ ["2026-10-25", "Teleport teardown — done 2026-10-24 (friend demo done): `infrastructure/teleport/` deleted"],
+ ["2026-10-25", "The devil teleport mounts/secret/configmap + `dependsOn: teleport` removed"],
+ ["2026-10-25", "omni's teleport unit + port 3022 + `TELEPORT_SESSION` prompt special-case removed"],
+ ["2026-10-25", "AGENTS/README notes updated. Devil runs ssh (2222) + ghostty-web (ttyd + real login)"],
+ ["2026-10-24", "Teleport removed. Devil uses ssh `2222` + ghostty-web."],
+ ["2026-10-21", "devil live — access model switched (2026-10-20): teleport is superseded but stays until the friend demo (teardown is a queued LATER item). New doors"],
+ ["2026-10-21", "All via the gateway (one hostname, `devil.internal`, knot wildcard — no DNS record needed):"],
+ ["2026-10-15", "First: plug rbpi in"],
+ ["2026-10-15", "Let it boot and rejoin (old schematic)"],
+ ["2026-10-15", "Then `flux get kustomizations` all green"],
+ ["2026-10-15", "Teleport CE — deployed (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Deploy: tag → `flux reconcile source oci flux-system` → `flux reconcile kustomization teleport --with-source` (OCIRepository interval is 10m). Remaining: bootstrap the admin user after the tag deploy"],
+ ["2026-10-15", "Teleport CE — deployed and bootstrapped (`infrastructure/teleport/`, chart 18.10.0 standalone, multiplex TLS on own LB IP `10.10.20.154`, local + WebAuthn, k8up-scheduled). Admin user `bf` (access/editor/auditor) registered with a passkey"],
+ ["2026-10-15", "`tsh login --proxy teleport.internal` works"],
+ ["2026-09-30", "DDNS updater (`applications/utilities/ddns-updater/`): keeps the single apex A record `0xbf.ch` pointed at the current home IP — prerequisite for anything public on the domain. Cloudflare API token via SOPS. Never per-subdomain records: the wildcard cert covers `*.0xbf.ch`"],
+ ["2026-09-30", "Traefik routes subdomains by Host header"],
+ ["2026-09-29", "ATProto PDS — `pds` (public; vanity handles `<name>.0xbf.ch` via well-known resolution, no per-account DNS)"],
+ ["2026-09-28", "Scaffold `applications/forgejo/` + entry in `cluster/applications.yaml`."],
+ ["2026-09-28", "Forgejo with SQLite"],
+ ["2026-09-28", "Everything under one `/data` PVC — no Postgres unless it ever outgrows (CloudNativePG would be the escape hatch)"],
+ ["2026-09-28", "HTTPRoute + subdomain: `git.0xbf.ch`"],
+ ["2026-09-28", "Public (`websecure` listener)"],
+ ["2026-09-28", "Decision: git-over-SSH — Gateway `TCPRoute` (Traefik `experimentalChannel`, `gitssh` entrypoint hostPort 22 on rbpi; WAN 22 → git via router forward, no router SSH, the future dev box takes WAN 2222)"],
+ ["2026-09-28", "Admin hardening: registration disabled"],
+ ["2026-09-28", "Admin bootstrapped from `forgejo-secrets.sops.yaml` on first boot"],
+ ["2026-09-26", "Network path: NAS on the tailnet at `dxp4800plus-brd.tail112719.ts.net` — WireGuard-encrypted transport"],
+ ["2026-09-26", "No UGREEN Link cloud relay (that portal is for admin UI only, never backup traffic)"],
+ ["2026-09-26", "Destination backend — Garage (S3) in Docker on the NAS: OSS"],
+ ["2026-09-26", "Single binary"],
+ ["2026-09-26", "No GUI (AIStor is MinIO's paid successor; MinIO OSS itself is deprecated). Future-proof: the same endpoint later serves etcd backups (velero). Plain HTTP is fine over the tailnet (WireGuard wraps transport; restic encrypts at rest)"],
+ ["2026-09-26", "k8up operator: HelmRepository `https://k8up-io.github.io/k8up`"],
+ ["2026-09-26", "HelmRelease `k8up` 4.10.0 (operator v2.16.0)"],
+ ["2026-09-26", "CRDs via `cluster/crds.yaml` (GitRepository `k8up-io/k8up` @ `k8up-4.10.0`, path `./charts/k8up/crds`, `prune: false`)"],
+ ["2026-09-26", "Schedules fire in `Europe/Zurich`"],
+ ["2026-09-26", "Global S3/repo-password env vars on the operator so per-namespace Schedules need no backend block and no secret copies"],
+ ["2026-09-26", "Backup model — namespace-scoped"],
+ ["2026-09-26", "Opt-in per app: k8up backs up the PVCs of the namespace a Schedule lives in"],
+ ["2026-09-26", "Nothing else. No Schedules exist today (monitoring/agh deliberately excluded)"],
+ ["2026-09-26", "An app opts in by adding a Schedule to its own directory (snippet in README)"],
+ ["2026-09-26", "SOPS secrets: restic repository password + Garage S3 credentials (owner encrypts)."],
+ ["2026-09-21", "AdGuard Home (`applications/utilities/agh/`, replaced Pi-hole): LAN-only ad-blocking DNS edge at `10.10.20.153` (static LB IP — inherited from Pi-hole, the router DHCP target must not float). Design: AGH forwards everything — including `.internal` — to kresd"],
+ ["2026-09-21", "Which stubs the zone to knotd"],
+ ["2026-09-21", "No edge-side wildcard needed because AGH does not special-case the reserved TLD. Config seeded from `agh-config.sops.yaml`"],
+ ["2026-09-21", "Admin UI at `agh.internal` via allowlisted HTTPRoute"],
+ ["2026-09-20", "Knot Resolver (`applications/utilities/dns/`): LAN-only recursive resolver with DNSSEC validation enabled"],
+ ["2026-09-20", "Never exposed publicly. Shipped as one pod: kresd (recursion + DNSSEC, ClusterIP `10.96.0.53`) + knotd (authoritative `internal.` zone, wildcard → `10.10.20.128`). kresd local-data cannot expand wildcards"],
+ ["2026-09-20", "So the zone is grafted via an authoritative stub (`forward: subtree: internal, authoritative: true, dnssec: false`) — the documented pattern for reserved TLDs"],
+ ["2026-09-20", "Pi-hole (`applications/utilities/pihole/`): LAN-only ad-blocking DNS at `10.10.20.153` (static LB IP — the router DHCP target must not float)"],
+ ["2026-09-20", "Forwarding to kresd (Knot stays the recursive/validating resolver, Pi-hole is not the sole resolver). Admin UI at `pihole.internal` via HTTPRoute. Needs `pihole-credentials.sops.yaml` (Secret `pihole-credentials`, key `password`) before the pods will start"],
+ ["2026-09-20", "Tailscale subnet route from the worker (off-LAN access without DNS gymnastics) — `10.10.10.0/24` and `10.10.20.0/24` advertised from `rbpi`."],
+ ["2026-09-16", "Generate Pi 5 Talos Linux raw image from Image Factory with PCIe/SATA system extensions."],
+ ["2026-09-16", "Flash image to Pi 5 SD card and boot node."],
+ ["2026-09-16", "Configure `talos/patches/worker/rpi5.yaml`:"],
+ ["2026-09-16", "Apply configuration using `topf apply` to join Pi 5 as a dedicated Worker Node."],
+ ["2026-09-13", "Install local CLI dependencies on developer workstation:"],
+ ["2026-09-13", "Generate an `age` key pair for secret encryption:"],
+ ["2026-09-13", "Ensure domain `yourdomain.com` is delegated to Cloudflare DNS (Grey Cloud / Proxy Disabled)."],
+ ["2026-09-13", "Create a Cloudflare API Token with `DNS:Edit` permissions."],
+ ["2026-09-13", "Download `oracle-arm64.qcow2` from Sidero Image Factory (`factory.talos.dev`)."],
+ ["2026-09-13", "Import `qcow2` image into OCI as a Custom Image (Paravirtualized mode)."],
+ ["2026-09-13", "Provision OCI Ampere A1 VM (12 GB RAM, 2 OCPUs) running native Talos Linux"],
+ ["2026-09-13", "Configure `talos/topf.yaml` (cluster `infra`, endpoint `https://140.238.210.235:6443`) and `talos/patches/` (`all/` hostname template; `control-plane/` DHCP networking, cert SANs, install disk)"],
+ ["2026-09-13", "Apply configuration using `topf apply --auto-bootstrap`."],
 ];
 const DOCS = [
  ["AGENTS.md","Rules, component notes, debugging playbook (source of truth)"],
@@ -566,7 +708,7 @@ const EXP_LABEL={public:"public",internal:"internal",lan:"LAN",cluster:"cluster"
 const pill=(cls,txt)=>h("span",{class:"pill "+cls},txt);
 const sp=s=>pill("s-"+s.status,STATE_LABEL[s.status]), ep=s=>pill("e-"+s.exp,EXP_LABEL[s.exp]);
 
-const SECTIONS=[["overview","Overview"],["needs","Needs you",()=>NEEDS.filter(n=>!done(n.id)).length],["services","Services",()=>SERVICES.length],["topology","Topology"],["nodes","Nodes",()=>NODES.length],["network","Network"],["storage","Storage"],["flux","Flux & releases"],["secrets","Secrets",()=>SECRETS.filter(s=>s[2]==="TO CREATE").length],["docs","Docs"]];
+const SECTIONS=[["overview","Overview"],["needs","Needs you",()=>NEEDS.filter(n=>!done(n.id)).length],["services","Services",()=>SERVICES.length],["topology","Topology"],["nodes","Nodes",()=>NODES.length],["network","Network"],["storage","Storage"],["flux","Flux & releases"],["secrets","Secrets",()=>SECRETS.filter(s=>s[2]==="TO CREATE").length],["done","Done",()=>DONE.length],["docs","Docs"]];
 function nav(){const n=$("#navlinks");n.innerHTML="";const cur=(location.hash||"#overview").slice(1);
  for(const[id,l,c]of SECTIONS){n.append(h("a",{class:id===cur?"active":"",href:"#"+id},h("span",{},l),c?h("span",{class:"count"},String(c())):""))}
  document.querySelectorAll("main section").forEach(s=>s.classList.toggle("active",s.id===cur));}
@@ -763,7 +905,10 @@ function panZoom(svg){
  $("#zin").onclick=()=>zoom(1/1.25);$("#zout").onclick=()=>zoom(1.25);$("#zreset").onclick=()=>{vb={...base};apply()};
 }
 
-function all(){nav();renderOverview();renderNeeds();renderServices();renderNodes();renderTables();renderTopo();}
+function renderDone(){const q=($("#doneq").value||"").toLowerCase();const rows=DONE.filter(([d,t])=>!q||t.toLowerCase().includes(q)||d.includes(q));
+ const by=new Map();for(const[d,t]of rows){if(!by.has(d))by.set(d,[]);by.get(d).push(t)}
+ $("#donelist").replaceChildren(...[...by].map(([d,ts])=>h("div",{class:"card",style:"margin-bottom:10px"},h("div",{class:"small"},`${d} · ${ts.length}`),h("ul",{style:"margin:6px 0 0;padding-left:18px"},...ts.map(t=>h("li",{},t))))));}
+function all(){nav();renderOverview();renderNeeds();renderServices();renderNodes();renderTables();renderTopo();renderDone();$("#doneq").oninput=renderDone;}
 all();
 panZoom($("#topo"));
 </script>
