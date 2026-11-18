@@ -27,7 +27,7 @@ spec:
           # it with the same tag; this pin must match the release tag
           # (`just release` checks). sshd (22) is mux-only: the sshmux
           # ForceCommands in with its key.
-          image: ghcr.io/bfeitknecht/browser:v1.42.1
+          image: ghcr.io/bfeitknecht/browser:v1.42.2
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -74,6 +74,10 @@ spec:
             - name: ssh-keys
               mountPath: /etc/ssh/keys
               readOnly: true
+            - name: ssh-authorized
+              mountPath: /etc/ssh/mux_authorized_keys
+              subPath: authorized_keys
+              readOnly: true
       volumes:
         - name: config
           emptyDir: {}
@@ -86,3 +90,10 @@ spec:
           secret:
             secretName: browser-ssh-keys
             defaultMode: 0400
+        - name: ssh-authorized
+          secret:
+            secretName: browser-ssh-keys
+            items:
+              - key: authorized_keys
+                path: authorized_keys
+                mode: 0444

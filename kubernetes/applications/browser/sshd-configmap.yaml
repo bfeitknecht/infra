@@ -21,5 +21,7 @@ data:
     ForceCommand /usr/local/bin/browser-session
     HostKey /etc/ssh/keys/host_ed25519
     HostKey /etc/ssh/keys/host_rsa
-    AuthorizedKeysFile /etc/ssh/keys/authorized_keys
+    # sshd reads this as the user, with StrictModes on every parent dir.
+    # The Secret volume root is 1777, so the file has its own subPath mount.
+    AuthorizedKeysFile /etc/ssh/mux_authorized_keys
     MaxSessions 2
