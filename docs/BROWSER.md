@@ -5,71 +5,62 @@ browsh `raw_text_server.go` source, 2026-11-18. Nothing here is deployed yet.
 
 ## Goal
 
-One pod, two fronts, all squeezed through Arachnidium first:
+One browser pod plus one new ssh-mux pod, all upstream traffic squeezed
+through Arachnidium:
 
 1. **Web, public, the upstream-documented browsh web front**:
    `https://browser.0xbf.ch/<url>` (HTML mode) and
    `https://text.browser.0xbf.ch/<url>` (plain text mode). Page in, a few
    KB of light text out. No login, no ttyd, no xterm — this is exactly how
    browsh's own `html.brow.sh` / `text.brow.sh` instances work.
-2. **SSH, personal, the interactive TUI**: `ssh browser@0xbf.ch` opens the
-   real browsh TUI — click links, scroll, tabs, mouse, forms, even video as
-   text frames. Only text frames cross the WAN link. It rides the EXISTING
-   port 22 forward through a new sshd mux; no new WAN port, no new gateway
-   listener, no router change.
+2. **SSH, personal, the interactive TUI through the mux**:
+   `ssh -p 2222 browser@0xbf.ch` opens the real browsh TUI — links, tabs,
+   scrolling, mouse, forms, even video as text frames. Only text frames
+   cross the WAN link.
 
-All upstream traffic goes through the Arachnidium proxy in the pod, so the
-Firefox behind browsh downloads less too.
+## The port map (decision made 2026-11-18)
 
-## Using it: `ssh browser.0xbf.ch`
+SSH never transmits the hostname, so no service can route by the dialed
+name. One port = one backend. The mux routes by username instead — the
+`git@github.com` model:
 
-SSH never transmits the hostname, so a bare `ssh browser.0xbf.ch` would hit
-the mux as the local username (`bf`) and land in apex. The name becomes real
-with one client-side alias (any machine, GUI SSH clients have the same three
-fields):
+| Where              | Port                                | Serves       | Use                                                                                                              |
+| ------------------ | ----------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| WAN 22             | entrypoint 22, hostPort rbpi        | forgejo sshd | `ssh://git@git.0xbf.ch/owner/repo.git` — the clean 22, no port suffix                                            |
+| WAN 2222           | entrypoint 2222, hostPort rbpi      | sshmux       | `ssh -p 2222 browser@0xbf.ch` → browsh; any other username → apex TUI (`ssh -p 2222 0xbf.ch`, `someone@…` alike) |
+| LAN + tailnet only | entrypoint 2223, no hostPort, LB IP | devil VM     | internal only. Moves from 2222 to the freed 2223                                                                 |
 
-```
-# ~/.ssh/config
-Host browser.0xbf.ch
-    HostName 0xbf.ch
-    User browser
-    HostKeyAlias 0xbf.ch      # one known_hosts entry for the mux key
-```
+Rules the mux encodes:
 
-`ssh browser.0xbf.ch` then opens browsh. `Host devil.0xbf.ch` follows the
-same pattern later. The alias carries the username to the mux; the mux does
-the rest. Nothing on the server knows the hostname — that is SSH, not a
-design gap; the 443 SNI option below is the only real name-aware variant.
+- `browser` → inter-pod ssh into the browser pod (owner key, forced
+  `browser-session`).
+- Every other username → chained to apex-tui, today's any-username
+  behavior. Default someone stays apex.
+- Devil is and stays internal only. Not a mux name.
+- New SSH TUI services in the future = one new mux username. No new WAN
+  port, listener, or router forward — the mux is the one multiplexer.
+- Apex's reinforced port is now 2222 (public command becomes
+  `ssh -p 2222 0xbf.ch`). Apex repo README copy changes at rollout.
 
-## The SSH port question
+Two consequences accepted with this layout:
 
-SSH sends no hostname before the handshake: there is no SNI, so true
-name-based demuxing of several SSH services on one port is impossible at
-the protocol level. What IS possible, and what this plan uses:
+- WAN `2222` stops being reserved for the dev box (the old devil note).
+- Renumbered internal devil SSH (2222 → 2223): LAN/tailnet users change
+  one keystroke. Devil never appears on the WAN.
 
-- **One front sshd on port 22 routes by username** (the
-  `git@github.com` model). The existing chain stays: router 22 → rbpi
-  hostPort → `apexssh` listener → ONE TCPRoute, backend swapped from
-  `apex-tui:2222` to the mux:
-    - `ssh 0xbf.ch` (user `bf`, the ssh default) → apex TUI, exactly as today.
-    - `ssh browser@0xbf.ch` → browsh TUI.
-    - `ssh devil@0xbf.ch` → devil VM (later, mux key into the VM).
-    - Any other username → apex TUI (today's any-username behavior).
-- The mux authenticates the owner key once, then runs the target itself
-  (per-user `ForceCommand`): for apex-tui the mux runs an ssh client
-  (apex-ssh needs no key), for browser it holds a mux key authorized in the
-  browser pod, bridging stdio to the client. One auth, one known_hosts
-  entry for `0xbf.ch:22`, no double handshake.
-- **Git cannot ride the mux.** Forgejo authenticates pushes by the END
-  USER's key; a shared mux key would collapse everyone into one identity.
-  Git keeps its own `2223` forward. This is the same reason GitHub does
-  not sit behind such a mux.
-- The strategic alternative, if the port zoo ever grows again: SNI
-  demuxing over **443** (`TLSRoute` per `ssh.<name>.0xbf.ch`, ssh wrapped
-  in TLS via `ProxyCommand openssl s_client`, stunnel sidecars to unwrap).
-  That is the only true name-based WAN multiplexing; it costs a client
-  alias and a TLS unwrap per service. Out of scope until a third or fourth
-  TCP service wants in.
+## Mux authentication
+
+The mux must authenticate before it can dispatch by username. Two
+populations ride it:
+
+- `browser`: owner key only (`browser` user, no password). Nothing else
+  gets the browsing proxy.
+- Everyone else, bound for apex: apex is public today and stays public.
+  sshd cannot authenticate nobody, so the apex path takes the empty
+  password: `PermitEmptyPasswords` limited to non-`browser` users. A
+  stranger types `ssh -p 2222 0xbf.ch`, presses Enter at the password
+  prompt, and is in the portfolio. The owner never sees the prompt
+  (pubkey wins first).
 
 ## Findings
 
@@ -87,7 +78,7 @@ the protocol level. What IS possible, and what this plan uses:
     - Built-ins: rate limit (ulule syntax, honours `X-Forwarded-For`),
       `blocked-domains` and `blocked-user-agents` regex lists, gzip,
       `Cache-Control: public, max-age=600`, render timeout, robots.txt
-      (`Allow: /$` only), and a healthy-response for probe user agents.
+      (`Allow: /$` only), and a healthy response for probe user agents.
     - Empty path serves a welcome page; the browsh upstream instances are
       literally `html.brow.sh` and `text.brow.sh`.
     - One shared Firefox instance serves all HTTP requests; each TTY client
@@ -115,26 +106,26 @@ the protocol level. What IS possible, and what this plan uses:
 ```
  phone / laptop
    │                        └──────────────────────────────┐
-   │ ssh browser@0xbf.ch   (text frames)                    │ https://(text.)browser.0xbf.ch/<url>
+   │ ssh -p 2222 (text frames)                               │ https://(text.)browser.0xbf.ch/<url>
    ▼                                                        ▼
-router WAN 22 → rbpi (already forwarded)          Traefik websecure (LE wildcard)
+router WAN 2222 → rbpi (new forward)           Traefik websecure (LE wildcard)
    ▼                                                        │
-Gateway `apexssh` listener, hostPort 22                       ▼
+Gateway entrypoint 2222, hostPort rbpi                       ▼
    ▼                                            Service browser-web :4333
 ONE TCPRoute → Service sshmux :22                          │
    ▼                                                        ▼
-ssh-mux (sshd, rbpi)                            browsh --http-server-mode
-   │ per-user ForceCommand                     (shared Firefox, HTML/PLAIN)
-   │  bf/* → apex-tui                                        │
-   │  browser ─────────────────────────────────────────┐    │
-   ▼                                                   ▼    ▼
-                         (inter-pod ssh, mux key)   browser-ssh sshd
-                                                       │ ForceCommand
-                                                       ▼
-                                           browser-session (fresh profile: user.js
-                                                       │ proxy + CA import)
-                                                       ▼
-                                           browsh TUI + own Firefox
+sshmux pod (sshd, rbpi)                        browsh --http-server-mode
+   │  user: browser → mux key                 (shared Firefox, HTML/PLAIN)
+   │  any other user → apex-tui                              │
+   │ browser ──────────────────────────────────────────┐    │
+   ▼                                                    ▼    ▼
+                       (inter-pod ssh, mux key)       browser-ssh sshd
+   git: WAN 22 ── entrypoint 22 ── TCPRoute           │ ForceCommand
+        → forgejo sshd (clean URLs, own keys)          ▼
+                                          browser-session (fresh profile:
+                                                       │ user.js proxy + CA)
+   devil: entrypoint 2223, LB only ──► devil VM       ▼
+   (internal only, unchanged otherwise)   browsh TUI + own Firefox
                                                        │
         every Firefox ──── user.js proxy ──► 127.0.0.1:8080 mitmproxy (Arachnidium)
                                                        │ bun-api :3000 (minify)
@@ -143,7 +134,7 @@ ssh-mux (sshd, rbpi)                            browsh --http-server-mode
 ```
 
 Browser pod on rzbl, one network namespace, no PVC. HTTP mode uses one
-shared Firefox; each SSH session adds its own (per-session HOME profile,
+shared Firefox; each mux session adds its own (per-session HOME profile,
 Arachnidium CA imported, proxy prefs written).
 
 ## Image plan (own repo, `bfeitknecht/browser`)
@@ -180,25 +171,32 @@ v1 (the browsh image bundles x64 Firefox).
 
 - `applications/browser/`, ns `browser`: namespace, deployment (tier-2
   Keel shape, pinned to rzbl, limits `2` cpu / `2.5Gi` for the HTTP
-  Firefox plus 1-2 TUI sessions), services `browser-web` `4333`
+  Firefox plus 1-2 mux sessions), services `browser-web` `4333`
   and `browser-ssh` `22`, kustomization.
 - HTTPRoute `browser.0xbf.ch` **and** `text.browser.0xbf.ch` (two
   hostnames, one route) on `websecure`. LE wildcard and ddns wildcard
   already cover both; no cert or DNS change.
-- `applications/sshmux/`, ns `sshmux` (tiny openssh image, rbpi): port 22
-  front, owner-key auth, sops `sshmux-host-key.sops.yaml` + mux keys.
-  Users: `bf`/unknown → apex-tui (chain as today), `browser` → pod sshd.
-  The ONE TCPRoute behind `apexssh` repoints to it; the router forward,
-  listener and WAN port do not change. Note: the public host key for
-  port 22 becomes the mux key — one known_hosts update, then apex's
-  port-22 users never see a key change again.
+- `applications/sshmux/`, ns `sshmux` (tiny openssh image, rbpi): the
+  username router above; sops `sshmux-host-key.sops.yaml` plus the mux
+  keys. ONE TCPRoute behind a new `muxssh` entrypoint `2222`,
+  hostPort `2222` on rbpi.
+- Listener surgery in the same tag (all one user-visible port map change):
+    - `gitssh` moves `2223` → `22` (WAN 22 already forwards to rbpi 22 —
+      no router change, the NAT rule stays), TCPRoute to forgejo sshd.
+    - `apexssh` listener retires (apex rides the mux as the default user).
+    - `devilssh` moves `2222` → `2223`, still LB-only, no hostPort.
+    - new `muxssh` listener `2222` + hostPort.
+- Owner router action: add WAN `2222` → `10.10.20.10`. Nothing else.
 - Egress CiliumNetworkPolicy `browser-egress`: DNS (udp 53 to kube-dns)
   and tcp 80/443 out. Proxy serves web traffic and nothing else.
 - Gatus `public` group: `browser.0xbf.ch/` (probe user agent gets the
-  built-in healthy response; assert host header not `text.` to probe the
-  HTML mode path too), plus `sshmux` as a platform TCP check.
+  built-in healthy response; one check per hostname so both HTML and PLAIN
+  modes are covered), plus TCP checks for `sshmux` and git on 22.
 - Atlas + AGENTS.md: SERVICE rows (browser, sshmux), HOSTS entries, tree
-  lines, component notes, tier list, DONE lines at rollout.
+  lines, component notes, tier list, DONE lines. AGENTS edits needed:
+  apex (`ssh -p 2222 0xbf.ch`), forgejo (`ssh://git@git.0xbf.ch/...`
+  without port), devil (2223, WAN-2222 note dead), the port list in the
+  traefik/gateway notes, apex repo README at the next apex release.
 
 ## Security and abuse
 
@@ -207,10 +205,11 @@ v1 (the browsh image bundles x64 Firefox).
   ads/trackers before Firefox sees them; responses cached 600 s.
   One shared Firefox renders public fetches — worst case is bandwidth,
   capped by limits.
-- SSH front: owner key only, at the mux. Public low-bandwidth browsing
-  happens on the web fronts; the interactive TUI is personal. An open
-  TUI would make the home IP a free browsing anonymizer.
-- SSH hardening at the pod sshd: mux key only, no forwarding anywhere,
+- Mux: `browser` is owner-key-only; the browsing proxy is personal.
+  The apex path's empty password keeps the public portfolio reachable
+  but grants nothing else (chained straight into apex-tui, which has no
+  exec, no SFTP, no shell).
+- Browser pod sshd: mux key only, no forwarding anywhere,
   `MaxSessions 2`, per-session 12 h timeout.
 
 ## Rollout checklist
@@ -218,29 +217,28 @@ v1 (the browsh image bundles x64 Firefox).
 1. Browser repo image; smoke test locally:
    `just image && docker run -p 4333:4333 -p 22:22 ghcr.io/bfeitknecht/browser:dev`;
    `curl http://localhost:4333/https://example.com` (HTML),
-   UA `GoogleHC` probe (healthy), ssh in and browse.
-   Measure a heavy page: direct fetch vs through Arachnidium.
-2. sshmux image/repo (or chart the smallest possible): test with a local
-   key that `bf` chains to a local apex-tui stub and `browser` chains to
-   the browser pod.
-3. Infra changes in one tag: `applications/browser/`, `applications/sshmux/`,
-   the ONE TCPRoute backend swap, gatus, atlas, AGENTS.md.
-4. `just check && just fmt --check`, then `just release X.Y.Z`.
-5. Keel picks the images up; Gatus goes green.
-6. Owner: update known_hosts for `0xbf.ch` once (mux key). Test
-   `ssh 0xbf.ch` (apex still), `ssh browser@0xbf.ch`,
-   `https://browser.0xbf.ch/https://news.ycombinator.com`,
-   same on `text.`. Record LTE data use for both fronts.
+   `curl -H "X-Browsh-Raw-Mode: DOM" ...`, probe UA healthy response,
+   ssh in and browse. Measure a heavy page: direct fetch vs through
+   Arachnidium.
+2. sshmux image/repo: test that `browser` chains to the browser pod and
+   an arbitrary user chains to an apex-tui stub; empty-password path
+   works with pubkey priority for the owner.
+3. Owner: add the router forward WAN `2222` → `10.10.20.10`.
+4. Infra changes in one tag: `applications/browser/`,
+   `applications/sshmux/`, the listener surgery, gatus, atlas, AGENTS.md.
+5. `just check && just fmt --check`, then `just release X.Y.Z`.
+6. Keel picks the images up; Gatus goes green.
+7. Cut over and verify: `ssh://git@git.0xbf.ch/owner/repo.git` clone
+   (clean 22), `ssh -p 2222 0xbf.ch` (apex), `ssh -p 2222 browser@0xbf.ch`
+   (browsh, from LTE — record data use), devil.internal on 2223.
+   One host-key notice: sshmux key for port 2222, one known_hosts entry.
 
 ## Open decisions
 
-- Mux auth: owner key only (recommended) vs apex-style open. Affects every
-  port-22 user immediately — apex's any-username behavior only survives
-  as "unknown user → apex".
 - Arachnidium `IMAGE_QUALITY`: default 20 is aggressive; 50-60 looks
   better. Runtime config in `defaults.json`, no rebuild.
-- Devil as a mux username (mux key into the VM) also retires the LAN-only
-  `devilssh` listener someday; separate change.
-- Later: MoSH on the web front? No — MoSH rides the SSH front, worth it
-  for roaming LTE. Also later: the 443 SNI TLSRoute world if more TCP
-  services arrive.
+- Empty-password apex path vs owner-key-only mux (apex SSH portfolio
+  becomes owner-only). The plan keeps apex public; flip by removing
+  `PermitEmptyPasswords` if unwanted.
+- Later: MoSH for roaming LTE on the mux front; 443 SNI (`TLSRoute`)
+  stays parked — with the mux, no new inbound port is in sight anyway.
