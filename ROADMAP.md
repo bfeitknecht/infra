@@ -16,6 +16,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
+- [ ] **Browser:** browsh http-server + Arachnidium compressor at `browser.0xbf.ch`. Plan and research done: `docs/BROWSER.md`. Needs: browser repo (image), `applications/browser/`, gatus, atlas.
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Forgejo:** Actions + runner live (v1.33.0). Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
