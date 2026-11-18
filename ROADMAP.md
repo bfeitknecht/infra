@@ -22,6 +22,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NEXT
 
+- [ ] **Music streaming:** Lidarr is live (v1.36.0). Add the Jellyfin music library, or Navidrome at `music.0xbf.ch` (`docs/RZBL_WORKLOADS.md`). Needs qBittorrent for downloads.
 - [ ] **Renovate** on the Forgejo runner: `renovate.json5` is ready (validated); needs a token for the platform the repos live on.
 - [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).

@@ -94,6 +94,7 @@ spec:
     - homepage.internal
     - immich.internal
     - jellyfin.internal
+    - lidarr.internal
     - opencode.internal
     - prowlarr.internal
     - qbittorrent.internal

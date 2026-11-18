@@ -8,6 +8,7 @@ Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernet
 | Sonarr 4.0.20                                    | `applications/media/`                    | **live**            | `sonarr.internal`                                     |
 | Radarr 7.0.3                                     | `applications/media/`                    | **live**            | `radarr.internal`                                     |
 | Prowlarr 2.7.0                                   | `applications/media/`                    | **live**            | `prowlarr.internal`                                   |
+| Lidarr 3.1.6                                     | `applications/media/`                    | **live**            | `lidarr.internal`                                     |
 | Immich v3.4.1 (ML on GPU, `-cuda`)               | `applications/immich/`                   | **live**            | `immich.internal`                                     |
 | Dawarich 1.23.0                                  | `applications/dawarich/`                 | prepared, suspended | `dawarich.internal`                                   |
 | Copyparty 1.20.26                                | `applications/copyparty/`                | **live**            | `copyparty.internal`, public `files.0xbf.ch`          |
@@ -142,11 +143,20 @@ GitHub as mirror: per repo on Forgejo, Settings > Repository > Mirror settings >
 One volume `media-files`, mounted at `/data` in jellyfin, sonarr, radarr and qbittorrent:
 
 ```
-/data/torrents/{movies,tv}   qBittorrent downloads (categories radarr, sonarr)
-/data/media/{movies,tv}      Jellyfin libraries, *arr root folders
+/data/torrents/{movies,tv,music}   qBittorrent downloads (categories radarr, sonarr, lidarr)
+/data/media/{movies,tv,music}      Jellyfin libraries, *arr root folders
 ```
 
-Jellyfin libraries: Movies `/data/media/movies`, Shows `/data/media/tv`. Sonarr root folder `/data/media/tv`, Radarr `/data/media/movies`.
+Jellyfin libraries: Movies `/data/media/movies`, Shows `/data/media/tv`. Sonarr root folder `/data/media/tv`, Radarr `/data/media/movies`. Lidarr root folder `/data/media/music`, Jellyfin library Music `/data/media/music`.
+
+## Music streaming (next)
+
+Lidarr fills `/data/media/music`. Two ways to stream it, both on rzbl over the same volume:
+
+- **Jellyfin music library** (no new app): add library Music at `/data/media/music`. Phone apps: Finamp (iOS/Android) or Symfonium against `stream.0xbf.ch`.
+- **Navidrome** (`music.0xbf.ch` by purpose, `navidrome.internal`): a Subsonic server made for music (smart playlists, scrobbling, many clients: Symfonium, play:Sub, Feishin, Supersonic). Read-only mount of `media-files`.
+
+Recommendation: start with the Jellyfin library (zero setup). Add Navidrome if the Subsonic clients are better for you.
 
 ## Public access (decision for the owner)
 
