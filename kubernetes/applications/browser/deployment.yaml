@@ -27,41 +27,30 @@ spec:
           # it with the same tag; this pin must match the release tag
           # (`just release` checks). sshd (22) is mux-only: the sshmux
           # ForceCommands in with its key.
-          image: ghcr.io/bfeitknecht/browser:v1.42.3
+          image: ghcr.io/bfeitknecht/browser:v1.43.0
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http
-              containerPort: 4333
             - name: ssh
               containerPort: 22
           env:
             - name: HOME
               value: /config
           resources:
-            # One shared Firefox (web front) + up to two session Firefoxes.
+            # One session Firefox at most (browser-session holds a lock).
             requests:
               cpu: 200m
               memory: 512Mi
             limits:
               cpu: "2"
-              memory: 2.5Gi
-          # Browsh's raw-text server answers a User-Agent of GoogleHC with
-          # "healthy" without fetching anything. Never use an HTTP probe
-          # without it: every probe would load a page through Firefox.
+              memory: 1.5Gi
           readinessProbe:
-            exec:
-              command:
-                - curl
-                - -sf
-                - -A
-                - GoogleHC
-                - http://localhost:4333/health
-            initialDelaySeconds: 15
+            tcpSocket:
+              port: ssh
+            initialDelaySeconds: 10
             periodSeconds: 30
-            timeoutSeconds: 5
           livenessProbe:
             tcpSocket:
-              port: http
+              port: ssh
             periodSeconds: 60
           volumeMounts:
             - name: config

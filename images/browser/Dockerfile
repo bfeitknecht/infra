@@ -1,7 +1,6 @@
-# Browsh + Arachnidium in one pod. Two fronts:
-#   - browsh --http-server-mode on 4333 (web: HTML / PLAIN via text.* hostname)
-#   - sshd on 22 for the mux (ForceCommand browser-session; one browsh + one
-#     Firefox per session)
+# Browsh + Arachnidium in one pod. One front: sshd on 22 for the mux
+# (ForceCommand browser-session; one browsh + one Firefox, one session at a
+# time).
 # All Firefox traffic goes through the in-pod Arachnidium mitmproxy.
 # Only linux/amd64: the browsh image bundles x64 Firefox. The infra
 # Deployment pins the pod to rzbl.
@@ -14,7 +13,7 @@ USER root
 # uv and bun for the python and the minifier runtimes.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      openssh-server libnss3-tools python3 python3-tk python3-venv ca-certificates curl git unzip && \
+      openssh-server procps util-linux libnss3-tools python3 python3-tk python3-venv ca-certificates curl git unzip && \
     rm -rf /var/lib/apt/lists/* && \
     curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="/usr/local/bin" sh && \
     curl -fsSL https://bun.sh/install | env BUN_INSTALL="/usr/local" bash
@@ -45,5 +44,5 @@ RUN chmod +x /usr/local/bin/prepare-profile /usr/local/bin/browser-session /entr
     useradd --create-home --shell /bin/bash browser && \
     mkdir -p /config /run/sshd && chown -R user:user /config
 
-EXPOSE 4333 22
+EXPOSE 22
 ENTRYPOINT ["/entrypoint.sh"]

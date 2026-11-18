@@ -1,4 +1,4 @@
-# The browser pod serves web traffic and nothing else. Egress: DNS for
+# The browser pod fetches web pages for the SSH TUI and nothing else. Egress: DNS for
 # name resolution and 80/443 for the fetched pages. No direct-service
 # ports, no API access (no SA token either).
 apiVersion: cilium.io/v2

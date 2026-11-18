@@ -2,16 +2,12 @@
 
 Browsh + Arachnidium: a very low bandwidth browsing pod.
 
-Two fronts:
+SSH only: port 22; the infra `sshmux` chains in here with
+`ssh -p 2222 browser@0xbf.ch`. One browsh TUI + one Firefox, one session at
+a time (browsh hard-codes Marionette 2828 and refuses to start beside
+another headless Firefox).
 
-- **Web (public):** `https://browser.0xbf.ch/<url>` returns a light HTML
-  rendering; `https://text.browser.0xbf.ch/<url>` returns plain text. This
-  is browsh's own `--http-server-mode` — the same server behind browsh's
-  `html.brow.sh` / `text.brow.sh`.
-- **SSH (personal):** port 22; the infra `sshmux` chains in here with
-  `ssh -p 2222 browser@0xbf.ch`. One browsh TUI + one Firefox per session.
-
-Every Firefox (the shared HTTP one and each session's own) sends all
+The session Firefox sends all
 traffic through the in-pod Arachnidium mitmproxy: images to WebP/AVIF,
 html/css/js/svg minified, responses recompressed at max levels.
 
@@ -24,10 +20,10 @@ document is the source of truth for ports and routing).
 - `Dockerfile` — browsh image (pinned digest) + openssh + uv + bun +
   Arachnidium (pinned commit) + patches
 - `patches/patch.py` — exact-anchor rewrite of `addon.py` for in-pod use
-- `entrypoint.sh` — bun-api, mitmdump, sshd, `browsh --http-server-mode`
-- `browser-session` — per-SSH-session browsh: fresh HOME + profile, 12h cap
+- `entrypoint.sh` — bun-api, mitmdump, then sshd as the main process
+- `browser-session` — per-SSH-session browsh: lock, fresh HOME + profile + TMPDIR, 12h cap
 - `prepare-profile.sh` — proxy prefs (`user.js`) + mitm CA import via certutil
-- `config.toml` — browsh HTTP server (port, rate limit, blocked domains)
+- `config.toml` — browsh TUI config
 - `defaults.json` — Arachnidium settings (GUI off, image quality)
 
 ## Commands

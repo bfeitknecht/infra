@@ -1,6 +1,12 @@
 # Browser initiative: brow.sh + Arachnidium
 
-Status: implemented 2026-11-18, not deployed. Both images are in-tree
+**Update 2026-11-18 (v1.43.0): the web front is dropped. The browser is SSH
+only.** browsh hard-codes Marionette `2828` and refuses to start beside
+another headless Firefox, so one pod runs one browsh. The owner chose the
+TUI. Sections below about `browser.0xbf.ch`, `text.browser.0xbf.ch`, port
+`4333` and the HTTP server are history. Live state: AGENTS.md (browser).
+
+Status: implemented 2026-11-18. Both images are in-tree
 under `images/` (no separate repos): `publish-manifests.yaml` builds and
 pushes them with the release tag, before the OCI artifact. Smoke-tested
 locally - both web fronts answer through the full chain (the first fetch

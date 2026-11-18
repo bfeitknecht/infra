@@ -1,6 +1,6 @@
 # The browser pod's sshd: mux key only, no passwords, no forwarding, every
 # session runs browser-session (fresh HOME and profile, 12h cap, one
-# browsh + one Firefox per mux user). Debian's sshd_config includes
+# browsh + one Firefox, one session at a time). Debian's sshd_config includes
 # /etc/ssh/sshd_config.d/*.conf.
 apiVersion: v1
 kind: ConfigMap
@@ -24,4 +24,4 @@ data:
     # sshd reads this as the user, with StrictModes on every parent dir.
     # The Secret volume root is 1777, so the file has its own subPath mount.
     AuthorizedKeysFile /etc/ssh/mux_authorized_keys
-    MaxSessions 2
+    MaxSessions 1

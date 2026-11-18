@@ -3,9 +3,10 @@
 #   1. bun-api   (arachnidium minifier, localhost:3000)
 #   2. mitmdump  (arachnidium addon, regular proxy mode, 127.0.0.1:8080;
 #      generates the mitm CA on first start)
-#   3. sshd      (22; the infra sshmux ForceCommands into browser-session)
-#   4. browsh --http-server-mode (4333, the public web front; launches the
-#      shared Firefox through the proxy profile prepared below)
+#   3. sshd      (22, main process; the infra sshmux ForceCommands into
+#      browser-session: one browsh + one Firefox, one session at a time)
+# No web front: browsh hard-codes Marionette 2828 and refuses to start
+# beside another headless Firefox, so the pod runs one browsh at most.
 set -euo pipefail
 
 export HOME=/config
@@ -43,23 +44,11 @@ until [ -f "$HOME/.mitmproxy/mitmproxy-ca-cert.pem" ]; do
   sleep 1
 done
 
-# --- the shared Firefox profile for the HTTP front --------------------------
-# Browsh makes its own Firefox profile at XDG_CONFIG_HOME/browsh/firefox_profile
-# (verified against browsh v1.8.3: the webext reports moz:profile there). Write
-# the proxy prefs and the mitm CA into exactly that directory. Firefox itself
-# recreates profiles.ini content inside its own profile dir; nothing shared.
-profile_root="$XDG_CONFIG_HOME/browsh"
-prepare-profile "$profile_root/firefox_profile" "$HOME/.mitmproxy/mitmproxy-ca-cert.pem"
-
-# Firefox runs as `user` and must own everything it writes: the profile
-# (prepared above as root), the config dir, and HOME.
+# Sessions run as `browser` and read the mitm CA from /config.
 chown -R user:user /config
+chmod 755 /config /config/.mitmproxy
+chmod 644 /config/.mitmproxy/mitmproxy-ca-cert.pem
 
-# --- sshd -------------------------------------------------------------------
+# --- sshd (main process) ----------------------------------------------------
 mkdir -p /run/sshd
-/usr/sbin/sshd -D -e &
-
-# --- the public HTTP front ---------------------------------------------------
-# Firefox refuses to run as root. browsh runs as `user` (uid 1000), the owner
-# of /config and the shared profile.
-exec su -s /bin/bash user -c 'cd /config && HOME=/config XDG_CONFIG_HOME=/config/.config exec browsh --http-server-mode'
+exec /usr/sbin/sshd -D -e
