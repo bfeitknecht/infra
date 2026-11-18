@@ -582,6 +582,18 @@ data:
               @media (prefers-color-scheme: dark) {
                 html:not([data-theme="light"]), html:not([data-theme="light"]) body { background-color: oklch(14% 0 0) !important; }
               }
+              /* Footer and language picker were styled for text on the photo. */
+              :root, :host {
+                --ak-c-login__footer--Color: oklch(35% 0 0);
+                --ak-c-locale-select--Color: oklch(35% 0 0);
+                --ak-c-locale-select--label--Color: oklch(35% 0 0);
+              }
+              html[data-theme="dark"], :host([theme="dark"]) {
+                --ak-c-login__footer--Color: oklch(75% 0 0);
+                --ak-c-locale-select--Color: oklch(75% 0 0);
+                --ak-c-locale-select--label--Color: oklch(75% 0 0);
+              }
+              ak-locale-select, .pf-c-login__footer, .pf-c-login__footer * { text-shadow: none !important; filter: none !important; }
               /* Dark theme sets the primary button text with a more specific rule. */
               html[data-theme="dark"] .pf-c-button.pf-m-primary,
               :host([theme="dark"]) .pf-c-button.pf-m-primary { color: oklch(14% 0 0) !important; }
