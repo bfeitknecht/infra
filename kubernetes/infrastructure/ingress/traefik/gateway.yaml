@@ -35,26 +35,29 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: internal-hosts-tls
-    # TCP for forgejo git SSH. Port must match gitssh entrypoint. Apex
-    # uses port 22 now. Gitssh uses port 2223.
+    # TCP for forgejo git SSH on the clean 22. Port must match the gitssh
+    # entrypoint. WAN 22 (already forwarded) ends here:
+    # ssh://git@git.0xbf.ch/owner/repo.git
     - name: gitssh
       protocol: TCP
-      port: 2223
+      port: 22
       allowedRoutes:
         namespaces:
           from: All
-    # TCP for devil SSH. Port matches devilssh entrypoint. No hostPort.
-    # No WAN. Access via LAN and tailnet only.
-    - name: devilssh
+    # TCP for the sshmux (username router) on WAN 2222. Browser TUI and the
+    # default (apex) ride it: ssh -p 2222 [browser@]0xbf.ch
+    - name: muxssh
       protocol: TCP
       port: 2222
       allowedRoutes:
         namespaces:
           from: All
-    # TCP for apex SSH portfolio. Port 22 serves portfolio. Use ssh 0xbf.ch.
-    - name: apexssh
+    # TCP for devil SSH. Port matches the devilssh entrypoint. No hostPort.
+    # No WAN. Access via LAN and tailnet only. 2223 since git took 22; the
+    # mux took 2222.
+    - name: devilssh
       protocol: TCP
-      port: 22
+      port: 2223
       allowedRoutes:
         namespaces:
           from: All

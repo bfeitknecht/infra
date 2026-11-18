@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browser
+  namespace: browser
+  labels:
+    app.kubernetes.io/name: browser
+  # Keel reads keel.sh/* from Deployment metadata. Do not use pod template
+  # metadata. Pod template annotations have no effect and Keel ignores the Deployment.
+  annotations:
+    keel.sh/trigger: poll
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: browser
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: browser
+    spec:
+      # amd64 only: the browsh base image bundles x64 Firefox.
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      # No Kubernetes API use.
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: browser
+          # Tier-2: own repo builds and publishes this image, Keel polls it.
+          # sshd (22) is mux-only: the sshmux ForceCommands in with its key.
+          image: ghcr.io/bfeitknecht/browser:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4333
+            - name: ssh
+              containerPort: 22
+          env:
+            - name: HOME
+              value: /config
+          resources:
+            # One shared Firefox (web front) + up to two session Firefoxes.
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2.5Gi
+          # Browsh's raw-text server answers a User-Agent of GoogleHC with
+          # "healthy" without fetching anything. Never use an HTTP probe
+          # without it: every probe would load a page through Firefox.
+          readinessProbe:
+            exec:
+              command:
+                - curl
+                - -sf
+                - -A
+                - GoogleHC
+                - http://localhost:4333/health
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 60
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: tmp
+              mountPath: /tmp
+            - name: sshd-config
+              mountPath: /etc/ssh/sshd_config.d
+              readOnly: true
+            - name: ssh-keys
+              mountPath: /etc/ssh/keys
+              readOnly: true
+      volumes:
+        - name: config
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: sshd-config
+          configMap:
+            name: browser-sshd
+        - name: ssh-keys
+          secret:
+            secretName: browser-ssh-keys
+            defaultMode: 0400

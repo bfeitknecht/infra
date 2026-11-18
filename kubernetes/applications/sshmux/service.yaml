@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sshmux
+  namespace: sshmux
+  labels:
+    app.kubernetes.io/name: sshmux
+spec:
+  selector:
+    app.kubernetes.io/name: sshmux
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: ssh

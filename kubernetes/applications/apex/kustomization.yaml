@@ -9,5 +9,4 @@ resources:
   # crashed session does not affect the static site.
   - tui-deployment.yaml
   - tui-service.yaml
-  - tui-tcproute.yaml
   - apex-ssh-host-key.sops.yaml

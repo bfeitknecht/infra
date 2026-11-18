@@ -1,0 +1,25 @@
+# The browser pod's sshd: mux key only, no passwords, no forwarding, every
+# session runs browser-session (fresh HOME and profile, 12h cap, one
+# browsh + one Firefox per mux user). Debian's sshd_config includes
+# /etc/ssh/sshd_config.d/*.conf.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: browser-sshd
+  namespace: browser
+data:
+  browser-sshd.conf: |-
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    PermitEmptyPasswords no
+    AllowTcpForwarding no
+    AllowAgentForwarding no
+    X11Forwarding no
+    PermitTunnel no
+    PermitTTY yes
+    Subsystem sftp no internal-sftp
+    ForceCommand /usr/local/bin/browser-session
+    HostKey /etc/ssh/keys/host_ed25519
+    HostKey /etc/ssh/keys/host_rsa
+    AuthorizedKeysFile /etc/ssh/keys/authorized_keys
+    MaxSessions 2

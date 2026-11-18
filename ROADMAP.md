@@ -16,7 +16,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **Browser:** browsh web front (`browser.`/`text.browser.0xbf.ch`) + TUI via the new sshmux on WAN 2222 (`browser@`; apex = default user) + Arachnidium. Git takes the clean 22 (`ssh://git@git.0xbf.ch/...`), devil moves to internal 2223. Plan: `docs/BROWSER.md`. Needs: browser repo, `applications/browser/`, `applications/sshmux/`, listener surgery, WAN 2222 forward.
+- [ ] **Browser + sshmux:** implemented 2026-11-18 (manifests in tree, images built and smoke-tested locally; repos `browser` `sshmux` ready to push). Left: push the repos (CI publishes images), add WAN 2222 forward in the router, tag infra. See `docs/BROWSER.md`.
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Forgejo:** Actions + runner live (v1.33.0). Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).

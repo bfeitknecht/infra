@@ -1,0 +1,32 @@
+# Two Services: the public web front (4333) and the mux-only SSH front (22).
+# The SSH Service never touches the Gateway; the sshmux chains into it over
+# the cluster network.
+apiVersion: v1
+kind: Service
+metadata:
+  name: browser-web
+  namespace: browser
+  labels:
+    app.kubernetes.io/name: browser
+spec:
+  selector:
+    app.kubernetes.io/name: browser
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: browser-ssh
+  namespace: browser
+  labels:
+    app.kubernetes.io/name: browser
+spec:
+  selector:
+    app.kubernetes.io/name: browser
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: ssh

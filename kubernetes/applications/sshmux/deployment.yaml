@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sshmux
+  namespace: sshmux
+  labels:
+    app.kubernetes.io/name: sshmux
+  annotations:
+    keel.sh/trigger: poll
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sshmux
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sshmux
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rbpi
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: sshmux
+          image: ghcr.io/bfeitknecht/sshmux:latest
+          imagePullPolicy: Always
+          ports:
+            - name: ssh
+              containerPort: 22
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            tcpSocket:
+              port: ssh
+            periodSeconds: 60
+          volumeMounts:
+            - name: config
+              mountPath: /etc/ssh/mux
+              readOnly: true
+            - name: keys
+              mountPath: /etc/ssh/keys
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: sshmux-config
+        - name: keys
+          secret:
+            secretName: sshmux-keys
+            # 0444: the to-browser chain key must stay readable by the
+            # per-session user; it copies the key to a private file before
+            # ssh accepts it. There is no shell on the mux: ForceCommand
+            # only, so 0444 exposes nothing executable.
+            defaultMode: 0444

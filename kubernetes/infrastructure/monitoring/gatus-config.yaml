@@ -45,15 +45,31 @@ endpoints:
     interval: 2m
     conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]
     alerts: [{type: ntfy}]
-  - name: apex ssh
+  # ---- browser: browsh web front, HTML mode and PLAIN mode (text.* host)
+  - name: browser
     group: public
-    url: tcp://0xbf.ch:22
+    url: https://browser.0xbf.ch/
+    interval: 5m
+    conditions: ["[STATUS] == 200", "[CERTIFICATE_EXPIRATION] > 240h"]
+    alerts: [{type: ntfy}]
+  - name: browser text
+    group: public
+    url: https://text.browser.0xbf.ch/
+    interval: 5m
+    conditions: ["[STATUS] == 200", "[CERTIFICATE_EXPIRATION] > 240h"]
+    alerts: [{type: ntfy}]
+  # ---- SSH fronts: git on the clean 22, the mux on 2222 (apex default
+  # username, browser@ -> browsh). Avoid probing through the mux: it would
+  # start real sessions. TCP connects are enough.
+  - name: git ssh
+    group: public
+    url: tcp://git.0xbf.ch:22
     interval: 2m
     conditions: ["[CONNECTED] == true"]
     alerts: [{type: ntfy}]
-  - name: git ssh
+  - name: sshmux
     group: public
-    url: tcp://git.0xbf.ch:2223
+    url: tcp://0xbf.ch:2222
     interval: 2m
     conditions: ["[CONNECTED] == true"]
     alerts: [{type: ntfy}]

@@ -1,7 +1,14 @@
 # Browser initiative: brow.sh + Arachnidium
 
-Status: plan, not built. Facts verified against upstream sources and the
-browsh `raw_text_server.go` source, 2026-11-18. Nothing here is deployed yet.
+Status: implemented 2026-11-18, not deployed. The `browser` and `sshmux`
+repos exist locally with built and smoke-tested images (the web fronts
+answered through the full chain on this machine; the HTTP front needed a
+warm Firefox under this Mac's QEMU emulation - native rzbl will be faster).
+Left to ship: push both repos (CI publishes the images), add the router
+forward, tag infra. See the rollout checklist.
+
+Facts verified against upstream sources and the browsh `raw_text_server.go`
+source, 2026-11-18.
 
 ## Goal
 
