@@ -1,11 +1,11 @@
 # Browser initiative: brow.sh + Arachnidium
 
-Status: implemented 2026-11-18, not deployed. The `browser` and `sshmux`
-repos exist locally with built and smoke-tested images (the web fronts
-answered through the full chain on this machine; the HTTP front needed a
-warm Firefox under this Mac's QEMU emulation - native rzbl will be faster).
-Left to ship: push both repos (CI publishes the images), add the router
-forward, tag infra. See the rollout checklist.
+Status: implemented 2026-11-18, not deployed. Both images are in-tree
+under `images/` (no separate repos): `publish-manifests.yaml` builds and
+pushes them with the release tag, before the OCI artifact. Smoke-tested
+locally - both web fronts answer through the full chain (the first fetch
+needs a warm Firefox and was slow only under this Mac's QEMU emulation).
+Left to ship: the router forward, tag infra.
 
 Facts verified against upstream sources and the browsh `raw_text_server.go`
 source, 2026-11-18.
@@ -144,10 +144,12 @@ Browser pod on rzbl, one network namespace, no PVC. HTTP mode uses one
 shared Firefox; each mux session adds its own (per-session HOME profile,
 Arachnidium CA imported, proxy prefs written).
 
-## Image plan (own repo, `bfeitknecht/browser`)
+## Image plan (in-tree, `images/browser`)
+
+Tier-1 shape: the build context lives in the infra repo, `publish-manifests.yaml` builds and pushes the image with the release tag, and the Deployment pins that tag. Bump the pin in the release commit; `just release` refuses mismatches.
 
 ```
-browser/
+images/browser/
 ├── Dockerfile        FROM browsh/browsh:<pinned digest>
 │                     + python 3.13 + uv (Arachnidium deps, pinned commit)
 │                     + bun-api runtime baked in
@@ -171,8 +173,7 @@ Arachnidium patches (`.patch` files against the pinned commit):
    `wg-keys.json`); bake the ad blocklist into the image.
 3. `defaults.json`: `ENABLE_GUI: false`.
 
-CI: the reusable `publish-image.yaml`, as apex/glob/exhib. amd64 only for
-v1 (the browsh image bundles x64 Firefox).
+amd64 only (the browsh image bundles x64 Firefox; the pod is pinned to rzbl). sshmux is arm64 (rbpi).
 
 ## Infra plan
 
@@ -221,24 +222,20 @@ v1 (the browsh image bundles x64 Firefox).
 
 ## Rollout checklist
 
-1. Browser repo image; smoke test locally:
-   `just image && docker run -p 4333:4333 -p 22:22 ghcr.io/bfeitknecht/browser:dev`;
-   `curl http://localhost:4333/https://example.com` (HTML),
-   `curl -H "X-Browsh-Raw-Mode: DOM" ...`, probe UA healthy response,
-   ssh in and browse. Measure a heavy page: direct fetch vs through
-   Arachnidium.
-2. sshmux image/repo: test that `browser` chains to the browser pod and
-   an arbitrary user chains to an apex-tui stub; empty-password path
-   works with pubkey priority for the owner.
-3. Owner: add the router forward WAN `2222` → `10.10.20.10`.
-4. Infra changes in one tag: `applications/browser/`,
-   `applications/sshmux/`, the listener surgery, gatus, atlas, AGENTS.md.
-5. `just check && just fmt --check`, then `just release X.Y.Z`.
-6. Keel picks the images up; Gatus goes green.
-7. Cut over and verify: `ssh://git@git.0xbf.ch/owner/repo.git` clone
+Done (2026-11-18): manifest work; local image smoke tests — the full chain
+answers on both web fronts (`just image` rebuilds; `docker run -p 4333:4333
+-p 2222:22 ghcr.io/bfeitknecht/browser:dev` re-verifies). Remaining:
+
+1. Owner: add the router forward WAN `2222` → `10.10.20.10` (any time; it
+   stays inert until the tag lands). Optionally drop the dead `2223` rule.
+2. Bump the two image pins to the release tag in the release commit (the
+   release recipe refuses a mismatch). Currently pinned: `v1.42.0`.
+3. `just release X.Y.Z`: gates, then CI builds both images and pushes them
+   before the OCI artifact. Gatus goes green.
+4. Cut over and verify: `ssh://git@git.0xbf.ch/owner/repo.git` clone
    (clean 22), `ssh -p 2222 0xbf.ch` (apex), `ssh -p 2222 browser@0xbf.ch`
    (browsh, from LTE — record data use), devil.internal on 2223.
-   One host-key notice: sshmux key for port 2222, one known_hosts entry.
+   One host-key notice: the sshmux key for port 2222, one known_hosts entry.
 
 ## Open decisions
 
