@@ -16,7 +16,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **Browser:** browsh TUI (SSH `2224` + web via ttyd) + Arachnidium compressor. Plan and research done: `docs/BROWSER.md`. Needs: browser repo (image), `applications/browser/`, gatus, atlas, WAN 2224 forward.
+- [ ] **Browser:** browsh web front (`browser.`/`text.browser.0xbf.ch`, upstream `--http-server-mode`) + personal TUI over SSH via a port-22 username mux + Arachnidium compressor. Plan: `docs/BROWSER.md`. Needs: browser repo, `applications/browser/`, `applications/sshmux/`, one TCPRoute backend swap. No new WAN port.
 - [ ] **Backup path:** friend fixes Garage bind on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for exhib, immich, media configs. **Gate for immich real use.**
 - [ ] **Forgejo:** Actions + runner live (v1.33.0). Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
