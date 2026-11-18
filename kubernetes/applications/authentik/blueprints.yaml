@@ -575,6 +575,25 @@ data:
                 --pf-c-button--m-primary--hover--Color: oklch(14% 0 0);
                 --pf-global--BackgroundColor--dark-100: oklch(14% 0 0);
               }
+              /* The flow photo is on body::before in the page document. */
+              body::before { background-image: none !important; }
+              html, body { background-color: oklch(96% 0 0) !important; }
+              html[data-theme="dark"], html[data-theme="dark"] body { background-color: oklch(14% 0 0) !important; }
+              @media (prefers-color-scheme: dark) {
+                html:not([data-theme="light"]), html:not([data-theme="light"]) body { background-color: oklch(14% 0 0) !important; }
+              }
+              /* Dark theme sets the primary button text with a more specific rule. */
+              html[data-theme="dark"] .pf-c-button.pf-m-primary,
+              :host([theme="dark"]) .pf-c-button.pf-m-primary { color: oklch(14% 0 0) !important; }
+      # The login heading is the flow title. Full validation: restate name,
+      # slug, designation.
+      - identifiers:
+          slug: default-authentication-flow
+        model: authentik_flows.flow
+        attrs:
+          name: Welcome to 0xbf
+          title: Welcome to 0xbf
+          designation: authentication
   grafana.yaml: |
     # Grafana at grafana.internal (group developers). Public client with PKCE:
     # Grafana holds no secret. authentik Admins get the Grafana Admin role
