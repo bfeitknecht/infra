@@ -7,5 +7,4 @@ resources:
   - db.yaml
   - redis.yaml
   - app.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
-  # - dawarich-secrets.sops.yaml
+  - dawarich-secrets.sops.yaml

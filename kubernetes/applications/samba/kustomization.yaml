@@ -4,5 +4,4 @@ resources:
   - namespace.yaml
   - pvc.yaml
   - timemachine.yaml
-  # Owner creates this file (docs/RZBL_WORKLOADS.md), then uncomments it.
-  # - timemachine-secrets.sops.yaml
+  - timemachine-secrets.sops.yaml

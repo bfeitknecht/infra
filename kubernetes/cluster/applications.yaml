@@ -288,9 +288,6 @@ metadata:
   name: dawarich
   namespace: flux-system
 spec:
-  # Prepared, not deployed. Owner creates the sops Secret first.
-  # See docs/RZBL_WORKLOADS.md. Then remove this line.
-  suspend: true
   dependsOn:
     - name: storage
     - name: traefik
@@ -335,9 +332,6 @@ metadata:
   name: samba
   namespace: flux-system
 spec:
-  # Prepared, not deployed. Owner creates the sops Secret first.
-  # See docs/RZBL_WORKLOADS.md. Then remove this line.
-  suspend: true
   dependsOn:
     - name: storage
   interval: 10m0s

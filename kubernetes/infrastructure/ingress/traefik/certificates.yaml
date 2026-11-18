@@ -95,6 +95,7 @@ spec:
     - immich.internal
     - jellyfin.internal
     - lidarr.internal
+    - navidrome.internal
     - opencode.internal
     - prowlarr.internal
     - qbittorrent.internal
