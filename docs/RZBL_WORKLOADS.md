@@ -139,6 +139,23 @@ Also enable Actions in Forgejo: `[actions] ENABLED = true` in `app.ini` (the liv
 
 GitHub as mirror: per repo on Forgejo, Settings > Repository > Mirror settings > Push mirror to `https://github.com/bfeitknecht/<repo>.git` with a GitHub fine-grained PAT (contents: write).
 
+### Renovate: `applications/renovate/renovate-secrets.sops.yaml`
+
+GitHub > Settings > Developer settings > Fine-grained tokens > Generate. Resource owner `bfeitknecht`, repository access: `infra` (add more later), expiry 1 year. Permissions: Contents, Pull requests, Issues, Workflows: read and write; Metadata: read. Then, in the infra root (the token is read hidden and never echoed):
+
+```nu
+let tok = (input -s "GitHub token: ")
+let f = "kubernetes/applications/renovate/renovate-secrets.sops.yaml"
+kubectl create secret generic renovate-secrets -n renovate --from-literal=$"RENOVATE_TOKEN=($tok)" --dry-run=client -o yaml
+  | sops --encrypt --filename-override $f --input-type yaml --output-type yaml /dev/stdin | save -f $f
+```
+
+Then uncomment the file in `applications/renovate/kustomization.yaml` and remove `suspend: true` for `renovate` in `cluster/applications.yaml` (or ask the agent). Renovate runs Mondays 05:00 on rzbl and opens pull requests on `bfeitknecht/infra` (config `renovate.json5`).
+
+### Dawarich admin
+
+Dawarich creates `demo@dawarich.app` (admin) with the documented password `password` on first start. Rotated by the agent on 2026-11-18; the new value is in `.private/dawarich-admin.sops.yaml`: `sops -d .private/dawarich-admin.sops.yaml | from yaml | get data.password | decode base64 | decode`. Log in at `dawarich.internal`, change the email to yours. Dawarich supports OIDC with PKCE (authentik) later.
+
 ## Media folder layout (TRaSH Guides)
 
 One volume `media-files`, mounted at `/data` in jellyfin, sonarr, radarr and qbittorrent:

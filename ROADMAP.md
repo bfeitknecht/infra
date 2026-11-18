@@ -24,7 +24,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## NEXT
 
 - [ ] **Music streaming:** Lidarr + Navidrome live (internal). Public `music.0xbf.ch` when wanted. Needs qBittorrent for downloads.
-- [ ] **Renovate** on the Forgejo runner: `renovate.json5` is ready (validated); needs a token for the platform the repos live on.
+- [ ] **Renovate:** CronJob ready on rzbl (suspended). Owner creates a GitHub fine-grained token (`docs/RZBL_WORKLOADS.md`).
 - [ ] Alert receiver (ntfy) for Alertmanager and Gatus.
 - [ ] infra `justfile` (`check` = kustomize build + yamllint, `release` = next semver tag) and CI lint (`docs/WORKSPACE.md`).
 - [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
@@ -45,6 +45,7 @@ Status as of 2026-11-17. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-18 Lidarr, Navidrome, Dawarich, Time Machine live; thyme history email rewrite (bundle in `.private/`).
 - [x] 2026-11-17 Kubernetes 1.35.3 -> 1.36.6 -> 1.37.2; journey page + deck.
 - [x] 2026-11-17 copyparty (files.0xbf.ch), Immich with GPU ML, Forgejo Actions + runner, agent sandbox slots (scripts/sandbox.nu).
 - [x] 2026-11-17 monitoring v2 (curated dashboards, 0xbf home, Gatus, GPU exporter), Flux on rbpi, Forgejo landing /bf, apex one-line footer (0.1.9).

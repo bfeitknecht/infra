@@ -60,6 +60,7 @@ kubernetes/
     ├── opencode/       opencode web in Kata at opencode.internal (authentik)
     ├── agents/         SandboxTemplate + SandboxWarmPool: one opencode Kata VM per task
     ├── forgejo/        tier-1 git forge at git.0xbf.ch
+    ├── renovate/       weekly Renovate CronJob (rzbl), GitHub platform, renovate.json5
     ├── pds/            tier-1 ATProto PDS at pds.0xbf.ch
     └── homepage/       dashboard
 ```
