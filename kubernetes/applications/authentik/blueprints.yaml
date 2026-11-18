@@ -525,6 +525,10 @@ data:
           name: default-authentication-identification
         model: authentik_stages_identification.identificationstage
         attrs:
+          # The serializer validates the whole stage: restate the stock fields.
+          user_fields:
+            - email
+            - username
           recovery_flow: !KeyOf flow
       - identifiers:
           domain: authentik-default
