@@ -27,7 +27,7 @@ spec:
           # it with the same tag; this pin must match the release tag
           # (`just release` checks). sshd (22) is mux-only: the sshmux
           # ForceCommands in with its key.
-          image: ghcr.io/bfeitknecht/browser:v1.42.0
+          image: ghcr.io/bfeitknecht/browser:v1.42.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
