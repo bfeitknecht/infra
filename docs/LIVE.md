@@ -94,6 +94,9 @@ make local users.
 
 ## 5. Photos (Immich at `photos.0xbf.ch`)
 
+- **First: create the Immich admin at `https://immich.internal`** (LAN or
+  tailnet). The first sign-up becomes admin; the public name blocks admin
+  sign-up on purpose. Use your authentik email.
 - Public at `https://photos.0xbf.ch` (also `immich.internal`). Login with
   authentik: only `family` and `developers` get in, so put relatives in
   `family` (step 3).

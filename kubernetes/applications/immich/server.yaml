@@ -127,6 +127,20 @@ spec:
   hostnames:
     - photos.0xbf.ch
   rules:
+    # The first sign-up becomes the Immich admin. Never through the public
+    # name: the exact match wins over "/" and never reaches the server.
+    # Create the admin at immich.internal.
+    - matches:
+        - path:
+            type: Exact
+            value: /api/auth/admin-sign-up
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /
+            statusCode: 302
     - backendRefs:
         - name: immich-server
           port: 80

@@ -388,6 +388,7 @@ const SERVICES = [
 
 const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets now. NAS still refuses 3900 on its tailnet IP.", svc:"k8up"},
+ {id:"immich-admin", prio:1, cat:"manual", t:"Immich: create the admin at immich.internal", d:"No admin exists yet. The first sign-up becomes admin. photos.0xbf.ch blocks admin sign-up; do it on the LAN or tailnet.", svc:"immich"},
  {id:"jellyfin-wizard", prio:3, cat:"manual", t:"Jellyfin: NVENC, known proxies, hide users", d:"Dashboard > Playback > Transcoding: NVIDIA NVENC. Networking > Known proxies 10.244.0.0/16. Hide users from login screen.", svc:"jellyfin"},
  {id:"timemachine-mac", prio:2, cat:"manual", t:"Time Machine: add the disk on each Mac", d:"Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/RZBL_WORKLOADS.md). Then pick it in Time Machine.", svc:"timemachine"},
  {id:"router-2222", prio:1, cat:"manual", t:"Zyxel: forward WAN 2222 → 10.10.20.10, drop 2223", d:"infra v1.42.x is live: the mux answers on the LB. WAN 2222 needs this rule. The 2223 rule is dead now.", svc:"sshmux"},
@@ -553,6 +554,7 @@ const SECRETS = [
  ["infrastructure/monitoring/gatus-secrets.sops.yaml","monitoring","exists","NTFY_TOKEN (gatus)"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-19","infra v1.46.1: photos.0xbf.ch blocks Immich admin sign-up (no admin existed yet)"],
  ["2026-11-19","infra v1.46.0: Immich public at photos.0xbf.ch (route, authentik redirect URIs, externalDomain, Gatus)"],
  ["2026-11-19","docs/LIVE.md: owner steps to go live with test data (Time Machine first, Jellyfin, invites, copyparty, Immich)"],
  ["2026-11-19","infra v1.45.0: browser (browsh) removed: manifests, image, mux route, CI step"],
