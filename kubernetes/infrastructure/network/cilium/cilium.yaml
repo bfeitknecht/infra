@@ -33,7 +33,7 @@ spec:
 
     kubeProxyReplacement: true
     # Socket LB only for host processes. Pods use per-packet service translation.
-    # Kata VMs (devil, agent sandboxes) bypass socket hooks: with full socket LB
+    # Kata VMs (devil, opencode) bypass socket hooks: with full socket LB
     # their ClusterIP traffic leaves untranslated and times out.
     socketLB:
       hostNamespaceOnly: true

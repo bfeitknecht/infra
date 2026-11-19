@@ -53,10 +53,6 @@
       matchPackageNames: ["kubernetes-sigs/gateway-api"],
     },
     {
-      groupName: "agent-sandbox",
-      matchPackageNames: ["kubernetes-sigs/agent-sandbox"],
-    },
-    {
       groupName: "talos and kubernetes",
       matchPackageNames: ["siderolabs/talos", "kubernetes/kubernetes"],
       // One minor at a time, after a etcd snapshot: see the debugging playbook.
