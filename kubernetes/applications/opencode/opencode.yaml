@@ -1,6 +1,6 @@
 # opencode web gives agents a shell. Isolation (docs/AGENT_ISOLATION.md):
 # Kata VM (own kernel), CiliumNetworkPolicy (egress allowlist, ingress from
-# Traefik only), authentik forward auth (group developers), no SA token.
+# Traefik and devil), authentik forward auth (group developers), no SA token.
 # No official image: the npm package runs on node. HOME is on the PVC, so the
 # npx cache, git clones and sessions survive restarts.
 apiVersion: apps/v1
@@ -38,13 +38,33 @@ spec:
       containers:
         - name: opencode
           image: docker.io/library/node:22-bookworm
-          command: ["npx", "-y", "opencode-ai@1.19.5", "web", "--hostname", "0.0.0.0", "--port", "4096"]
+          # The Forgejo bot key (opencode-secrets) is copied to a private file
+          # first: ssh refuses a key that others can read. Version pin: omni
+          # devil.nix wraps the same version for `oc` (bump both together).
+          command:
+            - sh
+            - -c
+            - >-
+              install -d -m 700 /home/node/.ssh && install -m 600 /etc/opencode-git/id_ed25519 /home/node/.ssh/forgejo-bot && exec npx -y opencode-ai@1.19.5 web --hostname 0.0.0.0 --port 4096
           workingDir: /home/node/work
           env:
             - name: HOME
               value: /home/node
             - name: OPENCODE_CONFIG
               value: /etc/opencode/opencode.json
+            # Git as the Forgejo bot `opencode`: SSH on git.0xbf.ch:22 with the
+            # pinned host key. Push rights come from collaborator access per
+            # repo on Forgejo, never from the owner's keys.
+            - name: GIT_SSH_COMMAND
+              value: ssh -i /home/node/.ssh/forgejo-bot -o IdentitiesOnly=yes -o UserKnownHostsFile=/etc/opencode-git/known_hosts
+            - name: GIT_AUTHOR_NAME
+              value: opencode
+            - name: GIT_AUTHOR_EMAIL
+              value: noreply+opencode@0xbf.ch
+            - name: GIT_COMMITTER_NAME
+              value: opencode
+            - name: GIT_COMMITTER_EMAIL
+              value: noreply+opencode@0xbf.ch
           ports:
             - name: http
               containerPort: 4096
@@ -69,6 +89,9 @@ spec:
             - name: config
               mountPath: /etc/opencode
               readOnly: true
+            - name: git
+              mountPath: /etc/opencode-git
+              readOnly: true
       volumes:
         - name: home
           persistentVolumeClaim:
@@ -76,6 +99,10 @@ spec:
         - name: config
           configMap:
             name: opencode-config
+        - name: git
+          secret:
+            secretName: opencode-secrets
+            defaultMode: 0440
 ---
 apiVersion: v1
 kind: Service
