@@ -10,7 +10,7 @@ Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernet
 | Prowlarr 2.7.0                                   | `applications/media/`                    | **live**            | `prowlarr.internal`                                   |
 | Lidarr 3.1.6                                     | `applications/media/`                    | **live**            | `lidarr.internal`                                     |
 | Navidrome 0.64.2                                 | `applications/media/`                    | **live**            | `navidrome.internal` (public later: `music.0xbf.ch`)  |
-| Immich v3.4.1 (ML on GPU, `-cuda`)               | `applications/immich/`                   | **live**            | `immich.internal`                                     |
+| Immich v3.4.1 (ML on GPU, `-cuda`)               | `applications/immich/`                   | **live**            | `photos.0xbf.ch`, `immich.internal`                   |
 | Dawarich 1.23.0                                  | `applications/dawarich/`                 | **live**            | `dawarich.internal`                                   |
 | Copyparty 1.20.26                                | `applications/copyparty/`                | **live**            | `copyparty.internal`, public `files.0xbf.ch`          |
 | Time Machine (Samba)                             | `applications/samba/`                    | **live**            | `smb://10.10.20.145`                                  |
@@ -185,7 +185,7 @@ Recommendation: start with the Jellyfin library (zero setup). Add Navidrome if t
 All apps are internal (`*.internal`, LAN + tailnet allowlist). Public needs an HTTPRoute on listener `websecure` with a `*.0xbf.ch` host. No DNS change (wildcard).
 
 - **Jellyfin**: finish the setup wizard at `jellyfin.internal` first. The wizard creates the admin with no auth, so a public wizard is open to anyone. Then uncomment `httproute-public.yaml` in `applications/media/kustomization.yaml`: public at `stream.0xbf.ch`. Server name in Jellyfin: `0xbf`.
-- **Immich**: first sign-up becomes admin. Same rule: sign up internal, then go public (`photos.0xbf.ch`).
+- **Immich**: first sign-up becomes admin. Public at `photos.0xbf.ch` since 2026-11-19; login through authentik (`family`, `developers`).
 - **Copyparty**: accounts come from the config, so it is public at once at `files.0xbf.ch` (route `copyparty-public`, live on un-suspend).
 - **\*arr, Prowlarr, Dawarich**: keep internal.
 

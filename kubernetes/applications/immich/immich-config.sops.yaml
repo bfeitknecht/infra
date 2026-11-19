@@ -5,19 +5,19 @@ metadata:
     namespace: immich
 type: Opaque
 stringData:
-    immich.json: ENC[AES256_GCM,data:UBY7aSfad7bNjbcFzcWf5DWIpfdF/az3asf95w+mLnVhWGzYN8pqxpR9TGpZwJ/Mbe1/Z+Nh1ihvlxiAnOJpKUzCPdsmBnRqPylCVMXeLJGGCr1sGdbb7pzo6on54ffmT+Up4W0zm0eqbHO2fRUOS8Ob+sR0oO8SN7NT8IwjAv13ovFlUd/ORutbv2Y040h7B5aH3gRgyYjEWCXwfyv/8vzEs9i0pvmLtXe6RPUiqcahhnjHy07lESnJu0pJ6wHDSszB/emJ+Fu+5fRpcbHqe6L3CHtxgNn1FCJ2IgFV0GTNSIehgllMptXbo/PTfqLhjsEE4/TbRy/IoOcBgoxpcoT5CQt2Dw2p/oEiv4/Ut83clFKERu55nm5HW51p1yuztJpHjganCkOfmdSEiBwxPx8c3CD5K+zuNKar00WRVapi2doMi6DPbpK5qHG8VvdfH8VxzQK1leAt8jBRbQQabdZ0WKWlzrC06lyvet9lXz2T+fBRe8yPjWBkESmFh4msjrajwc9QaIlLNEsVj6iALB6jNp3qBcm65DzlcCK/tAr+vczBFICWL6EpMM1oXemqyJLtccHBdrgSmt2YwB8vOhECfuhA0KIMtLLmbWygu6Ctt/wr6W75Udw8wVYgHTaRzVozS+FnCD+Mh4VFRE9ABHJqhRG8iJjlwKmIB5ZH+8xLVtFVxBFHlSFU4BjY42LXv8PPyxA6/a+7wtBxXS+CmfLFW9uPb8iQkmoS3gXrOlYB9Wt2TgOIH2k9qhCLHYaXAFALBJ5aL4dSzV5pbd27HlI3Jr7DUA8hajsU7N6UxMJCsA+gIDa9QUah7UtcDKP6hsxetVhpjSMqofJe4rU26quwezXRUCCkVUAYWlcFyMHG2yrNPb21jvt0oqqI1Y2kGXVhOo2Aq1gmQEWp/XrT4cuqC/xOtkeKs+83SGsp6c5BjsO9+9TPBmNKsTr2XiOs4lKzn0NGi5l0Z64X7kI/M+nCKwAYwUMijBFappp614DPo7jfI0HiTDO9kqx1vcrpuLoERYnuRw0QRGUPkCDmTep8afrlAhN5s1UnH/453La27u2QY35i7rv7Kz5OZLoh/PdBQe1HO8z0PsDCrcqrrzOdWHu2THYWzk1HCCAwPzX7ZNypyiX8A+E2g374gszDqj5zuOknIw==,iv:8o7ME3SG6LjEb0H2RsrModbFMXUD14zbQOCZCgxx/gw=,tag:Mu4p/e99T0AkzjUN+PIKuQ==,type:str]
+    immich.json: ENC[AES256_GCM,data:cA6zpR+qu62Y3HATgfZPN3YmBzovTrWBluJIkikWPzohT2sdYEPp9ERUafO3oyq7l26DYtuDzpMRD/CBZYrCXmtCZ/2zBHKSmFTbf6MFxk+woUOKOFmWijIJxY7XliVy+HqkYZY0Z+AP1tU3Tw4Od8U9a6YZr+A44FXY6ECerGcwT4kQ9ZU2Dt1SM+YF3oNEnINjLkcMQHb1vp5ysobH7mHImBz1zVWn1pvE35aonZYhXf49p9DQTH0YQHFpsdQC64UipugrH9pBUnOYttxj2eAeZ8rSekqEY431LQ/g/N6lavm4o/oC6meFdB7W3Rg1GJH3i31Xh+ZPyTC/8wRNysQEWCGS+HHgJpFk4dTxNFyd576bXvcSV4A30pIR4uIacD1lFDbmDZPXRrUqhfaUD+G0IinWmG0MsaN5Mm/tYBzW5nUlEkzRVM0yj3K2cbWlbHsIpgYlwcnMoHcGShqVtoBhOn4arpfwvR0O7hWuT0+ZVsBTvjRA6mKyirx0Rd/XkobyJYDrRi0GFhmpa3wImcXaiqs56UvkHE43LD4XGe73OPOK1ojUvbrhUqeIPZuU15RoAch7HRydMG+x13N4QPPoPsOHHHxqOhW3yKm7KunzUOLobaqpNbas+/5iHLR7n930QNZhIqkhmOcb2m5gW0Rpzhtwo1o1KJSpoCiMhSMJI3bi1noKkt7PjzpwcmU2p/AAJ1ZAgv1kzbQcscdm/+Oww/uG7DRg02rcxAfJXF4a8SjtGbcfilAqTZV4fUhRtlEdN2IDMqanPqvIMLMj1ZVSHZJH0dkAV88XOeEFwHGPa/V+hr4rKjvBg78bHUot3ItqhgUuEKvCrgoTC4taMHi8DxiaZRs1yFPfa3KSwWQqQGbKJJLUtOW7+TmPFc2AZXtORwFsFyVgepyvQA03sZnxuhwWKsWeYISzRDDdcdIVYk02/6IhqcizvL/57A1cQVkp766OjbuTgN5tUR4qs+T4tYcHRqms5qb9f5P3Aozj21HVYuzd4bjRz2FRqVDxSTtX54zf/JYfRaOzSzqhjKVZB23lNhrcaojs4uG2QWkUS59rPchfWkugThlIaiRRQd1cUka52WCnfZbLWw4aHXDiv4BgAriojFU1oU6AbLtthD/qwlMOO1O+/G/uIoUfL/f8/z0QUQ==,iv:7JNmyIPXpEyUapwjcyBd0NhK6NSSD3zDMHkLGCPF36U=,tag:j7KOTHlbnNAtY7o7ydLxTg==,type:str]
 sops:
     age:
         - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBManJ1V1N0VHA5dTBoUUlU
-            TS9CWG9paGpyN2lPWXB0SlRhdDdvRjVQNFNFCndzbWJUaXVUNzVSdFgzbjVXOGp2
-            cDcrTHFtT0ZTb2MwZ2hBNnF6azd4N2MKLS0tIFdpZzdWS1dSTFI1Q1kzVlZpYkI4
-            TjlYOGpjdDNIZnQyM0kwWjZTeWNIY2MKlvDAyZLwsyEaWCc0b6Kix/e7FMsDvCfv
-            R2roaTeZGDM4kY4mcRTntessfveTGCpoabAHT+wJv5hjhkPj21VxYg==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBVZUwzdnV0MkJXTnZuWUI3
+            Ykg1TDg2L0dLYzNMZmRLK3k5ci9YS3l0dHdzCjNZWjZnalYvbDJrWWJnR1RVSXoy
+            N2t2aGkwdUhmaXJhT0JxRVhMclZBekkKLS0tIE5ySTUzb1h5MDNNOGc1VThMWEhP
+            clgrTG44RVdFYWxBczJuZjRRK3lNTzAKNjcIxZ5hD1C85Ft4pCYw6WwsMfqWcSDL
+            7b09qEngRd0sqjGlGEUAP4DtNH23TVCCo1/zmRivs5IB3+XjMktRMg==
             -----END AGE ENCRYPTED FILE-----
           recipient: age170rmcek6zuhx4gd837elruddvhxha56ekqlkfu2ty6lpagxhsdrq6ra8ju
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-11-18T01:34:06Z"
-    mac: ENC[AES256_GCM,data:EO8OSUczpOFu31UNML5LqHMruPM6Ihe0o9QPdsBqKowtEbPleNtfagYvL6OwCE8gWwzWTXkzwDAZeNwR1gm1Ue4aJcBGvMILAxu+8/DlaS/a9/QK37Jdw0hp9bSa10A+iEZs39+x79VmZqUoarHckGUeEJuPa3urUuxlONukM8E=,iv:/N4lcnEJV/Ibjyu8v1rDY/OBM8Hx4XmlaWo2xcYz+oc=,tag:183x/d03mFONejs6+S2qLA==,type:str]
+    lastmodified: "2026-11-19T00:07:57Z"
+    mac: ENC[AES256_GCM,data:p045X7hvIf7FvI6qqpWXgGvEMJRDZ2T3YGueHgMqFUm8p4RoyV2G71/IHp+pJ/c5VHGqfxNIfZGnY9guRl7iipNOBbabDYyZgP0HL/O4MruH4/oTEvtV0Orlj+cj/xZDJrKU9iJdfem00Fd4Abmyr2cXZWODJg5QNxWafMOCIfc=,iv:s0RedtkM3BkJUIQAkwsKS8shSKUQw5ot5j6nwn6yPOQ=,tag:Xq9pT9xKrl6w9X/pFOIOaw==,type:str]
     version: 3.13.3

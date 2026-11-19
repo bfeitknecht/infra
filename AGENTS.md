@@ -60,7 +60,7 @@ kubernetes/
     ├── forgejo/        tier-1 git forge at git.0xbf.ch
     ├── forgejo-runner/ Actions runner (rzbl, docker:dind)
     ├── pds/            tier-1 ATProto PDS at pds.0xbf.ch
-    ├── immich/         tier-1 photos at immich.internal (Postgres + Valkey, ML on GPU)
+    ├── immich/         tier-1 photos at photos.0xbf.ch + immich.internal (Postgres + Valkey, ML on GPU)
     ├── authentik/      SSO IdP at auth.0xbf.ch (Postgres, blueprints)
     ├── agh/            AdGuard Home (LAN DNS edge)
     ├── ddns/           favonia/cloudflare-ddns (0xbf.ch to home IP)

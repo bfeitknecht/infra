@@ -78,7 +78,7 @@ Blueprints `forgejo.yaml` and `jellyfin.yaml` in `blueprints.yaml` create the OI
 | --- | --- | --- | --- |
 | Forgejo | git.0xbf.ch | OIDC (confidential) | developers |
 | Grafana | grafana.internal | OIDC (public, PKCE) | developers; authentik Admins = Grafana Admin |
-| Immich | immich.internal | OIDC (confidential, `immich-config`) | family, developers |
+| Immich | photos.0xbf.ch, immich.internal | OIDC (confidential, `immich-config`) | family, developers |
 | Dawarich | dawarich.internal | OIDC (public, PKCE, env) | family, developers |
 | Navidrome | navidrome.internal | forward auth + `X-authentik-username` (ExtAuth); `/rest` open for Subsonic apps | family, friends, developers |
 | opencode, sandbox-1..3 | *.internal | forward auth | developers |

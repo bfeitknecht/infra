@@ -16,9 +16,9 @@ This is the one real backup, and it comes first because echo -> anti is next.
 The share is on rzbl's 4 TB SSD (3.6 TB free; echo uses about 404 GiB).
 
 1. Get the password:
-   ```nu
-   sops -d kubernetes/applications/samba/timemachine-secrets.sops.yaml | from yaml | get data.PASSWORD | decode base64 | decode
-   ```
+    ```nu
+    sops -d kubernetes/applications/samba/timemachine-secrets.sops.yaml | from yaml | get data.PASSWORD | decode base64 | decode
+    ```
 2. Finder > Go > Connect to Server > `smb://10.10.20.145/TimeMachine`, user
    `timemachine`, the password from step 1. Save it in the keychain.
 3. System Settings > General > Time Machine > Add Backup Disk > the share.
@@ -38,9 +38,9 @@ move to anti. It is not off-site.
   `2223` rule.
 - Phone: ntfy app, server `https://notify.0xbf.ch`, user `bf`, topic
   `alerts`. Password:
-  ```nu
-  sops -d .private/ntfy-bf.sops.yaml
-  ```
+    ```nu
+    sops -d .private/ntfy-bf.sops.yaml
+    ```
 
 ## 2. Streaming (Jellyfin at `stream.0xbf.ch`)
 
@@ -48,22 +48,22 @@ Jellyfin is public already. It has no SSO (the plugin does not load on 12.x):
 make local users.
 
 1. `https://jellyfin.internal` > Dashboard:
-   - Playback > Transcoding: hardware acceleration **NVIDIA NVENC**.
-   - Networking > Known proxies: `10.244.0.0/16`.
-   - Users: make one user per person. Turn off "show on login screen".
+    - Playback > Transcoding: hardware acceleration **NVIDIA NVENC**.
+    - Networking > Known proxies: `10.244.0.0/16`.
+    - Users: make one user per person. Turn off "show on login screen".
 2. Libraries (they exist as folders on `media-files`): Movies
    `/data/media/movies`, Shows `/data/media/tv`, Music `/data/media/music`.
 3. Something to watch. Copy a test file straight into the library
    (copyparty does not mount `media-files`):
-   ```nu
-   let pod = (kubectl get pod -n media -l app.kubernetes.io/name=jellyfin -o name | lines | first | str replace 'pod/' '')
-   kubectl cp ~/Movies/test.mkv $"media/($pod):/data/media/movies/test.mkv"
-   ```
-   Then Dashboard > Libraries > Scan. Or use the *arr apps:
-   - `prowlarr.internal`: add indexers, connect Sonarr, Radarr, Lidarr.
-   - `qbittorrent.internal`: it downloads through Proton VPN only (gluetun).
-   - `sonarr.internal` / `radarr.internal`: root folders `/data/media/tv`,
-     `/data/media/movies`; download client qBittorrent.
+    ```nu
+    let pod = (kubectl get pod -n media -l app.kubernetes.io/name=jellyfin -o name | lines | first | str replace 'pod/' '')
+    kubectl cp ~/Movies/test.mkv $"media/($pod):/data/media/movies/test.mkv"
+    ```
+    Then Dashboard > Libraries > Scan. Or use the *arr apps:
+    - `prowlarr.internal`: add indexers, connect Sonarr, Radarr, Lidarr.
+    - `qbittorrent.internal`: it downloads through Proton VPN only (gluetun).
+    - `sonarr.internal` / `radarr.internal`: root folders `/data/media/tv`,
+      `/data/media/movies`; download client qBittorrent.
 4. Test from outside: phone on mobile data, `https://stream.0xbf.ch`. Play a
    file that forces a transcode (lower the quality) and watch the GPU panel on
    the Grafana home dashboard.
@@ -83,24 +83,24 @@ make local users.
 
 - Public, accounts from the Secret `copyparty-config` (not SSO). Your
   password:
-  ```nu
-  sops -d kubernetes/applications/copyparty/copyparty-config.sops.yaml | from yaml | get data."copyparty.conf" | decode base64 | decode
-  ```
-  The output includes the password. Do not paste it anywhere.
+    ```nu
+    sops -d kubernetes/applications/copyparty/copyparty-config.sops.yaml | from yaml | get data."copyparty.conf" | decode base64 | decode
+    ```
+    The output includes the password. Do not paste it anywhere.
 - Try: upload, share links. copyparty has its own volume (`copyparty-files`),
   not the media library.
 - More accounts: ask the agent. It seeds a password straight into sops, and
   you read it with the command above.
 
-## 5. Photos (Immich at `immich.internal`)
+## 5. Photos (Immich at `photos.0xbf.ch`)
 
-- Today internal only: LAN and your tailnet. Login with authentik (groups
-  `family`, `developers`).
-- The mobile app: server `https://immich.internal` on the LAN or tailnet. It
-  needs the internal CA on the phone (iOS profile, full trust).
-- **Decision for invites outside the tailnet:** a public route
-  `photos.0xbf.ch` (hostname rule: by purpose). The agent adds it on request;
-  the internal name stays.
+- Public at `https://photos.0xbf.ch` (also `immich.internal`). Login with
+  authentik: only `family` and `developers` get in, so put relatives in
+  `family` (step 3).
+- The mobile app: server `https://photos.0xbf.ch`, then "Login with
+  authentik". Works anywhere, no internal CA needed.
+- Share links (albums, single photos) use `photos.0xbf.ch`. A link opens
+  without an account.
 - Upload a few test photos. Check that face and object detection run on the
   GPU.
 - Do not turn on "backup all photos" in the app before step 9.

@@ -727,6 +727,12 @@ data:
               url: https://immich.internal/user-settings
               redirect_uri_type: authorization
             - matching_mode: strict
+              url: https://photos.0xbf.ch/auth/login
+              redirect_uri_type: authorization
+            - matching_mode: strict
+              url: https://photos.0xbf.ch/user-settings
+              redirect_uri_type: authorization
+            - matching_mode: strict
               url: app.immich:///oauth-callback
               redirect_uri_type: authorization
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
@@ -743,7 +749,7 @@ data:
         attrs:
           name: Immich
           provider: !KeyOf provider-immich
-          meta_launch_url: https://immich.internal
+          meta_launch_url: https://photos.0xbf.ch
       - model: authentik_policies.policybinding
         identifiers:
           target: !KeyOf app-immich
