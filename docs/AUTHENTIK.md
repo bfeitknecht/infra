@@ -84,7 +84,7 @@ Blueprints `forgejo.yaml` and `jellyfin.yaml` in `blueprints.yaml` create the OI
 | copyparty | files.0xbf.ch | forward auth + `X-authentik-username`/`-groups` (copyparty IdP headers); `/shr/` share links open; `copyparty.internal` keeps password login | family, developers |
 | opencode | opencode.internal | forward auth | developers |
 | Sonarr, Radarr, Prowlarr, Lidarr, qBittorrent, Gatus (status) | *.internal | forward auth | authentik Admins |
-| Jellyfin | stream.0xbf.ch | none (SSO plugin does not support 12.x) | local users |
+| Jellyfin | stream.0xbf.ch | OIDC via SSO plugin (K0lin fork 5.1.1, `jellyfin-sso-config`); login page button "Sign in with 0xbf"; apps use Quick Connect | family, friends, developers; authentik Admins = Jellyfin admin |
 | PDS, atuin, AGH, Traefik dashboard | | own login | (no header support) |
 
 Group meaning: `family` and `friends` get the media and photo apps, `developers` the dev tools, `authentik Admins` the admin tools. Put an invited person in the right group after they join.

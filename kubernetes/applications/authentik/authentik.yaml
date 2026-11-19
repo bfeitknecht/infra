@@ -27,6 +27,10 @@ spec:
   targetNamespace: authentik
   values:
     global:
+      # authentik-secrets is env and has no hash suffix: bump this after every
+      # change to it, so server and worker restart and blueprints see new keys.
+      podAnnotations:
+        0xbf.ch/secrets-rev: "2026-11-19"
       nodeSelector:
         kubernetes.io/hostname: rzbl
       # Non-secret config. The Secret authentik-secrets holds the rest.

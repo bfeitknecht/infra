@@ -5,6 +5,7 @@ resources:
   - middleware.yaml
   - pvc.yaml
   - jellyfin.yaml
+  - jellyfin-sso-config.sops.yaml
   - sonarr.yaml
   - radarr.yaml
   - lidarr.yaml

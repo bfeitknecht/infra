@@ -46,6 +46,43 @@ spec:
             - name: branding
               mountPath: /branding
               readOnly: true
+        # SSO plugin (K0lin fork of 9p4/jellyfin-plugin-sso, Jellyfin 12):
+        # pinned release, sha256-checked, unpacked once per version. The
+        # plugin config SSO-Auth.xml is seeded only if absent: the plugin
+        # stores its account links in the same file. To re-seed, delete
+        # /config/plugins/configurations/SSO-Auth.xml.
+        - name: sso-plugin
+          image: docker.io/library/alpine:3.22
+          env:
+            - name: VERSION
+              value: "5.1.1"
+            - name: SHA256
+              value: db126b4763bda3a3754fa2103232fc03ef1bf929cfeda35f2e9af39c875233b1
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              dir=/config/plugins/SSO-Auth_${VERSION}
+              if [ ! -f "$dir/SSO-Auth.dll" ]; then
+                wget -q -O /tmp/sso.zip "https://github.com/K0lin/jellyfin-plugin-sso/releases/download/v${VERSION}/sso-authentication_${VERSION}.zip"
+                echo "${SHA256}  /tmp/sso.zip" | sha256sum -c -
+                rm -rf /config/plugins/SSO-Auth_*
+                mkdir -p "$dir"
+                unzip -o -q /tmp/sso.zip -d "$dir"
+              fi
+              mkdir -p /config/plugins/configurations
+              [ -f /config/plugins/configurations/SSO-Auth.xml ] || cp /sso/SSO-Auth.xml /config/plugins/configurations/SSO-Auth.xml
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: sso
+              mountPath: /sso
+              readOnly: true
       containers:
         - name: jellyfin
           image: docker.io/jellyfin/jellyfin:12.4
@@ -93,6 +130,9 @@ spec:
             - name: library
               mountPath: /data
       volumes:
+        - name: sso
+          secret:
+            secretName: jellyfin-sso-config
         - name: branding
           configMap:
             name: jellyfin-branding

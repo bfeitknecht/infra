@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <BrandingOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <LoginDisclaimer>0xbf · invite only</LoginDisclaimer>
+  <LoginDisclaimer>&lt;a href="/sso/OID/start/authentik" class="raised emby-button button-submit block" style="display:block;text-align:center;padding:.9em;margin:1em 0"&gt;Sign in with 0xbf&lt;/a&gt;0xbf · invite only&lt;br&gt;TV and phone apps: use Quick Connect.</LoginDisclaimer>
   <CustomCss>/* 0xbf branding: monochrome palette of exhib and glob (dark values). */
 :root {
   --0xbf-bg: oklch(17% 0 0);
