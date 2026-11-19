@@ -18,6 +18,16 @@ spec:
         - ports:
             - port: "4096"
               protocol: TCP
+    # devil attaches its opencode TUI straight to the server
+    # (`opencode attach http://opencode.opencode.svc`), without authentik.
+    # devil is the owner's VM; nothing else in the cluster gets in.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: devil
+      toPorts:
+        - ports:
+            - port: "4096"
+              protocol: TCP
   egress:
     # DNS through CoreDNS, with DNS visibility (needed for toFQDNs).
     - toEndpoints:
@@ -73,5 +83,5 @@ spec:
         - matchName: git.0xbf.ch
       toPorts:
         - ports:
-            - port: "2223"
+            - port: "22"
               protocol: TCP

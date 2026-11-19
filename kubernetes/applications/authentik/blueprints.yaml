@@ -798,80 +798,6 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 0
-      # Agent sandbox slots sandbox-1..3.internal (scripts/sandbox.nu). One
-      # forward_single provider per host; same group as opencode.
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider-1
-        identifiers:
-          name: sandbox-1
-        attrs:
-          mode: forward_single
-          external_host: https://sandbox-1.internal
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          access_token_validity: hours=24
-      - model: authentik_core.application
-        id: app-1
-        identifiers:
-          slug: sandbox-1
-        attrs:
-          name: sandbox-1
-          provider: !KeyOf provider-1
-          meta_launch_url: https://sandbox-1.internal
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app-1
-          group: !KeyOf group-developers
-        attrs:
-          order: 0
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider-2
-        identifiers:
-          name: sandbox-2
-        attrs:
-          mode: forward_single
-          external_host: https://sandbox-2.internal
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          access_token_validity: hours=24
-      - model: authentik_core.application
-        id: app-2
-        identifiers:
-          slug: sandbox-2
-        attrs:
-          name: sandbox-2
-          provider: !KeyOf provider-2
-          meta_launch_url: https://sandbox-2.internal
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app-2
-          group: !KeyOf group-developers
-        attrs:
-          order: 0
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider-3
-        identifiers:
-          name: sandbox-3
-        attrs:
-          mode: forward_single
-          external_host: https://sandbox-3.internal
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          access_token_validity: hours=24
-      - model: authentik_core.application
-        id: app-3
-        identifiers:
-          slug: sandbox-3
-        attrs:
-          name: sandbox-3
-          provider: !KeyOf provider-3
-          meta_launch_url: https://sandbox-3.internal
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app-3
-          group: !KeyOf group-developers
-        attrs:
-          order: 0
       # Internal tools behind forward auth (one forward_single provider per host).
       - model: authentik_core.group
         id: group-family
@@ -1071,9 +997,6 @@ data:
         attrs:
           providers:
             - !KeyOf provider
-            - !KeyOf provider-1
-            - !KeyOf provider-2
-            - !KeyOf provider-3
             - !KeyOf provider-navidrome
             - !KeyOf provider-sonarr
             - !KeyOf provider-radarr
@@ -1081,6 +1004,32 @@ data:
             - !KeyOf provider-lidarr
             - !KeyOf provider-qbittorrent
             - !KeyOf provider-status
+      # Agent sandbox slots sandbox-1..3.internal, removed 2026-11-19 with the
+      # sandboxes. These entries delete the objects; drop them later.
+      - model: authentik_core.application
+        state: absent
+        identifiers:
+          slug: sandbox-1
+      - model: authentik_providers_proxy.proxyprovider
+        state: absent
+        identifiers:
+          name: sandbox-1
+      - model: authentik_core.application
+        state: absent
+        identifiers:
+          slug: sandbox-2
+      - model: authentik_providers_proxy.proxyprovider
+        state: absent
+        identifiers:
+          name: sandbox-2
+      - model: authentik_core.application
+        state: absent
+        identifiers:
+          slug: sandbox-3
+      - model: authentik_providers_proxy.proxyprovider
+        state: absent
+        identifiers:
+          name: sandbox-3
       # agent.0xbf.ch was public for a few hours on 2026-11-17. Removed: opencode
       # stays internal. These entries delete the objects; drop them later.
       - model: authentik_core.application
