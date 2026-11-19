@@ -2,6 +2,13 @@
 
 Scope: back up k8up data (forgejo, pds, etc.) to friend NAS via Tailscale that he shares into local tailnet.
 
+**Status 2026-11-19:** the relay works (option 1 below is live). From the relay
+pod, the NAS answers `tailscale ping` directly (9 ms) and ports `80/443` are
+open, but `3900` is refused at once. So nothing listens on `3900` on the
+tailnet side, or the NAS firewall rejects it. The friend must check: the
+Garage container runs, `3900` is published from Docker, `ss -ltnp` shows a
+listener on `0.0.0.0` or `[::]`, the firewall allows `3900` on `tailscale0`.
+
 ## Current setup
 
 - Friend shares his tailnet into local tailnet. No restrictive ACL.

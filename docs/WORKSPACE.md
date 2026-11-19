@@ -1,6 +1,6 @@
 # Workspace conventions (GENESIS)
 
-Status 2026-11-16. Rules come from the draft post `glob/posts/notes-to-agents.typ`.
+Status 2026-11-19. Rules come from the post `glob/posts/agents.typ`.
 
 ## Target interface
 
@@ -24,18 +24,20 @@ Every repository has:
 
 ## Current gaps
 
-| Repo  | flake dev shell                 | fmt --check                                | check            | release form                                             | CI lint                   |
-| ----- | ------------------------------- | ------------------------------------------ | ---------------- | -------------------------------------------------------- | ------------------------- |
-| apex  | **missing** (cargo not on host) | yes (2026-11-16)                           | yes              | `release` (from Cargo.toml, 2026-11-17)                  | yes                       |
-| exhib | **missing**                     | yes (2026-11-16)                           | yes (2026-11-16) | `release` (from pyproject.toml)                          | yes (2026-11-16)          |
-| glob  | **missing**                     | `fmt` formats the justfile only, not Typst | yes              | `release` (from `VERSION`, no commit, 2026-11-17)        | **missing**               |
-| thyme | **missing**                     | `fmt args="--inplace"` (typstyle)          | yes + `lint`     | `release` (from typst.toml; commits built artefacts)     | yes                       |
-| omni  | is the flake                    | no justfile                                |                  |                                                          | no CI                     |
-| infra | **missing**                     | no justfile                                |                  | tags by hand                                             | no CI lint (only publish) |
+| Repo      | flake dev shell                 | fmt --check                                | check            | release form                                         | CI lint                   |
+| --------- | ------------------------------- | ------------------------------------------ | ---------------- | ---------------------------------------------------- | ------------------------- |
+| apex      | **missing** (cargo not on host) | yes                                        | yes              | `release` (from Cargo.toml)                          | yes                       |
+| exhib     | **missing**                     | yes                                        | yes              | `release` (from pyproject.toml)                      | yes                       |
+| glob      | **missing**                     | `fmt` formats the justfile only, not Typst | yes              | `release` (from `VERSION`, no commit)                | **missing**               |
+| thyme     | **missing**                     | `fmt args="--inplace"` (typstyle)          | yes + `lint`     | `release` (from typst.toml; commits built artefacts) | yes                       |
+| syndicate | **missing**                     | yes (typstyle)                             | yes + `test`     | `release` (from typst.toml)                          | yes                       |
+| omni      | is the flake                    | `nix fmt` (nixfmt-tree), no justfile       |                  |                                                      | no CI                     |
+| infra     | **missing**                     | yes (yamlfmt 0.21.0 + `just --fmt`)        | yes (kustomize)  | `release X.Y.Z` (gates, pins sshmux image)           | yes (2026-11-18)          |
+
+apex, exhib, glob, thyme and infra have `.forgejo/workflows/` mirrors of their GitHub workflows (2026-11-18). They need the secret `GHCR_TOKEN` on Forgejo.
 
 ## Next steps (proposed, not done)
 
 1. One shared dev shell: omni exposes `devShells` per language (rust, python, typst). Each repo's `flake.nix` imports it. Then `cargo`, `uv`, `typst`, `typstyle`, `just`, `kubectl` come from one place.
-2. glob: `fmt` runs typstyle with the thyme settings (`--line-width 120`). `release` stops auto-committing and reads the version from one file.
-3. ~~Unify `release` arguments~~: done 2026-11-17. All four take no argument, read the manifest, support `--check`. thyme still commits its rebuilt manual and thumbnail by design.
-4. infra: `justfile` with `check` (kustomize build of every dir + yamllint) and `release` (next semver tag). CI runs `check` on pull requests.
+2. glob: `fmt` runs typstyle with the thyme settings (`--line-width 120`), and a CI lint job.
+3. omni: a `justfile` (`fmt`, `check` = `nix flake check`) and CI.

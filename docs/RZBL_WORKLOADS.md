@@ -1,10 +1,10 @@
 # rzbl workloads: status and owner steps
 
-Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernetes.io/hostname: rzbl`).
+Status 2026-11-19. All apps below run on rzbl (`nodeSelector: kubernetes.io/hostname: rzbl`).
 
 | App                                              | Dir                                      | State               | Access                                                |
 | ------------------------------------------------ | ---------------------------------------- | ------------------- | ----------------------------------------------------- |
-| Jellyfin 12.4 (GPU)                              | `applications/media/`                    | **live**            | `jellyfin.internal`                                   |
+| Jellyfin 12.4 (GPU)                              | `applications/media/`                    | **live**            | `stream.0xbf.ch`, `jellyfin.internal`                 |
 | Sonarr 4.0.20                                    | `applications/media/`                    | **live**            | `sonarr.internal`                                     |
 | Radarr 7.0.3                                     | `applications/media/`                    | **live**            | `radarr.internal`                                     |
 | Prowlarr 2.7.0                                   | `applications/media/`                    | **live**            | `prowlarr.internal`                                   |
@@ -17,19 +17,19 @@ Status 2026-11-17 (evening). All apps below run on rzbl (`nodeSelector: kubernet
 | Forgejo runner 13.2.1                            | `applications/forgejo-runner/`           | **live**            | none                                                  |
 | Ollama 0.40.16 (GPU)                             | `applications/ollama/`                   | **live**            | cluster only: `ollama.ollama.svc.cluster.local:11434` |
 | opencode web 1.19.5 (Kata)                       | `applications/opencode/`                 | **live**            | `opencode.internal` (authentik, group developers)     |
-| Agent sandboxes (Kata, warm pool 1)              | `applications/agents/`                   | **live** (v1.29.0)  | none (SandboxClaim, port-forward)                     |
+| Agent sandboxes (Kata, warm pool 1)              | `applications/agents/`                   | **live** (v1.29.0)  | `sandbox-1..3.internal` (`scripts/sandbox.nu`)        |
 | qBittorrent 5.3.0 + gluetun v3.41.3 (Proton VPN) | `applications/qbittorrent/` (ns `media`) | **live**            | `qbittorrent.internal`                                |
 
-Prepared apps have a Flux Kustomization with `suspend: true` in `cluster/applications.yaml`. Each needs one sops Secret from the owner. Agents do not create sops files.
+No app is suspended any more. Agents may seed random secrets straight into sops (AGENTS.md, Secrets); owner-provided values come from `.private/`.
 
 Storage classes: `local-path-nvme` (rzbl NVMe, rbpi nvme0) and `local-path-ssd` (rzbl 4 TB SSD only). `local-path` picks a random path from the node list.
 
-## Enable a prepared app
+## Enable a new app with a secret
 
 1. Create the secret file (commands below). Encrypt it with sops.
 2. In `applications/<app>/kustomization.yaml`, uncomment the `*.sops.yaml` line.
-3. In `cluster/applications.yaml`, delete `suspend: true` and its comment for the app.
-4. Commit, tag, push.
+3. If its Kustomization in `cluster/applications.yaml` has `suspend: true`, delete that line.
+4. Commit, then `just release X.Y.Z`.
 
 ## Secrets (nushell)
 
@@ -171,7 +171,7 @@ One volume `media-files`, mounted at `/data` in jellyfin, sonarr, radarr and qbi
 
 Jellyfin libraries: Movies `/data/media/movies`, Shows `/data/media/tv`. Sonarr root folder `/data/media/tv`, Radarr `/data/media/movies`. Lidarr root folder `/data/media/music`, Jellyfin library Music `/data/media/music`.
 
-## Music streaming (next)
+## Music streaming
 
 Lidarr fills `/data/media/music`. Two ways to stream it, both on rzbl over the same volume:
 
@@ -180,13 +180,13 @@ Lidarr fills `/data/media/music`. Two ways to stream it, both on rzbl over the s
 
 Recommendation: start with the Jellyfin library (zero setup). Add Navidrome if the Subsonic clients are better for you.
 
-## Public access (decision for the owner)
+## Public access
 
-All apps are internal (`*.internal`, LAN + tailnet allowlist). Public needs an HTTPRoute on listener `websecure` with a `*.0xbf.ch` host. No DNS change (wildcard).
+Public today: Jellyfin `stream.0xbf.ch`, Immich `photos.0xbf.ch`, copyparty `files.0xbf.ch`. The rest is internal (`*.internal`, LAN + tailnet allowlist). Public needs an HTTPRoute on listener `websecure` with a `*.0xbf.ch` host. No DNS change (wildcard).
 
-- **Jellyfin**: finish the setup wizard at `jellyfin.internal` first. The wizard creates the admin with no auth, so a public wizard is open to anyone. Then uncomment `httproute-public.yaml` in `applications/media/kustomization.yaml`: public at `stream.0xbf.ch`. Server name in Jellyfin: `0xbf`.
+- **Jellyfin**: public at `stream.0xbf.ch` (`httproute-public.yaml`). Server name `0xbf`. Local users only (no SSO on 12.x).
 - **Immich**: first sign-up becomes admin. Public at `photos.0xbf.ch` since 2026-11-19; login through authentik (`family`, `developers`).
-- **Copyparty**: accounts come from the config, so it is public at once at `files.0xbf.ch` (route `copyparty-public`, live on un-suspend).
+- **Copyparty**: accounts come from the config; public at `files.0xbf.ch` (route `copyparty-public`).
 - **\*arr, Prowlarr, Dawarich**: keep internal.
 
 Public route example (put into the app dir, add to `kustomization.yaml`):

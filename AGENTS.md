@@ -53,7 +53,7 @@ kubernetes/
 │       ├── traefik/       Gateway + certificates + middleware + Namespace
 │       └── tailscale/     HelmRelease + Namespace + operator-oauth secret
 └── applications/       one directory = one namespace
-    ├── apex/           tier-2 site + SSH TUI at 0xbf.ch (Keel-polled)
+    ├── apex/           tier-2 site at 0xbf.ch + SSH TUI behind the sshmux (Keel-polled)
     ├── glob/           tier-2 blog at blog.0xbf.ch (Keel-polled)
     ├── exhib/          tier-2 gallery at gallery.0xbf.ch (Keel-polled)
     ├── atuin/          tier-1 shell history (atuin.0xbf.ch, k8up)
@@ -72,7 +72,7 @@ kubernetes/
     ├── copyparty/      file share at files.0xbf.ch
     ├── dawarich/       location history at dawarich.internal (Postgres + Valkey)
     ├── samba/          Time Machine at smb://10.10.20.145
-    ├── devil/          kata VM pod: ssh 2222, ghostty-web at devil.internal
+    ├── devil/          kata VM pod: ssh 2223 (VM sshd 2222), ghostty-web at devil.internal
     ├── agents/         SandboxTemplate + SandboxWarmPool: one opencode Kata VM per task
     ├── renovate/       weekly Renovate CronJob (rzbl), GitHub platform, renovate.json5
     ├── ntfy/           push notifications (notify.0xbf.ch): Alertmanager + Gatus alerts
@@ -185,7 +185,7 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **atuin 18.24.2** (`applications/atuin/`, tier-1): Shell history at `atuin.0xbf.ch` on `websecure` with LE wildcard. Image `ghcr.io/atuinsh/atuin:18.24.2` pinned. Image tag drops `v` from release `v18.24.2`. Use SQLite at `/config/atuin.db` on PVC (5Gi, local-path, `Recreate`). Same shape as forgejo/pds, no Postgres. Configure via `atuin-config` ConfigMap. No sops Secret. Set `ATUIN_OPEN_REGISTRATION=true` for first user, then `false`. Image entrypoint is `atuin-server`. Deployment passes `start`. Set `enableServiceLinks: false` and explicit `ATUIN_PORT`/`ATUIN_HOST`. Service `atuin` creates service-link `ATUIN_PORT=tcp://...`. Upstream ignores form with warning. Explicit env removes ambiguity. Probes use `/healthz`. History is client-side encrypted. Server stores blobs it cannot read. No server key. K8up Schedule `04:30/06:30`. Clients use `https://atuin.0xbf.ch` as `sync_address` in `~/.config/atuin/config.toml`.
 
-- **apex 0.1.10** (`applications/apex/`, tier-2): Site + WASM app at `0xbf.ch` and SSH portfolio on `22`. Image `ghcr.io/bfeitknecht/apex:latest` multi-arch arm64. Use `imagePullPolicy: Always` and Keel. Two Deployments share image. `apex` serves HTTP `8080`. `apex-tui` serves SSH `2222`. SSH allows any username. No client key. Secret `apex-ssh-host-key` holds host key. Keep same key to avoid client warnings. HTTPRoute `apex` routes `0xbf.ch` to `apex:80` on `websecure`. The TUI has no direct route any more: the sshmux chains in (default username) and apex-ssh still takes any username with no credentials. Gatus checks the site and the mux port.
+- **apex 0.1.14** (`applications/apex/`, tier-2): Site + WASM app at `0xbf.ch` and SSH portfolio through the sshmux (`ssh -p 2222 0xbf.ch`). Image `ghcr.io/bfeitknecht/apex:latest` multi-arch arm64. Use `imagePullPolicy: Always` and Keel. Two Deployments share image. `apex` serves HTTP `8080`. `apex-tui` serves SSH `2222`. SSH allows any username. No client key. Secret `apex-ssh-host-key` holds host key. Keep same key to avoid client warnings. HTTPRoute `apex` routes `0xbf.ch` to `apex:80` on `websecure`. The TUI has no direct route any more: the sshmux chains in (default username) and apex-ssh still takes any username with no credentials. Gatus checks the site and the mux port.
 
 - **glob 0.1.1** (`applications/glob/`, tier-2): Typst blog at `blog.0xbf.ch`. Image `ghcr.io/bfeitknecht/glob:latest` multi-arch. Use `imagePullPolicy: Always` and Keel. SWS serves `8080`. HTTPRoute routes `blog.0xbf.ch` to `glob:80` on `websecure`. Probe is `GET /`. The image build imports `@preview/thyme` from Typst Universe (thyme itself needs `@preview/syndicate`; it does not use `exemel`). A glob release waits until the imported thyme version is on `@preview`. Next glob release (0.1.2) uses thyme 0.1.2: entry cards show `· <n> min` reading time (`blog.site(show-reading: true)`).
 
