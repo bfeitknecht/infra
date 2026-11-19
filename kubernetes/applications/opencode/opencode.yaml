@@ -41,7 +41,7 @@ spec:
           # In-tree image (images/opencode): opencode + the opencode-sandbox
           # plugin. The pin must match the release tag (`just release`
           # checks). omni devil.nix wraps the same opencode version for `oc`.
-          image: ghcr.io/bfeitknecht/opencode:v1.53.0
+          image: ghcr.io/bfeitknecht/opencode:v1.53.1
           imagePullPolicy: IfNotPresent
           workingDir: /home/node/work
           env:
@@ -61,10 +61,13 @@ spec:
             # only as collaborator on bf/* repos. ssh-style URLs are rewritten.
             - name: GIT_CONFIG_COUNT
               value: "3"
+            # Read-only helper: answers `get` from the mounted file and never
+            # writes back (the store helper fails on the read-only mount).
             - name: GIT_CONFIG_KEY_0
-              value: credential.helper
+              value: credential.https://git.0xbf.ch.helper
             - name: GIT_CONFIG_VALUE_0
-              value: store --file /etc/opencode-git/git-credentials
+              value: >-
+                !f() { [ "$1" = get ] || exit 0; printf 'username=opencode\npassword=%s\n' "$(sed -E 's#^https://[^:]+:([^@]+)@.*#\1#' /etc/opencode-git/git-credentials)"; }; f
             - name: GIT_CONFIG_KEY_1
               value: url.https://git.0xbf.ch/.insteadOf
             - name: GIT_CONFIG_VALUE_1
