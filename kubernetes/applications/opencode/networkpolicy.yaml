@@ -79,9 +79,3 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    - toFQDNs:
-        - matchName: git.0xbf.ch
-      toPorts:
-        - ports:
-            - port: "22"
-              protocol: TCP

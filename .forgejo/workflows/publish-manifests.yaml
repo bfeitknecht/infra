@@ -34,6 +34,15 @@ jobs:
           username: bfeitknecht
           password: ${{ secrets.GHCR_TOKEN }}
 
+      # amd64 only: the opencode VM runs on rzbl.
+      - name: Build and push opencode image
+        uses: docker/build-push-action@v6
+        with:
+          context: images/opencode
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/bfeitknecht/opencode:${{ github.ref_name }}
+
       # arm64 only: the mux runs on rbpi (Pi 5).
       - name: Build and push sshmux image
         uses: https://github.com/docker/build-push-action@v6

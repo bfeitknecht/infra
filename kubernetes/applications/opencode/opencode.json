@@ -14,5 +14,8 @@
       }
     }
   },
-  "model": "ollama/qwen2.5-coder:7b"
+  "model": "ollama/qwen2.5-coder:7b",
+  "plugin": [
+    "file:///opt/opencode-sandbox/node_modules/opencode-sandbox/dist/index.js"
+  ]
 }
