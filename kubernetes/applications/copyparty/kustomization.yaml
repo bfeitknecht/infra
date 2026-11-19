@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - middleware.yaml
+  - authentik.yaml
+  - networkpolicy.yaml
   - pvc.yaml
   - copyparty.yaml
   - copyparty-config.sops.yaml

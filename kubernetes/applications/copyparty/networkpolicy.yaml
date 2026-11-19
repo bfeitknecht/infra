@@ -1,0 +1,20 @@
+# copyparty trusts X-authentik-* headers from the pod network (idp-h-usr).
+# Only Traefik (after authentik or strip-identity) may reach it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: copyparty-ingress
+  namespace: copyparty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: copyparty
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ingress
+            app.kubernetes.io/name: traefik
+      toPorts:
+        - ports:
+            - port: "3923"
+              protocol: TCP

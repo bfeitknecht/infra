@@ -11,7 +11,7 @@ spec:
       namespace: opencode
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: agents
+      namespace: copyparty
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: media

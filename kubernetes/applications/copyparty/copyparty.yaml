@@ -16,6 +16,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: copyparty
+      annotations:
+        # copyparty reads copyparty.conf at start and the Secret has no hash
+        # suffix: bump this after every copyparty-config change.
+        0xbf.ch/config-rev: "2026-11-19"
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
@@ -102,12 +106,19 @@ spec:
             group: traefik.io
             kind: Middleware
             name: internal-allowlist
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: strip-identity
       backendRefs:
         - name: copyparty
           port: 80
 ---
-# Public by purpose (files), internal by software (copyparty). Accounts come
-# from copyparty-config, so public is safe from the first start.
+# Public by purpose (files), internal by software (copyparty). Login is
+# authentik (family, developers); copyparty reads the user from the
+# X-authentik-* headers. Share links (/shr/) and the static assets they need
+# (/.cpr/) skip authentik, with the identity headers stripped.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -121,6 +132,37 @@ spec:
   hostnames:
     - files.0xbf.ch
   rules:
-    - backendRefs:
+    # authentik forward auth callback (sign-in, sign-out) on this host.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /shr/
+        - path:
+            type: PathPrefix
+            value: /.cpr/
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: strip-identity
+      backendRefs:
+        - name: copyparty
+          port: 80
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
+      backendRefs:
         - name: copyparty
           port: 80

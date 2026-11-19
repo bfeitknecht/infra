@@ -811,6 +811,37 @@ data:
         id: group-authentik-admins
         identifiers:
           name: authentik Admins
+      # copyparty at files.0xbf.ch (public host, forward auth).
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-copyparty
+        identifiers:
+          name: copyparty
+        attrs:
+          mode: forward_single
+          external_host: https://files.0xbf.ch
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-copyparty
+        identifiers:
+          slug: copyparty
+        attrs:
+          name: Files
+          provider: !KeyOf provider-copyparty
+          meta_launch_url: https://files.0xbf.ch
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-copyparty
+          group: !KeyOf group-family
+        attrs:
+          order: 0
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-copyparty
+          group: !KeyOf group-developers
+        attrs:
+          order: 1
       - model: authentik_providers_proxy.proxyprovider
         id: provider-navidrome
         identifiers:
@@ -997,6 +1028,7 @@ data:
         attrs:
           providers:
             - !KeyOf provider
+            - !KeyOf provider-copyparty
             - !KeyOf provider-navidrome
             - !KeyOf provider-sonarr
             - !KeyOf provider-radarr
