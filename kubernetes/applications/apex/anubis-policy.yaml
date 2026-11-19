@@ -1,0 +1,10 @@
+# Anubis guards only the CV (/cv, /cv.pdf): the route sends nothing else
+# here. Every client solves the proof-of-work challenge; Anubis' default
+# policy would let non-browser clients (curl, scrapers) through.
+bots:
+  - name: everything
+    path_regex: .*
+    action: CHALLENGE
+    challenge:
+      difficulty: 4
+      algorithm: fast

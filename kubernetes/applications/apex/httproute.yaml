@@ -11,6 +11,21 @@ spec:
   hostnames:
     - 0xbf.ch
   rules:
+    # The CV goes through Anubis (proof of work against scrapers). Its
+    # challenge assets live under /.within.website/.
+    - matches:
+        - path:
+            type: Exact
+            value: /cv
+        - path:
+            type: Exact
+            value: /cv.pdf
+        - path:
+            type: PathPrefix
+            value: /.within.website/
+      backendRefs:
+        - name: apex-anubis
+          port: 80
     - backendRefs:
         - name: apex
           port: 80

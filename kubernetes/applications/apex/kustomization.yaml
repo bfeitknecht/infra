@@ -5,8 +5,14 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
+  - anubis.yaml
   # SSH portfolio uses a separate Deployment. A broken host key or a
   # crashed session does not affect the static site.
   - tui-deployment.yaml
   - tui-service.yaml
   - apex-ssh-host-key.sops.yaml
+configMapGenerator:
+  - name: apex-anubis-config
+    namespace: apex
+    files:
+      - policy.yaml=anubis-policy.yaml

@@ -1,0 +1,82 @@
+# Proof-of-work gate in front of the CV. A browser passes after a short
+# check (cookie for 7 days); scrapers without a JavaScript engine do not.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apex-anubis
+  namespace: apex
+  labels:
+    app.kubernetes.io/name: apex-anubis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: apex-anubis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: apex-anubis
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: anubis
+          image: ghcr.io/techarohq/anubis:v1.28.2
+          env:
+            - name: BIND
+              value: ":8923"
+            - name: METRICS_BIND
+              value: ":9090"
+            - name: TARGET
+              value: http://apex.apex.svc.cluster.local
+            - name: POLICY_FNAME
+              value: /etc/anubis/policy.yaml
+            - name: COOKIE_DOMAIN
+              value: 0xbf.ch
+            - name: SERVE_ROBOTS_TXT
+              value: "false"
+          ports:
+            - name: http
+              containerPort: 8923
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: policy
+              mountPath: /etc/anubis
+              readOnly: true
+      volumes:
+        - name: policy
+          configMap:
+            name: apex-anubis-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apex-anubis
+  namespace: apex
+spec:
+  selector:
+    app.kubernetes.io/name: apex-anubis
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
