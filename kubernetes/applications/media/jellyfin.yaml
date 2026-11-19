@@ -18,6 +18,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: jellyfin
+      annotations:
+        # Bump after a jellyfin-sso-config change (Secret has no hash suffix).
+        0xbf.ch/config-rev: "2026-11-19b"
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
@@ -48,9 +51,11 @@ spec:
               readOnly: true
         # SSO plugin (K0lin fork of 9p4/jellyfin-plugin-sso, Jellyfin 12):
         # pinned release, sha256-checked, unpacked once per version. The
-        # plugin config SSO-Auth.xml is seeded only if absent: the plugin
-        # stores its account links in the same file. To re-seed, delete
-        # /config/plugins/configurations/SSO-Auth.xml.
+        # plugin config SSO-Auth.xml is seeded only while it has no `authentik`
+        # provider: the plugin stores its account links in the same file. To
+        # re-seed, delete /config/plugins/configurations/SSO-Auth.xml. Format:
+        # per-provider element is <PluginConfiguration>, not <OidConfig>
+        # (written by the plugin API; Jellyfin silently resets an unreadable file).
         - name: sso-plugin
           image: docker.io/library/alpine:3.22
           env:
@@ -72,7 +77,7 @@ spec:
                 unzip -o -q /tmp/sso.zip -d "$dir"
               fi
               mkdir -p /config/plugins/configurations
-              [ -f /config/plugins/configurations/SSO-Auth.xml ] || cp /sso/SSO-Auth.xml /config/plugins/configurations/SSO-Auth.xml
+              grep -q '<string>authentik</string>' /config/plugins/configurations/SSO-Auth.xml 2>/dev/null || cp /sso/SSO-Auth.xml /config/plugins/configurations/SSO-Auth.xml
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
