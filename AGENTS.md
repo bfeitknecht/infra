@@ -31,13 +31,12 @@ kubernetes/
 ├── cluster/            root Kustomizations
 │   ├── crds.yaml       GitRepository + Kustomization for CRDs from pinned tags
 │   │                   gateway-api v1.6.2, traefik chart v41.6.0, kube-prometheus-stack 91.4.1,
-│   │                   k8up 4.10.0, knative-operator v1.23.1, agent-sandbox v1.0.11 (CRDs + Helm chart source)
+│   │                   k8up 4.10.0, knative-operator v1.23.1
 │   ├── infrastructure.yaml  dependency tree
 │   ├── applications.yaml    per-app Kustomizations
 │   └── ghcr-pat.sops.yaml
 ├── infrastructure/
 │   ├── storage/        local-path-provisioner
-│   ├── agent-sandbox/  Agent Sandbox controller (HelmRelease from pinned GitRepository)
 │   ├── backup/         k8up (restic to Garage S3 via egress relay)
 │   ├── egress/         tailscale-relay (user-owned egress for shared-in targets)
 │   ├── gpu/            nvidia device plugin (rzbl) + RuntimeClass nvidia
@@ -73,7 +72,6 @@ kubernetes/
     ├── dawarich/       location history at dawarich.internal (Postgres + Valkey)
     ├── samba/          Time Machine at smb://10.10.20.145
     ├── devil/          kata VM pod: ssh 2223 (VM sshd 2222), ghostty-web at devil.internal
-    ├── agents/         SandboxTemplate + SandboxWarmPool: one opencode Kata VM per task
     ├── renovate/       weekly Renovate CronJob (rzbl), GitHub platform, renovate.json5
     ├── ntfy/           push notifications (notify.0xbf.ch): Alertmanager + Gatus alerts
     ├── sshmux/         SSH username router on WAN 2222 (default -> apex)
@@ -107,7 +105,7 @@ Reviewed 2026-11-17. Three roles. One node failure must take down one role only.
 
 - **oci**: control plane + `dns` resolver. Taint stays. No other workloads.
 - **rbpi** (always-on edge): Traefik (pinned), AGH (L2 announce), tier-1 small-state apps (forgejo, pds, atuin), tier-2 sites, devil. **Platform controllers prefer rbpi** (`preferredDuringScheduling`, weight 100): cert-manager, Keel, tailscale operator, local-path-provisioner. If rbpi is down, the edge is down anyway; the controllers then fall back to rzbl. New cluster-healing controllers get the same affinity.
-- **rzbl** (heavy): GPU (jellyfin, ollama), bulk storage on `local-path-ssd`, Postgres-backed apps (authentik, immich, dawarich), Kata agents (opencode, agent sandboxes), CI runner. Boots from USB stick: do not make the cluster depend on it to heal.
+- **rzbl** (heavy): GPU (jellyfin, ollama), bulk storage on `local-path-ssd`, Postgres-backed apps (authentik, immich, dawarich), Kata agent (opencode), CI runner. Boots from USB stick: do not make the cluster depend on it to heal.
 - Floating is fine for stateless apps and for knative-serving.
 - Flux is installed out of tree. Its four controllers carry the same preference as a `kubectl patch` (2026-11-17). A new `flux install` drops it: re-apply the patch.
 
@@ -117,8 +115,8 @@ Placement per app (target state):
 | ---- | ---- | ---- |
 | oci | control plane, DNS | kube-apiserver/etcd, `dns` (kresd + knotd), CoreDNS |
 | rbpi | edge, always-on core, observers | Traefik, AGH, cert-manager, Flux, Keel, tailscale operator, local-path; forgejo, pds, atuin, apex, glob, exhib, devil; Prometheus, Alertmanager, Grafana, Gatus |
-| rzbl | heavy, GPU, bulk storage | jellyfin, *arr, qbittorrent, ollama, immich (+ ML on GPU), copyparty, Time Machine, dawarich, authentik (+ Postgres), opencode, agent sandboxes, forgejo runner + Renovate, GPU exporter |
-| floating | stateless, cheap | knative-serving, agent-sandbox controller, metrics-server, ddns, tailscale-relay |
+| rzbl | heavy, GPU, bulk storage | jellyfin, *arr, qbittorrent, ollama, immich (+ ML on GPU), copyparty, Time Machine, dawarich, authentik (+ Postgres), opencode, forgejo runner + Renovate, GPU exporter |
+| floating | stateless, cheap | knative-serving, metrics-server, ddns, tailscale-relay |
 
 Monitoring sits on rbpi so it can report a failing rzbl. Authentik stays on rzbl (Postgres on NVMe, RAM); if rzbl is down, SSO is down but local logins (Forgejo admin, Grafana admin) still work.
 - Stateful apps follow their PVC. local-path PVs are node-bound: moving an app means moving data.
@@ -135,13 +133,12 @@ monitoring dependsOn prometheus-crds, traefik
 backup dependsOn k8up-crds, egress-tailscale   # restic endpoint is the relay Service
 knative-operator dependsOn knative-operator-crds
 knative-serving dependsOn knative-operator
-agent-sandbox dependsOn agent-sandbox-crds
 keel, gpu, kata: no dependencies
 
 apps (cluster/applications.yaml):
 most apps depend on storage and traefik
 agh also dependsOn dns; media, ollama also dependOn gpu
-devil dependsOn kata; agents dependsOn agent-sandbox, kata
+devil dependsOn kata
 opencode dependsOn ollama, authentik; forgejo-runner dependsOn forgejo
 qbittorrent dependsOn media (shared PVC); authentik also dependsOn k8up-crds
 sshmux dependsOn traefik
@@ -201,8 +198,8 @@ Dry-run validates all manifests in a Kustomization before apply. A CR without it
 
 - **devil (kata VM, `applications/devil/`)**: NixOS VM image is from omni flake. This repo owns pod, routing, terminal page. Access via one hostname `devil.internal` (knot wildcard to gateway LB). No DNS record. **ssh 2223** via `devilssh` entrypoint/listener (no hostPort, LAN + tailnet only; WAN 2222 belongs to the sshmux since 2026-11-18) to TCPRoute `ssh` to headless Service to VM sshd (pubkey-only, host keys on PVC). **ghostty-web** via HTTPRoute `devil` (`websecure-internal` with `internal-allowlist` copy in `devil` ns; only middleware, no basic-auth) to headless Service `7681` to ttyd in VM (`-I /srv/ghostty-web/index.html login`). Page is `ghostty-web/index.html` (ConfigMap `devil-ghostty-web`, hash-rolled; ghostty-web from esm.sh CDN, ttyd wire protocol). Auth is `login` prompt. PAM checks bf password (omni sops `login/devil`). Shell has full home config. Service is headless (historic: before `socketLB.hostNamespaceOnly` Kata VMs could not use ClusterIPs). Since 2026-11-17 Kata pods use normal cluster DNS and ClusterIPs. State is on `devil-data` (subPaths `home`/`ssh`).
 
-- **agent-sandbox v1.0.11** (`infrastructure/agent-sandbox/`, `applications/agents/`): kubernetes-sigs controller with extensions. One GitRepository `agent-sandbox` (tag `v1.0.11`, in `cluster/crds.yaml`) feeds both CRDs (Kustomization `agent-sandbox-crds`, path `./k8s/crds`, `prune: false`) and the chart (HelmRelease `chart: ./helm`, `crds: Skip`). Bump the tag and `image.tag` together. Template `opencode` in ns `agents`: same pod as `applications/opencode` but on `emptyDir`, Kata, rzbl, no SA token. **`networkPolicyManagement: Unmanaged` is load-bearing**: Managed with no rules creates a NetworkPolicy that allows all public egress, and Cilium unions it with the CNP. CNP `agent-isolation` is a copy of the opencode one. Keep both in sync. ConfigMap hash reaches the template via `kustomizeconfig.yaml`. Warm pool `replicas: 1` (each is a VM). Use: `scripts/sandbox.nu` (`sandbox new|ls|rm`): claims a warm VM and binds it to a free slot `sandbox-1..3.internal` (Service on label `agents.x-k8s.io/claim-uid` + HTTPRoute labelled `0xbf.ch/slot`, both owned by the claim; runtime state, not git). Slots are in `internal-hosts`, have one authentik `forward_single` provider each (blueprint `opencode.yaml`). `kubectl port-forward` cannot reach Kata pods.
 
+- **opencode** (`applications/opencode/`, rzbl, Kata): one long-lived opencode web server at `opencode.internal` (authentik forward auth, group `developers`) on PVC `opencode-data` (50Gi, HOME `/home/node`). Isolation: Kata VM + CNP `agent-isolation`. Ingress: Traefik only, plus the `devil` namespace on `4096` (devil runs `opencode attach http://opencode.opencode.svc`, no authentik on that path). Egress: DNS, Ollama, an FQDN allowlist on 443 (model APIs, GitHub, package registries, Debian, Forgejo) and `git.0xbf.ch:22`. It cannot reach the cluster, the LAN, devil or the owner's keys. Clients: browser; devil TUI; echo/anti through devil (Rex or ssh). Agent Sandbox (per-task VMs, slots `sandbox-1..3.internal`) was removed 2026-11-19: one isolated server is enough.
 - **ntfy v2.38.1** (`applications/ntfy/`, rbpi): push notifications at `notify.0xbf.ch` (public, so the phone gets pushes anywhere) and `ntfy.internal`. Whole `server.yml` is Secret `ntfy-config` (sops): `auth-default-access: deny-all`, provisioned `auth-users` (bf admin, publisher user), `auth-access` (publisher write-only `alerts*`), `auth-tokens` (publisher tokens labelled alertmanager, gatus). Tokens: `tk_` + 29 chars; hashes bcrypt cost >= 10. To change users, regenerate the secret (no `ntfy user` CLI edits: config wins on restart). Alertmanager: webhook to `http://ntfy.ntfy.svc.cluster.local/alerts?template=alertmanager` with `credentials_file` from Secret `alertmanager-secrets` (`alertmanagerSpec.secrets`); Watchdog/InfoInhibitor and `severity=info` go to `null`. Gatus: `alerting.ntfy` with `${NTFY_TOKEN}` from Secret `gatus-secrets`, alerts after 3 failures, also on resolve; garage check has no alert until Garage works. iOS instant push uses `upstream-base-url: https://ntfy.sh`.
 
 

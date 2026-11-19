@@ -273,7 +273,7 @@ const NODES = [
   talos:"1.14.6", schematic:"b10204b7…", ext:["tailscale","intel-ucode","nvme-cli","kata-containers","nvidia-open-gpu-kernel-modules-lts","nvidia-container-toolkit-lts"], taint:"none",
   storage:[{path:"USB SanDisk 62 GB",size:"boot, META, STATE",use:"Talos system"},{path:"/var (EPHEMERAL)",size:"107 GB NVMe",use:"images, kubelet, logs"},{path:"/var/mnt/storage-nvme0",size:"893 GB",use:"local-path-nvme: configs, DBs, models"},{path:"/var/mnt/storage-ssd0",size:"4 TB",use:"local-path-ssd: media, photos, files, Time Machine"}],
   routing:"--accept-routes + RoutingRuleConfig 5200 (10.10.0.0/16 → main), advertises 10.10.20.11/32 (approved) so oci reaches it directly. VXLAN via rbpi SNAT does not work.",
-  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","opencode (kata)","agent sandboxes (kata, warm pool 1)","authentik","nvidia-device-plugin","tailscale-relay","k8up","GPU exporter","knative-serving"],
+  runs:["jellyfin (GPU)","sonarr","radarr","prowlarr","ollama (GPU)","opencode (kata)","authentik","nvidia-device-plugin","tailscale-relay","k8up","GPU exporter","knative-serving"],
   notes:["GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.","Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before).","Role: heavy, GPU, bulk storage, agent VMs. Not for controllers the cluster needs to heal."]},
 ];
 
@@ -310,7 +310,7 @@ const SERVICES = [
  {id:"authentik", name:"authentik", cat:"identity", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"authentik", ks:"authentik",
   host:"https://auth.0xbf.ch", image:"authentik 2026.8.5 (Helm) + postgres:17.11", desc:"The one IdP for all apps (OIDC, forward auth, invitations).",
   ports:"HTTP 9000 (Service authentik-server:80)", deps:["traefik","storage","k8up-crds"], secrets:["authentik/authentik-secrets.sops.yaml"], storage:"authentik-db 10Gi (rzbl nvme)",
-  runbook:"docs/AUTHENTIK.md", notes:["Live since 2026-11-17 (v1.25.1). IdP for Forgejo, Grafana, Immich, Dawarich, Navidrome, opencode, sandboxes, *arr, qBittorrent, Gatus (docs/AUTHENTIK.md).","Mail via Proton (noreply@0xbf.ch); forgot-password flow recover.","2026-11-17: akadmin deactivated before bf had a password. Recover with ak create_recovery_key (docs/AUTHENTIK.md)."]},
+  runbook:"docs/AUTHENTIK.md", notes:["Live since 2026-11-17 (v1.25.1). IdP for Forgejo, Grafana, Immich, Dawarich, Navidrome, opencode, *arr, qBittorrent, Gatus (docs/AUTHENTIK.md).","Mail via Proton (noreply@0xbf.ch); forgot-password flow recover.","2026-11-17: akadmin deactivated before bf had a password. Recover with ak create_recovery_key (docs/AUTHENTIK.md)."]},
  {id:"jellyfin", name:"Jellyfin", cat:"media", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"media", ks:"media",
   host:"https://stream.0xbf.ch · https://jellyfin.internal", image:"jellyfin/jellyfin:12.4", desc:"Media server with NVENC/NVDEC on the GTX 1660 Ti.",
   ports:"HTTP 8096", deps:["gpu","storage","traefik"], secrets:[], storage:"jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
@@ -378,8 +378,6 @@ const SERVICES = [
  {id:"keel", name:"Keel", cat:"platform", status:"live", exp:"cluster", node:"rbpi (preferred)", tier:"infra", ns:"keel", ks:"keel", host:"—", image:"keel", desc:"Polls :latest digests for tier-2 apps and restarts them.", ports:"—", deps:[], secrets:[], notes:["Flux ignores the image field of tier-2 Deployments."]},
  {id:"knative", name:"Knative Serving", cat:"platform", status:"live", exp:"public", node:"any", tier:"3", ns:"knative-serving", ks:"knative-serving", host:"https://<ksvc>.0xbf.ch (whimsy ns)", image:"operator v1.23.1, serving 1.23.0", desc:"Scale-to-zero whims via kn, net-gateway-api on Traefik.", ports:"—", deps:["knative-operator"], secrets:["whimsy GHCR (sops)"], notes:["PDBs block drains: use topf upgrade --delete-if-eviction-fails."]},
  {id:"storage", name:"local-path-provisioner", cat:"platform", status:"live", exp:"cluster", node:"rbpi (preferred)", tier:"infra", ns:"local-path-storage", ks:"storage", host:"—", image:"rancher/local-path-provisioner v0.0.28", desc:"Node-local volumes. Classes local-path, local-path-nvme, local-path-ssd.", ports:"—", deps:[], secrets:[], notes:[]},
- {id:"agent-sandbox", name:"Agent Sandbox", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"agent-sandbox-system", ks:"agent-sandbox", host:"—", image:"agent-sandbox-controller v1.0.11 (chart from pinned GitRepository)", desc:"kubernetes-sigs controller: Sandbox, SandboxTemplate, SandboxWarmPool, SandboxClaim.", ports:"—", deps:["agent-sandbox-crds"], secrets:[], runbook:"docs/AGENT_ISOLATION.md", notes:["CRDs from the same GitRepository (crds.yaml, prune false). Chart skips its crds/."]},
- {id:"agents", name:"agent sandboxes", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"agents", ks:"agents", host:"https://sandbox-1..3.internal (scripts/sandbox.nu)", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"One throwaway opencode Kata VM per task. Warm pool of 1.", ports:"HTTP 4096 (Traefik only, no route yet)", deps:["agent-sandbox","kata"], secrets:[], runbook:"docs/AGENT_ISOLATION.md", notes:["Template Unmanaged: the controller default policy would add public egress. CNP agent-isolation is the only wall.","Take one: use scripts/sandbox.nu; sandbox new (binds a claim to a free slot sandbox-N.internal, authentik + allowlist). port-forward does not work with Kata."]},
  {id:"metrics", name:"metrics-server", cat:"platform", status:"live", exp:"cluster", node:"any", tier:"infra", ns:"monitoring", ks:"monitoring", host:"—", image:"metrics-server 3.14.0", desc:"kubectl top, homepage stats.", ports:"—", deps:[], secrets:[], notes:[]},
  {id:"sshmux", name:"sshmux", cat:"app", status:"live", exp:"public", node:"rbpi", tier:"2", ns:"sshmux", ks:"sshmux", host:"0xbf.ch:2222 (WAN)", image:"ghcr.io/bfeitknecht/sshmux:<release tag> (in-tree, images/sshmux)", desc:"One WAN port for all SSH TUI services, routed by username: bf/someone/apex/guest → apex TUI. Git is not on the mux (own keys).", ports:"22 (tcp, entrypoint 2222)", deps:["traefik"], secrets:["sshmux/sshmux-keys.sops.yaml"], notes:["ssh -p 2222 0xbf.ch (apex).","New SSH TUI = new username; no new WAN port."]},
  {id:"kata", name:"Kata Containers", cat:"platform", status:"live", exp:"cluster", node:"all", tier:"infra", ns:"—", ks:"kata", host:"—", image:"kata 3.32.0 (Talos ext, rbpi + rzbl)", desc:"RuntimeClass kata-qemu for VM pods (devil, opencode, agent sandboxes).", ports:"—", deps:[], secrets:[], notes:[]},
@@ -434,7 +432,7 @@ const HOSTS = [
  ["pds.0xbf.ch, *.pds.0xbf.ch","public","PDS + handles"],["atuin.0xbf.ch","public","atuin"],["auth.0xbf.ch","public","authentik"],["notify.0xbf.ch","public","ntfy"],["<ksvc>.0xbf.ch","public","Knative whims"],
  ["agh.internal","internal","AdGuard UI"],["grafana.internal","internal","Grafana (home: 0xbf)"],["status.internal","internal","Gatus"],["homepage.internal","internal","dashboard"],["dashboard.internal","internal","Traefik dashboard"],["devil.internal","internal","dev VM"],
  ["0xbf.ch:2222 (ssh)","public","sshmux → apex TUI"],["stream.0xbf.ch","public","Jellyfin"],["jellyfin.internal","internal","Jellyfin"],["sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal","internal","*arr"],["navidrome.internal","internal","Navidrome"],["ntfy.internal","internal","ntfy"],["qbittorrent.internal","internal","prepared"],
- ["photos.0xbf.ch","public","Immich"],["immich.internal","internal","Immich"],["dawarich.internal","internal","Dawarich"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],["sandbox-1..3.internal","internal","agent sandbox slots (scripts/sandbox.nu)"],
+ ["photos.0xbf.ch","public","Immich"],["immich.internal","internal","Immich"],["dawarich.internal","internal","Dawarich"],["copyparty.internal","internal","copyparty"],["files.0xbf.ch","public","copyparty"],["opencode.internal","internal","opencode (authentik)"],
 ];
 const TAIL = [
  ["oci","100.73.186.19","tag:infra","advertises 10.20.20.0/24, accepts routes"],
@@ -461,7 +459,7 @@ const PVS = [
  ["samba","timemachine-files","1Ti","rzbl","storage-ssd0","live"],["forgejo-runner","forgejo-runner-data","5Gi","rzbl","storage-nvme0","live"],
  ["opencode","opencode-data","50Gi","rzbl","storage-nvme0","live"],["media","qbittorrent-data","1Gi","rzbl","storage-nvme0","live"],["ntfy","ntfy-data","1Gi","rbpi","storage-nvme0","live"],["authentik","authentik-db","10Gi","rzbl","storage-nvme0","live"],
 ];
-const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   agent-sandbox-crds   (pinned GitRepositories)
+const KS_TREE = `gateway-api-crds   traefik-crds   prometheus-crds   k8up-crds   knative-operator-crds   (pinned GitRepositories)
 storage
  └─ cilium  (+prometheus-crds)
      ├─ ipam
@@ -471,7 +469,6 @@ storage
              ├─ monitoring (metrics-server only)
              └─ apps: apex glob exhib forgejo pds atuin homepage devil agh(dns) media* …
 gpu ── media, ollama ── opencode
-agent-sandbox-crds ── agent-sandbox ── agents (+kata)
 backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: none`;
@@ -554,6 +551,7 @@ const SECRETS = [
  ["infrastructure/monitoring/gatus-secrets.sops.yaml","monitoring","exists","NTFY_TOKEN (gatus)"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-19","infra v1.48.0 + v1.49.0: Agent Sandbox controller and CRDs removed"],
  ["2026-11-19","infra v1.47.0: agent sandboxes removed (objects, slots, authentik apps); devil may attach to opencode; agent git SSH on 22"],
  ["2026-11-19","devil: repos cloned to ~/HOME/CODE/GENESIS, NixOS switch, Rex server running (linger)"],
  ["2026-11-19","infra v1.46.1: photos.0xbf.ch blocks Immich admin sign-up (no admin existed yet)"],
@@ -720,7 +718,7 @@ const DOCS = [
  ["AGENTS.md","Rules, component notes, debugging playbook (source of truth)"],
  ["docs/web/journey.html","History: activity, releases, roadmap over time (python3 scripts/journey.py)"],
  ["ROADMAP.md","Work queue: NOW / NEXT / LATER"],
- ["docs/AGENT_ISOLATION.md","Agent sandbox options and recommendation"],
+ ["docs/AGENT_ISOLATION.md","Agent isolation: opencode in Kata + network policy"],
  ["docs/RZBL_WORKLOADS.md","rzbl apps, secrets commands, public access"],
  ["docs/AUTHENTIK.md","authentik setup, invites, app connection pattern"],
  ["docs/IDENTITY.md","IdP options and decision"],
@@ -891,7 +889,6 @@ const TN=[ // id,label,sub,x,y,w,ref
  ["tm","Time Machine","smb .145",1080,440,110,"timemachine"],
  ["relay","ts-relay","→ NAS :3900",1200,440,80,"relay"],
  ["disks","NVMe 893 GB · SSD 4 TB","/var on NVMe, boot USB",670,505,260,null],
- ["agents","sandboxes","kata · warm pool 1",940,505,120,"agents"],
  ["k8up","k8up","backups (failing)",1070,505,100,"k8up"],
  ["flux","Flux","floats · OCI semver",1180,505,100,null],
  // oci
@@ -905,7 +902,7 @@ const TE=[ // from,to,type
  ["mac","tsc","tail"],["mac","agh","lan"],["mac","lb","lan"],["agh","aghpod","lan"],["lb","traefik","lan"],
  ["traefik","forgejo",""],["traefik","pds",""],["traefik","atuin",""],["traefik","exhib",""],["traefik","apex",""],["traefik","devil",""],
  ["traefik","jelly",""],["traefik","arr",""],["traefik","auth",""],["traefik","immich",""],["traefik","daw",""],["traefik","cp",""],["traefik","opencode",""],["traefik","glob",""],
- ["opencode","ollama",""],["agents","ollama",""],["ddns","cf","wan"],["ctl","le","wan"],["gpu","jelly",""],["gpu","ollama",""],["jelly","arr",""],
+ ["opencode","ollama",""],["ddns","cf","wan"],["ctl","le","wan"],["gpu","jelly",""],["gpu","ollama",""],["jelly","arr",""],
  ["aghpod","resolver","tail"],["k8up","relay",""],["relay","nas","tail"],
  ["rbpi","oci","tail"],["rzbl","oci","tail"],["rbpi","rzbl","lan"],["tsc","rbpi","tail"],["tsc","rzbl","tail"],["tsc","oci","tail"],
  ["flux","api",""],["lb","tm","lan"],
