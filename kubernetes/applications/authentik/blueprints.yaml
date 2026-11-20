@@ -813,6 +813,31 @@ data:
         id: group-authentik-admins
         identifiers:
           name: authentik Admins
+      # Gallery uploader at gallery.0xbf.ch/upload: only the user bf.
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-gallery-upload
+        identifiers:
+          name: gallery-upload
+        attrs:
+          mode: forward_single
+          external_host: https://gallery.0xbf.ch
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-gallery-upload
+        identifiers:
+          slug: gallery-upload
+        attrs:
+          name: Gallery upload
+          provider: !KeyOf provider-gallery-upload
+          meta_launch_url: https://gallery.0xbf.ch/upload/
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-gallery-upload
+          user: !Find [authentik_core.user, [username, bf]]
+        attrs:
+          order: 0
       # copyparty at files.0xbf.ch (public host, forward auth).
       - model: authentik_providers_proxy.proxyprovider
         id: provider-copyparty
@@ -1031,6 +1056,7 @@ data:
           providers:
             - !KeyOf provider
             - !KeyOf provider-copyparty
+            - !KeyOf provider-gallery-upload
             - !KeyOf provider-navidrome
             - !KeyOf provider-sonarr
             - !KeyOf provider-radarr

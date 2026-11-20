@@ -82,6 +82,7 @@ Blueprints `forgejo.yaml` and `jellyfin.yaml` in `blueprints.yaml` create the OI
 | Dawarich | dawarich.internal | OIDC (public, PKCE, env) | family, developers |
 | Navidrome | navidrome.internal | forward auth + `X-authentik-username` (ExtAuth); `/rest` open for Subsonic apps | family, friends, developers |
 | copyparty | files.0xbf.ch | forward auth + `X-authentik-username`/`-groups` (copyparty IdP headers); `/shr/` share links open; `copyparty.internal` keeps password login | family, developers |
+| Gallery upload | gallery.0xbf.ch/upload | forward auth (app bound to one user) | user bf only |
 | opencode | opencode.internal | forward auth | developers |
 | Sonarr, Radarr, Prowlarr, Lidarr, qBittorrent, Gatus (status) | *.internal | forward auth | authentik Admins |
 | Jellyfin | stream.0xbf.ch | OIDC via SSO plugin (K0lin fork 5.1.1, `jellyfin-sso-config`); login page button "Sign in with 0xbf"; apps use Quick Connect | family, friends, developers; authentik Admins = Jellyfin admin |

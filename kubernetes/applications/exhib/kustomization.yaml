@@ -6,3 +6,5 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
+  - authentik.yaml
+  - networkpolicy.yaml

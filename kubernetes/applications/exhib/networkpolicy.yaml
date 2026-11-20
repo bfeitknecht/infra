@@ -1,0 +1,22 @@
+# The uploader trusts X-authentik-username. Only Traefik may reach the pod
+# (the site on 8080, the uploader on 8081).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: exhib-ingress
+  namespace: exhib
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: exhib
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ingress
+            app.kubernetes.io/name: traefik
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+            - port: "8081"
+              protocol: TCP

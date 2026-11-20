@@ -52,6 +52,11 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+            # The web uploader (/upload): reachable only through Traefik after
+            # authentik; it checks the user and the Origin again.
+            - name: upload
+              containerPort: 8081
+              protocol: TCP
           # SWS 2.44.1 serves /health only. It has no /livez or /readyz.
           # The image sws.toml enables it.
           readinessProbe:

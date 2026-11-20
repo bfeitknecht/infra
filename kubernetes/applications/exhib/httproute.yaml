@@ -11,6 +11,29 @@ spec:
   hostnames:
     - gallery.0xbf.ch
   rules:
+    # authentik forward auth callback (sign-in, sign-out) on this host.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    # The web uploader: authentik app `gallery-upload`, bound to user bf.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /upload
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
+      backendRefs:
+        - name: exhib
+          port: 8081
     - backendRefs:
         - name: exhib
           port: 80
