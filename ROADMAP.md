@@ -1,6 +1,6 @@
 # Roadmap
 
-Status as of 2026-11-19. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps to go live: `docs/LIVE.md`.
+Status as of 2026-11-19. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps to go live: `docs/OPERATIONS.md`.
 
 ## Where things stand
 
@@ -16,20 +16,20 @@ Status as of 2026-11-19. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - [ ] **Router:** WAN 2222 forward to rbpi for the sshmux; drop the dead `2223` rule.
 - [ ] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba and the app databases. **Gate for real data.**
-- [ ] **Go live with test data:** `docs/LIVE.md` (Time Machine of echo first, Jellyfin, invites, copyparty, Immich).
+- [ ] **Go live with test data:** `docs/OPERATIONS.md` section 2 (Time Machine of echo first, router, ACL, Immich admin, ntfy).
 - [ ] **Forgejo:** Actions + runner live. Push mirrors to GitHub when repos move to Forgejo.
 - [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
 
 ## NEXT
 
 - [ ] **Music streaming:** Lidarr + Navidrome + qBittorrent live. Connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
-- [ ] Nix dev shells per repo from omni (`docs/WORKSPACE.md`). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
+- [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
 
 ### omni (details in omni/ROADMAP.md)
 
 - [ ] **Flesh out omni:** Rex on devil is declared (personal server, client on every host); left: `nh os switch .#devil` in the pod. opencode on devil attached to the opencode web server (needs a CNP rule from `devil`).
-- [ ] **MacBook Pro echo -> anti:** omni `docs/MIGRATION.md` lists what can move. Time Machine of echo first (`docs/LIVE.md` step 0).
+- [ ] **MacBook Pro echo -> anti:** omni `docs/MIGRATION.md` lists what can move. Time Machine of echo first (`docs/OPERATIONS.md` section 2).
 
 ### omni: pre-reset parity (macbook reset gate)
 

@@ -6,7 +6,7 @@ Hybrid Talos Linux Kubernetes cluster, managed by Flux from this repo. One
 control plane in Oracle Cloud `eu-zurich-1` (oci), two workers at home: a
 Raspberry Pi 5 (rbpi, the always-on edge) and a Razer Blade 15 (rzbl, GPU
 and bulk storage). Hardware details: `HARDWARE.md`. Agent and operator rules:
-`AGENTS.md`. Steps to go live: `docs/LIVE.md`. Interactive atlas:
+`AGENTS.md`. Owner runbook: `docs/OPERATIONS.md`. Interactive atlas:
 `docs/web/index.html`.
 
 ### Infrastructure & Operations

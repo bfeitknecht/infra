@@ -1,4 +1,4 @@
-# opencode web gives agents a shell. Isolation (docs/AGENT_ISOLATION.md):
+# opencode web gives agents a shell. Isolation (AGENTS.md, opencode):
 # Kata VM (own kernel), CiliumNetworkPolicy (egress allowlist, ingress from
 # Traefik and devil), authentik forward auth (group developers), no SA token.
 # Image: images/opencode (opencode + the opencode-sandbox plugin; every bash

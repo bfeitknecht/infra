@@ -227,7 +227,7 @@ One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the ca
 
 ## Single sign-on
 
-authentik is the IdP for every app that supports it: table in `docs/AUTHENTIK.md` ("Who logs in where"). Blueprints: `apps-oidc.yaml` (Dawarich, Immich), `opencode.yaml` (all forward-auth providers; it owns the embedded outpost list), `recovery.yaml` (forgot-password flow), `brand.yaml` (title, logo from `https://0xbf.ch/assets/favicon.svg`, monochrome custom CSS). Forward-auth routes: an `/outpost.goauthentik.io` rule to `authentik-server` (ReferenceGrant `outpost-routes` lists the namespace) plus the `authentik` middleware copy in the route namespace. OAuth2 providers need `grant_types`. The *arr apps run `AuthenticationMethod=External` (config.xml on the PVC) behind forward auth. Navidrome trusts `X-authentik-username` only because CNP `navidrome-ingress` limits ingress to Traefik and Gatus.
+authentik is the IdP for every app that supports it: table in `docs/OPERATIONS.md` (section 1). Blueprints: `apps-oidc.yaml` (Dawarich, Immich), `opencode.yaml` (all forward-auth providers; it owns the embedded outpost list), `recovery.yaml` (forgot-password flow), `brand.yaml` (title, logo from `https://0xbf.ch/assets/favicon.svg`, monochrome custom CSS). Forward-auth routes: an `/outpost.goauthentik.io` rule to `authentik-server` (ReferenceGrant `outpost-routes` lists the namespace) plus the `authentik` middleware copy in the route namespace. OAuth2 providers need `grant_types`. The *arr apps run `AuthenticationMethod=External` (config.xml on the PVC) behind forward auth. Navidrome trusts `X-authentik-username` only because CNP `navidrome-ingress` limits ingress to Traefik and Gatus.
 
 ## Secrets
 
