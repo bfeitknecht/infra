@@ -8,7 +8,6 @@ resources:
   - service.yaml
   - middleware.yaml
   - httproute.yaml
-  - homepage-services.sops.yaml
 configMapGenerator:
   - name: homepage-config
     files:
