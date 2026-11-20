@@ -390,7 +390,7 @@ const NEEDS = [
  {id:"garage", prio:1, cat:"external", t:"Friend: Garage must listen on 3900", d:"Credentials are in k8up-secrets. NAS still refuses 3900 on its tailnet IP. Gate for real data.", svc:"k8up"},
  {id:"immich-admin", prio:2, cat:"manual", t:"Immich: save the reset admin password", d:"open .private/immich-admin.txt, save it, delete the file. Login with 0xbf works now.", svc:"immich"},
  {id:"timemachine-mac", prio:2, cat:"manual", t:"Time Machine: add the disk on echo", d:"Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/OPERATIONS.md). Before the move to anti.", svc:"timemachine"},
- {id:"ntfy-phone", prio:2, cat:"manual", t:"ntfy app on the phone", d:"Install ntfy, add server https://notify.0xbf.ch, log in as bf (password: sops -d .private/ntfy-bf.sops.yaml), subscribe to topic alerts.", svc:"ntfy"},
+ {id:"ntfy-phone", prio:2, cat:"manual", t:"ntfy app on the phone", d:"Install ntfy, add server https://notify.0xbf.ch, log in as bf (password: sops -d .private/ntfy-bf.sops.yaml), subscribe to topics alerts and alerts-media.", svc:"ntfy"},
  {id:"invites", prio:3, cat:"manual", t:"Invite people", d:"authentik > Directory > Invitations > Create (flow invite) > send by email. Then group family or friends (docs/OPERATIONS.md).", svc:"authentik"},
  {id:"autoapprove", prio:3, cat:"manual", t:"Tailscale autoApprovers for tag:infra", d:"Admin console > Access controls: autoApprovers.routes for 10.10.10.0/24, 10.10.20.0/24, 10.10.20.11/32, 10.20.20.0/24 -> tag:infra (AGENTS.md).", svc:null},
  {id:"kubeconfig", prio:3, cat:"manual", t:"kubeconfig is a 24 h cert", d:"Regenerate in talos/: topf kubeconfig > ../kubeconfig.", svc:null},
@@ -576,6 +576,7 @@ const SECRETS = [ // every *.sops.yaml in the repo (git ls-files); all live
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-20","v1.63.0: *arr apps push to ntfy topic alerts-media (own publisher token); starship without tmux"],
  ["2026-11-20","admin@0xbf.ch for admin accounts (authentik bf had no email: Immich OAuth failed), Immich admin password reset, Seerr auto-approve for all"],
  ["2026-11-20","Requests live: Seerr (Sonarr/Radarr HD-1080p, Jellyfin user seerr LAN-only) linked to Jellyfin Enhanced; FlareSolverr proxy in Prowlarr; Rex on iPhone over the tailnet"],
  ["2026-11-20","v1.62.0: opencode model keys (Anthropic, Mistral, OpenRouter) from a sops Secret as files, denied to the sandbox and opencode tools; FlareSolverr for Prowlarr"],
