@@ -1,0 +1,43 @@
+/* 0xbf: plain monochrome challenge page. Served in place of Anubis' own
+   xess.min.css (exact-path route); same palette and font as 0xbf.ch. */
+@font-face {
+  font-family: "Commit Mono";
+  src: url("/CommitMono-400-Regular.otf") format("opentype");
+  font-weight: 400;
+}
+:root {
+  --bg: oklch(18% 0 0);
+  --fg: oklch(93% 0 0);
+  --muted: oklch(65% 0 0);
+  color-scheme: dark light;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg: oklch(99% 0 0); --fg: oklch(18% 0 0); --muted: oklch(45% 0 0); }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.6 "Commit Mono", ui-monospace, monospace;
+}
+main { max-width: 34rem; padding: 2rem 1.25rem; margin: 0 auto; }
+h1 { font-size: 1rem; font-weight: 400; margin: 0 0 1.5rem; }
+p { margin: 0.5rem 0; }
+a { color: inherit; }
+code { font: inherit; }
+/* No mascot, no decoy link. */
+#image, img, body > a:first-of-type { display: none !important; }
+#status { color: var(--muted); }
+#progress {
+  width: min(20rem, 90%) !important;
+  height: 2px !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  margin: 1.25rem auto 1.75rem !important;
+  background: color-mix(in oklch, var(--muted) 30%, transparent);
+}
+.bar-inner { background-color: var(--fg) !important; }
+details { color: var(--muted); font-size: 0.85rem; text-align: left; margin-top: 1rem; }
+summary { cursor: pointer; }
+footer { color: var(--muted); font-size: 0.75rem; opacity: 0.7; margin-top: 2rem; filter: grayscale(1); }

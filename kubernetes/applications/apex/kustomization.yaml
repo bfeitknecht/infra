@@ -16,3 +16,4 @@ configMapGenerator:
     namespace: apex
     files:
       - policy.yaml=anubis-policy.yaml
+      - style.css=anubis-style.css

@@ -11,6 +11,14 @@ spec:
   hostnames:
     - 0xbf.ch
   rules:
+    # Anubis' stylesheet, replaced by a plain monochrome one (sidecar).
+    - matches:
+        - path:
+            type: Exact
+            value: /.within.website/x/xess/xess.min.css
+      backendRefs:
+        - name: apex-anubis
+          port: 8080
     # The CV goes through Anubis (proof of work against scrapers). Its
     # challenge assets live under /.within.website/.
     - matches:
