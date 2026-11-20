@@ -1,0 +1,118 @@
+# Seerr: request shows and movies; it sends them to Sonarr/Radarr. Users log in
+# with their Jellyfin account through Quick Connect (Seerr has no OIDC yet).
+# The setup wizard runs without login: seerr.internal first, the public route
+# (seerr-public.yaml, request.0xbf.ch) only after the wizard is done.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seerr-data
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-nvme
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seerr
+  namespace: media
+  labels:
+    app.kubernetes.io/name: seerr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: seerr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: seerr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        # the image runs as node (1000); local-path volumes start as root
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: seerr
+          image: ghcr.io/seerr-team/seerr:v3.5.2
+          env:
+            - name: TZ
+              value: Europe/Zurich
+            - name: PORT
+              value: "5055"
+          ports:
+            - name: http
+              containerPort: 5055
+          readinessProbe:
+            httpGet:
+              path: /api/v1/settings/public
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: seerr-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seerr
+  namespace: media
+spec:
+  selector:
+    app.kubernetes.io/name: seerr
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5055
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: seerr
+  namespace: media
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure-internal
+  hostnames:
+    - seerr.internal
+  rules:
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+      backendRefs:
+        - name: seerr
+          port: 80

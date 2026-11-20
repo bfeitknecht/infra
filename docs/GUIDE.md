@@ -38,7 +38,12 @@ Watch at `https://stream.0xbf.ch` ("Sign in with 0xbf"). TV and phone apps (Jell
 Finamp for music): open the app, choose Quick Connect, approve the code in a logged-in browser
 (Jellyfin > avatar > Quick Connect).
 
-Getting something to watch, after the one-time setup in `docs/OPERATIONS.md` section 3:
+**Request a show or movie (the easy way):** `https://request.0xbf.ch` (Seerr; until it is public:
+`seerr.internal`). Sign in with Quick Connect: Seerr shows a code, approve it in Jellyfin (avatar >
+Quick Connect). Search, press Request. Seerr hands it to Sonarr/Radarr; it shows up in Jellyfin
+when the download is done. Nothing seeds: a torrent stops the moment it is complete.
+
+By hand, in the *arr apps (after the one-time setup in `docs/OPERATIONS.md` section 3):
 
 1. **Shows:** `sonarr.internal` > Add New > search > root folder `/data/media/tv`, monitor what you
    want, a quality profile, "start search" > Add.

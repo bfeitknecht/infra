@@ -28,7 +28,34 @@ spec:
       initContainers:
         - name: init-state
           image: busybox:1.36
-          command: ["sh", "-c", "mkdir -p /volume/home /volume/ssh && chown 1000:100 /volume/home"]
+          command: ["sh", "-c", "mkdir -p /volume/home /volume/ssh /volume/nix/store && chown 1000:100 /volume/home"]
+          volumeMounts:
+            - name: state
+              mountPath: /volume
+        # /nix lives on the PVC, so `nh os switch` inside the VM survives a
+        # restart. Copy in every store path of the bootstrap image that the
+        # PVC lacks (the first time: all of it). The image registers its paths
+        # in the Nix db at each boot, so they must exist. Copy, then rename:
+        # an interrupted copy never looks complete.
+        - name: seed-nix
+          image: ghcr.io/bfeitknecht/devil:latest
+          imagePullPolicy: Always
+          command:
+            - /sw/bin/sh
+            - -c
+            - |
+              set -eu
+              export PATH=/sw/bin
+              cd /nix/store
+              rm -rf /volume/nix/store/.seed-*
+              n=0
+              for p in *; do
+                [ -e "/volume/nix/store/$p" ] && continue
+                cp -a "$p" "/volume/nix/store/.seed-$p"
+                mv "/volume/nix/store/.seed-$p" "/volume/nix/store/$p"
+                n=$((n + 1))
+              done
+              echo "seed-nix: copied $n store paths"
           volumeMounts:
             - name: state
               mountPath: /volume
@@ -40,7 +67,16 @@ spec:
           imagePullPolicy: Always
           # The image has no entrypoint. The boot command is here. /init
           # registers the store and boots systemd.
-          command: ["/init"]
+          # Boot the persisted system profile (the last `nh os switch`); the
+          # image's /init only on the very first boot.
+          command:
+            - /sw/bin/sh
+            - -c
+            - |
+              if [ -x /nix/var/nix/profiles/system/init ]; then
+                exec /nix/var/nix/profiles/system/init
+              fi
+              exec /init
           # systemd as PID 1 ignores SIGTERM. SIGRTMIN+3 makes it power off
           # cleanly, so the Kata VM stops instead of hanging in Terminating.
           lifecycle:
@@ -58,6 +94,10 @@ spec:
           # TTY provides /dev/console. Without TTY logs do not reach kubectl logs.
           tty: true
           volumeMounts:
+            # Keep /nix on PVC: store, Nix db, system and home generations.
+            - name: state
+              mountPath: /nix
+              subPath: nix
             # Keep /home on PVC. Pod recreation keeps the machine state.
             - name: state
               mountPath: /home
