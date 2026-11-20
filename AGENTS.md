@@ -227,7 +227,7 @@ Note: Keel cannot update Knative Services (it handles Deployment/StatefulSet/Dae
 
 ## Mail
 
-One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the catch-all). It is the commit author of bots (Renovate) and the SMTP sender for authentik, Forgejo, PDS and Immich (Proton `smtp.protonmail.ch:587` STARTTLS, user `noreply@0xbf.ch`, submission token). Token locations: `authentik-secrets` (`AUTHENTIK_EMAIL__PASSWORD`), `forgejo-secrets` (`mailer-password`, via `FORGEJO__mailer__*` env), `pds-secrets` (`PDS_EMAIL_SMTP_URL`), `immich-config` (`immich.json`). Do not invent per-service addresses. Exception: Forgejo needs a unique email per user, so bot users take a plus-address (`noreply+opencode@0xbf.ch`, `noreply+renovate@0xbf.ch`, same mailbox).
+One address for everything: `noreply@0xbf.ch` (Proton custom domain, also the catch-all). It is the commit author of bots (Renovate) and the SMTP sender for authentik, Forgejo, PDS and Immich (Proton `smtp.protonmail.ch:587` STARTTLS, user `noreply@0xbf.ch`, submission token). Token locations: `authentik-secrets` (`AUTHENTIK_EMAIL__PASSWORD`), `forgejo-secrets` (`mailer-password`, via `FORGEJO__mailer__*` env), `pds-secrets` (`PDS_EMAIL_SMTP_URL`), `immich-config` (`immich.json`). Admin accounts and admin notifications use `admin@0xbf.ch` (owner, 2026-11-20): authentik `bf` (so every OIDC app gets it), Forgejo `bf`, Immich admin, Dawarich admin, Seerr `bf`. Do not invent per-service addresses. Exception: Forgejo needs a unique email per user, so bot users take a plus-address (`noreply+opencode@0xbf.ch`, `noreply+renovate@0xbf.ch`, same mailbox).
 
 ## Single sign-on
 
