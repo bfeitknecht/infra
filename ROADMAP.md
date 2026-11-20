@@ -17,12 +17,11 @@ Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [ ] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
 - [ ] **Go live with test data:** `docs/OPERATIONS.md` section 2: Time Machine of echo, Tailscale ACL autoApprovers, Immich admin (not created yet: `immich.internal`), ntfy app, Dawarich email.
 - [ ] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.
-- [ ] **Stale branches:** ~40 old feature and `arena/*` branches on GitHub and Forgejo (infra, apex). Say the word and the agent deletes the merged ones.
 - [ ] **thyme 0.1.3 merged:** bump glob and apex.
 
 ## NEXT
 
-- [ ] **Rex over the tailnet:** `services.rex.tailscale` on devil (own tailnet device, HTTPS), so the iPhone connects without an SSH key. Until then: SSH key from the app.
+- [ ] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `devil`, owner-only). Left: `nh os switch` on devil, open the sign-in link from `rex server status`, disable key expiry on the node, then on the iPhone add `https://devil.tailac5960.ts.net`.
 - [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
 - [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
 - [ ] glob post descriptions (wording).
@@ -40,6 +39,7 @@ Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-20 devil browser terminal removed (v1.58.0); 89 merged branches deleted across the repos.
 - [x] 2026-11-20 Forgejo primary with GitHub push mirrors, Renovate on Forgejo (v1.57.0); docs unified (OPERATIONS, GUIDE, README diagram); Anubis on `/cv` plain monochrome (v1.56.x); exhib web uploader (0.5.8, v1.55.0); glob links in the footer (0.1.5); thyme 0.1.3 PR; `.private` cleanup.
 - [x] 2026-11-19 Jellyfin + copyparty SSO, opencode isolated with bubblewrap sandbox + Forgejo bot, agent sandboxes removed, Rex on devil, anti host in omni.
 - [x] 2026-11-19 Immich public at `photos.0xbf.ch` (v1.46.0); browser removed (v1.45.0); Arachnidium dropped (v1.44.0); apex 0.1.12-0.1.14 (plain help, syndicate in projects, cursor and selection fixes); thyme 0.1.2 released (Universe PR #6452).

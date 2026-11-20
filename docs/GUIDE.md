@@ -61,9 +61,11 @@ the laptop, pick it up from another device.
   network listener, which devil does not open. Two ways:
   - Over SSH: Add Remote Host > `ssh://bf@devil.internal:2223`, with a key made in the app. devil
     accepts only listed keys: hand the app's public key to the agent, it adds it in omni.
-  - **Over the tailnet (planned):** Rex has Tailscale built in. devil's Rex server joins the tailnet
-    as its own device and the app connects to `https://<name>.<tailnet>.ts.net`, no SSH key. Needs a
-    one-time sign-in of that device and HTTPS certificates on in the tailnet (ROADMAP).
+  - **Over the tailnet (preferred):** devil's Rex server runs its own Tailscale node `devil`,
+    owned by your account, so only your devices get in. Once: `ssh devil.internal rex server
+    status` prints a sign-in link; open it, then disable key expiry for `devil` in the admin
+    console. In the app: Add Remote Host > `https://devil.tailac5960.ts.net` (or scan the QR from
+    `rex server tailscale pair`). The Mac app is the separate node `rex`.
 - No browser terminal: devil is SSH and Rex only.
 
 ## 4. Agentic development (opencode)
