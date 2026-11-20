@@ -58,11 +58,6 @@ spec:
           # TTY provides /dev/console. Without TTY logs do not reach kubectl logs.
           tty: true
           volumeMounts:
-            # Ghostty-web terminal page. Ttyd serves the page. A new hash
-            # restarts the pod.
-            - name: ghostty-web
-              mountPath: /srv/ghostty-web
-              readOnly: true
             # Keep /home on PVC. Pod recreation keeps the machine state.
             - name: state
               mountPath: /home
@@ -79,12 +74,6 @@ spec:
               cpu: "4"
               memory: 4Gi
       volumes:
-        - name: ghostty-web
-          configMap:
-            name: devil-ghostty-web
-            items:
-              - key: index.html
-                path: index.html
         - name: state
           persistentVolumeClaim:
             claimName: devil-data

@@ -64,7 +64,7 @@ the laptop, pick it up from another device.
   - **Over the tailnet (planned):** Rex has Tailscale built in. devil's Rex server joins the tailnet
     as its own device and the app connects to `https://<name>.<tailnet>.ts.net`, no SSH key. Needs a
     one-time sign-in of that device and HTTPS certificates on in the tailnet (ROADMAP).
-- Until then, a browser terminal: `https://devil.internal` (login prompt).
+- No browser terminal: devil is SSH and Rex only.
 
 ## 4. Agentic development (opencode)
 

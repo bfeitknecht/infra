@@ -170,7 +170,7 @@ Dry-run validates all manifests in a Kustomization before apply. So CRs must not
 - Internal names `*.internal` use cert-manager internal CA. Chain is selfsigned bootstrap to 10y CA (name-constrained to `.internal`) to 1y cert with explicit names. Let's Encrypt cannot issue for `internal`.
 - Traefik dashboard is at `https://dashboard.internal`. It is IngressRoute with LAN allowlist middleware.
 - ATProto PDS is at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle via `/.well-known/atproto-did`). Custom handles use DNS TXT.
-- Devil kata VM: `devil.internal` serves ghostty-web terminal via HTTPRoute to ttyd in VM. Login uses real `login` prompt and PAM password. SSH is on `2223` via TCPRoute to VM sshd. LAN + tailnet only.
+- Devil kata VM: SSH on `devil.internal:2223` via TCPRoute to VM sshd, LAN + tailnet only. Rex rides that SSH. No web route.
 
 ### Secrets
 

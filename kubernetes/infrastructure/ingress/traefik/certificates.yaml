@@ -88,7 +88,6 @@ spec:
     - agh.internal
     - dashboard.internal
     - dawarich.internal
-    - devil.internal
     - copyparty.internal
     - grafana.internal
     - homepage.internal

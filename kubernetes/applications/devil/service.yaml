@@ -14,6 +14,3 @@ spec:
     - name: ssh
       port: 2222
       targetPort: 2222
-    - name: ghostty-web
-      port: 7681
-      targetPort: 7681

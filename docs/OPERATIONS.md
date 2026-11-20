@@ -15,19 +15,19 @@ has no working backend yet (section 9). Real photos and files go in after that.
 
 authentik at `https://auth.0xbf.ch` is the login for every app that supports it.
 
-| App | Address | How | Who |
-| --- | --- | --- | --- |
-| Forgejo | git.0xbf.ch | OIDC | developers |
-| Grafana | grafana.internal | OIDC (PKCE) | developers; authentik Admins = Grafana admin |
-| Immich | photos.0xbf.ch, immich.internal | OIDC | family, developers |
-| Jellyfin | stream.0xbf.ch | OIDC via SSO plugin; "Sign in with 0xbf" | family, friends, developers; authentik Admins = admin |
-| copyparty | files.0xbf.ch | forward auth; share links `/shr/` open | family, developers |
-| Gallery upload | gallery.0xbf.ch/upload | forward auth | user bf only |
-| Dawarich | dawarich.internal | OIDC (PKCE) | family, developers |
-| Navidrome | navidrome.internal | forward auth; `/rest` open for Subsonic apps | family, friends, developers |
-| opencode | opencode.internal | forward auth | developers |
-| *arr, qBittorrent, Gatus | *.internal | forward auth | authentik Admins |
-| PDS, atuin, AGH, Traefik dashboard | | own login | |
+| App                                | Address                         | How                                          | Who                                                   |
+| ---------------------------------- | ------------------------------- | -------------------------------------------- | ----------------------------------------------------- |
+| Forgejo                            | git.0xbf.ch                     | OIDC                                         | developers                                            |
+| Grafana                            | grafana.internal                | OIDC (PKCE)                                  | developers; authentik Admins = Grafana admin          |
+| Immich                             | photos.0xbf.ch, immich.internal | OIDC                                         | family, developers                                    |
+| Jellyfin                           | stream.0xbf.ch                  | OIDC via SSO plugin; "Sign in with 0xbf"     | family, friends, developers; authentik Admins = admin |
+| copyparty                          | files.0xbf.ch                   | forward auth; share links `/shr/` open       | family, developers                                    |
+| Gallery upload                     | gallery.0xbf.ch/upload          | forward auth                                 | user bf only                                          |
+| Dawarich                           | dawarich.internal               | OIDC (PKCE)                                  | family, developers                                    |
+| Navidrome                          | navidrome.internal              | forward auth; `/rest` open for Subsonic apps | family, friends, developers                           |
+| opencode                           | opencode.internal               | forward auth                                 | developers                                            |
+| *arr, qBittorrent, Gatus           | *.internal                      | forward auth                                 | authentik Admins                                      |
+| PDS, atuin, AGH, Traefik dashboard |                                 | own login                                    |                                                       |
 
 Groups: `family` and `friends` get media and photos, `developers` the dev tools,
 `authentik Admins` the admin tools.
@@ -123,12 +123,12 @@ SOPS + age; Flux decrypts. Rules and the full list: `AGENTS.md`, Secrets. Patter
 
 - Read one value (example): `sops -d <file> | from yaml | get data.<KEY> | decode base64 | decode`.
 - A new secret from a value you have (never echoed):
-  ```nu
-  let v = (input -s "value: ")
-  let f = "kubernetes/applications/<app>/<app>-secrets.sops.yaml"
-  kubectl create secret generic <app>-secrets -n <app> --from-literal=$"KEY=($v)" --dry-run=client -o yaml
-    | sops --encrypt --filename-override $f --input-type yaml --output-type yaml /dev/stdin | save -f $f
-  ```
+    ```nu
+    let v = (input -s "value: ")
+    let f = "kubernetes/applications/<app>/<app>-secrets.sops.yaml"
+    kubectl create secret generic <app>-secrets -n <app> --from-literal=$"KEY=($v)" --dry-run=client -o yaml
+      | sops --encrypt --filename-override $f --input-type yaml --output-type yaml /dev/stdin | save -f $f
+    ```
 - Random values: the agent seeds them straight into sops (allowed since 2026-11-17).
 
 ## 8. Favicons look wrong
