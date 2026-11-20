@@ -88,6 +88,37 @@ spec:
             - name: sso
               mountPath: /sso
               readOnly: true
+        # Jellyfin Enhanced: requests from Jellyfin search (Seerr in the
+        # background, users already signed in through authentik), plus
+        # display extras. Pinned + sha256 like the SSO plugin. Its settings
+        # live in the Jellyfin dashboard (Plugins > Jellyfin Enhanced).
+        - name: enhanced-plugin
+          image: docker.io/library/alpine:3.22
+          env:
+            - name: VERSION
+              value: "12.16.0.0"
+            - name: SHA256
+              value: 2598d53fef00aa5c234c602cf0ee99ad216b83058d0d8e1d6531405479b9db2c
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              dir=/config/plugins/JellyfinEnhanced_${VERSION}
+              if [ ! -f "$dir/Jellyfin.Plugin.JellyfinEnhanced.dll" ]; then
+                wget -q -O /tmp/je.zip "https://github.com/n00bcodr/Jellyfin-Enhanced/releases/download/${VERSION}/Jellyfin.Plugin.JellyfinEnhanced_12.0.0.zip"
+                echo "${SHA256}  /tmp/je.zip" | sha256sum -c -
+                rm -rf /config/plugins/JellyfinEnhanced_*
+                mkdir -p "$dir"
+                unzip -o -q /tmp/je.zip -d "$dir"
+              fi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: jellyfin
           image: docker.io/jellyfin/jellyfin:12.4

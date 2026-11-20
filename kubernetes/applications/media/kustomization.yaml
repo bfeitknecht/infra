@@ -14,8 +14,6 @@ resources:
   - authentik.yaml
   - prowlarr.yaml
   - seerr.yaml
-  # Public request.0xbf.ch: enable after the Seerr setup wizard.
-  # - seerr-public.yaml
   # Public stream.0xbf.ch (wizard done 2026-11-16).
   - httproute-public.yaml
 configMapGenerator:

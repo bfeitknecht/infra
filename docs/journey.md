@@ -3,12 +3,12 @@ title: "GENESIS: a homelab journey"
 sub_title: "From one Pi to a three-node Talos cluster, in 69 days"
 author: Basil Feitknecht
 theme:
-  override:
-    intro_slide:
-      title:
-        font_size: 3
-    slide_title:
-      font_size: 2
+    override:
+        intro_slide:
+            title:
+                font_size: 3
+        slide_title:
+            font_size: 2
 ---
 
 <!--
@@ -19,6 +19,7 @@ kitty >= 0.40 only. Elsewhere, present in a window with a large font, e.g.
 
 The idea
 ===
+
 <!-- font_size: 2 -->
 
 <!-- column_layout: [3, 2] -->
@@ -47,6 +48,7 @@ A broken tag breaks reconcile until the next one.
 
 By the numbers
 ===
+
 <!-- font_size: 2 -->
 
 |              |                                              |
@@ -64,6 +66,7 @@ Source: `python3 scripts/journey.py` -> `docs/web/journey.html`
 
 The machines
 ===
+
 <!-- font_size: 2 -->
 
 <!-- column_layout: [1, 1, 1] -->
@@ -104,6 +107,7 @@ Razer Blade 15, GTX 1660 Ti, 4 TB SSD
 
 Phase 1: the foundation (Sep 13 to 30)
 ===
+
 <!-- font_size: 2 -->
 
 - **v1.0.0** on Sep 16: Talos, Flux, an OCI artifact as the only source
@@ -120,6 +124,7 @@ Phase 1: the foundation (Sep 13 to 30)
 
 Phase 2: the dev box and the quiet month (Oct)
 ===
+
 <!-- font_size: 2 -->
 
 - **devil**: a NixOS VM in a Kata pod, ssh on 2222, ghostty-web in the browser
@@ -132,6 +137,7 @@ Phase 2: the dev box and the quiet month (Oct)
 
 Phase 3: the sites (Nov 8 to 15)
 ===
+
 <!-- font_size: 2 -->
 
 - **thyme**: a Typst static-site package, published on Typst Universe
@@ -146,6 +152,7 @@ The busiest day: **Nov 9**, 66 commits across five repos (thyme 23, apex 21).
 
 Phase 4: the second worker (Nov 15 to 16)
 ===
+
 <!-- font_size: 2 -->
 
 - **rzbl** joins: Talos boots from a USB stick, NVMe and SSD as user volumes
@@ -158,6 +165,7 @@ Phase 4: the second worker (Nov 15 to 16)
 
 Phase 5: identity and isolation (Nov 17)
 ===
+
 <!-- font_size: 2 -->
 
 <!-- column_layout: [1, 1] -->
@@ -187,6 +195,7 @@ Phase 5: identity and isolation (Nov 17)
 
 Phase 6: one place to look (Nov 17)
 ===
+
 <!-- font_size: 2 -->
 
 - Grafana home dashboard **0xbf**: health, status checks, nodes, disks, GPU, traffic, Flux
@@ -199,6 +208,7 @@ Phase 6: one place to look (Nov 17)
 
 Then the rest of the night
 ===
+
 <!-- font_size: 2 -->
 
 - copyparty at **files.0xbf.ch**
@@ -211,6 +221,7 @@ Then the rest of the night
 
 Phase 7: one SSH port (Nov 18 to 19)
 ===
+
 <!-- font_size: 2 -->
 
 - git on the clean **22**: `ssh://git@git.0xbf.ch/owner/repo.git`
@@ -223,6 +234,7 @@ Phase 7: one SSH port (Nov 18 to 19)
 
 Phase 8: own the git (Nov 19 to 20)
 ===
+
 <!-- font_size: 2 -->
 
 - **Forgejo is primary** for all six repos; push mirrors keep GitHub for CI
@@ -236,6 +248,7 @@ Phase 8: own the git (Nov 19 to 20)
 
 What went wrong (and what it taught)
 ===
+
 <!-- font_size: 2 -->
 
 - a CR next to its CRD: dry-run fails, nothing applies
@@ -253,6 +266,7 @@ What went wrong (and what it taught)
 
 Next
 ===
+
 <!-- font_size: 2 -->
 
 1. **backups**: Garage on a friend's NAS must answer on 3900, then restore drills

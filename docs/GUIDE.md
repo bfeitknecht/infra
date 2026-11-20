@@ -1,6 +1,6 @@
 # Guide: using the homelab day to day
 
-How to *use* things. One-time setup and maintenance are in `docs/OPERATIONS.md`, how the cluster
+How to _use_ things. One-time setup and maintenance are in `docs/OPERATIONS.md`, how the cluster
 is built is in `AGENTS.md`, the map of where everything runs is in `README.md`.
 
 ## 1. Signing in (authentik)
@@ -12,23 +12,23 @@ or "Sign in with authentik".
   authentik" on `git.0xbf.ch`. The local Forgejo password (and its own passkey from 2026-09-29) is
   only the emergency fallback for the Forgejo admin.
 - **The login asks for the password, then a passkey** (your second factor). The passkey must be the
-  one registered *at authentik* (`auth.0xbf.ch`, made 2026-11-17). Apple Passwords can confuse it
+  one registered _at authentik_ (`auth.0xbf.ch`, made 2026-11-17). Apple Passwords can confuse it
   with Forgejo's passkey for `git.0xbf.ch`.
 
 ### Passkey trouble: get back in and make it solid
 
 1. One-time login link, valid 30 minutes (on a Mac with the kubeconfig):
-   ```nu
-   $env.KUBECONFIG = "kubeconfig"
-   kubectl -n authentik exec deploy/authentik-server -- ak create_recovery_key 30 bf
-   ```
-   Open `https://auth.0xbf.ch` + the printed path.
+    ```nu
+    $env.KUBECONFIG = "kubeconfig"
+    kubectl -n authentik exec deploy/authentik-server -- ak create_recovery_key 30 bf
+    ```
+    Open `https://auth.0xbf.ch` + the printed path.
 2. In authentik: avatar > Settings > MFA Devices. Delete the old "Apple Passwords" passkey.
    Enroll a new passkey and give it a clear name (e.g. `apple-passwords-2026-11`).
 3. Make it solid with a second way in:
-   - **TOTP**: enroll an authenticator app (Proton Pass or Apple Passwords codes).
-   - **Static recovery codes**: enroll "Static tokens" and keep them in Proton Pass.
-4. In the Passwords app: search `0xbf`. For `auth.0xbf.ch` keep the password and the *new* passkey
+    - **TOTP**: enroll an authenticator app (Proton Pass or Apple Passwords codes).
+    - **Static recovery codes**: enroll "Static tokens" and keep them in Proton Pass.
+4. In the Passwords app: search `0xbf`. For `auth.0xbf.ch` keep the password and the _new_ passkey
    only. For `git.0xbf.ch` you may delete the passkey (you sign in through authentik); keep the
    Forgejo password as a break-glass entry, ideally in Proton Pass.
 
@@ -38,10 +38,10 @@ Watch at `https://stream.0xbf.ch` ("Sign in with 0xbf"). TV and phone apps (Jell
 Finamp for music): open the app, choose Quick Connect, approve the code in a logged-in browser
 (Jellyfin > avatar > Quick Connect).
 
-**Request a show or movie (the easy way):** `https://request.0xbf.ch` (Seerr; until it is public:
-`seerr.internal`). Sign in with Quick Connect: Seerr shows a code, approve it in Jellyfin (avatar >
-Quick Connect). Search, press Request. Seerr hands it to Sonarr/Radarr; it shows up in Jellyfin
-when the download is done. Nothing seeds: a torrent stops the moment it is complete.
+**Request a show or movie:** search in Jellyfin. Titles you don't have yet appear below your
+library with a **Request** button (also whole seasons). The request goes through Seerr to
+Sonarr/Radarr; the title shows up in Jellyfin when the download is done. Nothing seeds: a torrent
+stops the moment it is complete. Admin view of all requests: `seerr.internal`.
 
 By hand, in the *arr apps (after the one-time setup in `docs/OPERATIONS.md` section 3):
 
@@ -64,13 +64,13 @@ the laptop, pick it up from another device.
 - **iPhone:** the iOS app is for enrolled testers (enroll on the Rex Discord). A bare
   `devil.internal` as host fails with "no server running": without `ssh://`, Rex looks for its own
   network listener, which devil does not open. Two ways:
-  - Over SSH: Add Remote Host > `ssh://bf@devil.internal:2223`, with a key made in the app. devil
-    accepts only listed keys: hand the app's public key to the agent, it adds it in omni.
-  - **Over the tailnet (preferred):** devil's Rex server runs its own Tailscale node `devil`,
-    owned by your account, so only your devices get in. Once: `ssh devil.internal rex server
-    status` prints a sign-in link; open it, then disable key expiry for `devil` in the admin
-    console. In the app: Add Remote Host > `https://devil.tailac5960.ts.net` (or scan the QR from
-    `rex server tailscale pair`). The Mac app is the separate node `rex`.
+    - Over SSH: Add Remote Host > `ssh://bf@devil.internal:2223`, with a key made in the app. devil
+      accepts only listed keys: hand the app's public key to the agent, it adds it in omni.
+    - **Over the tailnet (preferred):** devil's Rex server runs its own Tailscale node `devil`,
+      owned by your account, so only your devices get in. Once: `ssh devil.internal rex server
+status` prints a sign-in link; open it, then disable key expiry for `devil` in the admin
+      console. In the app: Add Remote Host > `https://devil.tailac5960.ts.net` (or scan the QR from
+      `rex server tailscale pair`). The Mac app is the separate node `rex`.
 - No browser terminal: devil is SSH and Rex only.
 
 ## 4. Agentic development (opencode)
@@ -104,8 +104,10 @@ the laptop, pick it up from another device.
 
 ## 5. Gallery and files
 
-- **Gallery upload:** `https://gallery.0xbf.ch/upload` (only you). Drag and drop, or pick from
-  Photos on the iPhone. Monthly album: kind collection, order "by capture date".
+- **Gallery editor:** `https://gallery.0xbf.ch/upload` (only you). The `just manifest` editor in
+  the browser: open any item or make a new one, add or delete files, set order, cover, crop,
+  captions; **save** keeps a draft, **publish** puts it live (deleted files go to a trash folder).
+  Monthly album: kind collection, sort "date".
 - **Files:** `https://files.0xbf.ch` (your folder `/u/bf`, family folder `/shared`, share links
   open for anyone).
 - **Photos:** `https://photos.0xbf.ch` and the Immich app (server `https://photos.0xbf.ch`).

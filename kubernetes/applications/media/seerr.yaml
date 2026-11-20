@@ -1,7 +1,7 @@
-# Seerr: request shows and movies; it sends them to Sonarr/Radarr. Users log in
-# with their Jellyfin account through Quick Connect (Seerr has no OIDC yet).
-# The setup wizard runs without login: seerr.internal first, the public route
-# (seerr-public.yaml, request.0xbf.ch) only after the wizard is done.
+# Seerr: the request backend; it sends requests to Sonarr/Radarr. People request
+# inside Jellyfin (Jellyfin Enhanced plugin), already signed in through
+# authentik. Seerr itself stays internal: no OIDC yet, so no public route.
+# seerr.internal is for the admin (setup wizard, approvals).
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

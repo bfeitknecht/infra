@@ -95,9 +95,8 @@ the library and tells Jellyfin. Watch at `stream.0xbf.ch`.
 - **copyparty** (`files.0xbf.ch`): login through authentik. Your folder `/u/bf`, the family's
   `/shared`. Share links (`/shr/...`) open without an account. `copyparty.internal` still takes
   the password of `bf` (in `copyparty-config`).
-- **Gallery upload** (`gallery.0xbf.ch/upload`, only you): drag and drop photos and videos, or
-  tap to pick from the iPhone. For a monthly album: kind collection, order "by capture date".
-  Per-photo titles, crops and the cover: `just manifest` + `just upload` in the exhib repo.
+- **Gallery editor** (`gallery.0xbf.ch/upload`, only you): `docs/GUIDE.md` section 5 and the
+  exhib manual section 1.1.
 - **Time Machine** for another Mac: as in section 2, step 1.
 
 ## 5. Remote development
