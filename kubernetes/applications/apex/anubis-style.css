@@ -40,4 +40,4 @@ code { font: inherit; }
 .bar-inner { background-color: var(--fg) !important; }
 details { color: var(--muted); font-size: 0.85rem; text-align: left; margin-top: 1rem; }
 summary { cursor: pointer; }
-footer { color: var(--muted); font-size: 0.75rem; opacity: 0.7; margin-top: 2rem; filter: grayscale(1); }
+footer { color: var(--muted); font-size: 0.75rem; opacity: 0.7; margin-top: 2rem; }

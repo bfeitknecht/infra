@@ -1,7 +1,7 @@
 {
   // Renovate for the infra tree. Pull requests only, never automerge: every
-  // change still goes PR -> merge -> tag (AGENTS.md). Runs on the Forgejo
-  // runner (applications/forgejo-runner) once its token secret exists.
+  // change still goes PR -> merge -> tag (AGENTS.md). Runs as a weekly CronJob
+  // (applications/renovate) and opens its PRs on Forgejo as the bot `renovate`.
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: ["config:recommended", ":dependencyDashboard", ":semanticCommitsDisabled"],
   timezone: "Europe/Zurich",
