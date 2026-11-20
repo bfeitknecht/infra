@@ -75,6 +75,10 @@ spec:
               value: /srv
             - name: SERVER_CACHE_CONTROL_HEADERS
               value: "false"
+            # The path starts with `.within.website`; the volume holds only
+            # this stylesheet.
+            - name: SERVER_IGNORE_HIDDEN_FILES
+              value: "false"
           ports:
             - name: style
               containerPort: 8080

@@ -41,7 +41,7 @@ spec:
           # In-tree image (images/opencode): opencode + the opencode-sandbox
           # plugin. The pin must match the release tag (`just release`
           # checks). omni devil.nix wraps the same opencode version for `oc`.
-          image: ghcr.io/bfeitknecht/opencode:v1.56.0
+          image: ghcr.io/bfeitknecht/opencode:v1.56.1
           imagePullPolicy: IfNotPresent
           workingDir: /home/node/work
           env:
