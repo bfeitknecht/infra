@@ -20,7 +20,7 @@ spec:
         - name: authentik-server
           namespace: authentik
           port: 80
-    # The web uploader: authentik app `gallery-upload`, bound to user bf.
+    # The web uploader: authentik app `exhib`, bound to user bf.
     - matches:
         - path:
             type: PathPrefix

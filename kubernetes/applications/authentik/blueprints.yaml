@@ -813,11 +813,11 @@ data:
         id: group-authentik-admins
         identifiers:
           name: authentik Admins
-      # Gallery uploader at gallery.0xbf.ch/upload: only the user bf.
+      # exhib: the gallery editor at gallery.0xbf.ch/upload, only the user bf.
       - model: authentik_providers_proxy.proxyprovider
-        id: provider-gallery-upload
+        id: provider-exhib
         identifiers:
-          name: gallery-upload
+          name: exhib
         attrs:
           mode: forward_single
           external_host: https://gallery.0xbf.ch
@@ -825,16 +825,16 @@ data:
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
           access_token_validity: hours=24
       - model: authentik_core.application
-        id: app-gallery-upload
+        id: app-exhib
         identifiers:
-          slug: gallery-upload
+          slug: exhib
         attrs:
-          name: Gallery upload
-          provider: !KeyOf provider-gallery-upload
+          name: Exhib
+          provider: !KeyOf provider-exhib
           meta_launch_url: https://gallery.0xbf.ch/upload/
       - model: authentik_policies.policybinding
         identifiers:
-          target: !KeyOf app-gallery-upload
+          target: !KeyOf app-exhib
           user: !Find [authentik_core.user, [username, bf]]
         attrs:
           order: 0
@@ -1056,7 +1056,7 @@ data:
           providers:
             - !KeyOf provider
             - !KeyOf provider-copyparty
-            - !KeyOf provider-gallery-upload
+            - !KeyOf provider-exhib
             - !KeyOf provider-navidrome
             - !KeyOf provider-sonarr
             - !KeyOf provider-radarr
