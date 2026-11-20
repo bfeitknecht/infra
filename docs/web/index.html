@@ -569,13 +569,14 @@ const SECRETS = [ // every *.sops.yaml in the repo (git ls-files); all live
  ["applications/media/jellyfin-sso-config.sops.yaml","media","exists","SSO-Auth.xml seed with the OIDC client secret"],
  ["applications/qbittorrent/qbittorrent-secrets.sops.yaml","media","exists","WIREGUARD_PRIVATE_KEY (Proton VPN)"],
  ["applications/dawarich/dawarich-secrets.sops.yaml","dawarich","exists","POSTGRES_PASSWORD, SECRET_KEY_BASE (seeded by agent)"],
- ["applications/copyparty/copyparty-config.sops.yaml","copyparty","exists","copyparty.conf (IdP headers, account bf)"],
+ ["applications/copyparty/copyparty-config.sops.yaml","copyparty","exists","copyparty.conf (IdP headers, local account admin)"],
  ["applications/samba/timemachine-secrets.sops.yaml","samba","exists","PASSWORD (seeded by agent)"],
  ["applications/ntfy/ntfy-config.sops.yaml","ntfy","exists","server.yml: bcrypt hashes, publisher tokens (seeded by agent)"],
  ["talos/secrets.sops.yaml","talos","exists","Talos secrets bundle"],
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-20","Identities split: personal bf (Basil, io@0xbf.ch) vs native admin (admin, admin@0xbf.ch) in authentik, Forgejo, Immich, Grafana, Seerr, copyparty, Dawarich"],
  ["2026-11-20","v1.63.0: *arr apps push to ntfy topic alerts-media (own publisher token); starship without tmux"],
  ["2026-11-20","admin@0xbf.ch for admin accounts (authentik bf had no email: Immich OAuth failed), Immich admin password reset, Seerr auto-approve for all"],
  ["2026-11-20","Requests live: Seerr (Sonarr/Radarr HD-1080p, Jellyfin user seerr LAN-only) linked to Jellyfin Enhanced; FlareSolverr proxy in Prowlarr; Rex on iPhone over the tailnet"],

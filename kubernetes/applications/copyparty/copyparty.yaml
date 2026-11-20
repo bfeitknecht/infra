@@ -19,7 +19,7 @@ spec:
       annotations:
         # copyparty reads copyparty.conf at start and the Secret has no hash
         # suffix: bump this after every copyparty-config change.
-        0xbf.ch/config-rev: "2026-11-19"
+        0xbf.ch/config-rev: "2026-11-20"
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
