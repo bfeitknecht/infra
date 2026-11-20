@@ -1,48 +1,47 @@
 # Roadmap
 
-Status as of 2026-11-19. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps to go live: `docs/OPERATIONS.md`.
+Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md`; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2. Infra tag `v1.46.0`. Placement roles (AGENTS.md "Workload placement"): oci = control plane + DNS, rbpi = edge + always-on core + platform controllers (preferred), rzbl = GPU, bulk storage, Postgres apps, Kata agents.
-- **Public:** apex `0xbf.ch` (v0.1.14; SSH TUI `ssh -p 2222 0xbf.ch` through the sshmux), glob `blog.0xbf.ch` (v0.1.1), exhib `gallery.0xbf.ch` (v0.5.7), forgejo `git.0xbf.ch` (git SSH on `22`, SSO), pds, atuin, jellyfin `stream.0xbf.ch`, immich `photos.0xbf.ch`, copyparty `files.0xbf.ch`, ntfy `notify.0xbf.ch`, authentik `auth.0xbf.ch`.
-- **Internal:** AGH, knot/kresd, devil (Kata, SSH `2223`), *arr, qBittorrent (Proton VPN), Navidrome, Dawarich, Time Machine (`smb://10.10.20.145`), ollama (GPU), opencode (Kata + CNP + authentik), agent sandboxes (Agent Sandbox v1.0.11, warm pool 1), Renovate (weekly, rzbl).
-- **Monitoring:** Grafana `grafana.internal` (home dashboard `0xbf`, authentik SSO), Gatus `status.internal`, Prometheus on rbpi, alerts to ntfy. Homepage off.
-- **Backup:** relay runs. Garage on the friend NAS refuses `3900`. Nothing is backed up yet. Test data only until then.
-- **Release:** every repo uses `just release` (infra: `just release X.Y.Z`, gates on `check` + `fmt --check`, pins the in-tree sshmux image).
-- **Removed 2026-11-19:** browser (browsh over SSH): looked bad, cost RAM.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.57.0`, every Flux Kustomization ready, Gatus 31/32 green (the red one is the Garage backup check). Load: rbpi ~45 % RAM, rzbl ~47 %, oci ~36 %.
+- **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. Bots: `opencode` (agent VM), `renovate` (weekly, on Forgejo).
+- **Public:** apex `0xbf.ch` (0.1.16, `/cv` behind Anubis, SSH TUI `ssh -p 2222 0xbf.ch`), glob `blog.0xbf.ch` (0.1.5), exhib `gallery.0xbf.ch` (0.5.8 with the web uploader), forgejo, pds, atuin, jellyfin `stream.0xbf.ch` (SSO), immich `photos.0xbf.ch`, copyparty `files.0xbf.ch` (SSO), ntfy, authentik.
+- **Internal:** AGH, knot/kresd, devil (Kata, SSH `2223`, Rex server), *arr, qBittorrent (Proton VPN), Navidrome, Dawarich, Time Machine, ollama (GPU), opencode (Kata + CNP + bubblewrap sandbox), Renovate.
+- **Backup:** relay runs; Garage on the friend NAS refuses `3900`. Nothing is backed up. Test data only.
+- **thyme:** 0.1.3 (reading time left of the date) waits in Universe PR typst/packages#6463; then glob and apex move to it.
 
 ## NOW
 
-- [ ] **Router:** WAN 2222 forward to rbpi for the sshmux; drop the dead `2223` rule.
-- [ ] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba and the app databases. **Gate for real data.**
-- [ ] **Go live with test data:** `docs/OPERATIONS.md` section 2 (Time Machine of echo first, router, ACL, Immich admin, ntfy).
-- [ ] **Forgejo:** Actions + runner live. Push mirrors to GitHub when repos move to Forgejo.
-- [ ] **devil home:** check that `~` is complete (an old VM overlapped the new pod for ~4 min once).
+- [ ] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
+- [ ] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
+- [ ] **Go live with test data:** `docs/OPERATIONS.md` section 2: Time Machine of echo, Tailscale ACL autoApprovers, Immich admin (not created yet: `immich.internal`), ntfy app, Dawarich email.
+- [ ] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.
+- [ ] **Stale branches:** ~40 old feature and `arena/*` branches on GitHub and Forgejo (infra, apex). Say the word and the agent deletes the merged ones.
+- [ ] **thyme 0.1.3 merged:** bump glob and apex.
 
 ## NEXT
 
-- [ ] **Music streaming:** Lidarr + Navidrome + qBittorrent live. Connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
-- [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim (`~/.cargo/bin` links dangle).
+- [ ] **Rex over the tailnet:** `services.rex.tailscale` on devil (own tailnet device, HTTPS), so the iPhone connects without an SSH key. Until then: SSH key from the app.
+- [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
+- [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
+- [ ] glob post descriptions (wording).
 - [ ] **rbpi case** design + final assembly (HARDWARE.md).
 
 ### omni (details in omni/ROADMAP.md)
 
-- [ ] **Flesh out omni:** Rex on devil is declared (personal server, client on every host); left: `nh os switch .#devil` in the pod. opencode on devil attached to the opencode web server (needs a CNP rule from `devil`).
-- [ ] **MacBook Pro echo -> anti:** omni `docs/MIGRATION.md` lists what can move. Time Machine of echo first (`docs/OPERATIONS.md` section 2).
-
-### omni: pre-reset parity (macbook reset gate)
-
-- [ ] Back up age key (`~/.config/sops/age/keys.txt`).
-- [ ] Zed settings to nix. macOS defaults (ready block in omni `docs/MIGRATION.md`). Brewfile parity.
+- [ ] **MacBook Pro echo -> anti:** anti host is minimal; omni `docs/MIGRATION.md` lists what can move. Time Machine of echo first.
+- [ ] Back up age key (`~/.config/sops/age/keys.txt`) before any reset.
+- [ ] Zed settings to nix, macOS defaults (ready block in MIGRATION.md), Brewfile parity.
 
 ## LATER
 
-- [ ] Identity: atproto login source, Jellyfin SSO when the plugin supports 12.x.
-- [ ] Tailscale autoApprovers for `tag:infra` routes (snippet in AGENTS.md, tailscale on nodes).
+- [ ] Identity: atproto login source.
 
 ## Done (recent)
 
+- [x] 2026-11-20 Forgejo primary with GitHub push mirrors, Renovate on Forgejo (v1.57.0); docs unified (OPERATIONS, GUIDE, README diagram); Anubis on `/cv` plain monochrome (v1.56.x); exhib web uploader (0.5.8, v1.55.0); glob links in the footer (0.1.5); thyme 0.1.3 PR; `.private` cleanup.
+- [x] 2026-11-19 Jellyfin + copyparty SSO, opencode isolated with bubblewrap sandbox + Forgejo bot, agent sandboxes removed, Rex on devil, anti host in omni.
 - [x] 2026-11-19 Immich public at `photos.0xbf.ch` (v1.46.0); browser removed (v1.45.0); Arachnidium dropped (v1.44.0); apex 0.1.12-0.1.14 (plain help, syndicate in projects, cursor and selection fixes); thyme 0.1.2 released (Universe PR #6452).
 - [x] 2026-11-18 Port cutover (v1.42.x): git on `22`, sshmux on `2222`, devil on `2223`; `justfile` (check, fmt, release) + yamlfmt + CI format gate.
 - [x] 2026-11-18 Mail via Proton SMTP (noreply@0xbf.ch) for authentik, Forgejo, PDS, Immich; authentik SSO for Immich, Dawarich, Navidrome and the admin tools; forgot-password flow.

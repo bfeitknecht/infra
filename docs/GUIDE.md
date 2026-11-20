@@ -1,0 +1,112 @@
+# Guide: using the homelab day to day
+
+How to *use* things. One-time setup and maintenance are in `docs/OPERATIONS.md`, how the cluster
+is built is in `AGENTS.md`, the map of where everything runs is in `README.md`.
+
+## 1. Signing in (authentik)
+
+One account, `bf`, for everything: `https://auth.0xbf.ch`. Apps with SSO show "Login with 0xbf"
+or "Sign in with authentik".
+
+- **Forgejo is the same account.** Your Forgejo user `bf` is linked to authentik. Use "Sign in with
+  authentik" on `git.0xbf.ch`. The local Forgejo password (and its own passkey from 2026-09-29) is
+  only the emergency fallback for the Forgejo admin.
+- **The login asks for the password, then a passkey** (your second factor). The passkey must be the
+  one registered *at authentik* (`auth.0xbf.ch`, made 2026-11-17). Apple Passwords can confuse it
+  with Forgejo's passkey for `git.0xbf.ch`.
+
+### Passkey trouble: get back in and make it solid
+
+1. One-time login link, valid 30 minutes (on a Mac with the kubeconfig):
+   ```nu
+   $env.KUBECONFIG = "kubeconfig"
+   kubectl -n authentik exec deploy/authentik-server -- ak create_recovery_key 30 bf
+   ```
+   Open `https://auth.0xbf.ch` + the printed path.
+2. In authentik: avatar > Settings > MFA Devices. Delete the old "Apple Passwords" passkey.
+   Enroll a new passkey and give it a clear name (e.g. `apple-passwords-2026-11`).
+3. Make it solid with a second way in:
+   - **TOTP**: enroll an authenticator app (Proton Pass or Apple Passwords codes).
+   - **Static recovery codes**: enroll "Static tokens" and keep them in Proton Pass.
+4. In the Passwords app: search `0xbf`. For `auth.0xbf.ch` keep the password and the *new* passkey
+   only. For `git.0xbf.ch` you may delete the passkey (you sign in through authentik); keep the
+   Forgejo password as a break-glass entry, ideally in Proton Pass.
+
+## 2. Streaming
+
+Watch at `https://stream.0xbf.ch` ("Sign in with 0xbf"). TV and phone apps (Jellyfin, Swiftfin,
+Finamp for music): open the app, choose Quick Connect, approve the code in a logged-in browser
+(Jellyfin > avatar > Quick Connect).
+
+Getting something to watch, after the one-time setup in `docs/OPERATIONS.md` section 3:
+
+1. **Shows:** `sonarr.internal` > Add New > search > root folder `/data/media/tv`, monitor what you
+   want, a quality profile, "start search" > Add.
+2. **Movies:** `radarr.internal`, the same with `/data/media/movies`.
+3. **Music:** `lidarr.internal` > `/data/media/music`; listen in Jellyfin or Navidrome
+   (`navidrome.internal`, any Subsonic app).
+4. Downloads run in qBittorrent through Proton VPN only (`qbittorrent.internal` shows progress).
+   When done, the *arr app moves the file into the library and Jellyfin shows it within a minute.
+
+## 3. Rex (persistent terminals on devil)
+
+Rex keeps terminal sessions alive on devil, your NixOS VM in the cluster: start something, close
+the laptop, pick it up from another device.
+
+- **Mac:** open Rex. `devil` is in the sidebar (from `~/.config/rex/init.lua`; omni writes it on
+  anti, echo has a copy). By hand: Add Remote Host > `ssh://devil.internal`. Rex runs your normal
+  `ssh`; the ssh config sends it to port 2223 with the devil key.
+- **iPhone:** the iOS app is for enrolled testers (enroll on the Rex Discord). A bare
+  `devil.internal` as host fails with "no server running": without `ssh://`, Rex looks for its own
+  network listener, which devil does not open. Two ways:
+  - Over SSH: Add Remote Host > `ssh://bf@devil.internal:2223`, with a key made in the app. devil
+    accepts only listed keys: hand the app's public key to the agent, it adds it in omni.
+  - **Over the tailnet (planned):** Rex has Tailscale built in. devil's Rex server joins the tailnet
+    as its own device and the app connects to `https://<name>.<tailnet>.ts.net`, no SSH key. Needs a
+    one-time sign-in of that device and HTTPS certificates on in the tailnet (ROADMAP).
+- Until then, a browser terminal: `https://devil.internal` (login prompt).
+
+## 4. Agentic development (opencode)
+
+```
+ browser ──> opencode.internal ──authentik──┐
+ devil: oc ─────────────── direct ──────────┤
+ Mac:  oc = ssh -t devil.internal oc ───────┘
+                                            v
+                 opencode web server (Kata VM on rzbl, its own disk)
+                   every bash command: bubblewrap sandbox
+                   git: bot `opencode` ──HTTPS──> git.0xbf.ch (bf/*)
+                                                     │ push mirror
+                                                     v
+                                                 github.com (CI, images)
+```
+
+- **One server, many clients.** The browser, `oc` on devil and `oc` on a Mac all show the same
+  sessions. Sessions run in the server, so closing the laptop stops nothing.
+- **Models:** `/connect` once in any client; the key stays on the server. Local fallback: Qwen 2.5
+  Coder 7B on the GPU (Ollama).
+- **Code lives on the server's disk** (`/home/node/work`). The agent clones `bf/<repo>` from Forgejo,
+  works on a branch and pushes as the bot `opencode`. You review and merge on `git.0xbf.ch`; the
+  mirror carries it to GitHub, where CI builds images.
+- **What the agent can reach:** the model APIs, package registries, GitHub and Forgejo, nothing else.
+  It cannot see the cluster, your LAN, devil or your keys. Each bash command also runs in its own
+  bubblewrap sandbox: it may write only to the project directory and `/tmp`, cannot read secret
+  paths or opencode's stored API keys, and gets only an allowlist of domains.
+- **Where you do your own work:** devil (`~/src`, your keys, Rex sessions). The agent never touches
+  devil's files.
+
+## 5. Gallery and files
+
+- **Gallery upload:** `https://gallery.0xbf.ch/upload` (only you). Drag and drop, or pick from
+  Photos on the iPhone. Monthly album: kind collection, order "by capture date".
+- **Files:** `https://files.0xbf.ch` (your folder `/u/bf`, family folder `/shared`, share links
+  open for anyone).
+- **Photos:** `https://photos.0xbf.ch` and the Immich app (server `https://photos.0xbf.ch`).
+
+## 6. What is `/.within.website/`?
+
+The URL prefix that Anubis, the bot check in front of `0xbf.ch/cv`, reserves for itself: its
+challenge script, its stylesheet (replaced by our monochrome one) and the endpoint that checks the
+solved puzzle. The route sends that prefix to Anubis; everything else on the site goes straight to
+apex. You need it as long as `/cv` is guarded: without it the check page cannot load its script
+and nobody gets through. Remove Anubis and the prefix goes with it.

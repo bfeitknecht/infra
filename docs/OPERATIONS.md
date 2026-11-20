@@ -41,9 +41,8 @@ browser.
 **Forgot password:** login page > "Forgot password?" mails a reset link (30 min).
 Test mail: `kubectl -n authentik exec deploy/authentik-worker -- ak test_email <address>`.
 
-**Locked out:** a one-time login link for 30 minutes:
-`kubectl -n authentik exec deploy/authentik-server -- ak create_recovery_key 30 bf`, then open
-`https://auth.0xbf.ch` + the printed path and set a password and a passkey.
+**Locked out or passkey broken:** `docs/GUIDE.md` section 1 (recovery link, new passkey,
+TOTP and backup codes).
 
 ## 2. Going live (one-time steps)
 
@@ -51,7 +50,7 @@ Test mail: `kubectl -n authentik exec deploy/authentik-worker -- ak test_email <
    Password: `sops -d kubernetes/applications/samba/timemachine-secrets.sops.yaml | from yaml | get data.PASSWORD | decode base64 | decode`.
    Finder > Go > Connect to Server > `smb://10.10.20.145/TimeMachine`, user `timemachine`.
    System Settings > General > Time Machine > Add Backup Disk. First run on the LAN.
-2. **Router:** forward WAN `2222` to `10.10.20.10` (the sshmux). Remove the old `2223` rule.
+2. **Router:** done (WAN `2222` answers). Remove the old `2223` rule if it is still there.
 3. **Tailscale ACL:** `autoApprovers.routes` for `tag:infra` (snippet in `AGENTS.md`,
    tailscale on nodes).
 4. **Immich admin:** sign up first at `https://immich.internal` (LAN or tailnet). The first
@@ -103,32 +102,20 @@ the library and tells Jellyfin. Watch at `stream.0xbf.ch`.
 
 ## 5. Remote development
 
-- **devil** (`devil.internal`, LAN and tailnet): your NixOS VM. Repos in `~/src`, omni in
-  `~/.config/omni` (`nh os switch` there). SSH: `ssh devil.internal` (port 2223 in the ssh
-  config). Browser terminal: `https://devil.internal` (login prompt).
-- **Rex on a Mac:** the Rex app lists `devil` (from `~/.config/rex/init.lua`; omni writes it on
-  anti, echo has a copy). Or Add Remote Host > `ssh://devil.internal`. The server runs on devil
-  as your user and keeps sessions while you are away.
-- **Rex on the iPhone:** the iOS app is for enrolled testers only (enroll on the Rex Discord).
-  Then: the phone on Tailscale, Add Remote Host > `ssh://bf@devil.internal:2223` with a key made
-  in the app. devil accepts only listed keys: give the agent the app's public key and it adds it
-  in omni. Until then: `https://devil.internal` in Safari.
-- **opencode:** the server runs isolated in the cluster (`opencode.internal` in the browser).
-  Terminal: `oc` on devil, or `ssh -t devil.internal oc` on a Mac (anti has `oc`). Sessions keep
-  running when you close the laptop. Add a model provider once with `/connect`. Every bash
-  command of the agent runs in a bubblewrap sandbox; it pushes as the Forgejo bot `opencode`
-  to `bf/*` only.
+How to use devil, Rex and opencode: `docs/GUIDE.md` sections 3 and 4. Owner-side setup left:
+the Rex key of the iPhone app (give its public key to the agent) and, later, Rex over the tailnet
+(ROADMAP).
 
 ## 6. Git hosting
 
 Forgejo (`git.0xbf.ch`) holds `bf/{apex,infra,thyme,glob,exhib,omni}`. Clone and push over
 SSH on the clean port: `ssh://git@git.0xbf.ch/bf/<repo>.git`.
 
-GitHub mirror (GitHub keeps CI, GHCR images and the Typst Universe flow): a fine-grained
-GitHub token for the six repos with **Contents** and **Workflows** read and write. Save it with
-`input -s | save -f .private/github-mirror-token`; the agent sets up the push mirrors, moves
-the remotes and Renovate to Forgejo. Then delete the two `repo-migration` tokens in Forgejo >
-Settings > Applications.
+Push mirrors to `github.com/bfeitknecht/<repo>` run on every push and every 8 h (token:
+`.private/github-mirror-token.sops.yaml`, Contents + Workflows read and write; renew it before it
+expires and update each mirror in the repo settings). GitHub keeps CI, GHCR images and the Typst
+Universe flow. Never push to GitHub directly: the mirror overwrites it. Left for you: delete the
+tokens `repo-migration` and `repo-migration-2` in Forgejo > Settings > Applications.
 
 ## 7. Secrets
 

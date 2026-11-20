@@ -1,6 +1,6 @@
 ---
 title: "GENESIS: a homelab journey"
-sub_title: "From one Pi to a three-node Talos cluster, in 68 days"
+sub_title: "From one Pi to a three-node Talos cluster, in 69 days"
 author: Basil Feitknecht
 theme:
   override:
@@ -51,11 +51,11 @@ By the numbers
 
 |              |                                              |
 | ------------ | -------------------------------------------- |
-| days         | **68** calendar, **39** active               |
+| days         | **69** calendar, **40** active               |
 | repositories | **6**: infra, apex, exhib, glob, thyme, omni |
-| commits      | **480** (plus **123** merged pull requests)  |
-| releases     | **177** tags, **142** of them infra          |
-| lines        | **+169,811 / −115,194**                      |
+| commits      | **530** (plus **123** merged pull requests)  |
+| releases     | **208** tags, **163** of them infra          |
+| lines        | **+173,813 / −118,345**                      |
 | roadmap      | **56** items done, **19** open               |
 
 Source: `python3 scripts/journey.py` -> `docs/web/journey.html`
@@ -177,10 +177,11 @@ Phase 5: identity and isolation (Nov 17)
 
 - opencode in a **Kata VM**
 - Cilium egress allowlist, no SA token
-- **Agent Sandbox**: a warm pool,
-  one throwaway VM per task
-- `sandbox new` binds a claim to
-  `sandbox-N.internal`
+- every bash command in a
+  **bubblewrap** sandbox inside it
+- pushes as the Forgejo bot `opencode`
+- per-task sandbox VMs tried,
+  then removed: one VM is enough
 
 <!-- end_slide -->
 
@@ -220,6 +221,19 @@ Phase 7: one SSH port (Nov 18 to 19)
 
 <!-- end_slide -->
 
+Phase 8: own the git (Nov 19 to 20)
+===
+<!-- font_size: 2 -->
+
+- **Forgejo is primary** for all six repos; push mirrors keep GitHub for CI
+- Renovate moved to Forgejo, with its own bot
+- SSO for Jellyfin (maintained plugin fork) and copyparty
+- gallery **uploader**: drag and drop at `gallery.0xbf.ch/upload`, one user only
+- **Anubis** proof-of-work in front of `/cv`, restyled plain monochrome
+- one runbook (`OPERATIONS.md`), one guide (`GUIDE.md`), one diagram
+
+<!-- end_slide -->
+
 What went wrong (and what it taught)
 ===
 <!-- font_size: 2 -->
@@ -232,6 +246,8 @@ What went wrong (and what it taught)
 - `0xbf` unquoted in YAML is a hex number
 - sshd refuses world-readable keys, and Secret volumes are world-writable dirs
 - browsh hard-codes its Firefox port: two in one pod cannot work
+- a Kata container cannot mount a fresh `/proc`: patch the sandbox to nest weaker
+- static-web-server will not follow ConfigMap symlinks: mount by `subPath`
 
 <!-- end_slide -->
 
@@ -240,9 +256,9 @@ Next
 <!-- font_size: 2 -->
 
 1. **backups**: Garage on a friend's NAS must answer on 3900, then restore drills
-2. the MacBook reset to omni
-3. rex on devil
-4. glob 0.1.2 when thyme 0.1.2 is on Universe
+2. real data only after that: photos, files, Time Machine
+3. the MacBook move from echo to anti
+4. Rex on the phone over the tailnet
 
 <!-- pause -->
 
