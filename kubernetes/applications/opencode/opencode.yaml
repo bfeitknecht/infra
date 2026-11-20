@@ -41,7 +41,7 @@ spec:
           # In-tree image (images/opencode): opencode + the opencode-sandbox
           # plugin. The pin must match the release tag (`just release`
           # checks). omni devil.nix wraps the same opencode version for `oc`.
-          image: ghcr.io/bfeitknecht/opencode:v1.61.0
+          image: ghcr.io/bfeitknecht/opencode:v1.62.0
           imagePullPolicy: IfNotPresent
           workingDir: /home/node/work
           env:
@@ -111,6 +111,12 @@ spec:
             - name: git
               mountPath: /etc/opencode-git
               readOnly: true
+            # Model API keys, read by opencode.json ({file:...}). The bash
+            # sandbox (denyRead) and opencode's own tools (permission.read)
+            # cannot read them.
+            - name: providers
+              mountPath: /etc/opencode-providers
+              readOnly: true
       volumes:
         - name: home
           persistentVolumeClaim:
@@ -121,6 +127,10 @@ spec:
         - name: git
           secret:
             secretName: opencode-secrets
+            defaultMode: 0440
+        - name: providers
+          secret:
+            secretName: opencode-providers
             defaultMode: 0440
 ---
 apiVersion: v1

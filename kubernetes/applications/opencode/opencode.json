@@ -12,9 +12,35 @@
           "name": "Qwen2.5 Coder 7B"
         }
       }
+    },
+    "anthropic": {
+      "options": {
+        "apiKey": "{file:/etc/opencode-providers/anthropic}"
+      }
+    },
+    "mistral": {
+      "options": {
+        "apiKey": "{file:/etc/opencode-providers/mistral}"
+      }
+    },
+    "openrouter": {
+      "options": {
+        "apiKey": "{file:/etc/opencode-providers/openrouter}"
+      }
     }
   },
   "model": "ollama/qwen2.5-coder:7b",
+  "permission": {
+    "read": {
+      "*": "allow",
+      "/etc/opencode-providers/*": "deny",
+      "/home/node/.local/share/opencode/*": "deny"
+    },
+    "external_directory": {
+      "/etc/opencode-providers/*": "deny",
+      "/etc/opencode-providers": "deny"
+    }
+  },
   "plugin": [
     "file:///opt/opencode-sandbox/node_modules/opencode-sandbox/dist/index.js"
   ]
