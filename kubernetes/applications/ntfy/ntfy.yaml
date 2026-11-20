@@ -1,7 +1,7 @@
 # Push notifications: alerts from Alertmanager and Gatus to the phone.
 # Config is Secret ntfy-config (server.yml: deny-all, provisioned users bf
-# (admin) and publisher (write-only to alerts*), tokens for alertmanager and
-# gatus). On rbpi with monitoring, so it can report a failing rzbl.
+# (admin) and publisher (write-only to alerts*), tokens for alertmanager,
+# gatus and media (the *arr apps, topic alerts-media)). On rbpi with monitoring, so it can report a failing rzbl.
 # iOS gets instant pushes through upstream-base-url ntfy.sh (it only sees a
 # hash of the message id, not the content).
 apiVersion: apps/v1
@@ -22,6 +22,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: ntfy
+      annotations:
+        # bump after a change to ntfy-config (the Secret does not roll the pod)
+        0xbf.ch/config-rev: "2"
     spec:
       nodeSelector:
         kubernetes.io/hostname: rbpi
