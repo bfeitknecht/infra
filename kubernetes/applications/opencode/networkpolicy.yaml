@@ -59,6 +59,7 @@ spec:
         - matchName: api.anthropic.com
         - matchName: api.openai.com
         - matchName: openrouter.ai
+        - matchName: api.mistral.ai
         - matchName: generativelanguage.googleapis.com
         # Code hosting
         - matchName: github.com

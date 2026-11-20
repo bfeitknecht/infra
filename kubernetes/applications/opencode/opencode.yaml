@@ -41,7 +41,7 @@ spec:
           # In-tree image (images/opencode): opencode + the opencode-sandbox
           # plugin. The pin must match the release tag (`just release`
           # checks). omni devil.nix wraps the same opencode version for `oc`.
-          image: ghcr.io/bfeitknecht/opencode:v1.60.0
+          image: ghcr.io/bfeitknecht/opencode:v1.61.0
           imagePullPolicy: IfNotPresent
           workingDir: /home/node/work
           env:
@@ -55,7 +55,7 @@ spec:
             # directory and /tmp only. An env var, so no file the agent can
             # write changes it.
             - name: OPENCODE_SANDBOX_CONFIG
-              value: '{"mode":"enforce","filesystem":{"denyRead":["/home/node/.ssh","/home/node/.gnupg","/home/node/.aws/credentials","/home/node/.azure","/home/node/.config/gcloud","/home/node/.config/gh","/home/node/.kube","/home/node/.docker/config.json","/home/node/.npmrc","/home/node/.netrc","/home/node/.env","/home/node/.local/share/opencode","/home/node/.config/opencode"]},"network":{"allowedDomains":["registry.npmjs.org","*.npmjs.org","registry.yarnpkg.com","pypi.org","*.pypi.org","files.pythonhosted.org","crates.io","*.crates.io","proxy.golang.org","sum.golang.org","github.com","*.github.com","codeload.github.com","*.githubusercontent.com","git.0xbf.ch"]}}'
+              value: '{"mode":"enforce","filesystem":{"denyRead":["/home/node/.ssh","/home/node/.gnupg","/home/node/.aws/credentials","/home/node/.azure","/home/node/.config/gcloud","/home/node/.config/gh","/home/node/.kube","/home/node/.docker/config.json","/home/node/.npmrc","/home/node/.netrc","/home/node/.env","/home/node/.local/share/opencode","/home/node/.config/opencode","/etc/opencode-providers"]},"network":{"allowedDomains":["registry.npmjs.org","*.npmjs.org","registry.yarnpkg.com","pypi.org","*.pypi.org","files.pythonhosted.org","crates.io","*.crates.io","proxy.golang.org","sum.golang.org","github.com","*.github.com","codeload.github.com","*.githubusercontent.com","git.0xbf.ch"]}}'
             # Git as the Forgejo bot `opencode` over HTTPS (the sandbox proxy
             # carries HTTPS, not SSH). Token in opencode-secrets; push rights
             # only as collaborator on bf/* repos. ssh-style URLs are rewritten.
