@@ -23,7 +23,7 @@ spec:
         - name: sshmux
           # In-tree image (images/sshmux). The pin must match the release
           # tag (`just release` checks).
-          image: ghcr.io/bfeitknecht/sshmux:v1.56.1
+          image: ghcr.io/bfeitknecht/sshmux:v1.56.2
           imagePullPolicy: IfNotPresent
           ports:
             - name: ssh

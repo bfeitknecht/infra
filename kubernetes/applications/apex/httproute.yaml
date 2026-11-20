@@ -16,6 +16,12 @@ spec:
         - path:
             type: Exact
             value: /.within.website/x/xess/xess.min.css
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /xess.min.css
       backendRefs:
         - name: apex-anubis
           port: 8080

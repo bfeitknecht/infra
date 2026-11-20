@@ -75,10 +75,6 @@ spec:
               value: /srv
             - name: SERVER_CACHE_CONTROL_HEADERS
               value: "false"
-            # The path starts with `.within.website`; the volume holds only
-            # this stylesheet.
-            - name: SERVER_IGNORE_HIDDEN_FILES
-              value: "false"
           ports:
             - name: style
               containerPort: 8080
@@ -93,9 +89,12 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
+          # subPath: a plain file, no ConfigMap symlinks (SWS refuses those).
+          # The route rewrites the request path to /xess.min.css.
           volumeMounts:
             - name: style
-              mountPath: /srv
+              mountPath: /srv/xess.min.css
+              subPath: xess.min.css
               readOnly: true
       volumes:
         - name: policy
@@ -106,7 +105,7 @@ spec:
             name: apex-anubis-config
             items:
               - key: style.css
-                path: .within.website/x/xess/xess.min.css
+                path: xess.min.css
 ---
 apiVersion: v1
 kind: Service
