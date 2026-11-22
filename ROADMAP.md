@@ -14,14 +14,14 @@ Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## NOW
 
 - [ ] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
-- [ ] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
+- [x] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
 - [ ] **Go live with test data:** `docs/OPERATIONS.md` section 2: Time Machine of echo, Tailscale ACL autoApprovers, Immich admin (not created yet: `immich.internal`), ntfy app, Dawarich email.
-- [ ] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.
-- [ ] **thyme 0.1.3 merged:** bump glob and apex.
+- [x] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.
+- [x] **thyme 0.1.3 merged:** bump glob and apex.
 
 ## NEXT
 
-- [ ] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `devil`, owner-only). Left: `nh os switch` on devil, open the sign-in link from `rex server status`, disable key expiry on the node, then on the iPhone add `https://devil.tailac5960.ts.net`.
+- [x] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `devil`, owner-only). Left: `nh os switch` on devil, open the sign-in link from `rex server status`, disable key expiry on the node, then on the iPhone add `https://devil.tailac5960.ts.net`.
 - [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
 - [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
 - [ ] glob post descriptions (wording).
