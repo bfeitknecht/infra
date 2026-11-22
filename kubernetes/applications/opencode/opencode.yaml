@@ -38,10 +38,10 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          # In-tree image (images/opencode): opencode + the opencode-sandbox
+          # In-tree image (images/opencode): opencode v2 + the opencode-sandbox
           # plugin. The pin must match the release tag (`just release`
           # checks). omni devil.nix wraps the same opencode version for `oc`.
-          image: ghcr.io/bfeitknecht/opencode:v1.65.0
+          image: ghcr.io/bfeitknecht/opencode:v1.66.0
           imagePullPolicy: IfNotPresent
           workingDir: /home/node/work
           env:
@@ -49,6 +49,14 @@ spec:
               value: /home/node
             - name: OPENCODE_CONFIG
               value: /etc/opencode/opencode.json
+            # v2 servers always require a password (no disable). Fixed value
+            # from sops so devil's `oc` (--server) and the browser connect
+            # dialog survive restarts. authentik stays the front gate.
+            - name: OPENCODE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: opencode-secrets
+                  key: server-password
             # Every bash command: bubblewrap, enforce mode. Reads: the secret
             # paths and opencode's own state (API keys) are denied. Network:
             # domain allowlist through the sandbox proxy. Writes: the project

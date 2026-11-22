@@ -329,9 +329,9 @@ const SERVICES = [
  {id:"ollama", name:"Ollama", cat:"ai", status:"live", exp:"cluster", node:"rzbl", tier:"1", ns:"ollama", ks:"ollama",
   host:"ollama.ollama.svc.cluster.local:11434", image:"ollama/ollama:0.40.16", desc:"Local LLM runtime on the GPU. Model qwen2.5-coder:7b (25/29 layers on GPU, 16k context).",
   ports:"HTTP 11434 (no auth, no route)", deps:["gpu","storage"], secrets:[], storage:"ollama-cache 100Gi (rzbl nvme)", notes:["Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull."]},
- {id:"opencode", name:"opencode web", cat:"ai", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
-  host:"https://opencode.internal", image:"node:22-bookworm + npx opencode-ai@1.19.5", desc:"Coding agent web UI, default model Ollama.",
-  ports:"HTTP 4096 (authentik; devil attaches directly)", deps:["ollama","traefik","storage"], secrets:[], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/OPERATIONS.md", notes:["Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik only), authentik forward auth (group developers), no SA token."]},
+ {id:"opencode", name:"opencode", cat:"ai", status:"live", exp:"internal", node:"rzbl", tier:"1", ns:"opencode", ks:"opencode",
+  host:"https://opencode.internal", image:"node:22-bookworm + @opencode/cli 2.3.2 (v2)", desc:"Coding agent web UI, default model Ollama.",
+  ports:"HTTP 4096 (authentik + server password; devil connects with --server)", deps:["ollama","traefik","storage"], secrets:["opencode/opencode-secrets.sops.yaml","opencode/opencode-providers.sops.yaml"], storage:"opencode-data 50Gi (rzbl nvme)", runbook:"docs/OPERATIONS.md", notes:["Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik and devil), authentik forward auth (group developers), no SA token.","v2: serve command, password auth always on (OPENCODE_PASSWORD), sandbox plugin 0.7.0 loads dist/v2.js."]},
  {id:"immich", name:"Immich", cat:"media", status:"live", exp:"public", node:"rzbl", tier:"1", ns:"immich", ks:"immich",
   host:"https://photos.0xbf.ch · https://immich.internal", image:"immich v3.4.1 (server, ML), immich-db (vectorchord postgres), immich-redis (valkey 9)", desc:"Photo library with ML search.",
   ports:"HTTP 2283", deps:["traefik","storage"], secrets:["immich/immich-secrets.sops.yaml","immich/immich-config.sops.yaml"], storage:"immich-files 1Ti (ssd), immich-db 20Gi, immich-cache 20Gi (nvme)", runbook:"docs/OPERATIONS.md",
@@ -468,6 +468,7 @@ backup (k8up) ← egress-tailscale
 kata, keel, knative-operator → knative-serving, ddns, dns, authentik
 * suspended: none`;
 const TAGS = [
+ ["v1.66.0","2026-11-22","opencode v2: @opencode/cli 2.3.2 (serve, password auth), sandbox plugin 0.7.0 (v2 entry); devil oc --server + sops password"],
  ["v1.57.0","2026-11-20","Renovate on Forgejo (bot renovate, GitHub token for release notes only); Anubis footer keeps its emoji colour; AGENTS git hosting"],
  ["v1.56.2","2026-11-20","apex-anubis style: subPath file + URLRewrite (SWS refused the ConfigMap symlink path)"],
  ["v1.56.1","2026-11-20","apex-anubis style sidecar: serve the dot-path stylesheet (SERVER_IGNORE_HIDDEN_FILES=false)"],
@@ -560,7 +561,7 @@ const SECRETS = [ // every *.sops.yaml in the repo (git ls-files); all live
  ["applications/forgejo/forgejo-secrets.sops.yaml","forgejo","exists","[security] block, admin, SMTP token (mailer-password)"],
  ["applications/forgejo-runner/forgejo-runner-secrets.sops.yaml","forgejo-runner","exists","RUNNER_TOKEN (minted by agent)"],
  ["applications/renovate/renovate-secrets.sops.yaml","renovate","exists","RENOVATE_TOKEN (Forgejo bot renovate), GITHUB_COM_TOKEN (release notes only)"],
- ["applications/opencode/opencode-secrets.sops.yaml","opencode","exists","git-credentials: Forgejo bot opencode HTTPS token"],
+ ["applications/opencode/opencode-secrets.sops.yaml","opencode","exists","git-credentials (Forgejo bot opencode HTTPS token), server-password (v2 server auth; same value in omni)"],
  ["applications/opencode/opencode-providers.sops.yaml","opencode","exists","model API keys: anthropic, mistral, openrouter (owner)"],
  ["applications/pds/pds-secrets.sops.yaml","pds","exists","JWT, admin password, PLC rotation key, SMTP URL"],
  ["applications/authentik/authentik-secrets.sops.yaml","authentik","exists","secret key, DB pw, bootstrap admin, SMTP, OIDC client secrets"],
@@ -576,6 +577,7 @@ const SECRETS = [ // every *.sops.yaml in the repo (git ls-files); all live
  ["talos/patches/all/02-tailscale.sops.yaml","talos","exists","node Tailscale authkey"],
 ];
 const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+ ["2026-11-22","opencode v2 on the server and devil: @opencode/cli 2.3.2 (serve, password auth), sandbox plugin 0.7.0 (v2 entry), oc --server + sops password"],
  ["2026-11-20","authentik: gallery-upload renamed to exhib (app + provider) in the blueprint; thyme (unreleased): wide tables scroll in the column"],
  ["2026-11-20","Identities split: personal bf (Basil, io@0xbf.ch) vs native admin (admin, admin@0xbf.ch) in authentik, Forgejo, Immich, Grafana, Seerr, copyparty, Dawarich"],
  ["2026-11-20","v1.63.0: *arr apps push to ntfy topic alerts-media (own publisher token); starship without tmux"],

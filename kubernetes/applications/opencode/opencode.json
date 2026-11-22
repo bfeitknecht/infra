@@ -41,7 +41,8 @@
       "/etc/opencode-providers": "deny"
     }
   },
-  "plugin": [
-    "file:///opt/opencode-sandbox/node_modules/opencode-sandbox/dist/index.js"
+  "update": "disable",
+  "plugins": [
+    "file:///opt/opencode-sandbox/node_modules/opencode-sandbox"
   ]
 }
