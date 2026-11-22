@@ -1,10 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "provider": {
+  "providers": {
     "ollama": {
-      "npm": "@ai-sdk/openai-compatible",
+      "package": "@opencode/ai/providers/openai-compatible",
       "name": "Ollama (rzbl)",
-      "options": {
+      "settings": {
         "baseURL": "http://ollama.ollama.svc.cluster.local:11434/v1"
       },
       "models": {
@@ -14,33 +14,49 @@
       }
     },
     "anthropic": {
-      "options": {
+      "settings": {
         "apiKey": "{file:/etc/opencode-providers/anthropic}"
       }
     },
     "mistral": {
-      "options": {
+      "settings": {
         "apiKey": "{file:/etc/opencode-providers/mistral}"
       }
     },
     "openrouter": {
-      "options": {
+      "settings": {
         "apiKey": "{file:/etc/opencode-providers/openrouter}"
       }
     }
   },
   "model": "ollama/qwen2.5-coder:7b",
-  "permission": {
-    "read": {
-      "*": "allow",
-      "/etc/opencode-providers/*": "deny",
-      "/home/node/.local/share/opencode/*": "deny"
+  "permissions": [
+    {
+      "action": "read",
+      "resource": "/etc/opencode-providers/*",
+      "effect": "deny"
     },
-    "external_directory": {
-      "/etc/opencode-providers/*": "deny",
-      "/etc/opencode-providers": "deny"
+    {
+      "action": "read",
+      "resource": "/home/node/.local/share/opencode/*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/etc/opencode-providers/*",
+      "effect": "deny"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/etc/opencode-providers",
+      "effect": "deny"
     }
-  },
+  ],
   "update": "disable",
   "plugins": [
     "file:///opt/opencode-sandbox/node_modules/opencode-sandbox"
