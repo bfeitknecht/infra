@@ -92,7 +92,7 @@ status` prints a sign-in link; open it, then disable key expiry for `devil` in t
   sessions. Sessions run in the server, so closing the laptop stops nothing.
 - **Models:** `/connect` once in any client; the key stays on the server. Local fallback: Qwen 2.5
   Coder 7B on the GPU (Ollama).
-- **Code lives on the server's disk** (`/home/node/work`). The agent clones `bf/<repo>` from Forgejo,
+- **Code lives on the server's disk** (`/home/node/Projects`). The agent clones `bf/<repo>` from Forgejo,
   works on a branch and pushes as the bot `opencode`. You review and merge on `git.0xbf.ch`; the
   mirror carries it to GitHub, where CI builds images.
 - **What the agent can reach:** the model APIs, package registries, GitHub and Forgejo, nothing else.
