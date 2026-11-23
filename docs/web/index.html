@@ -2136,6 +2136,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.70.0",
+        "2026-11-23",
+        "devil: memory limit 8Gi (the Kata guest hotplugs to ~6GB; a 4Gi cgroup clamped qemu and froze the VM on both nodes)",
+      ],
+      [
         "v1.69.0",
         "2026-11-23",
         "devil to rzbl (amd64 rebuild, Pi Kata wedged and poisoned the node); status.internal→gatus.internal, dashboard.internal→traefik.internal, homepage.internal gone from the cert",

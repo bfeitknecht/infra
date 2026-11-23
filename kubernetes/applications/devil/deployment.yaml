@@ -116,9 +116,13 @@ spec:
             requests:
               cpu: 500m
               memory: 2Gi
+            # The Kata guest hotplugs to ~6 GB no matter the limit. A 4Gi limit
+            # clamps the qemu cgroup under the guest's own size: every build
+            # (and on the Pi even idle) froze the VM. 8Gi keeps the cgroup
+            # above the guest; requests stay 2Gi for scheduling.
             limits:
               cpu: "4"
-              memory: 4Gi
+              memory: 8Gi
       volumes:
         - name: state
           persistentVolumeClaim:
