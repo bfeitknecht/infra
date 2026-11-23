@@ -15,14 +15,8 @@ spec:
       labels:
         app: devil
     spec:
-      # Kata sets vCPU and RAM from container limits. Without a CPU limit the
-      # VM boots with one vCPU. This is too slow for nix builds.
-      runtimeClassName: kata-qemu
       hostname: devil
-      # rzbl since 2026-11-23: Kata VMs on the Pi froze within minutes and
-      # each force-delete left an orphan qemu that poisoned the node. amd64
-      # KVM on the Blade is stable (opencode Kata runs there for weeks) and
-      # devil's nix builds belong on the heavy node anyway.
+      # rzbl since 2026-11-23; amd64 since the move off the Pi.
       nodeSelector:
         kubernetes.io/hostname: rzbl
       # Devil does not use the Kubernetes API. Do not mount a service account token.
@@ -71,8 +65,13 @@ spec:
           # The tag has no effect. The image is only bootstrap. Updates happen
           # inside the VM. Use :latest to pull the newest bootstrap.
           imagePullPolicy: Always
-          # The image has no entrypoint. The boot command is here. /init
-          # registers the store and boots systemd.
+          # No Kata: the guest froze with virtiofsd serving /nix under nix
+          # build I/O on both nodes (idle too, on the Pi), while opencode's
+          # light Kata VM is stable; each force-delete also orphaned a qemu.
+          # The image is the docker-container profile: it runs as a plain
+          # container, with the PVC as direct bind mounts (no virtiofs), so
+          # builds are faster and the failure class is gone. Isolation is the
+          # CNP + no SA token; the VM boundary went with the Kata removal.
           # Boot the persisted system profile (the last `nh os switch`); the
           # image's /init only on the very first boot.
           command:
@@ -84,7 +83,7 @@ spec:
               fi
               exec /init
           # systemd as PID 1 ignores SIGTERM. SIGRTMIN+3 makes it power off
-          # cleanly, so the Kata VM stops instead of hanging in Terminating.
+          # cleanly, so the pod stops instead of hanging in Terminating.
           lifecycle:
             preStop:
               exec:
@@ -116,10 +115,6 @@ spec:
             requests:
               cpu: 500m
               memory: 2Gi
-            # The Kata guest hotplugs to ~6 GB no matter the limit. A 4Gi limit
-            # clamps the qemu cgroup under the guest's own size: every build
-            # (and on the Pi even idle) froze the VM. 8Gi keeps the cgroup
-            # above the guest; requests stay 2Gi for scheduling.
             limits:
               cpu: "4"
               memory: 8Gi

@@ -2136,6 +2136,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.71.0",
+        "2026-11-23",
+        "devil drops Kata: plain container on rzbl (virtiofsd + /nix I/O froze the guest on both nodes; direct PVC mounts, no VM boundary)",
+      ],
+      [
         "v1.70.0",
         "2026-11-23",
         "devil: memory limit 8Gi (the Kata guest hotplugs to ~6GB; a 4Gi cgroup clamped qemu and froze the VM on both nodes)",
@@ -2646,6 +2651,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-23",
+        "devil runs as a plain container (Kata guest froze on both nodes under virtiofs + nix I/O; docker-container profile runs without Kata, direct PVC mounts)",
+      ],
       [
         "2026-11-23",
         "Garage on the NAS answers again (403 via the relay, Gatus green); internal names by software: gatus.internal, traefik.internal; homepage.internal removed from cert and atlas",
