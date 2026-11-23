@@ -22,8 +22,8 @@ REPOS = ["infra", "apex", "exhib", "glob", "thyme", "omni"]
 ROLE = {
     "infra": "Talos cluster, Flux, every app",
     "apex": "0xbf.ch: Ratatui site, WASM app, SSH TUI",
-    "exhib": "glry.0xbf.ch: Hugo gallery + processor",
-    "glob": "blg.0xbf.ch: Typst blog",
+    "exhib": "gallery.0xbf.ch: Hugo gallery + processor",
+    "glob": "blog.0xbf.ch: Typst blog",
     "thyme": "Typst static-site package (Universe)",
     "omni": "nix: machines, home, devil VM",
 }

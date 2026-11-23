@@ -23,7 +23,7 @@ and bulk storage). Hardware details: `HARDWARE.md`. Agent and operator rules:
 
 ### Applications
 
-- **Public sites:** apex `0xbf.ch` (SSH TUI: `ssh -p 2222 0xbf.ch`), glob `blg.0xbf.ch`, exhib `glry.0xbf.ch`
+- **Public sites:** apex `0xbf.ch` (SSH TUI: `ssh -p 2222 0xbf.ch`), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch`
 - **Public apps:** Forgejo `git.0xbf.ch` (git SSH on `22`), Jellyfin `stream.0xbf.ch`, Immich `photos.0xbf.ch`, copyparty `files.0xbf.ch`, atuin `atuin.0xbf.ch`, ATProto PDS `pds.0xbf.ch`, ntfy `notify.0xbf.ch`
 - **Internal (`*.internal`):** *arr apps, qBittorrent (Proton VPN), Navidrome, Dawarich, opencode (agent VM, bubblewrap sandbox), Ollama, devil (dev VM), Grafana, Gatus, AdGuard Home
 - **Platform:** knotd + kresd (`.internal` zone), DDNS, Time Machine (Samba), Forgejo Actions runner, Knative (tier-3 whims)

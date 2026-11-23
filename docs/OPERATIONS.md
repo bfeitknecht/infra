@@ -22,7 +22,7 @@ authentik at `https://auth.0xbf.ch` is the login for every app that supports it.
 | Immich                             | photos.0xbf.ch, immich.internal | OIDC                                         | family, developers                                    |
 | Jellyfin                           | stream.0xbf.ch                  | OIDC via SSO plugin; "Sign in with 0xbf"     | family, friends, developers; authentik Admins = admin |
 | copyparty                          | files.0xbf.ch                   | forward auth; share links `/shr/` open       | family, developers                                    |
-| Gallery upload                     | glry.0xbf.ch/upload          | forward auth                                 | user bf only                                          |
+| Gallery upload                     | gallery.0xbf.ch/upload          | forward auth                                 | user bf only                                          |
 | Dawarich                           | dawarich.internal               | OIDC (PKCE)                                  | family, developers                                    |
 | Navidrome                          | navidrome.internal              | forward auth; `/rest` open for Subsonic apps | family, friends, developers                           |
 | opencode                           | opencode.internal               | forward auth                                 | developers                                            |
@@ -95,7 +95,7 @@ the library and tells Jellyfin. Watch at `stream.0xbf.ch`.
 - **copyparty** (`files.0xbf.ch`): login through authentik. Your folder `/u/bf`, the family's
   `/shared`. Share links (`/shr/...`) open without an account. `copyparty.internal` still takes
   the password of `bf` (in `copyparty-config`).
-- **Gallery editor** (`glry.0xbf.ch/upload`, only you): `docs/GUIDE.md` section 5 and the
+- **Gallery editor** (`gallery.0xbf.ch/upload`, only you): `docs/GUIDE.md` section 5 and the
   exhib manual section 1.1.
 - **Time Machine** for another Mac: as in section 2, step 1.
 

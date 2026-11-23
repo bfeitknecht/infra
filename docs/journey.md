@@ -257,7 +257,7 @@ Phase 9: real use (Nov 21 to 23)
 - **backups** unblocked: Garage on the friend's NAS answers again
 - **Bazarr** for subtitles, `music.0xbf.ch` public behind SSO
 - **Claude Code** in the opencode VM: my subscription, same two walls
-- shorter names: `blg.0xbf.ch`, `glry.0xbf.ch`; thyme **0.1.4** with the gallery's nav
+- the blog gets the gallery's nav (thyme **0.1.4**); `glry` on narrow screens, not `gal`
 
 <!-- end_slide -->
 
