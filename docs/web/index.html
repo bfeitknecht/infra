@@ -2149,7 +2149,12 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
-        "v1.74.0",
+        "v1.76.0",
+        "2026-11-23",
+        "Bazarr port 6767; both live: bazarr.internal 200, music.0xbf.ch 302 (forward auth)",
+      ],
+      [
+        "v1.73.0",
         "2026-11-23",
         "Bazarr (subtitles, bazarr.internal) + public music.0xbf.ch (Navidrome forward auth, /rest on the Subsonic password); media authentik middleware into git (was drift)",
       ],
@@ -2679,6 +2684,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-23",
+        "Bazarr live on 6767 (bazarr.internal), music.0xbf.ch public with authentik forward auth; Subsonic apps use the Navidrome password on /rest",
+      ],
       [
         "2026-11-23",
         "Bazarr live (bazarr.internal, subtitles for Sonarr/Radarr libraries) and music.0xbf.ch public (Navidrome behind authentik, family/friends/developers; /rest for Subsonic apps)",
