@@ -30,8 +30,8 @@ endpoints:
     interval: 2m
     conditions: ["[STATUS] == 200", "[CERTIFICATE_EXPIRATION] > 240h"]
     alerts: [{type: ntfy}]
-  - {!!merge <<: *public, name: blog, url: 'https://blog.0xbf.ch'}
-  - {!!merge <<: *public, name: gallery, url: 'https://gallery.0xbf.ch'}
+  - {!!merge <<: *public, name: blog, url: 'https://blg.0xbf.ch'}
+  - {!!merge <<: *public, name: gallery, url: 'https://glry.0xbf.ch'}
   - {!!merge <<: *public, name: git, url: 'https://git.0xbf.ch/api/healthz'}
   - {!!merge <<: *public, name: pds, url: 'https://pds.0xbf.ch/xrpc/_health'}
   - {!!merge <<: *public, name: atuin, url: 'https://atuin.0xbf.ch/healthz'}

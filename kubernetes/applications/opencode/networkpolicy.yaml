@@ -55,10 +55,12 @@ spec:
         - matchName: models.dev
         - matchName: opencode.ai
         - matchPattern: "*.opencode.ai"
-        # LLM APIs (api.anthropic.com also serves the Claude Code OAuth
-        # device flow that the bundled claude-agent provider uses)
+        # LLM APIs. Claude Code (subscription login, claude-agent provider):
+        # api.anthropic.com, claude.ai and platform.claude.com (OAuth token
+        # exchange and refresh).
         - matchName: api.anthropic.com
         - matchName: claude.ai
+        - matchName: platform.claude.com
         - matchName: mcp-proxy.anthropic.com
         - matchName: api.openai.com
         - matchName: openrouter.ai

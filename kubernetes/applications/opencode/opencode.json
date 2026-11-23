@@ -43,6 +43,16 @@
     },
     {
       "action": "read",
+      "resource": "/home/node/.claude/*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "/home/node/.claude.json",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
       "resource": "*",
       "effect": "allow"
     },

@@ -104,7 +104,7 @@ status` prints a sign-in link; open it, then disable key expiry for `devil` in t
 
 ## 5. Gallery and files
 
-- **Gallery editor:** `https://gallery.0xbf.ch/upload` (only you). The `just manifest` editor in
+- **Gallery editor:** `https://glry.0xbf.ch/upload` (only you). The `just manifest` editor in
   the browser: open any item or make a new one, add or delete files, set order, cover, crop,
   captions; **save** keeps a draft, **publish** puts it live (deleted files go to a trash folder).
   Monthly album: kind collection, sort "date".

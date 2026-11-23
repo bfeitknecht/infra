@@ -6,7 +6,7 @@ Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.57.0`, every Flux Kustomization ready, Gatus 31/32 green (the red one is the Garage backup check). Load: rbpi ~45 % RAM, rzbl ~47 %, oci ~36 %.
 - **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. Bots: `opencode` (agent VM), `renovate` (weekly, on Forgejo).
-- **Public:** apex `0xbf.ch` (0.1.16, `/cv` behind Anubis, SSH TUI `ssh -p 2222 0xbf.ch`), glob `blog.0xbf.ch` (0.1.5), exhib `gallery.0xbf.ch` (0.5.8 with the web uploader), forgejo, pds, atuin, jellyfin `stream.0xbf.ch` (SSO), immich `photos.0xbf.ch`, copyparty `files.0xbf.ch` (SSO), ntfy, authentik.
+- **Public:** apex `0xbf.ch` (0.1.16, `/cv` behind Anubis, SSH TUI `ssh -p 2222 0xbf.ch`), glob `blg.0xbf.ch` (0.1.5), exhib `glry.0xbf.ch` (0.5.8 with the web uploader), forgejo, pds, atuin, jellyfin `stream.0xbf.ch` (SSO), immich `photos.0xbf.ch`, copyparty `files.0xbf.ch` (SSO), ntfy, authentik.
 - **Internal:** AGH, knot/kresd, devil (Kata, SSH `2223`, Rex server), *arr, qBittorrent (Proton VPN), Navidrome, Dawarich, Time Machine, ollama (GPU), opencode (Kata + CNP + bubblewrap sandbox), Renovate.
 - **Backup:** relay runs; Garage on the friend NAS refuses `3900`. Nothing is backed up. Test data only.
 - **thyme:** 0.1.3 (reading time left of the date) waits in Universe PR typst/packages#6463; then glob and apex move to it.

@@ -1,6 +1,6 @@
 ---
 title: "GENESIS: a homelab journey"
-sub_title: "From one Pi to a three-node Talos cluster, in 69 days"
+sub_title: "From one Pi to a three-node Talos cluster, in 72 days"
 author: Basil Feitknecht
 theme:
     override:
@@ -246,6 +246,21 @@ Phase 8: own the git (Nov 19 to 20)
 
 <!-- end_slide -->
 
+Phase 9: real use (Nov 21 to 23)
+===
+
+<!-- font_size: 2 -->
+
+- **identities** split: personal `bf` everywhere, native `admin` where an app keeps one
+- **Immich** set up, **ntfy** on the phone: alerts reach me anywhere
+- devil to **rzbl**; the "freeze" was a hung `nix-store --load-db`, not Kata
+- **backups** unblocked: Garage on the friend's NAS answers again
+- **Bazarr** for subtitles, `music.0xbf.ch` public behind SSO
+- **Claude Code** in the opencode VM: my subscription, same two walls
+- shorter names: `blg.0xbf.ch`, `glry.0xbf.ch`; thyme **0.1.4** with the gallery's nav
+
+<!-- end_slide -->
+
 What went wrong (and what it taught)
 ===
 
@@ -261,6 +276,9 @@ What went wrong (and what it taught)
 - browsh hard-codes its Firefox port: two in one pod cannot work
 - a Kata container cannot mount a fresh `/proc`: patch the sandbox to nest weaker
 - static-web-server will not follow ConfigMap symlinks: mount by `subPath`
+- one hung systemd unit blocks the job queue: the VM is up, but nothing new starts
+- eleven alerts in one group were too big for ntfy: the phone stayed silent
+- "bundled" was not bundled: check the binary is on PATH before you write it down
 
 <!-- end_slide -->
 
@@ -269,10 +287,10 @@ Next
 
 <!-- font_size: 2 -->
 
-1. **backups**: Garage on a friend's NAS must answer on 3900, then restore drills
-2. real data only after that: photos, files, Time Machine
-3. the MacBook move from echo to anti
-4. Rex on the phone over the tailnet
+1. **backups**: check the first green nightly run, then a restore drill
+2. Schedules for exhib, Immich and media; then the real photos and files
+3. Time Machine on the MacBook, then the move from echo to anti
+4. more family and friends through authentik invitations
 
 <!-- pause -->
 

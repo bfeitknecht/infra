@@ -99,6 +99,10 @@ spec:
               matchers: ['alertname =~ "Watchdog|InfoInhibitor"']
             - receiver: "null"
               matchers: ['severity = "info"']
+            # The admin kubeconfig is a short-lived topf cert (24 h) by
+            # design: this alert would fire every day.
+            - receiver: "null"
+              matchers: ['alertname = "KubeClientCertificateExpiration"', 'job = "apiserver"']
         inhibit_rules:
           - source_matchers: ['severity = "critical"']
             target_matchers: ['severity = "warning"']
@@ -109,6 +113,9 @@ spec:
             webhook_configs:
               - url: http://ntfy.ntfy.svc.cluster.local/alerts?template=alertmanager
                 send_resolved: true
+                # ntfy rejects a templated message over its size limit (400):
+                # a group of 11 failed Jobs never reached the phone.
+                max_alerts: 5
                 http_config:
                   authorization:
                     type: Bearer

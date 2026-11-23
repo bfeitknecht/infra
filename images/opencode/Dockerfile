@@ -15,6 +15,17 @@ RUN apt-get update && \
 ARG OPENCODE_VERSION=2.4.0
 RUN npm install -g "@opencode/cli@${OPENCODE_VERSION}" && npm cache clean --force
 
+# Claude Code: the executable behind opencode's Claude Agent provider (it
+# looks up `claude` on PATH) and a direct CLI over kubectl exec. Subscription
+# login (/login) lands in ~/.claude on the PVC. Root-owned, so the agent
+# cannot update or replace it; the nonessential-traffic switch also stops the
+# auto-updater and telemetry. Managed settings: Claude Code's own bash
+# sandbox with the same deny-read list and domain allowlist as the plugin.
+ARG CLAUDE_CODE_VERSION=2.1.325
+RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && npm cache clean --force
+COPY claude-managed-settings.json /etc/claude-code/managed-settings.json
+ENV CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+
 # The plugin lives in the image (root-owned, read-only to the agent) and is
 # loaded by file URL. v2 loads plugin directories and resolves the package
 # entry (dist/v2.js); a single-file path is skipped. Patch: a Kata container

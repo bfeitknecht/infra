@@ -48,6 +48,10 @@ spec:
         - name: exhib
           image: ghcr.io/bfeitknecht/exhib:latest
           imagePullPolicy: Always
+          env:
+            # The uploader refuses a POST from any other Origin.
+            - name: UPLOAD_ORIGIN
+              value: https://glry.0xbf.ch
           ports:
             - name: http
               containerPort: 8080

@@ -977,7 +977,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "2",
         ns: "glob",
         ks: "glob",
-        host: "https://blog.0xbf.ch",
+        host: "https://blg.0xbf.ch",
         image: "ghcr.io/bfeitknecht/glob:latest",
         desc: "Typst blog built with thyme.",
         ports: "HTTP 8080",
@@ -1000,7 +1000,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "2",
         ns: "exhib",
         ks: "exhib",
-        host: "https://gallery.0xbf.ch",
+        host: "https://glry.0xbf.ch",
         image: "ghcr.io/bfeitknecht/exhib:latest (Keel)",
         desc: "Hugo gallery. SWS + upload processor in one container.",
         ports: "HTTP 8080, /health",
@@ -1355,7 +1355,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "opencode",
         ks: "opencode",
         host: "https://opencode.internal",
-        image: "node:22-bookworm + @opencode/cli 2.3.2 (v2)",
+        image: "node:22-bookworm + @opencode/cli 2.4.0 (v2) + Claude Code 2.1.325",
         desc: "Coding agent web UI, default model Ollama.",
         ports:
           "HTTP 4096 (authentik + server password; devil connects with --server)",
@@ -1369,6 +1369,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         notes: [
           "Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik and devil), authentik forward auth (group developers), no SA token.",
           "v2: serve command, password auth always on (OPENCODE_PASSWORD), sandbox plugin 0.7.0 loads dist/v2.js.",
+          "Claude Code: subscription via the Claude Agent provider (claude on PATH; opencode runs its tools, so the plugin sandbox applies). Login: kubectl exec -it deploy/opencode -- claude, /login. Managed settings /etc/claude-code (own bash sandbox, deny reads). API credits: provider anthropic (key from sops).",
         ],
       },
       {
@@ -1890,19 +1891,35 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         notes: [
           "v2 since 2026-11-17 (v1.31.0). authentik SSO (developers; authentik Admins = Grafana Admin).",
           "Stock dashboards off; curated set pinned. Flux metrics via kube-state-metrics custom resource state.",
-          "Alert receiver pending (ntfy).",
+          "Alerts: Alertmanager and Gatus to ntfy topic alerts (phone). max_alerts 5 per push (ntfy size limit).",
         ],
       },
     ];
 
     const NEEDS = [
       {
-        id: "immich-admin",
+        id: "claude-login",
+        prio: 1,
+        cat: "manual",
+        t: "Claude Code: log in on the opencode pod",
+        d: "kubectl --kubeconfig kubeconfig -n opencode exec -it deploy/opencode -- claude, then /login, Claude account (subscription), open the URL, paste the code. Credentials stay in ~/.claude on the PVC. Then pick the Claude Agent models in the opencode UI.",
+        svc: "opencode",
+      },
+      {
+        id: "thyme-universe",
         prio: 2,
         cat: "manual",
-        t: "Immich: save the reset admin password",
-        d: "open .private/immich-admin.txt, save it, delete the file. Login with 0xbf works now.",
-        svc: "immich",
+        t: "thyme 0.1.4: open the Universe PR, then release glob 0.1.8",
+        d: "Open the compare link from the thyme release job summary (GitHub Actions). After the merge: in glob, just check, then tag v0.1.8 (glob master already imports 0.1.4).",
+        svc: "glob",
+      },
+      {
+        id: "k8up-failed-jobs",
+        prio: 2,
+        cat: "manual",
+        t: "Delete the stale failed backup Jobs",
+        d: "30 failed k8up Jobs from the Garage outage keep KubeJobFailed firing. Delete them after the first green nightly run (atuin, authentik, forgejo, pds).",
+        svc: null,
       },
       {
         id: "timemachine-mac",
@@ -1911,14 +1928,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         t: "Time Machine: add the disk on echo",
         d: "Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/OPERATIONS.md). Before the move to anti.",
         svc: "timemachine",
-      },
-      {
-        id: "ntfy-phone",
-        prio: 2,
-        cat: "manual",
-        t: "ntfy app on the phone",
-        d: "Install ntfy, add server https://notify.0xbf.ch, log in as bf (password: sops -d .private/ntfy-bf.sops.yaml), subscribe to topics alerts and alerts-media.",
-        svc: "ntfy",
       },
       {
         id: "invites",
@@ -2006,8 +2015,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     ];
     const HOSTS = [
       ["0xbf.ch", "public", "apex"],
-      ["blog.0xbf.ch", "public", "glob"],
-      ["gallery.0xbf.ch", "public", "exhib"],
+      ["blg.0xbf.ch", "public", "glob (blog.0xbf.ch: 301)"],
+      ["glry.0xbf.ch", "public", "exhib (gallery.0xbf.ch: 301)"],
       ["git.0xbf.ch", "public", "forgejo"],
       ["pds.0xbf.ch, *.pds.0xbf.ch", "public", "PDS + handles"],
       ["atuin.0xbf.ch", "public", "atuin"],
@@ -2149,12 +2158,22 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.77.0",
+        "2026-11-23",
+        "blg.0xbf.ch + glry.0xbf.ch (old names 301); Claude Code 2.1.325 in the opencode image (managed sandbox settings, platform.claude.com egress); Alertmanager max_alerts 5 (ntfy size limit), topf kubeconfig cert alert to null",
+      ],
+      [
         "v1.76.0",
         "2026-11-23",
         "Bazarr port 6767; both live: bazarr.internal 200, music.0xbf.ch 302 (forward auth)",
       ],
       [
-        "v1.73.0",
+        "v1.75.0",
+        "2026-11-23",
+        "Bazarr: LSIO pattern (start as root, s6 drops to PUID; runAsUser + cap drop had killed s6)",
+      ],
+      [
+        "v1.74.0",
         "2026-11-23",
         "Bazarr (subtitles, bazarr.internal) + public music.0xbf.ch (Navidrome forward auth, /rest on the Subsonic password); media authentik middleware into git (was drift)",
       ],
@@ -2186,7 +2205,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       [
         "v1.68.0",
         "2026-11-23",
-        "opencode 2.4.0 (bundled Claude Code: claude-agent provider, CNP claude.ai + mcp-proxy); Grafana home: network throughput + errors by node",
+        "opencode 2.4.0 (claude-agent provider; the claude binary was not in the image until v1.77.0; CNP claude.ai + mcp-proxy); Grafana home: network throughput + errors by node",
       ],
       [
         "v1.67.0",
@@ -2686,11 +2705,39 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
       [
         "2026-11-23",
-        "Bazarr live on 6767 (bazarr.internal), music.0xbf.ch public with authentik forward auth; Subsonic apps use the Navidrome password on /rest",
+        "thyme 0.1.4 released (blog.site(nav: ...) path nav in the top bar; folder posts get their folder name as slug); Universe PR pending the owner's click",
       ],
       [
         "2026-11-23",
-        "Bazarr live (bazarr.internal, subtitles for Sonarr/Radarr libraries) and music.0xbf.ch public (Navidrome behind authentik, family/friends/developers; /rest for Subsonic apps)",
+        "Hostnames blog -> blg.0xbf.ch, gallery -> glry.0xbf.ch; old names 301 to the same path (HTTPRoutes glob-redirect, exhib-redirect); authentik exhib external_host, Gatus, apex links",
+      ],
+      [
+        "2026-11-23",
+        "exhib 0.6.1: tag pages show the homepage cards with previews (were text-only); baseURL glry.0xbf.ch",
+      ],
+      [
+        "2026-11-23",
+        "glob 0.1.8 prepared: gallery-style top nav (/ /posts/ /tags/), /posts/ index, GoL post at /posts/gol/ (301 from /posts/index/); release waits for thyme 0.1.4 on Universe",
+      ],
+      [
+        "2026-11-23",
+        "opencode: Claude Code CLI 2.1.325 in the image (claude-agent provider and kubectl exec), managed settings with its own bash sandbox; ~/.claude denied to both sandboxes; platform.claude.com egress. The 2.4.0 entry claimed it was bundled: it was not",
+      ],
+      [
+        "2026-11-23",
+        "Alertmanager -> ntfy fixed: 11 grouped KubeJobFailed alerts exceeded ntfy's template size (400, nothing reached the phone); max_alerts 5; KubeClientCertificateExpiration (24 h topf kubeconfig) to null",
+      ],
+      [
+        "2026-11-23",
+        "ntfy app on the phone (server notify.0xbf.ch, user bf, topics alerts + alerts-media)",
+      ],
+      [
+        "2026-11-23",
+        "Immich set up: admin password saved, SSO login with 0xbf works",
+      ],
+      [
+        "2026-11-23",
+        "Bazarr live on 6767 (bazarr.internal), music.0xbf.ch public with authentik forward auth; Subsonic apps use the Navidrome password on /rest",
       ],
       [
         "2026-11-23",
@@ -3921,12 +3968,12 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["forgejo", "Forgejo", "git.0xbf.ch", 250, 375, 105, "forgejo"],
       ["pds", "PDS", "pds.0xbf.ch", 365, 375, 100, "pds"],
       ["atuin", "atuin", "", 475, 375, 105, "atuin"],
-      ["exhib", "exhib", "gallery.0xbf.ch", 60, 440, 110, "exhib"],
+      ["exhib", "exhib", "glry.0xbf.ch", 60, 440, 110, "exhib"],
       ["apex", "apex", "0xbf.ch + ssh :2222", 180, 440, 110, "apex"],
       ["devil", "devil", "kata VM", 300, 440, 100, "devil"],
       ["aghpod", "AGH pod", "", 410, 440, 80, "agh"],
       ["nv0", "nvme0/nvme1", "256+250 GB", 500, 440, 90, null],
-      ["glob", "glob", "blog.0xbf.ch", 60, 505, 110, "glob"],
+      ["glob", "glob", "blg.0xbf.ch", 60, 505, 110, "glob"],
       ["ddns", "ddns", "→ Cloudflare", 180, 505, 100, "ddns"],
       [
         "ctl",
