@@ -2136,6 +2136,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.72.0",
+        "2026-11-23",
+        "devil freeze root cause: lix load-db hangs in-container via register-nix-paths, blocking the job queue; unit masked in omni; devil switched (gen 2), oc 2.4.0 talks to the server",
+      ],
+      [
         "v1.71.0",
         "2026-11-23",
         "devil drops Kata: plain container on rzbl (virtiofsd + /nix I/O froze the guest on both nodes; direct PVC mounts, no VM boundary)",
@@ -2651,6 +2656,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-23",
+        "devil un-wedged for good: register-nix-paths (lix load-db epoll hang) masked in omni; switch completed, oc 2.4.0 --server works against the pod; RBPI edge healed after the zombie-qemu spiral",
+      ],
       [
         "2026-11-23",
         "devil runs as a plain container (Kata guest froze on both nodes under virtiofs + nix I/O; docker-container profile runs without Kata, direct PVC mounts)",
