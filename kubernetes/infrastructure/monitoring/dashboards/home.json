@@ -951,12 +951,125 @@
    "description": "Empty is good."
   },
   {
+   "id": 17,
+   "type": "timeseries",
+   "title": "Network throughput by node",
+   "gridPos": {
+    "x": 0,
+    "y": 30,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (instance) (rate(node_network_receive_bytes_total{device!=\"lo\"}[2m]))",
+     "legendFormat": "{{instance}} rx"
+    },
+    {
+     "refId": "B",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "- sum by (instance) (rate(node_network_transmit_bytes_total{device!=\"lo\"}[2m]))",
+     "legendFormat": "{{instance}} tx"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "Bps",
+     "custom": {
+      "lineWidth": 1,
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "description": "rx above zero, tx below. Flat lines during activity mean a wedged node."
+  },
+  {
+   "id": 18,
+   "type": "timeseries",
+   "title": "Network errors and drops by node",
+   "gridPos": {
+    "x": 12,
+    "y": 30,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (instance) (rate(node_network_receive_errs_total{device!=\"lo\"}[2m]) + rate(node_network_receive_drop_total{device!=\"lo\"}[2m]))",
+     "legendFormat": "{{instance}} rx"
+    },
+    {
+     "refId": "B",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (instance) (rate(node_network_transmit_errs_total{device!=\"lo\"}[2m]) + rate(node_network_transmit_drop_total{device!=\"lo\"}[2m]))",
+     "legendFormat": "{{instance}} tx"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ops",
+     "min": 0,
+     "custom": {
+      "lineWidth": 1,
+      "fillOpacity": 10,
+      "showPoints": "never"
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "description": "Zero is good. Drops pile up when a node's NIC or path is wedged."
+  },
+  {
    "id": 16,
    "type": "text",
    "title": "",
    "gridPos": {
     "x": 0,
-    "y": 30,
+    "y": 38,
     "w": 24,
     "h": 3
    },

@@ -12,7 +12,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # v2 ships as @opencode/cli (opencode-ai stays on the 1.x line).
-ARG OPENCODE_VERSION=2.3.2
+ARG OPENCODE_VERSION=2.4.0
 RUN npm install -g "@opencode/cli@${OPENCODE_VERSION}" && npm cache clean --force
 
 # The plugin lives in the image (root-owned, read-only to the agent) and is
