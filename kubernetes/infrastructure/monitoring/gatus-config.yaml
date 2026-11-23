@@ -1,4 +1,4 @@
-# Gatus endpoints (status.internal). Groups: public = what visitors see,
+# Gatus endpoints (gatus.internal). Groups: public = what visitors see,
 # through the real edge (DNS, WAN, Traefik, TLS); internal = services in the
 # cluster; platform = DNS, gateway, monitoring; backup = the path to the NAS.
 metrics: true
@@ -98,7 +98,7 @@ endpoints:
     url: 10.96.0.53
     interval: 1m
     dns:
-      query-name: dashboard.internal
+      query-name: traefik.internal
       query-type: A
     conditions: ["[DNS_RCODE] == NOERROR", "[BODY] == 10.10.20.128"]
     alerts: [{type: ntfy}]

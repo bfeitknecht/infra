@@ -163,7 +163,7 @@
      "legendFormat": ""
     }
    ],
-   "description": "Gatus endpoints whose last check failed. Details: status.internal.",
+   "description": "Gatus endpoints whose last check failed. Details: gatus.internal.",
    "fieldConfig": {
     "defaults": {
      "unit": "none",
@@ -1075,7 +1075,7 @@
    },
    "options": {
     "mode": "markdown",
-    "content": "**Dashboards** \u00b7 [Cluster](/d/k8s_views_global) \u00b7 [Nodes](/d/k8s_views_nodes) \u00b7 [Namespaces](/d/k8s_views_ns) \u00b7 [Pods](/d/k8s_views_pods) \u00b7 [Hardware](/d/rYdddlPWk) \u00b7 [GPU](/d/vlvPlrgnk) \u00b7 [Traefik](/d/n5bu_kv45) \u00b7 [Flux](/d/flux-cluster) \u00b7 [Flux controllers](/d/flux-control-plane) \u00b7 [Cilium](/dashboards?query=cilium)\n\n**Places** \u00b7 [status.internal](https://status.internal) \u00b7 [git.0xbf.ch](https://git.0xbf.ch) \u00b7 [auth.0xbf.ch](https://auth.0xbf.ch/if/admin/) \u00b7 [stream.0xbf.ch](https://stream.0xbf.ch) \u00b7 [opencode.internal](https://opencode.internal) \u00b7 [agh.internal](https://agh.internal) \u00b7 [dashboard.internal](https://dashboard.internal) (Traefik)"
+    "content": "**Dashboards** \u00b7 [Cluster](/d/k8s_views_global) \u00b7 [Nodes](/d/k8s_views_nodes) \u00b7 [Namespaces](/d/k8s_views_ns) \u00b7 [Pods](/d/k8s_views_pods) \u00b7 [Hardware](/d/rYdddlPWk) \u00b7 [GPU](/d/vlvPlrgnk) \u00b7 [Traefik](/d/n5bu_kv45) \u00b7 [Flux](/d/flux-cluster) \u00b7 [Flux controllers](/d/flux-control-plane) \u00b7 [Cilium](/dashboards?query=cilium)\n\n**Places** \u00b7 [gatus.internal](https://gatus.internal) \u00b7 [git.0xbf.ch](https://git.0xbf.ch) \u00b7 [auth.0xbf.ch](https://auth.0xbf.ch/if/admin/) \u00b7 [stream.0xbf.ch](https://stream.0xbf.ch) \u00b7 [opencode.internal](https://opencode.internal) \u00b7 [agh.internal](https://agh.internal) \u00b7 [traefik.internal](https://traefik.internal) (dashboard)"
    }
   }
  ],

@@ -86,11 +86,10 @@ spec:
   # host here (same PR as its HTTPRoute).
   dnsNames:
     - agh.internal
-    - dashboard.internal
     - dawarich.internal
     - copyparty.internal
+    - gatus.internal
     - grafana.internal
-    - homepage.internal
     - immich.internal
     - jellyfin.internal
     - lidarr.internal
@@ -102,7 +101,7 @@ spec:
     - qbittorrent.internal
     - radarr.internal
     - sonarr.internal
-    - status.internal
+    - traefik.internal
 ---
 # Second-level wildcard for PDS handles. Pattern is <name>.pds.0xbf.ch.
 # The *.0xbf.ch cert matches one label only.

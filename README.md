@@ -168,7 +168,7 @@ Dry-run validates all manifests in a Kustomization before apply. So CRs must not
 - Gateway address `10.10.20.128` is from Cilium LB-IPAM pool in `network/ipam`. It is L2-announced on worker `end0`.
 - Public names `0xbf.ch` and `*.0xbf.ch` use Let's Encrypt wildcard via Cloudflare DNS-01.
 - Internal names `*.internal` use cert-manager internal CA. Chain is selfsigned bootstrap to 10y CA (name-constrained to `.internal`) to 1y cert with explicit names. Let's Encrypt cannot issue for `internal`.
-- Traefik dashboard is at `https://dashboard.internal`. It is IngressRoute with LAN allowlist middleware.
+- Traefik dashboard is at `https://traefik.internal`. It is IngressRoute with LAN allowlist middleware.
 - ATProto PDS is at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle via `/.well-known/atproto-did`). Custom handles use DNS TXT.
 - Devil kata VM: SSH on `devil.internal:2223` via TCPRoute to VM sshd, LAN + tailnet only. Rex rides that SSH. No web route.
 
@@ -180,4 +180,4 @@ All secrets are SOPS-encrypted with age (`.sops.yaml`, files `*.sops.yaml`). Flu
 
 - `kubeconfig` at repo root and `talos/talosconfig` (both gitignored).
 - Off-LAN access is over tailnet. Nodes run the Tailscale extension. rbpi advertises `10.10.10.0/24` and `10.10.20.0/24`, oci `10.20.20.0/24`, rzbl its own `/32`. The tailnet policy `autoApprovers` approves them.
-- `dashboard.internal` and all `*.internal` names resolve via DNS stack: AdGuard Home `10.10.20.153` (LAN-facing) to `resolver` pod on OCI (recursion + DNSSEC, ClusterIP `10.96.0.53`) to knotd for `internal.` (wildcard to `10.10.20.128`; explicit records for LAN devices like `router.internal` to `10.10.10.1`). LAN: router DHCP DNS to `10.10.20.153`. Off-LAN via Tailscale split DNS `internal.` to `10.10.20.153` (needs MagicDNS via advertised subnet routes).
+- `traefik.internal` and all `*.internal` names resolve via DNS stack: AdGuard Home `10.10.20.153` (LAN-facing) to `resolver` pod on OCI (recursion + DNSSEC, ClusterIP `10.96.0.53`) to knotd for `internal.` (wildcard to `10.10.20.128`; explicit records for LAN devices like `router.internal` to `10.10.10.1`). LAN: router DHCP DNS to `10.10.20.153`. Off-LAN via Tailscale split DNS `internal.` to `10.10.20.153` (needs MagicDNS via advertised subnet routes).

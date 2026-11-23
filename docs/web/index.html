@@ -1550,30 +1550,12 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ],
       },
       {
-        id: "homepage",
-        name: "Homepage",
-        cat: "network",
-        status: "disabled",
-        exp: "internal",
-        node: "any",
-        tier: "1",
-        ns: "homepage",
-        ks: "homepage",
-        host: "https://homepage.internal",
-        image: "homepage v2.4.0",
-        desc: "Dashboard with cluster stats.",
-        ports: "HTTP 3000",
-        deps: ["traefik", "metrics-server"],
-        secrets: [],
-        notes: ["Off since 2026-11-17 (Kustomization commented out). Config kept."],
-      },
-      {
         id: "devil",
         name: "devil",
         cat: "dev",
         status: "live",
         exp: "internal",
-        node: "rbpi",
+        node: "rzbl",
         tier: "1",
         ns: "devil",
         ks: "devil",
@@ -1584,7 +1566,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ports: "SSH 2223 (devilssh, headless Service)",
         deps: ["kata", "traefik", "storage"],
         secrets: [],
-        storage: "devil-data 20Gi (rbpi nvme0)",
+        storage: "devil-data 20Gi (rzbl nvme0)",
         notes: [
           "Headless Service is historic. Kata pods use ClusterIPs since socketLB.hostNamespaceOnly (2026-11-17).",
           "SSH moved 2222 → 2223 in infra v1.42.0 (mux owns 2222).",
@@ -1619,7 +1601,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "ingress",
         ks: "traefik",
         host:
-          "LB 10.10.20.128 · hostPorts 80/443/22/2222 · https://dashboard.internal",
+          "LB 10.10.20.128 · hostPorts 80/443/22/2222 · https://traefik.internal",
         image: "traefik chart 41.6.0",
         desc: "Gateway API implementation. Terminates TLS.",
         ports: "web 8000, websecure 8443, gitssh 22, muxssh 2222, devilssh 2223",
@@ -1876,7 +1858,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "infra",
         ns: "monitoring",
         ks: "monitoring",
-        host: "https://grafana.internal · https://status.internal",
+        host: "https://grafana.internal · https://gatus.internal",
         image:
           "kube-prometheus-stack 91.4.1, gatus v5.36.0, nvidia_gpu_exporter 1.2.1",
         desc:
@@ -2021,9 +2003,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["<ksvc>.0xbf.ch", "public", "Knative whims"],
       ["agh.internal", "internal", "AdGuard UI"],
       ["grafana.internal", "internal", "Grafana (home: 0xbf)"],
-      ["status.internal", "internal", "Gatus"],
-      ["homepage.internal", "internal", "dashboard"],
-      ["dashboard.internal", "internal", "Traefik dashboard"],
+      ["gatus.internal", "internal", "Gatus status page"],
+      ["traefik.internal", "internal", "Traefik dashboard"],
       ["devil.internal", "internal", "dev VM"],
       ["0xbf.ch:2222 (ssh)", "public", "sshmux → apex TUI"],
       ["stream.0xbf.ch", "public", "Jellyfin"],
@@ -2093,7 +2074,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["forgejo", "forgejo-data", "10Gi", "rbpi", "storage-nvme1", "live"],
       ["pds", "pds-data", "10Gi", "rbpi", "storage-nvme0", "live"],
       ["exhib", "exhib-data", "50Gi", "rbpi", "storage-nvme0", "live"],
-      ["devil", "devil-data", "20Gi", "rbpi", "storage-nvme0", "live"],
+      ["devil", "devil-data", "20Gi", "rzbl", "storage-nvme0", "live"],
       ["agh", "agh-data", "1Gi", "rbpi", "storage-nvme0", "live"],
       ["atuin", "atuin-data", "5Gi", "rbpi", "storage-nvme0", "live"],
       ["media", "media-files", "2Ti", "rzbl", "storage-ssd0", "live"],
@@ -2154,6 +2135,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.69.0",
+        "2026-11-23",
+        "devil to rzbl (amd64 rebuild, Pi Kata wedged and poisoned the node); status.internal→gatus.internal, dashboard.internal→traefik.internal, homepage.internal gone from the cert",
+      ],
       [
         "v1.68.0",
         "2026-11-23",
@@ -2655,6 +2641,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-23",
+        "Garage on the NAS answers again (403 via the relay, Gatus green); internal names by software: gatus.internal, traefik.internal; homepage.internal removed from cert and atlas",
+      ],
+      [
+        "2026-11-23",
+        "devil moved rbpi→rzbl: amd64 image rebuild, PVC re-provisioned on rzbl nvme0 (home/ssh carried over, nix store fresh), nodeSelector pinned; rbpi edge healed after zombie-qemu memory pressure forced a node reboot",
+      ],
       [
         "2026-11-23",
         "opencode 2.4.0: claude-agent provider (subscription) with claude.ai + mcp-proxy egress; devil Kata wedge force-recovered (VM exit 255, unresponsive); Grafana home network panels",

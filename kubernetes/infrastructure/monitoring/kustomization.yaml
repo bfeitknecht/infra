@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 # Monitoring v2 (2026-11-17): kube-prometheus-stack with curated dashboards and
-# the 0xbf home dashboard, Gatus at status.internal, GPU exporter. All on rbpi
+# the 0xbf home dashboard, Gatus at gatus.internal, GPU exporter. All on rbpi
 # except the GPU exporter (rzbl).
 resources:
   - namespace.yaml

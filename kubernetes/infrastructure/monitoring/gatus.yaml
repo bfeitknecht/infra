@@ -1,4 +1,5 @@
-# Gatus status page at status.internal. Config: gatus-config.yaml (generated
+# Gatus status page at gatus.internal (named by software, 2026-11-23; was
+# status.internal). Config: gatus-config.yaml (generated
 # ConfigMap: a change rolls the pod). Pinned to rbpi with the rest of monitoring.
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -94,7 +95,7 @@ spec:
       namespace: ingress
       sectionName: websecure-internal
   hostnames:
-    - status.internal
+    - gatus.internal
   rules:
     # authentik forward auth callback (sign-in, sign-out) on this host.
     - matches:

@@ -97,7 +97,7 @@ spec:
     ingressRoute:
       dashboard:
         enabled: true
-        matchRule: Host(`dashboard.internal`)
+        matchRule: Host(`traefik.internal`)
         entryPoints:
           - websecure
         middlewares:
