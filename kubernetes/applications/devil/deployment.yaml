@@ -15,8 +15,15 @@ spec:
       labels:
         app: devil
     spec:
+      # Kata sets vCPU and RAM from container limits. Without a CPU limit the
+      # VM boots with one vCPU. This is too slow for nix builds. The VM wall
+      # stays (owner, 2026-11-23); the freeze was register-nix-paths (see
+      # omni devil.nix), not Kata.
+      runtimeClassName: kata-qemu
       hostname: devil
-      # rzbl since 2026-11-23; amd64 since the move off the Pi.
+      # rzbl since 2026-11-23; amd64 since the move off the Pi. Kata hang on
+      # stop leaves an orphan qemu: reboot the node after force-deletes
+      # (AGENTS.md, devil).
       nodeSelector:
         kubernetes.io/hostname: rzbl
       # Devil does not use the Kubernetes API. Do not mount a service account token.
@@ -65,13 +72,8 @@ spec:
           # The tag has no effect. The image is only bootstrap. Updates happen
           # inside the VM. Use :latest to pull the newest bootstrap.
           imagePullPolicy: Always
-          # No Kata: the guest froze with virtiofsd serving /nix under nix
-          # build I/O on both nodes (idle too, on the Pi), while opencode's
-          # light Kata VM is stable; each force-delete also orphaned a qemu.
-          # The image is the docker-container profile: it runs as a plain
-          # container, with the PVC as direct bind mounts (no virtiofs), so
-          # builds are faster and the failure class is gone. Isolation is the
-          # CNP + no SA token; the VM boundary went with the Kata removal.
+          # The image has no entrypoint. The boot command is here. /init
+          # registers the store and boots systemd.
           # Boot the persisted system profile (the last `nh os switch`); the
           # image's /init only on the very first boot.
           command:

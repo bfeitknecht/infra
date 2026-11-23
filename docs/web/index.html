@@ -2136,6 +2136,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.73.0",
+        "2026-11-23",
+        "devil back on Kata (owner call; register-nix-paths mask was the real fix); 94 zombie cilium-operator pods from the node reboots cleaned",
+      ],
+      [
         "v1.72.0",
         "2026-11-23",
         "devil freeze root cause: lix load-db hangs in-container via register-nix-paths, blocking the job queue; unit masked in omni; devil switched (gen 2), oc 2.4.0 talks to the server",
@@ -2656,6 +2661,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-23",
+        "devil returns to Kata (owner decision); the lix load-db hang behind the freezes is fixed by the omni mask, inside the VM; cilium-operator zombie pods cleaned",
+      ],
       [
         "2026-11-23",
         "devil un-wedged for good: register-nix-paths (lix load-db epoll hang) masked in omni; switch completed, oc 2.4.0 --server works against the pod; RBPI edge healed after the zombie-qemu spiral",
