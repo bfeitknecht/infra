@@ -2,5 +2,6 @@
 .direnv
 kubeconfig
 talos/talosconfig
+/talosconfig
 talos/output
 __pycache__/
