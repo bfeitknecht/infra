@@ -40,12 +40,9 @@ spec:
         kubernetes.io/hostname: rzbl
       enableServiceLinks: false
       automountServiceAccountToken: false
+      # linuxserver image starts as root (s6 init), then drops to PUID/PGID.
+      # No runAsUser and no cap drop: s6 needs setuid/chown for its init.
       securityContext:
-        # the image runs as abc (1000); local-path volumes start as root
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -73,10 +70,6 @@ spec:
               memory: 256Mi
             limits:
               memory: 1Gi
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
           volumeMounts:
             - name: config
               mountPath: /config
