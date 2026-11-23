@@ -1258,21 +1258,44 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         name: "Navidrome",
         cat: "media",
         status: "live",
+        exp: "public",
+        node: "rzbl",
+        tier: "1",
+        ns: "media",
+        ks: "media",
+        host: "https://music.0xbf.ch · https://navidrome.internal",
+        image: "deluan/navidrome:0.64.2",
+        desc: "Music streaming (Subsonic API). Reads /data/media/music read-only.",
+        ports: "HTTP 4533",
+        deps: ["storage", "traefik"],
+        secrets: [],
+        storage: "navidrome-data 2Gi (nvme), media-files/media/music (ro)",
+        notes: [
+          "Added 2026-11-18 (v1.37.0). First login creates the admin.",
+          "Public at music.0xbf.ch since 2026-11-23 (v1.74.0): forward auth (family, friends, developers), header login; /rest on the Navidrome password for Subsonic apps.",
+        ],
+      },
+      {
+        id: "bazarr",
+        name: "Bazarr",
+        cat: "media",
+        status: "live",
         exp: "internal",
         node: "rzbl",
         tier: "1",
         ns: "media",
         ks: "media",
-        host: "https://navidrome.internal",
-        image: "deluan/navidrome:0.64.2",
-        desc: "Music streaming (Subsonic API). Reads /data/media/music read-only.",
-        ports: "HTTP 4533",
+        host: "https://bazarr.internal",
+        image: "lscr.io/linuxserver/bazarr:1.6.2",
+        desc:
+          "Subtitle manager for the Sonarr/Radarr libraries; writes .srt next to the media.",
+        ports: "HTTP 9696",
         deps: ["storage"],
         secrets: [],
-        storage: "navidrome-data 2Gi (nvme), media-files/media/music (ro)",
+        storage: "bazarr-data 2Gi (nvme), media-files at /data (rw)",
         notes: [
-          "Added 2026-11-18 (v1.37.0). First login creates the admin.",
-          "Public later: music.0xbf.ch.",
+          "Added 2026-11-23 (v1.74.0). Its own login is the second wall (no External auth mode).",
+          "Connect it to Sonarr + Radarr APIs, set the language profile.",
         ],
       },
       {
@@ -1675,7 +1698,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         id: "relay",
         name: "tailscale-relay",
         cat: "platform",
-        status: "broken",
+        status: "live",
         exp: "cluster",
         node: "rzbl",
         tier: "infra",
@@ -1688,16 +1711,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         deps: [],
         secrets: ["egress/tailscale-relay-secrets.sops.yaml"],
         notes: [
-          "Pod runs since 2026-11-16 (PodSecurity + TS_KUBE_SECRET fixes).",
-          "Target refuses 3900: Garage on the NAS is not listening on its tailnet IP.",
-          "Alternative later: tailcat (tailscale.com/tailcat).",
+          "Garage answers 403 via the relay since 2026-11-23 (the friend fixed it).",
         ],
       },
       {
         id: "k8up",
         name: "k8up",
         cat: "platform",
-        status: "broken",
+        status: "live",
         exp: "cluster",
         node: "rzbl",
         tier: "infra",
@@ -1710,8 +1731,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         deps: ["k8up-crds"],
         secrets: ["backup/k8up/k8up-secrets.sops.yaml"],
         notes: [
-          "No backup has ever succeeded. Gate for immich.",
-          "Schedules: forgejo 03:00, pds 03:30, atuin 04:30, authentik 05:00 (pg_dump).",
+          "Unblocked 2026-11-23 (Garage answers); the nightly forgejo Schedule produces the first real backups.",
+          "Open: verify the first run, restore drill, Schedules for exhib, immich, media.",
         ],
       },
       {
@@ -1875,14 +1896,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     ];
 
     const NEEDS = [
-      {
-        id: "garage",
-        prio: 1,
-        cat: "external",
-        t: "Friend: Garage must listen on 3900",
-        d: "Credentials are in k8up-secrets. NAS still refuses 3900 on its tailnet IP. Gate for real data.",
-        svc: "k8up",
-      },
       {
         id: "immich-admin",
         prio: 2,
@@ -2135,6 +2148,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.74.0",
+        "2026-11-23",
+        "Bazarr (subtitles, bazarr.internal) + public music.0xbf.ch (Navidrome forward auth, /rest on the Subsonic password); media authentik middleware into git (was drift)",
+      ],
       [
         "v1.73.0",
         "2026-11-23",
@@ -2661,6 +2679,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-23",
+        "Bazarr live (bazarr.internal, subtitles for Sonarr/Radarr libraries) and music.0xbf.ch public (Navidrome behind authentik, family/friends/developers; /rest for Subsonic apps)",
+      ],
       [
         "2026-11-23",
         "devil returns to Kata (owner decision); the lix load-db hang behind the freezes is fixed by the omni mask, inside the VM; cilium-operator zombie pods cleaned",

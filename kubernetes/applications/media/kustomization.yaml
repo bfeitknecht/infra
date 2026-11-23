@@ -11,6 +11,7 @@ resources:
   - lidarr.yaml
   - navidrome.yaml
   - navidrome-networkpolicy.yaml
+  - bazarr.yaml
   - authentik.yaml
   - prowlarr.yaml
   - flaresolverr.yaml

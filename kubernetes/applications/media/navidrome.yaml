@@ -1,6 +1,7 @@
 # Music streaming (Subsonic API: Symfonium, Feishin, Supersonic, play:Sub).
 # Reads the Lidarr library read-only. The first login creates the admin.
-# Internal only for now; public would be music.0xbf.ch (by purpose).
+# navidrome.internal for the LAN/tailnet; public at music.0xbf.ch (forward
+# auth, family + friends + developers) since 2026-11-23.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -149,6 +150,50 @@ spec:
             group: traefik.io
             kind: Middleware
             name: internal-allowlist
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
+      backendRefs:
+        - name: navidrome
+          port: 80
+---
+# Public music.0xbf.ch: forward auth (authentik app music, family + friends
+# + developers). No internal-allowlist: it is the public listener. The
+# wildcard-domain cert covers the name. /rest stays on the Navidrome
+# password (Subsonic apps log in themselves); the web UI gets the header
+# login (Navidrome auto-creates the user from X-authentik-username).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: navidrome-public
+  namespace: media
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure
+  hostnames:
+    - music.0xbf.ch
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    # Subsonic API for phone apps: no forward auth (Navidrome password).
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /rest
+      backendRefs:
+        - name: navidrome
+          port: 80
+    - filters:
         - type: ExtensionRef
           extensionRef:
             group: traefik.io

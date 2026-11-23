@@ -1049,6 +1049,71 @@ data:
           group: !KeyOf group-authentik-admins
         attrs:
           order: 0
+      # bazarr (subtitle manager, bazarr.internal): admins only. Bazarr has
+      # its own login on top (it has no External auth mode).
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-bazarr
+        identifiers:
+          name: bazarr
+        attrs:
+          mode: forward_single
+          external_host: https://bazarr.internal
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-bazarr
+        identifiers:
+          slug: bazarr
+        attrs:
+          name: Bazarr
+          provider: !KeyOf provider-bazarr
+          meta_launch_url: https://bazarr.internal
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-bazarr
+          group: !KeyOf group-authentik-admins
+        attrs:
+          order: 0
+      # Music: public Navidrome at music.0xbf.ch (forward auth), same groups
+      # as Jellyfin. Navidrome auto-creates the user from the authentik
+      # headers; the Subsonic /rest path bypasses (Navidrome password).
+      - model: authentik_providers_proxy.proxyprovider
+        id: provider-music
+        identifiers:
+          name: music
+        attrs:
+          mode: forward_single
+          external_host: https://music.0xbf.ch
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+          access_token_validity: hours=24
+      - model: authentik_core.application
+        id: app-music
+        identifiers:
+          slug: music
+        attrs:
+          name: Music
+          provider: !KeyOf provider-music
+          meta_launch_url: https://music.0xbf.ch
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-music
+          group: !KeyOf group-family
+        attrs:
+          order: 0
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-music
+          group: !KeyOf group-friends
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf app-music
+          group: !KeyOf group-developers
+        attrs:
+          order: 2
       - model: authentik_outposts.outpost
         identifiers:
           managed: goauthentik.io/outposts/embedded
@@ -1064,6 +1129,8 @@ data:
             - !KeyOf provider-lidarr
             - !KeyOf provider-qbittorrent
             - !KeyOf provider-status
+            - !KeyOf provider-bazarr
+            - !KeyOf provider-music
       # Agent sandbox slots sandbox-1..3.internal, removed 2026-11-19 with the
       # sandboxes. These entries delete the objects; drop them later.
       - model: authentik_core.application

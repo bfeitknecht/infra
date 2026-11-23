@@ -13,7 +13,7 @@ Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
+- [x] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [x] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
 - [ ] **Go live with test data:** `docs/OPERATIONS.md` section 2: Time Machine of echo, Tailscale ACL autoApprovers, Immich admin (not created yet: `immich.internal`), ntfy app, Dawarich email.
 - [x] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.

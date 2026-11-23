@@ -86,6 +86,7 @@ spec:
   # host here (same PR as its HTTPRoute).
   dnsNames:
     - agh.internal
+    - bazarr.internal
     - dawarich.internal
     - copyparty.internal
     - gatus.internal

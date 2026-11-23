@@ -46,6 +46,13 @@ endpoints:
     interval: 2m
     conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]
     alerts: [{type: ntfy}]
+  # music.0xbf.ch: forward auth answers 401/302 without login; any non-5xx is up.
+  - name: music
+    group: public
+    url: https://music.0xbf.ch/
+    interval: 2m
+    conditions: ["[STATUS] < 500", "[CERTIFICATE_EXPIRATION] > 240h"]
+    alerts: [{type: ntfy}]
   # ---- SSH fronts: git on the clean 22, the mux on 2222 (apex). Avoid probing through the mux: it would
   # start real sessions. TCP connects are enough.
   - name: git ssh
@@ -80,6 +87,7 @@ endpoints:
     conditions: ["[CONNECTED] == true"]
     alerts: [{type: ntfy}]
   - {!!merge <<: *internal, name: prowlarr, url: 'http://prowlarr.media.svc.cluster.local/ping'}
+  - {!!merge <<: *internal, name: bazarr, url: 'http://bazarr.media.svc.cluster.local/'}
   - {!!merge <<: *internal, name: ollama, url: 'http://ollama.ollama.svc.cluster.local:11434/'}
   - {!!merge <<: *internal, name: agh, url: 'http://agh.agh.svc.cluster.local/'}
   - {!!merge <<: *internal, name: immich, url: 'http://immich-server.immich.svc.cluster.local/api/server/ping'}

@@ -1,0 +1,133 @@
+# Bazarr: fetches and syncs subtitles for the Sonarr/Radarr libraries. It
+# writes .srt files next to the media (rw on media-files) and talks to the
+# Sonarr/Radarr APIs (cluster-local). Subtitle providers (opensubtitles.org
+# etc.) are plain HTTPS egress. No default-deny in ns media, so no CNP.
+# Config is Bazarr's own (its login is the wall; the authentik forward auth
+# on the route is the second). bazarr.internal is for the admin.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bazarr-data
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path-nvme
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+  namespace: media
+  labels:
+    app.kubernetes.io/name: bazarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bazarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bazarr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rzbl
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        # the image runs as abc (1000); local-path volumes start as root
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bazarr
+          image: lscr.io/linuxserver/bazarr:1.6.2
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Zurich
+          ports:
+            - name: http
+              containerPort: 9696
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            # rw: Bazarr writes the .srt files next to the videos.
+            - name: library
+              mountPath: /data
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: bazarr-data
+        - name: library
+          persistentVolumeClaim:
+            claimName: media-files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bazarr
+  namespace: media
+spec:
+  selector:
+    app.kubernetes.io/name: bazarr
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9696
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bazarr
+  namespace: media
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure-internal
+  hostnames:
+    - bazarr.internal
+  rules:
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authentik
+      backendRefs:
+        - name: bazarr
+          port: 80
