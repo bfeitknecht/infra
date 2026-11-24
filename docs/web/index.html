@@ -1405,12 +1405,12 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         name: "Dawarich",
         cat: "apps",
         status: "live",
-        exp: "internal",
+        exp: "public",
         node: "rzbl",
         tier: "1",
         ns: "dawarich",
         ks: "dawarich",
-        host: "https://dawarich.internal",
+        host: "https://location.0xbf.ch",
         image: "freikin/dawarich:1.23.0, postgis 17-3.5, redis 8",
         desc: "Location history (Google Timeline alternative).",
         ports: "HTTP 3000",
@@ -1418,7 +1418,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         secrets: ["dawarich/dawarich-secrets.sops.yaml"],
         storage: "dawarich-db 20Gi, dawarich-data 20Gi (nvme)",
         runbook: "docs/OPERATIONS.md",
-        notes: [],
+        notes: ["Public since 2026-11-24 (was dawarich.internal) so the phone app can post points from anywhere. Web login authentik OIDC; the app uses the Dawarich API key."],
       },
       {
         id: "copyparty",
@@ -2067,7 +2067,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["qbittorrent.internal", "internal", "prepared"],
       ["photos.0xbf.ch", "public", "Immich"],
       ["immich.internal", "internal", "Immich"],
-      ["dawarich.internal", "internal", "Dawarich"],
+      ["location.0xbf.ch", "public", "Dawarich (OIDC; phone app with API key)"],
       ["copyparty.internal", "internal", "copyparty"],
       ["files.0xbf.ch", "public", "copyparty"],
       ["opencode.internal", "internal", "opencode (authentik)"],
@@ -2183,6 +2183,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.81.0",
+        "2026-11-24",
+        "Dawarich public at location.0xbf.ch (was dawarich.internal: route, cert name, allowlist middleware dropped); authentik Location (Dawarich), redirect URI; Gatus public check",
+      ],
       [
         "v1.80.0",
         "2026-11-24",
@@ -2744,6 +2749,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "Dawarich public at location.0xbf.ch (one host, dawarich.internal dropped) for the phone app; authentik app Location (Dawarich)",
+      ],
       [
         "2026-11-24",
         "authentik launcher: public apps named by purpose with the software in parentheses (Git (Forgejo), Gallery (Exhib), ...); internal tools keep the software name. Only attrs.name changed, slugs untouched",

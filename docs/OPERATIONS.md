@@ -23,7 +23,7 @@ authentik at `https://auth.0xbf.ch` is the login for every app that supports it.
 | Jellyfin                           | stream.0xbf.ch                  | OIDC via SSO plugin; "Sign in with 0xbf"     | family, friends, developers; authentik Admins = admin |
 | copyparty                          | files.0xbf.ch                   | forward auth; share links `/shr/` open       | family, developers                                    |
 | Gallery upload                     | gallery.0xbf.ch/upload          | forward auth                                 | user bf only                                          |
-| Dawarich                           | dawarich.internal               | OIDC (PKCE)                                  | family, developers                                    |
+| Dawarich                           | location.0xbf.ch                | OIDC (PKCE)                                  | family, developers                                    |
 | Navidrome                          | music.0xbf.ch                   | forward auth; `/rest` open for Subsonic apps | family, friends, developers                           |
 | OpenCode                           | opencode.internal               | forward auth                                 | developers                                            |
 | *arr, qBittorrent, Gatus           | *.internal                      | forward auth                                 | authentik Admins                                      |

@@ -70,7 +70,7 @@ kubernetes/
     ├── ollama/         LLM server on rzbl GPU
     ├── opencode/       opencode web in Kata at opencode.internal (authentik)
     ├── copyparty/      file share at files.0xbf.ch
-    ├── dawarich/       location history at dawarich.internal (Postgres + Valkey)
+    ├── dawarich/       location history at location.0xbf.ch (Postgres + Valkey)
     ├── samba/          Time Machine at smb://10.10.20.145
     ├── devil/          kata VM pod: ssh 2223 (VM sshd 2222) + Rex, no web route
     ├── renovate/       weekly Renovate CronJob (rzbl), Forgejo platform (bot renovate), renovate.json5
@@ -94,7 +94,7 @@ One rule per kind. New resources must follow them. Exceptions are listed below; 
 - **StorageClass by role:** `data`/`db`/`cache` on `local-path-nvme`, `files` on `local-path-ssd` (rzbl). rbpi apps use `local-path`.
 - **Secret = `<app>-secrets`** (env-style keys) or `<app>-config` (the whole value is a config file). **File name = `<secret-name>.sops.yaml`.** Exception by design: GHCR pull secret `dockerconfigjson` in `ghcr.sops.yaml`.
 - **ConfigMap = `<app>-config`** (from `configMapGenerator`, hash suffix).
-- **Hostnames:** public, user-facing services are named by **purpose**, not by software, so the URL survives a software swap and says what users do there: `git`, `auth`, `blog`, `gallery`, `stream` (Jellyfin), `files` (copyparty), `photos` (Immich). Avoid names with two meanings (`watch` = clock, `media` = also photos). Internal and admin tools are named by **software**: `<app>.internal` (`sonarr.internal`, `agh.internal`). Every new `*.internal` name goes into the `internal-hosts` certificate.
+- **Hostnames:** public, user-facing services are named by **purpose**, not by software, so the URL survives a software swap and says what users do there: `git`, `auth`, `blog`, `gallery`, `stream` (Jellyfin), `files` (copyparty), `photos` (Immich), `location` (Dawarich). The authentik launcher shows public apps as `Purpose (Software)`, e.g. `Git (Forgejo)`; internal tools keep the software name. Avoid names with two meanings (`watch` = clock, `media` = also photos). Internal and admin tools are named by **software**: `<app>.internal` (`sonarr.internal`, `agh.internal`). Every new `*.internal` name goes into the `internal-hosts` certificate.
 - **LB IPs:** last octet = `100 + (port mod 100)` (see cilium note).
 - **Flux Kustomization = app directory name.**
 

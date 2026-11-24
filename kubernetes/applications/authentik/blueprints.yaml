@@ -683,7 +683,7 @@ data:
           client_id: dawarich
           redirect_uris:
             - matching_mode: strict
-              url: https://dawarich.internal/users/auth/openid_connect/callback
+              url: https://location.0xbf.ch/users/auth/openid_connect/callback
               redirect_uri_type: authorization
           authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
           invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
@@ -697,9 +697,9 @@ data:
         identifiers:
           slug: dawarich
         attrs:
-          name: Dawarich
+          name: Location (Dawarich)
           provider: !KeyOf provider-dawarich
-          meta_launch_url: https://dawarich.internal
+          meta_launch_url: https://location.0xbf.ch
       - model: authentik_policies.policybinding
         identifiers:
           target: !KeyOf app-dawarich

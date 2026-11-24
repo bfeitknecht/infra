@@ -39,7 +39,7 @@ spec:
             - name: DATABASE_NAME
               value: dawarich
             - name: APPLICATION_HOSTS
-              value: dawarich.internal
+              value: location.0xbf.ch
             - name: APPLICATION_PROTOCOL
               value: http
             - name: TIME_ZONE
@@ -58,7 +58,7 @@ spec:
             - name: OIDC_ISSUER
               value: https://auth.0xbf.ch/application/o/dawarich/
             - name: OIDC_REDIRECT_URI
-              value: https://dawarich.internal/users/auth/openid_connect/callback
+              value: https://location.0xbf.ch/users/auth/openid_connect/callback
             - name: OIDC_PROVIDER_NAME
               value: "0xbf"
             - name: OIDC_AUTO_REGISTER
@@ -133,16 +133,12 @@ spec:
   parentRefs:
     - name: traefik-gateway
       namespace: ingress
-      sectionName: websecure-internal
+      sectionName: websecure
+  # Public so the phone app can post points from anywhere. Web login is
+  # authentik (OIDC); the app authenticates with the user's Dawarich API key.
   hostnames:
-    - dawarich.internal
+    - location.0xbf.ch
   rules:
-    - filters:
-        - type: ExtensionRef
-          extensionRef:
-            group: traefik.io
-            kind: Middleware
-            name: internal-allowlist
-      backendRefs:
+    - backendRefs:
         - name: dawarich
           port: 80

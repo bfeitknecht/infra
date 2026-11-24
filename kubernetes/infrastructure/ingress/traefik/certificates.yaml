@@ -87,7 +87,6 @@ spec:
   dnsNames:
     - agh.internal
     - bazarr.internal
-    - dawarich.internal
     - copyparty.internal
     - gatus.internal
     - grafana.internal
