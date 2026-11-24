@@ -1,6 +1,6 @@
-# Publishes the OCI artifact (Flux source) and, from the same tag, the two
-# in-tree images (sshmux, opencode). Image tags equal the git tag, so the
-# Deployment pins in-tree match what CI publishes. Images build first:
+# Publishes the OCI artifact (Flux source) and, from the same tag, the
+# in-tree image (opencode). Image tags equal the git tag, so the
+# Deployment pin in-tree matches what CI publishes. The image builds first:
 # Flux may reconcile the artifact as soon as it exists, and a manifest whose
 # image is still pushing would crash-loop.
 name: Publish OCI Artifact
@@ -41,15 +41,6 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/opencode:${{ github.ref_name }}
-
-      # arm64 only: the mux runs on rbpi (Pi 5).
-      - name: Build and push sshmux image
-        uses: docker/build-push-action@v6
-        with:
-          context: images/sshmux
-          platforms: linux/arm64
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/sshmux:${{ github.ref_name }}
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@v2.9.6

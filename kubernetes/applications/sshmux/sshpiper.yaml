@@ -1,0 +1,60 @@
+# The mux is sshpiper (username-routed SSH reverse proxy), pinned chart.
+# The routes are Pipe objects (pipes.yaml); sshpiper watches its namespace.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: sshpiper
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://tg123.github.io/sshpiper-chart/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sshmux
+  namespace: flux-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: sshpiper
+      version: "0.6.0"
+      sourceRef:
+        kind: HelmRepository
+        name: sshpiper
+        namespace: flux-system
+  targetNamespace: sshmux
+  # CRDs come from cluster/crds.yaml (sshpiper-crds), same chart tag.
+  # Retries: on the switch from the old sshmux Deployment, Flux prunes the
+  # old Deployment/Service after this release first tries to install.
+  install:
+    crds: Skip
+    remediation:
+      retries: 5
+  upgrade:
+    crds: Skip
+  values:
+    # Service and Deployment keep the name sshmux (the TCPRoute backend).
+    fullnameOverride: sshmux
+    # No failtoban: behind the Traefik TCPRoute every client arrives from
+    # Traefik's pod IP, so a ban would lock out everyone.
+    sshpiper:
+      # The old mux host key: clients keep their known_hosts entry. (The RSA
+      # host key is gone: sshpiper serves one key.)
+      ssh_host_key:
+        existing_secret:
+          enabled: true
+          secret_name: sshmux-keys
+          secret_key: host_ed25519
+    service:
+      port: 22
+    nodeSelector:
+      kubernetes.io/hostname: rbpi
+    resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi

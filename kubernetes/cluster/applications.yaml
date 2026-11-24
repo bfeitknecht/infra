@@ -506,6 +506,7 @@ metadata:
 spec:
   dependsOn:
     - name: traefik
+    - name: sshpiper-crds
   interval: 10m0s
   path: ./kubernetes/applications/sshmux
   prune: true

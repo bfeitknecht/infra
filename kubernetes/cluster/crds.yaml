@@ -134,3 +134,31 @@ spec:
   sourceRef:
     kind: GitRepository
     name: knative-operator-crds
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: sshpiper-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/tg123/sshpiper-chart
+  ref:
+    tag: sshpiper-0.6.0
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: sshpiper-crds
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  wait: true
+  prune: false
+  # Pipe (sshpiper.com/v1beta1): the username routes of the sshmux.
+  path: ./charts/sshpiper/crds
+  sourceRef:
+    kind: GitRepository
+    name: sshpiper-crds

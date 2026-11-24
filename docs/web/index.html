@@ -1841,7 +1841,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "sshmux",
         ks: "sshmux",
         host: "0xbf.ch:2222 (WAN)",
-        image: "ghcr.io/bfeitknecht/sshmux:<release tag> (in-tree, images/sshmux)",
+        image: "farmer1992/sshpiperd v1.6.1 (chart sshpiper 0.6.0)",
         desc:
           "One WAN port for all SSH TUI services, routed by username: bf/someone/apex/guest → apex TUI. Git is not on the mux (own keys).",
         ports: "22 (tcp, entrypoint 2222)",
@@ -1849,7 +1849,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         secrets: ["sshmux/sshmux-keys.sops.yaml"],
         notes: [
           "ssh -p 2222 0xbf.ch (apex).",
-          "New SSH TUI = new username; no new WAN port.",
+          "New SSH TUI = new Pipe (pipes.yaml); no new WAN port.",
+          "sshpiper since 2026-11-24 (was an in-tree OpenSSH image): routes are Pipe objects, CRD from cluster/crds.yaml.",
         ],
       },
       {
@@ -2183,6 +2184,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.83.0",
+        "2026-11-24",
+        "sshmux is sshpiper (chart 0.6.0, Pipes owner + apex, CRD via sshpiper-crds); images/sshmux and its CI step removed",
+      ],
       [
         "v1.82.0",
         "2026-11-24",
@@ -2754,6 +2760,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "sshmux: in-tree OpenSSH image replaced by sshpiper (pinned chart + Pipe objects, same host key and Service name); one in-tree image left (opencode)",
+      ],
       [
         "2026-11-24",
         "Tailscale clients past the Oct 2026 SSH bulletins (fixed in 1.104.4): operator 1.104.7, relay 1.104.7; Talos ext 1.104.5, devil 1.104.6, Rex app tsnet 1.104.4 already fine",

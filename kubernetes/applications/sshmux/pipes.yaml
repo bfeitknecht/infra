@@ -1,0 +1,40 @@
+# Username routes. Every route ends at apex-tui (apex-ssh takes any user and
+# no credentials: it accepts the "none" method, which sshpiper's upstream
+# client tries first). Unknown usernames match no Pipe and fail.
+#
+# The owner: key from sshmux-keys authorized_keys, no prompt. sshpiper needs
+# an upstream credential for a key route; the mux host key serves (apex
+# accepts any).
+apiVersion: sshpiper.com/v1beta1
+kind: Pipe
+metadata:
+  name: owner
+  namespace: sshmux
+  annotations:
+    sshpiper.com/privatekey_field_name: host_ed25519
+spec:
+  from:
+    - username: bf
+      authorized_keys_secret:
+        name: sshmux-keys
+  to:
+    host: apex-tui.apex.svc.cluster.local:2222
+    username: apex
+    ignore_hostkey: true
+    private_key_secret:
+      name: sshmux-keys
+---
+# The public apex path: these usernames, press Enter at the password prompt.
+apiVersion: sshpiper.com/v1beta1
+kind: Pipe
+metadata:
+  name: apex
+  namespace: sshmux
+spec:
+  from:
+    - username: "^(someone|apex|guest)$"
+      username_regex_match: true
+  to:
+    host: apex-tui.apex.svc.cluster.local:2222
+    username: apex
+    ignore_hostkey: true

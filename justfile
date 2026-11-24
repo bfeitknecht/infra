@@ -4,11 +4,10 @@
 default:
     @just --list
 
-# Build the in-tree images locally. CI builds and pushes them on release tags.
+# Build the in-tree image locally. CI builds and pushes it on release tags.
 image:
     #!/usr/bin/env sh
     set -eu
-    docker build -t ghcr.io/bfeitknecht/sshmux:dev --platform linux/arm64 images/sshmux
     docker build -t ghcr.io/bfeitknecht/opencode:dev --platform linux/amd64 images/opencode
 
 # Check: every Flux Kustomization path must build. Reads from disk, no cluster access.
@@ -76,9 +75,9 @@ release version *flags:
     [ "$(git rev-parse HEAD)" = "$(git rev-parse '@{u}')" ] \
       || { echo "release: HEAD differs from upstream; push or pull first" >&2; exit 1; }
 
-    # The in-tree images (sshmux, opencode) publish with the release tag. The
-    # Deployment pins must name it: a tag whose images mismatch crashes loops.
-    for app in sshmux opencode; do
+    # The in-tree image (opencode) publishes with the release tag. The
+    # Deployment pin must name it: a tag whose image mismatches crash-loops.
+    for app in opencode; do
         pin="$(grep -rhoE 'ghcr.io/bfeitknecht/'"$app"':v[0-9]+\.[0-9]+\.[0-9]+' \
           "kubernetes/applications/$app/" | head -1)"
         [ "$pin" = "ghcr.io/bfeitknecht/$app:$tag" ] \
