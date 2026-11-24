@@ -4,11 +4,11 @@
 default:
     @just --list
 
-# Build the in-tree image locally. CI builds and pushes it on release tags.
+# Build the opencode image (a Nix build from omni, pinned by
+# images/opencode/flake.lock). Needs x86_64-linux, e.g. devil. CI builds and
+# pushes it on release tags.
 image:
-    #!/usr/bin/env sh
-    set -eu
-    docker build -t ghcr.io/bfeitknecht/opencode:dev --platform linux/amd64 images/opencode
+    nix build ./images/opencode#default -o opencode-image
 
 # Check: every Flux Kustomization path must build. Reads from disk, no cluster access.
 check:
@@ -75,7 +75,7 @@ release version *flags:
     [ "$(git rev-parse HEAD)" = "$(git rev-parse '@{u}')" ] \
       || { echo "release: HEAD differs from upstream; push or pull first" >&2; exit 1; }
 
-    # The in-tree image (opencode) publishes with the release tag. The
+    # The opencode image (Nix, from omni) publishes with the release tag. The
     # Deployment pin must name it: a tag whose image mismatches crash-loops.
     for app in opencode; do
         pin="$(grep -rhoE 'ghcr.io/bfeitknecht/'"$app"':v[0-9]+\.[0-9]+\.[0-9]+' \

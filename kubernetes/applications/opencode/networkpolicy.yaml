@@ -72,6 +72,17 @@ spec:
         - matchName: codeload.github.com
         - matchPattern: "*.githubusercontent.com"
         - matchName: git.0xbf.ch
+        # single-user nix in the image (substitutes, channels, fetchurl)
+        - matchName: cache.nixos.org
+        - matchName: channels.nixos.org
+        - matchName: releases.nixos.org
+        - matchName: tarballs.nixos.org
+        # mcp-nixos (package and option search)
+        - matchName: search.nixos.org
+        - matchName: nix-community.github.io
+        # mcp-nixos (package and option search)
+        - matchName: search.nixos.org
+        - matchName: nix-community.github.io
         # Package registries
         - matchName: pypi.org
         - matchName: files.pythonhosted.org

@@ -32,6 +32,21 @@
   "model": "ollama/qwen2.5-coder:7b",
   "permissions": [
     {
+      "action": "edit",
+      "resource": "/nix/*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "/opt/*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "/etc/*",
+      "effect": "deny"
+    },
+    {
       "action": "read",
       "resource": "/etc/opencode-providers/*",
       "effect": "deny"
@@ -70,5 +85,23 @@
   "update": "disable",
   "plugins": [
     "file:///opt/opencode-sandbox/node_modules/opencode-sandbox"
-  ]
+  ],
+  "mcp": {
+    "servers": {
+      "nixos": {
+        "type": "local",
+        "command": [
+          "mcp-nixos"
+        ]
+      },
+      "forgejo": {
+        "type": "local",
+        "command": [
+          "sh",
+          "-c",
+          "FORGEJO_ACCESS_TOKEN=\"$(sed -E 's#^https://[^:]+:([^@]+)@.*#\\1#' /etc/opencode-git/git-credentials)\" exec forgejo-mcp --transport stdio --url https://git.0xbf.ch"
+        ]
+      }
+    }
+  }
 }

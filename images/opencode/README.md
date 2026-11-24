@@ -1,16 +1,23 @@
 # opencode
 
-The image of the isolated opencode web server (`infra/kubernetes/applications/opencode`).
+The image of the isolated OpenCode server (`infra/kubernetes/applications/opencode`).
 
-- `@opencode/cli` (opencode v2, pinned) on node 22. The server command is
-  `opencode serve`; it serves the API and the web UI and always requires a
-  password (`OPENCODE_PASSWORD` from `opencode-secrets`).
-- `opencode-sandbox` (pinned) in `/opt/opencode-sandbox`, loaded by `file://`
-  from the opencode config (directory form; v2 resolves `dist/v2.js`). Every
-  bash command runs in bubblewrap with a filesystem allowlist and a network
-  domain allowlist.
-- `patch.mjs` sets `enableWeakerNestedSandbox`: a Kata container cannot mount
-  a fresh `/proc`, so the sandbox binds the existing one. Commands still run
-  in their own user, PID and network namespaces.
+It is a Nix build. The definition lives in omni, `modules/images/opencode.nix`;
+`flake.nix` here pins omni in `flake.lock`, so a release tag names exactly one image.
+CI (`publish-manifests.yaml`) builds it with `nix build ./images/opencode#default`
+and pushes it as `ghcr.io/bfeitknecht/opencode:<release tag>`.
 
-Published with the infra release tag, like `sshmux`.
+- OpenCode v2 (`@opencode/cli` prebuilt binary, glibc loader linked at `/lib64`).
+  `opencode serve` serves the API and the web UI and requires a password.
+- `opencode-sandbox` (pinned, patched with `enableWeakerNestedSandbox` for Kata) as a
+  root-owned copy in `/opt/opencode-sandbox`. Every bash command runs in bubblewrap.
+- The sandbox policy is `/etc/opencode-sandbox.json` (root-owned, generated in omni):
+  writes to the project, `/tmp` and single-user nix; every store path the image ships
+  is write-denied (they run unsandboxed); secrets and OpenCode's state are read-denied;
+  a network domain allowlist. infra's CiliumNetworkPolicy must allow the same names.
+- Claude Code with `/etc/claude-code/managed-settings.json`.
+- Single-user lix as uid 1000 (`node`): `nix develop` works without a daemon.
+- MCP servers `mcp-nixos`, `forgejo-mcp` (configured in `opencode.json`).
+
+Bump omni (OpenCode, Claude Code, the policy): `nix flake update omni` here, commit,
+release. Build locally: `just image` (x86_64-linux, e.g. on devil).

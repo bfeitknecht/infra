@@ -1355,7 +1355,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "opencode",
         ks: "opencode",
         host: "https://opencode.internal",
-        image: "node:22-bookworm + @opencode/cli 2.4.0 (v2) + Claude Code 2.1.325",
+        image: "ghcr.io/bfeitknecht/opencode:<release tag> (Nix build from omni modules/images/opencode.nix, pinned by images/opencode/flake.lock)",
         desc: "Coding agent web UI, default model Ollama.",
         ports:
           "HTTP 4096 (authentik + server password; devil connects with --server)",
@@ -2183,6 +2183,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.87.0",
+        "2026-11-24",
+        "opencode image is a Nix build from omni (images/opencode/flake.nix pins omni): sandbox policy file in the image, single-user nix, bot MCP (mcp-nixos, forgejo-mcp); CNP allows the nixos.org caches; Dockerfile gone",
+      ],
+      [
         "v1.86.0",
         "2026-11-24",
         "devil ssh path removed (TCPRoute, headless Service, gateway listener devilssh, Traefik entrypoint 2223): Tailscale SSH only",
@@ -2773,6 +2778,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "OpenCode pod image defined in omni (dockerTools, uid 1000, single-user lix, patched sandbox plugin as root-owned copy, generated sandbox policy write-denying all 268 shipped store paths); infra CI builds it from a flake.lock pin per release tag. devil MCP: GitHub and Forgejo as bf",
+      ],
       [
         "2026-11-24",
         "devil: Tailscale SSH (tag:devil, hardened tailnet policy: personal devices only, relay to Garage only, no root) replaces sshd and port 2223; omni drops the ssh/devil key and devil.internal; thyme-0.1.4 branch deleted on the packages fork",
