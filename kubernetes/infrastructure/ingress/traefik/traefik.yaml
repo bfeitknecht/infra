@@ -77,13 +77,6 @@ spec:
         # The sshmux (username router) owns WAN 2222: apex is the
         # default username. Router forwards 2222 to rbpi:2222.
         hostPort: 2222
-      devilssh:
-        port: 2223
-        expose:
-          default: true
-        exposedPort: 2223
-        # No hostPort. Devil SSH uses LB IP only. LAN and tailnet only.
-        # 2223 since git took 22 and the mux took 2222.
     providers:
       kubernetesGateway:
         enabled: true

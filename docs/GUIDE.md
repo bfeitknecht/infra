@@ -58,19 +58,14 @@ By hand, in the *arr apps (after the one-time setup in `docs/OPERATIONS.md` sect
 Rex keeps terminal sessions alive on devil, your NixOS VM in the cluster: start something, close
 the laptop, pick it up from another device.
 
-- **Mac:** open Rex. `devil` is in the sidebar (from `~/.config/rex/init.lua`; omni writes it on
-  anti, echo has a copy). By hand: Add Remote Host > `ssh://devil.internal`. Rex runs your normal
-  `ssh`; the ssh config sends it to port 2223 with the devil key.
-- **iPhone:** the iOS app is for enrolled testers (enroll on the Rex Discord). A bare
-  `devil.internal` as host fails with "no server running": without `ssh://`, Rex looks for its own
-  network listener, which devil does not open. Two ways:
-    - Over SSH: Add Remote Host > `ssh://bf@devil.internal:2223`, with a key made in the app. devil
-      accepts only listed keys: hand the app's public key to the agent, it adds it in omni.
-    - **Over the tailnet (preferred):** devil's Rex server runs its own Tailscale node `devil`,
-      owned by your account, so only your devices get in. Once: `ssh devil.internal rex server
-status` prints a sign-in link; open it, then disable key expiry for `devil` in the admin
-      console. In the app: Add Remote Host > `https://devil.tailac5960.ts.net` (or scan the QR from
-      `rex server tailscale pair`). The Mac app is the separate node `rex`.
+- **ssh:** `ssh bf@devil` (Tailscale SSH: no key, no port; the tailnet policy lets your own Macs
+  and phones in). Zed remote and ish use the same host. devil has no sshd since 2026-11-24.
+- **Mac:** open Rex. Add Remote Host > `https://deviler.tailac5960.ts.net` (devil's Rex server runs
+  its own Tailscale node `deviler`, owned by your account, so only your devices get in). The Rex
+  CLI's `devil` entry (`~/.config/rex/init.lua`, from omni) goes over `ssh://devil`.
+- **iPhone:** the same `https://deviler.tailac5960.ts.net` (or scan the QR from
+  `rex server tailscale pair` on devil). After a Rex reinstall: `ssh bf@devil rex server status`
+  prints the sign-in link; open it, then disable key expiry for `deviler` in the admin console.
 - No browser terminal: devil is SSH and Rex only.
 
 ## 4. Agentic development (opencode)
@@ -78,7 +73,7 @@ status` prints a sign-in link; open it, then disable key expiry for `devil` in t
 ```
  browser ──> opencode.internal ──authentik──┐
  devil: oc ─────────────── direct ──────────┤
- Mac:  oc = ssh -t devil.internal oc ───────┘
+ Mac:  oc = ssh -t devil oc ──────────────┘
                                             v
                  opencode web server (Kata VM on rzbl, its own disk)
                    every bash command: bubblewrap sandbox

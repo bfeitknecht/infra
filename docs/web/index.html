@@ -1583,17 +1583,16 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "1",
         ns: "devil",
         ks: "devil",
-        host: "ssh -p 2223 devil.internal · Rex",
+        host: "ssh bf@devil (Tailscale SSH) · Rex deviler",
         image: "omni flake NixOS VM (kata-qemu)",
         desc:
-          "Personal dev VM in a Kata pod. SSH (pubkey) and Rex only; browser terminal removed 2026-11-20.",
-        ports: "SSH 2223 (devilssh, headless Service)",
-        deps: ["kata", "traefik", "storage"],
+          "Personal dev VM in a Kata pod. Tailscale SSH and Rex only (tailnet, no sshd since 2026-11-24); browser terminal removed 2026-11-20.",
+        ports: "none in the cluster (tailnet: tailscaled node devil, Rex node deviler)",
+        deps: ["kata", "storage"],
         secrets: [],
         storage: "devil-data 20Gi (rzbl nvme0)",
         notes: [
-          "Headless Service is historic. Kata pods use ClusterIPs since socketLB.hostNamespaceOnly (2026-11-17).",
-          "SSH moved 2222 → 2223 in infra v1.42.0 (mux owns 2222).",
+          "2026-11-24: sshd, the devil.internal 2223 route, Service and gateway listener removed; Tailscale SSH (tag:devil) is the way in, kubectl exec the break-glass.",
           "Since 2026-11-23 on rzbl (amd64, Kata). Rex serves the tailnet as devil; after a move, check no ghost VM on the old node holds the same Rex identity (2026-11-24 incident, AGENTS.md).",
         ],
       },
@@ -1629,7 +1628,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "LB 10.10.20.128 · hostPorts 80/443/22/2222 · https://traefik.internal",
         image: "traefik chart 41.6.0",
         desc: "Gateway API implementation. Terminates TLS.",
-        ports: "web 8000, websecure 8443, gitssh 22, muxssh 2222, devilssh 2223",
+        ports: "web 8000, websecure 8443, gitssh 22, muxssh 2222",
         deps: ["cert-manager", "gateway-api-crds", "traefik-crds"],
         secrets: [],
         notes: [
@@ -2034,7 +2033,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
       ["22", "TCP", "WAN + LB", "Forgejo git SSH (ssh://git@git.0xbf.ch/…)"],
       ["2222", "TCP", "WAN + LB", "sshmux → apex TUI"],
-      ["2223", "TCP", "LB + tailnet only", "devil SSH (no WAN)"],
       ["53", "UDP/TCP", "LB .153", "AdGuard Home"],
       ["445", "TCP", "LB .145", "Time Machine (prepared)"],
       ["41641", "UDP", "oci VCN", "Tailscale WireGuard (only open port on oci)"],
@@ -2053,7 +2051,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["grafana.internal", "internal", "Grafana (home: 0xbf)"],
       ["gatus.internal", "internal", "Gatus status page"],
       ["traefik.internal", "internal", "Traefik dashboard"],
-      ["devil.internal", "internal", "dev VM"],
+      ["devil (tailnet)", "tailnet", "dev VM: Tailscale SSH; Rex at deviler"],
       ["0xbf.ch:2222 (ssh)", "public", "sshmux → apex TUI"],
       ["stream.0xbf.ch", "public", "Jellyfin"],
       ["jellyfin.internal", "internal", "Jellyfin"],
@@ -2184,6 +2182,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.86.0",
+        "2026-11-24",
+        "devil ssh path removed (TCPRoute, headless Service, gateway listener devilssh, Traefik entrypoint 2223): Tailscale SSH only",
+      ],
       [
         "v1.85.0",
         "2026-11-24",
@@ -2770,6 +2773,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "devil: Tailscale SSH (tag:devil, hardened tailnet policy: personal devices only, relay to Garage only, no root) replaces sshd and port 2223; omni drops the ssh/devil key and devil.internal; thyme-0.1.4 branch deleted on the packages fork",
+      ],
       [
         "2026-11-24",
         "apex brand/: the mark source (light + dark), SVG, PNG 16-1024, favicon.ico, palette json/css, `just brand`; README lists every copy (glob, exhib, Forgejo, Jellyfin, authentik URL)",

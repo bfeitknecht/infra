@@ -52,15 +52,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    # TCP for devil SSH. Port matches the devilssh entrypoint. No hostPort.
-    # No WAN. Access via LAN and tailnet only. 2223 since git took 22; the
-    # mux took 2222.
-    - name: devilssh
-      protocol: TCP
-      port: 2223
-      allowedRoutes:
-        namespaces:
-          from: All
     # PDS handles use <name>.pds.0xbf.ch. This needs second-level wildcard
     # cert. Listeners on same port with different hostnames are distinct.
     # Most specific hostname wins.
