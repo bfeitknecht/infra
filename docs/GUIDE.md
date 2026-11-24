@@ -49,7 +49,7 @@ By hand, in the *arr apps (after the one-time setup in `docs/OPERATIONS.md` sect
    want, a quality profile, "start search" > Add.
 2. **Movies:** `radarr.internal`, the same with `/data/media/movies`.
 3. **Music:** `lidarr.internal` > `/data/media/music`; listen in Jellyfin or Navidrome
-   (`navidrome.internal`, any Subsonic app).
+   (`music.0xbf.ch`, any Subsonic app).
 4. Downloads run in qBittorrent through Proton VPN only (`qbittorrent.internal` shows progress).
    When done, the *arr app moves the file into the library and Jellyfin shows it within a minute.
 

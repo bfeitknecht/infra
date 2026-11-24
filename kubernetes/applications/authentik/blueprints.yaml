@@ -791,7 +791,7 @@ data:
         identifiers:
           slug: opencode
         attrs:
-          name: opencode
+          name: OpenCode
           provider: !KeyOf provider
           meta_launch_url: https://opencode.internal
       - model: authentik_policies.policybinding
@@ -854,7 +854,7 @@ data:
         identifiers:
           slug: copyparty
         attrs:
-          name: Files
+          name: Copyparty
           provider: !KeyOf provider-copyparty
           meta_launch_url: https://files.0xbf.ch
       - model: authentik_policies.policybinding
@@ -869,42 +869,6 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 1
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider-navidrome
-        identifiers:
-          name: navidrome
-        attrs:
-          mode: forward_single
-          external_host: https://navidrome.internal
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          access_token_validity: hours=24
-      - model: authentik_core.application
-        id: app-navidrome
-        identifiers:
-          slug: navidrome
-        attrs:
-          name: Navidrome
-          provider: !KeyOf provider-navidrome
-          meta_launch_url: https://navidrome.internal
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app-navidrome
-          group: !KeyOf group-family
-        attrs:
-          order: 0
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app-navidrome
-          group: !KeyOf group-friends
-        attrs:
-          order: 1
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app-navidrome
-          group: !KeyOf group-developers
-        attrs:
-          order: 2
       - model: authentik_providers_proxy.proxyprovider
         id: provider-sonarr
         identifiers:
@@ -1075,8 +1039,9 @@ data:
           group: !KeyOf group-authentik-admins
         attrs:
           order: 0
-      # Music: public Navidrome at music.0xbf.ch (forward auth), same groups
-      # as Jellyfin. Navidrome auto-creates the user from the authentik
+      # Navidrome at music.0xbf.ch (forward auth), same groups as Jellyfin.
+      # Provider and slug stay "music" (identifiers); the old internal app
+      # navidrome is deleted below. Navidrome auto-creates the user from the authentik
       # headers; the Subsonic /rest path bypasses (Navidrome password).
       - model: authentik_providers_proxy.proxyprovider
         id: provider-music
@@ -1093,7 +1058,7 @@ data:
         identifiers:
           slug: music
         attrs:
-          name: Music
+          name: Navidrome
           provider: !KeyOf provider-music
           meta_launch_url: https://music.0xbf.ch
       - model: authentik_policies.policybinding
@@ -1122,7 +1087,6 @@ data:
             - !KeyOf provider
             - !KeyOf provider-copyparty
             - !KeyOf provider-exhib
-            - !KeyOf provider-navidrome
             - !KeyOf provider-sonarr
             - !KeyOf provider-radarr
             - !KeyOf provider-prowlarr
@@ -1131,6 +1095,15 @@ data:
             - !KeyOf provider-status
             - !KeyOf provider-bazarr
             - !KeyOf provider-music
+      # navidrome.internal, dropped 2026-11-24: music.0xbf.ch is the one host.
+      - model: authentik_core.application
+        state: absent
+        identifiers:
+          slug: navidrome
+      - model: authentik_providers_proxy.proxyprovider
+        state: absent
+        identifiers:
+          name: navidrome
       # Agent sandbox slots sandbox-1..3.internal, removed 2026-11-19 with the
       # sandboxes. These entries delete the objects; drop them later.
       - model: authentik_core.application

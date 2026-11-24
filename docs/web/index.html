@@ -1263,7 +1263,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "1",
         ns: "media",
         ks: "media",
-        host: "https://music.0xbf.ch · https://navidrome.internal",
+        host: "https://music.0xbf.ch",
         image: "deluan/navidrome:0.64.2",
         desc: "Music streaming (Subsonic API). Reads /data/media/music read-only.",
         ports: "HTTP 4533",
@@ -2044,7 +2044,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         "internal",
         "*arr",
       ],
-      ["navidrome.internal", "internal", "Navidrome"],
       ["music.0xbf.ch", "public", "Navidrome (forward auth; /rest for Subsonic apps)"],
       ["bazarr.internal", "internal", "Bazarr"],
       ["ntfy.internal", "internal", "ntfy"],
@@ -2718,6 +2717,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "authentik dashboard: Files -> Copyparty, opencode -> OpenCode, Music/Navidrome merged (navidrome.internal route, cert name and app dropped; one Navidrome entry at music.0xbf.ch)",
+      ],
       [
         "2026-11-24",
         "thyme 0.2.0 released (layered CSS + design tokens + styling.md, nav/footer options, table scroll fade, booktab/crosstab/note/tip/warning/important renames); glob 0.1.8 ready on master (gallery chrome, The Perfect Prompt post); omni starship to spec (behind count, stash escape, status on)",
