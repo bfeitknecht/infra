@@ -32,6 +32,21 @@
   "model": "ollama/qwen2.5-coder:7b",
   "permissions": [
     {
+      "action": "edit",
+      "resource": "/nix/*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "/opt/*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "/etc/*",
+      "effect": "deny"
+    },
+    {
       "action": "read",
       "resource": "/etc/opencode-providers/*",
       "effect": "deny"

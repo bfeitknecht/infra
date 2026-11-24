@@ -21,12 +21,6 @@ jobs:
       - name: Checkout repository
         uses: https://github.com/actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: https://github.com/docker/setup-qemu-action@v4
-
-      - name: Set up Buildx
-        uses: https://github.com/docker/setup-buildx-action@v4
-
       - name: Log in to GHCR
         uses: https://github.com/docker/login-action@v4
         with:
@@ -34,14 +28,17 @@ jobs:
           username: bfeitknecht
           password: ${{ secrets.GHCR_TOKEN }}
 
-      # amd64 only: the opencode VM runs on rzbl.
+      # The opencode image is a Nix build defined in omni
+      # (modules/images/opencode.nix); images/opencode/flake.lock pins omni.
+      - name: Install Nix
+        uses: https://github.com/cachix/install-nix-action@v32
+
       - name: Build and push opencode image
-        uses: docker/build-push-action@v6
-        with:
-          context: images/opencode
-          platforms: linux/amd64
-          push: true
-          tags: ghcr.io/bfeitknecht/opencode:${{ github.ref_name }}
+        run: |
+          nix build ./images/opencode#default -o opencode-image
+          docker load < opencode-image
+          docker tag ghcr.io/bfeitknecht/opencode:dev ghcr.io/bfeitknecht/opencode:${{ github.ref_name }}
+          docker push ghcr.io/bfeitknecht/opencode:${{ github.ref_name }}
 
       - name: Setup Flux CLI
         run: |
