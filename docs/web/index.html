@@ -2185,6 +2185,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.85.0",
+        "2026-11-24",
+        "Forgejo seed: landing /bf?tab=activity, THEMES = 0xbf only, SSH_PORT 22 (was 2223), no local 2FA comment",
+      ],
+      [
         "v1.84.0",
         "2026-11-24",
         "Login only through authentik: Grafana (no form, auto login), Immich (password login off, auto launch), Forgejo seed ENABLE_INTERNAL_SIGNIN=false (live file done by hand)",
@@ -2765,6 +2770,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "apex brand/: the mark source (light + dark), SVG, PNG 16-1024, favicon.ico, palette json/css, `just brand`; README lists every copy (glob, exhib, Forgejo, Jellyfin, authentik URL)",
+      ],
+      [
+        "2026-11-24",
+        "Forgejo: signed-out landing = public activity feed, one theme (0xbf) signed in and out, clone URLs on port 22 (advertised 2223 by mistake)",
+      ],
       [
         "2026-11-24",
         "SSO only where authentik exists: Forgejo (local form off; Forgejo asks for its own stale WebAuthn key after the authentik login until `reset-mfa` clears it, --skip-local-2fa is a no-op in Forgejo 16), Grafana, Immich. Kept: Jellyfin local login (TV apps), Dawarich (phone app login), copyparty.internal admin",

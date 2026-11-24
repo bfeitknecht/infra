@@ -1,6 +1,6 @@
 # PNG logo files as binaryData. Not plain .png files in git: flux push artifact
 # drops *.png by default (Flux ignore list), so the build cannot find them.
-# Regenerate from apex/ssg/favicon.typ (typst compile --format png, --ppi 1152
+# Regenerate from apex brand/ (png/mark-512.png, png/mark-180.png; was --ppi 1152
 # for 512 px, --ppi 405 for 180 px) when the mark changes.
 apiVersion: v1
 kind: ConfigMap
