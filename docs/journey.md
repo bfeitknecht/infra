@@ -271,7 +271,11 @@ Phase 10: polish and ghosts (Nov 24)
 - one `agents.md` in omni for every agent: tools from flakes, nothing global
 - a **ghost devil**: the old VM outlived its pod and answered for devil in Rex
 - backups found: Garage lost the bucket; one manual run showed it
-- authentik tidied: one entry per app, and why the passkey kept vanishing
+- authentik tidied: one entry per app, named by purpose (`Git (Forgejo)`), login only through it
+- **devil, two tiers**: OpenCode with providers and MCP declared in omni; no sshd, only Tailscale SSH
+- a tighter tailnet: only my phones and Macs reach everything, and only on patched clients
+- **sshpiper** replaced our own SSH image: a pinned chart and a few `Pipe`s
+- `location.0xbf.ch` for the phone; one `brand/` folder for the mark and the palette
 
 <!-- end_slide -->
 
@@ -296,6 +300,10 @@ What went wrong (and what it taught)
 - a copied home copies identities: two VMs, one tailnet name, the wrong one answered
 - iCloud keeps one passkey per site: enrolling again replaces it everywhere
 - k8up deletes failed pods: start one run by hand and read its log live
+- a passkey belongs to one site; a forge that keeps its own 2FA asks for a key you never made
+- a setting can be accepted and ignored: `--skip-local-2fa` stored nothing, the database said so
+- the clone URL said port 2223 for weeks: the display port is its own setting
+- behind a TCP proxy every client has the proxy's address: no fail2ban there
 
 <!-- end_slide -->
 
@@ -305,7 +313,7 @@ Next
 <!-- font_size: 2 -->
 
 1. **backups**: the bucket back on the NAS, a green night, then a restore drill
-2. **opencode**: a caged NixOS pod and a trusted tier, each with the right MCP servers
+2. **opencode**: the caged pod defined in omni, with nix, built per release
 3. thyme 0.2.0 on Universe, then glob 0.1.8
 4. Time Machine, the real photos and files, and the move from echo to anti
 
