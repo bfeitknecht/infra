@@ -1689,7 +1689,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "tailscale",
         ks: "tailscale",
         host: "—",
-        image: "tailscale operator 1.102.3",
+        image: "tailscale operator 1.104.7",
         desc: "Tailnet ingress/egress proxies with tag:k8s.",
         ports: "—",
         deps: ["traefik"],
@@ -1707,7 +1707,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "egress",
         ks: "egress-tailscale",
         host: "tailscale-relay.egress.svc:3900 → 100.96.72.126:3900",
-        image: "tailscale v1.104.1 + socat",
+        image: "tailscale v1.104.7 + socat",
         desc: "Untagged user device that can reach the friend's shared-in NAS.",
         ports: "3900",
         deps: [],
@@ -2183,6 +2183,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.82.0",
+        "2026-11-24",
+        "tailscale operator chart 1.102.3 -> 1.104.7, egress relay v1.104.1 -> v1.104.7 (Tailscale SSH bulletins TS-2026-014..017, fixed in 1.104.4)",
+      ],
       [
         "v1.81.0",
         "2026-11-24",
@@ -2749,6 +2754,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "Tailscale clients past the Oct 2026 SSH bulletins (fixed in 1.104.4): operator 1.104.7, relay 1.104.7; Talos ext 1.104.5, devil 1.104.6, Rex app tsnet 1.104.4 already fine",
+      ],
+      [
+        "2026-11-24",
+        "devil tier 1: opencode providers (anthropic, mistral, openrouter via omni sops) and MCP (atuin, mcp-nixos) declarative in omni agents.nix; claude-code; Rex skill; Rex node renamed deviler; own tailnet node devil with Tailscale SSH (pending sign-in)",
+      ],
       [
         "2026-11-24",
         "Dawarich public at location.0xbf.ch (one host, dawarich.internal dropped) for the phone app; authentik app Location (Dawarich)",
