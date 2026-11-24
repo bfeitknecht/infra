@@ -163,8 +163,12 @@ spec:
           root_url: https://grafana.internal
         dashboards:
           default_home_dashboard_path: /tmp/dashboards/0xbf/home.json
+        # Login only through authentik: no local form, straight to SSO.
+        # Break-glass: the local admin over the API (basic auth) or
+        # `grafana cli admin reset-admin-password` in the pod.
         auth:
-          oauth_auto_login: false
+          disable_login_form: true
+          oauth_auto_login: true
           signout_redirect_url: https://auth.0xbf.ch/application/o/grafana/end-session/
         # authentik SSO: public client with PKCE, no secret. Group developers
         # may log in (authentik binding); authentik Admins become Grafana admins.

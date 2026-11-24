@@ -19,7 +19,7 @@ spec:
       annotations:
         # Immich reads immich.json only at start and the Secret has no hash
         # suffix: bump this after every immich-config change.
-        0xbf.ch/config-rev: "2026-11-19"
+        0xbf.ch/config-rev: "2026-11-24"
     spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
