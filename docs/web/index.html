@@ -1898,6 +1898,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 
     const NEEDS = [
       {
+        id: "garage-bucket",
+        prio: 1,
+        cat: "manual",
+        t: "Garage: bucket k8up is gone (all backups fail)",
+        d: "Friend on the NAS: garage bucket create k8up; garage bucket allow --read --write --owner k8up --key GK3e334142e0c47bd805588381. Error seen: MakeBucket Forbidden, key not allowed to create buckets.",
+        svc: null,
+      },
+      {
         id: "claude-login",
         prio: 1,
         cat: "manual",
