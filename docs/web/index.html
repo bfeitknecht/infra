@@ -2187,7 +2187,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       [
         "v1.84.0",
         "2026-11-24",
-        "Login only through authentik: Grafana (no form, auto login), Immich (password login off, auto launch), Forgejo seed ENABLE_INTERNAL_SIGNIN=false (live file + --skip-local-2fa done by hand)",
+        "Login only through authentik: Grafana (no form, auto login), Immich (password login off, auto launch), Forgejo seed ENABLE_INTERNAL_SIGNIN=false (live file done by hand)",
       ],
       [
         "v1.83.0",
@@ -2767,7 +2767,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
       [
         "2026-11-24",
-        "SSO only where authentik exists: Forgejo (local form off, authentik source --skip-local-2fa: Forgejo asked for its own WebAuthn after the authentik login), Grafana, Immich. Kept: Jellyfin local login (TV apps), Dawarich (phone app login), copyparty.internal admin",
+        "SSO only where authentik exists: Forgejo (local form off; Forgejo asks for its own stale WebAuthn key after the authentik login until `reset-mfa` clears it, --skip-local-2fa is a no-op in Forgejo 16), Grafana, Immich. Kept: Jellyfin local login (TV apps), Dawarich (phone app login), copyparty.internal admin",
       ],
       [
         "2026-11-24",
