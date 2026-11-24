@@ -2183,6 +2183,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.91.0",
+        "2026-11-25",
+        "opencode image (omni 42e6b85): nix cache/state dirs created on start, so nix works in the sandbox on a fresh volume",
+      ],
+      [
         "v1.90.0",
         "2026-11-25",
         "opencode: user opencode at /home/opencode, memory limit 2Gi, debug log removed; devil limit 8Gi -> 4Gi (Kata VMs fill rzbl /dev/shm: qemu SIGBUS was the 'VM dies on bash' bug)",
@@ -2793,6 +2798,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "rzbl Kata config with reclaim_guest_freed_memory (talos 08-kata.yaml, applied + reboot): qemu runs with free-page-reporting, /dev/shm 94% -> 13%. opencode on the Nix image verified in Kata: sandboxed bash, write-protected /opt and store paths, hidden keys and state, git as the bot, allowlist blocks other domains, nix run works",
+      ],
       [
         "2026-11-25",
         "Found why the opencode Kata VM died on a bash tool: rzbl /dev/shm (8.3 GB) backs both Kata VMs' RAM (up to 16 GB together); full shm = qemu SIGBUS, no guest log. Stopgap: limits 2Gi/4Gi. Same pressure OOM-killed authentik twice",

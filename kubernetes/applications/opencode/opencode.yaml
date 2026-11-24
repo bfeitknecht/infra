@@ -41,7 +41,7 @@ spec:
         - name: opencode
           # Built by CI from images/opencode (omni pinned in its flake.lock).
           # The pin must match the release tag (`just release` checks).
-          image: ghcr.io/bfeitknecht/opencode:v1.90.0
+          image: ghcr.io/bfeitknecht/opencode:v1.91.0
           imagePullPolicy: IfNotPresent
           workingDir: /home/opencode/Projects
           env:
