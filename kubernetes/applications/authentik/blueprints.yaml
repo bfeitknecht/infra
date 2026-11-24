@@ -277,7 +277,7 @@ data:
         identifiers:
           slug: forgejo
         attrs:
-          name: Forgejo
+          name: Git (Forgejo)
           provider: !KeyOf provider
           meta_launch_url: https://git.0xbf.ch
       # Only these groups may log in.
@@ -335,7 +335,7 @@ data:
         identifiers:
           slug: jellyfin
         attrs:
-          name: Jellyfin
+          name: Stream (Jellyfin)
           provider: !KeyOf provider
           meta_launch_url: https://stream.0xbf.ch
       # Only these groups may log in.
@@ -749,7 +749,7 @@ data:
         identifiers:
           slug: immich
         attrs:
-          name: Immich
+          name: Photos (Immich)
           provider: !KeyOf provider-immich
           meta_launch_url: https://photos.0xbf.ch
       - model: authentik_policies.policybinding
@@ -829,7 +829,7 @@ data:
         identifiers:
           slug: exhib
         attrs:
-          name: Exhib
+          name: Gallery (Exhib)
           provider: !KeyOf provider-exhib
           meta_launch_url: https://gallery.0xbf.ch/upload/
       - model: authentik_policies.policybinding
@@ -854,7 +854,7 @@ data:
         identifiers:
           slug: copyparty
         attrs:
-          name: Copyparty
+          name: Files (Copyparty)
           provider: !KeyOf provider-copyparty
           meta_launch_url: https://files.0xbf.ch
       - model: authentik_policies.policybinding
@@ -1058,7 +1058,7 @@ data:
         identifiers:
           slug: music
         attrs:
-          name: Navidrome
+          name: Music (Navidrome)
           provider: !KeyOf provider-music
           meta_launch_url: https://music.0xbf.ch
       - model: authentik_policies.policybinding

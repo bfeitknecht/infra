@@ -2184,6 +2184,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.80.0",
+        "2026-11-24",
+        "authentik: public apps carry purpose name + software: Git (Forgejo), Stream (Jellyfin), Photos (Immich), Gallery (Exhib), Files (Copyparty), Music (Navidrome)",
+      ],
+      [
         "v1.79.0",
         "2026-11-24",
         "authentik: Files -> Copyparty, opencode -> OpenCode; navidrome.internal dropped (route, cert name, app and provider): one Navidrome entry at music.0xbf.ch",
@@ -2739,6 +2744,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "authentik launcher: public apps named by purpose with the software in parentheses (Git (Forgejo), Gallery (Exhib), ...); internal tools keep the software name. Only attrs.name changed, slugs untouched",
+      ],
       [
         "2026-11-24",
         "Old arm64 devil purged: its Kata VM survived the force-delete on rbpi (2.3 GB RAM) and, with the copied home, held the same Rex tailnet identity, so the Rex app reached it (stale git, old prompt, nh os switch hanging on the old freeze bug). qemu killed, old PV data, directory and PV object deleted",
