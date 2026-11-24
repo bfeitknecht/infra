@@ -1909,8 +1909,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         id: "thyme-universe",
         prio: 2,
         cat: "manual",
-        t: "thyme 0.1.4: open the Universe PR, then release glob 0.1.8",
-        d: "Open the compare link from the thyme release job summary (GitHub Actions). After the merge: in glob, just check, then tag v0.1.8 (glob master already imports 0.1.4).",
+        t: "thyme 0.2.0: open the Universe PR, then release glob 0.1.8",
+        d: "Open https://github.com/typst/packages/compare/main...bfeitknecht:thyme-0.2.0 (0.1.4 was never submitted; delete its branch on the fork). After the merge: tag glob v0.1.8 (master imports 0.2.0).",
         svc: "glob",
       },
       {
@@ -2710,6 +2710,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-24",
+        "thyme 0.2.0 released (layered CSS + design tokens + styling.md, nav/footer options, table scroll fade, booktab/crosstab/note/tip/warning/important renames); glob 0.1.8 ready on master (gallery chrome, The Perfect Prompt post); omni starship to spec (behind count, stash escape, status on)",
+      ],
       [
         "2026-11-23",
         "thyme 0.1.4 released (blog.site(nav: ...) path nav in the top bar; folder posts get their folder name as slug); Universe PR pending the owner's click",
