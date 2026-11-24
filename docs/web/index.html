@@ -2183,6 +2183,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.90.0",
+        "2026-11-25",
+        "opencode: user opencode at /home/opencode, memory limit 2Gi, debug log removed; devil limit 8Gi -> 4Gi (Kata VMs fill rzbl /dev/shm: qemu SIGBUS was the 'VM dies on bash' bug)",
+      ],
+      [
         "v1.89.0",
         "2026-11-25",
         "opencode Nix image again, MCP-free, util-linux, with a temporary dmesg log to the PVC to catch why the Kata VM dies on a bash tool",
@@ -2788,6 +2793,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "Found why the opencode Kata VM died on a bash tool: rzbl /dev/shm (8.3 GB) backs both Kata VMs' RAM (up to 16 GB together); full shm = qemu SIGBUS, no guest log. Stopgap: limits 2Gi/4Gi. Same pressure OOM-killed authentik twice",
+      ],
       [
         "2026-11-24",
         "OpenCode pod image defined in omni (dockerTools, uid 1000, single-user lix, patched sandbox plugin as root-owned copy, generated sandbox policy write-denying all 268 shipped store paths); infra CI builds it from a flake.lock pin per release tag. devil MCP: GitHub and Forgejo as bf",

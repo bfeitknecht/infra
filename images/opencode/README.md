@@ -16,7 +16,7 @@ and pushes it as `ghcr.io/bfeitknecht/opencode:<release tag>`.
   is write-denied (they run unsandboxed); secrets and OpenCode's state are read-denied;
   a network domain allowlist. infra's CiliumNetworkPolicy must allow the same names.
 - Claude Code with `/etc/claude-code/managed-settings.json`.
-- Single-user lix as uid 1000 (`node`): `nix develop` works without a daemon.
+- Single-user lix as uid 1000 (`opencode`, home `/home/opencode`): `nix develop` works without a daemon.
 
 Bump omni (OpenCode, Claude Code, the policy): `nix flake update omni` here, commit,
 release. Build locally: `just image` (x86_64-linux, e.g. on devil).

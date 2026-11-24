@@ -41,19 +41,12 @@ spec:
         - name: opencode
           # Built by CI from images/opencode (omni pinned in its flake.lock).
           # The pin must match the release tag (`just release` checks).
-          image: ghcr.io/bfeitknecht/opencode:v1.89.0
-          # DEBUG (2026-11-25, remove after): the Kata VM dies when the agent
-          # runs a bash tool with this image. Keep the guest kernel log on the
-          # PVC so the last messages survive the VM.
-          command:
-            - sh
-            - -c
-            - dmesg -w >> /home/node/kmsg.log 2>&1 & exec opencode serve --hostname 0.0.0.0 --port 4096
+          image: ghcr.io/bfeitknecht/opencode:v1.90.0
           imagePullPolicy: IfNotPresent
-          workingDir: /home/node/Projects
+          workingDir: /home/opencode/Projects
           env:
             - name: HOME
-              value: /home/node
+              value: /home/opencode
             - name: OPENCODE_CONFIG
               value: /etc/opencode/opencode.json
             # v2 servers always require a password (no disable). Fixed value
@@ -108,15 +101,17 @@ spec:
             requests:
               cpu: 100m
               memory: 512Mi
+            # The Kata VM is 2 GiB plus this limit, backed by rzbl's /dev/shm
+            # (8.3 GB, shared with devil). A full shm kills qemu (SIGBUS).
             limits:
-              memory: 4Gi
+              memory: 2Gi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
           volumeMounts:
             - name: home
-              mountPath: /home/node
+              mountPath: /home/opencode
             - name: config
               mountPath: /etc/opencode
               readOnly: true

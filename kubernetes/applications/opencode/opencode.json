@@ -53,17 +53,17 @@
     },
     {
       "action": "read",
-      "resource": "/home/node/.local/share/opencode/*",
+      "resource": "/home/opencode/.local/share/opencode/*",
       "effect": "deny"
     },
     {
       "action": "read",
-      "resource": "/home/node/.claude/*",
+      "resource": "/home/opencode/.claude/*",
       "effect": "deny"
     },
     {
       "action": "read",
-      "resource": "/home/node/.claude.json",
+      "resource": "/home/opencode/.claude.json",
       "effect": "deny"
     },
     {

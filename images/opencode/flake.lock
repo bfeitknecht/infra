@@ -253,11 +253,11 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1795561651,
-        "narHash": "sha256-pSYkWQteDLK5AIVSIo0iT1h1nrs/aTach4KTlGVrEk8=",
+        "lastModified": 1795562445,
+        "narHash": "sha256-hLDRdkoC9Zt2hkaYFYu/tDgrNBPB8Dk0XBMXLlI54tg=",
         "owner": "bfeitknecht",
         "repo": "omni",
-        "rev": "74bae92190f343b182b19063864e76ebb11a95f3",
+        "rev": "17b0c747db5ea06ebbb504922a0b1e55eff96399",
         "type": "github"
       },
       "original": {
