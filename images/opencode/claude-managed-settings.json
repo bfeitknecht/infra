@@ -1,0 +1,52 @@
+{
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Read(//etc/opencode-providers/**)",
+      "Read(//etc/opencode-git/**)",
+      "Read(//home/node/.claude/.credentials.json)",
+      "Read(//home/node/.local/share/opencode/**)",
+      "Read(//home/node/.config/opencode/**)",
+      "Read(//home/node/.ssh/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "enableWeakerNestedSandbox": true,
+    "filesystem": {
+      "denyRead": [
+        "~/.claude/.credentials.json",
+        "~/.claude.json",
+        "~/.ssh",
+        "~/.gnupg",
+        "~/.local/share/opencode",
+        "~/.config/opencode",
+        "~/.npmrc",
+        "~/.netrc",
+        "/etc/opencode-providers"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "*.npmjs.org",
+        "registry.yarnpkg.com",
+        "pypi.org",
+        "*.pypi.org",
+        "files.pythonhosted.org",
+        "crates.io",
+        "*.crates.io",
+        "proxy.golang.org",
+        "sum.golang.org",
+        "github.com",
+        "*.github.com",
+        "codeload.github.com",
+        "*.githubusercontent.com",
+        "git.0xbf.ch"
+      ]
+    }
+  }
+}

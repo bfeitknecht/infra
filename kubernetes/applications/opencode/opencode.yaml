@@ -1,10 +1,9 @@
 # opencode web gives agents a shell. Isolation (AGENTS.md, opencode):
 # Kata VM (own kernel), CiliumNetworkPolicy (egress allowlist, ingress from
 # Traefik and devil), authentik forward auth (group developers), no SA token.
-# Image: a Nix build from omni (modules/images/opencode.nix), pinned by
-# images/opencode/flake.lock: opencode, the opencode-sandbox plugin (every bash
-# command runs in bubblewrap), Claude Code, single-user nix as uid 1000. HOME
-# is on the PVC, so git clones and sessions survive restarts.
+# Image: images/opencode (opencode + the opencode-sandbox plugin; every bash
+# command runs in bubblewrap). HOME is on the PVC, so git clones and sessions
+# survive restarts.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,9 +38,10 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          # Built by CI from images/opencode (omni pinned in its flake.lock).
-          # The pin must match the release tag (`just release` checks).
-          image: ghcr.io/bfeitknecht/opencode:v1.87.0
+          # In-tree image (images/opencode): opencode v2 + the opencode-sandbox
+          # plugin. The pin must match the release tag (`just release`
+          # checks). omni devil.nix wraps the same opencode version for `oc`.
+          image: ghcr.io/bfeitknecht/opencode:v1.88.0
           imagePullPolicy: IfNotPresent
           workingDir: /home/node/Projects
           env:
@@ -57,10 +57,14 @@ spec:
                 secretKeyRef:
                   name: opencode-secrets
                   key: server-password
-            # Every bash command runs in bubblewrap (enforce): the policy is
-            # /etc/opencode-sandbox.json in the image (OPENCODE_SANDBOX_CONFIG_PATH),
-            # built in omni modules/images/opencode.nix. Do not set
-            # OPENCODE_SANDBOX_CONFIG here: it would override that file.
+            # Every bash command: bubblewrap, enforce mode. Reads: the secret
+            # paths, opencode's own state (API keys) and the Claude Code login
+            # (~/.claude) are denied. Network:
+            # domain allowlist through the sandbox proxy. Writes: the project
+            # directory and /tmp only. An env var, so no file the agent can
+            # write changes it.
+            - name: OPENCODE_SANDBOX_CONFIG
+              value: '{"mode":"enforce","filesystem":{"denyRead":["/home/node/.ssh","/home/node/.gnupg","/home/node/.aws/credentials","/home/node/.azure","/home/node/.config/gcloud","/home/node/.config/gh","/home/node/.kube","/home/node/.docker/config.json","/home/node/.npmrc","/home/node/.netrc","/home/node/.env","/home/node/.local/share/opencode","/home/node/.config/opencode","/home/node/.claude","/home/node/.claude.json","/etc/opencode-providers"]},"network":{"allowedDomains":["registry.npmjs.org","*.npmjs.org","registry.yarnpkg.com","pypi.org","*.pypi.org","files.pythonhosted.org","crates.io","*.crates.io","proxy.golang.org","sum.golang.org","github.com","*.github.com","codeload.github.com","*.githubusercontent.com","git.0xbf.ch"]}}'
             # Git as the Forgejo bot `opencode` over HTTPS (the sandbox proxy
             # carries HTTPS, not SSH). Token in opencode-secrets; push rights
             # only as collaborator on bf/* repos. ssh-style URLs are rewritten.
