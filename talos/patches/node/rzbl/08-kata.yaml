@@ -126,6 +126,6 @@ machine:
     - path: /etc/cri/conf.d/20-customization.part
       permissions: 0o644
       op: create
-      content: |
+      content: |-
         [plugins."io.containerd.cri.v1.runtime".containerd.runtimes.kata-qemu.options]
           ConfigPath = "/var/etc/kata-containers/configuration-qemu.toml"
