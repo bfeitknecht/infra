@@ -1,6 +1,6 @@
 ---
 title: "GENESIS: a homelab journey"
-sub_title: "From one Pi to a three-node Talos cluster, in 72 days"
+sub_title: "From one Pi to a three-node Talos cluster, in 73 days"
 author: Basil Feitknecht
 theme:
     override:
@@ -254,10 +254,24 @@ Phase 9: real use (Nov 21 to 23)
 - **identities** split: personal `bf` everywhere, native `admin` where an app keeps one
 - **Immich** set up, **ntfy** on the phone: alerts reach me anywhere
 - devil to **rzbl**; the "freeze" was a hung `nix-store --load-db`, not Kata
-- **backups** unblocked: Garage on the friend's NAS answers again
+- Garage on the friend's NAS answers again (the bucket, it turned out, did not)
 - **Bazarr** for subtitles, `music.0xbf.ch` public behind SSO
 - **Claude Code** in the opencode VM: my subscription, same two walls
-- the blog gets the gallery's nav (thyme **0.1.4**); `glry` on narrow screens, not `gal`
+- `glry` on narrow screens, not `gal`
+
+<!-- end_slide -->
+
+Phase 10: polish and ghosts (Nov 24)
+===
+
+<!-- font_size: 2 -->
+
+- thyme **0.2.0**: one CSS layer, design tokens, `nav` and `footer`, a table fade that follows the scroll
+- the blog wears the gallery's chrome; a post on **the perfect prompt**
+- one `agents.md` in omni for every agent: tools from flakes, nothing global
+- a **ghost devil**: the old VM outlived its pod and answered for devil in Rex
+- backups found: Garage lost the bucket; one manual run showed it
+- authentik tidied: one entry per app, and why the passkey kept vanishing
 
 <!-- end_slide -->
 
@@ -279,6 +293,9 @@ What went wrong (and what it taught)
 - one hung systemd unit blocks the job queue: the VM is up, but nothing new starts
 - eleven alerts in one group were too big for ntfy: the phone stayed silent
 - "bundled" was not bundled: check the binary is on PATH before you write it down
+- a copied home copies identities: two VMs, one tailnet name, the wrong one answered
+- iCloud keeps one passkey per site: enrolling again replaces it everywhere
+- k8up deletes failed pods: start one run by hand and read its log live
 
 <!-- end_slide -->
 
@@ -287,10 +304,10 @@ Next
 
 <!-- font_size: 2 -->
 
-1. **backups**: check the first green nightly run, then a restore drill
-2. Schedules for exhib, Immich and media; then the real photos and files
-3. Time Machine on the MacBook, then the move from echo to anti
-4. more family and friends through authentik invitations
+1. **backups**: the bucket back on the NAS, a green night, then a restore drill
+2. **opencode**: a caged NixOS pod and a trusted tier, each with the right MCP servers
+3. thyme 0.2.0 on Universe, then glob 0.1.8
+4. Time Machine, the real photos and files, and the move from echo to anti
 
 <!-- pause -->
 

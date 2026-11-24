@@ -1594,6 +1594,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         notes: [
           "Headless Service is historic. Kata pods use ClusterIPs since socketLB.hostNamespaceOnly (2026-11-17).",
           "SSH moved 2222 → 2223 in infra v1.42.0 (mux owns 2222).",
+          "Since 2026-11-23 on rzbl (amd64, Kata). Rex serves the tailnet as devil; after a move, check no ghost VM on the old node holds the same Rex identity (2026-11-24 incident, AGENTS.md).",
         ],
       },
       {
@@ -1898,6 +1899,22 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 
     const NEEDS = [
       {
+        id: "passkey",
+        prio: 1,
+        cat: "manual",
+        t: "authentik: re-enrol the passkey once",
+        d: "Sign in with TOTP, Settings > MFA devices: delete Apple Passwords, enrol one passkey. Never enrol again from another Apple device: iCloud keeps one passkey per site and a new enrolment replaces it everywhere.",
+        svc: "authentik",
+      },
+      {
+        id: "opencode-tiers",
+        prio: 2,
+        cat: "decision",
+        t: "opencode: caged pod vs trusted tier, NixOS pod, MCP servers",
+        d: "Open discussion (2026-11-24): pod as NixOS with nix daemon + safe MCPs (mcp-nixos, forgejo-mcp as bot); trusted tier on devil/Macs with atuin mcp, Rex skill, GitHub/Forgejo as bf.",
+        svc: "opencode",
+      },
+      {
         id: "garage-bucket",
         prio: 1,
         cat: "manual",
@@ -2166,6 +2183,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.79.0",
+        "2026-11-24",
+        "authentik: Files -> Copyparty, opencode -> OpenCode; navidrome.internal dropped (route, cert name, app and provider): one Navidrome entry at music.0xbf.ch",
+      ],
       [
         "v1.78.0",
         "2026-11-24",
@@ -2719,6 +2741,22 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
       [
         "2026-11-24",
+        "Old arm64 devil purged: its Kata VM survived the force-delete on rbpi (2.3 GB RAM) and, with the copied home, held the same Rex tailnet identity, so the Rex app reached it (stale git, old prompt, nh os switch hanging on the old freeze bug). qemu killed, old PV data, directory and PV object deleted",
+      ],
+      [
+        "2026-11-24",
+        "devil switched in Rex (nh os switch exit 0): starship to spec (behind count <n, stash count, [ERR] on), global agents.md as ~/.config/opencode/AGENTS.md and ~/.claude/CLAUDE.md",
+      ],
+      [
+        "2026-11-24",
+        "Backups root cause: Garage lost the bucket k8up (restic init: MakeBucket Forbidden); friend task in NEEDS",
+      ],
+      [
+        "2026-11-24",
+        "glob post The Perfect Prompt (starship spec, three config bugs) on master; ships with glob 0.1.8",
+      ],
+      [
+        "2026-11-24",
         "authentik dashboard: Files -> Copyparty, opencode -> OpenCode, Music/Navidrome merged (navidrome.internal route, cert name and app dropped; one Navidrome entry at music.0xbf.ch)",
       ],
       [
@@ -2727,7 +2765,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
       [
         "2026-11-23",
-        "thyme 0.1.4 released (blog.site(nav: ...) path nav in the top bar; folder posts get their folder name as slug); Universe PR pending the owner's click",
+        "thyme 0.1.4 tagged (nav option, folder-post slugs), never submitted to Universe: superseded by 0.2.0",
       ],
       [
         "2026-11-23",
