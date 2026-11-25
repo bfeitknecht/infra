@@ -146,13 +146,11 @@ keep their own icons.
 ## 9. Backups
 
 k8up (restic) to Garage on a friend's NAS, through the `tailscale-relay` (details in
-`docs/COMPONENTS.md`, k8up). **Blocked (2026-11-24):** Garage answers again (Gatus
-`garage via relay` is green, the key authenticates), but `restic init` fails: the key may not
-create buckets and the bucket `k8up` is gone. The friend runs
-`garage bucket create k8up` and
-`garage bucket allow --read --write --owner k8up --key GK3e334142e0c47bd805588381`. Then the
-agent runs a restic round-trip and a forgejo restore drill and adds Schedules for immich,
-copyparty, samba and the app databases.
+`docs/COMPONENTS.md`, k8up). **Works again (2026-11-25):** the NAS rejoined the
+friend's tailnet with a new IP (`100.101.234.110`, relay forwarder in v1.93.0) and the bucket
+`k8up` exists again. A manual atuin Backup wrote snapshot `aee77223`. Left: a forgejo restore
+drill and Schedules for immich, copyparty, samba and the app databases. If the NAS IP changes
+again: `tailscale status | find ugreen`, update `egress/tailscale/relay.yaml`, tag.
 
 ## 10. Workspace conventions
 

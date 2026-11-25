@@ -8,13 +8,13 @@ Status as of 2026-11-25. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. CI runs on GitHub only (Forgejo workflows removed 2026-11-25; the runner is idle). Bots: `opencode`, `renovate`.
 - **Public:** apex `0xbf.ch` (0.1.20, brand palette), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0, curated photo metadata live), forgejo (SSO only), pds, atuin, jellyfin `stream`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `location`, ntfy, authentik.
 - **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex node `deviler`), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), opencode (Nix image in Kata, bubblewrap sandbox), Renovate.
-- **Backup:** Garage answers again, but the bucket `k8up` is gone: every backup fails. Nothing is backed up. Test data only.
+- **Backup:** works again since 2026-11-25 (NAS on a new tailnet IP, v1.93.0; bucket back). First snapshot: atuin. Nightly schedules: atuin, authentik, forgejo, pds. Restore drill not done yet.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
 
 - [ ] **Next push: echo -> anti** (factory reset, apply omni). Runbook and decisions: omni `docs/RESET.md`. Gate: the age key is off the Mac (it decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it).
-- [ ] **Backup path:** friend recreates the Garage bucket `k8up` and its key grant (atlas `garage-bucket`; the `3900` fix is done). Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.** (This box was ticked by mistake before; the bucket is still gone.)
+- [ ] **Backup path:** bucket and relay fixed (2026-11-25, manual atuin snapshot OK). Left: watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [ ] **CLI logins** by hand on devil and anti: `gh`, `tea`, `glab` (atlas `cli-logins`).
 - [ ] **Dawarich phone setup:** app on `location.0xbf.ch` with the API key; then the agent sets `ALLOW_EMAIL_PASSWORD_LOGIN=false` (atlas `dawarich-phone`).
 - [ ] **Zed host:** add `devil` as a Zed remote host (`ssh bf@devil`, Tailscale SSH).
@@ -30,7 +30,7 @@ Status as of 2026-11-25. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [ ] **Renovate never opened a PR or a dashboard issue** on Forgejo infra. Runs finish in about 2 min, logs are gone. Debug: `kubectl -n renovate create job --from=cronjob/renovate renovate-manual`, read its logs (redact first).
 - [ ] **API timeouts from home to oci** (`100.73.186.19:6443` over Tailscale): ~150 five-second timeouts from rbpi in 20 h; the API server answers in < 0.1 s, so it is the path. k8up restarted 19 times in 32 h (lost leader lease).
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
-- [ ] **Rex node `deviler` runs over the DERP relay in Frankfurt**, no direct link: more latency. Check UDP 41641 reachability from the Kata VM.
+- [ ] **Rex node `deviler` ran over the DERP relay in Frankfurt.** 2026-11-25 after the devil restart: direct (`31.164.81.63`). Drop if it stays direct.
 - [ ] **Leftovers:** two `Completed` authentik pods; failed k8up Jobs (delete after the first green nightly, atlas `k8up-failed-jobs`).
 - [ ] **forgejo-runner is idle** since CI moved to GitHub only: keep it for later or remove `applications/forgejo-runner/` and turn off `[actions]`.
 - [ ] **podman on devil:** undecided (omni SOMEDAY).

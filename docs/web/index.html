@@ -1915,14 +1915,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: "authentik",
       },
       {
-        id: "garage-bucket",
-        prio: 1,
-        cat: "manual",
-        t: "Garage: bucket k8up is gone (all backups fail)",
-        d: "Friend on the NAS: garage bucket create k8up; garage bucket allow --read --write --owner k8up --key GK3e334142e0c47bd805588381. Error seen: MakeBucket Forbidden, key not allowed to create buckets.",
-        svc: null,
-      },
-      {
         id: "cli-logins",
         prio: 1,
         cat: "manual",
@@ -2806,6 +2798,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "Backups work again: Garage bucket k8up back, relay on the new NAS IP; manual atuin Backup wrote snapshot aee77223",
+      ],
       [
         "2026-11-25",
         "NAS rejoined the friend's tailnet with a new IP: relay forwarder 100.96.72.126 -> 100.101.234.110 (v1.93.0)",

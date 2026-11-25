@@ -116,7 +116,7 @@ Each line broke something once. Details in `docs/COMPONENTS.md`.
 - **sshmux:** a new SSH TUI = a new `Pipe`, never a new WAN port. Git is not on the mux.
 - **YAML:** quote `"0xbf"` (unquoted it is the number 191).
 - **Talos:** `topf.yaml` `kubernetesVersion` must match the cluster, or `topf apply` rolls it back. A new schematic needs `--submit-to-factory` once. topf has no reboot mode: use auto, then `talosctl reboot`.
-- **Backups:** k8up is blocked until the friend recreates the Garage bucket. Never rotate the restic repo password (`k8up-secrets` `password`).
+- **Backups:** Garage is a shared-in NAS: when its tailnet IP changes, update the relay forwarder (`egress/tailscale/relay.yaml`). Never rotate the restic repo password (`k8up-secrets` `password`).
 
 ## Secrets
 
