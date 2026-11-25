@@ -70,7 +70,7 @@ spec:
           # IP literal: the NAS's ts.net name is MagicDNS-only, unresolvable in-cluster
           args:
             - TCP-LISTEN:3900,fork,reuseaddr
-            - TCP:100.96.72.126:3900
+            - TCP:100.101.234.110:3900
           readinessProbe:
             tcpSocket:
               port: 3900

@@ -1705,7 +1705,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "infra",
         ns: "egress",
         ks: "egress-tailscale",
-        host: "tailscale-relay.egress.svc:3900 → 100.96.72.126:3900",
+        host: "tailscale-relay.egress.svc:3900 → 100.101.234.110:3900",
         image: "tailscale v1.104.7 + socat",
         desc: "Untagged user device that can reach the friend's shared-in NAS.",
         ports: "3900",
@@ -2106,7 +2106,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
       [
         "dxp4800plus-brd",
-        "100.96.72.126",
+        "100.101.234.110",
         "shared in (friend)",
         "Garage S3 :3900 (refused), web UIs 80/443",
       ],
@@ -2806,6 +2806,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "NAS rejoined the friend's tailnet with a new IP: relay forwarder 100.96.72.126 -> 100.101.234.110 (v1.93.0)",
+      ],
       [
         "2026-11-25",
         "infra v1.92.0 live: devil without the old ssh mount (old pod hung in Terminating; guest poweroff ended it), opencode pin v1.92.0; all Kustomizations ready",
