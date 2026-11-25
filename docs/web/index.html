@@ -1911,7 +1911,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         prio: 1,
         cat: "manual",
         t: "Push the two releases from the night of 2026-11-25",
-        d: "The agent may not tag. exhib: cd ~/HOME/CODE/GENESIS/exhib; just release (v0.7.0: one exhib package, new gallery editor; Keel restarts the gallery). infra: the next infra tag drops devil's old ssh mount, so devil's Kata VM restarts; afterwards check that no Error pod blocks it (kubectl -n devil get pods) and that rzbl has one devil qemu.",
+        d: "The agent may not tag. exhib: cd ~/HOME/CODE/GENESIS/exhib; just release (v0.7.0: one exhib package, new gallery editor, curated photo metadata with place names; Keel restarts the gallery). When the new pod runs: just metadata (once; strips the old Apple metadata from published photos and adds place names, no re-encode). infra: the next infra tag drops devil's old ssh mount, so devil's Kata VM restarts; afterwards check that no Error pod blocks it (kubectl -n devil get pods) and that rzbl has one devil qemu.",
         svc: null,
       },
       {
