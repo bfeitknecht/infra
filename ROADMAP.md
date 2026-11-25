@@ -1,19 +1,19 @@
 # Roadmap
 
-Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md`; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
+Status as of 2026-11-25. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md` and the atlas "Needs you"; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.57.0`, every Flux Kustomization ready, Gatus 31/32 green (the red one is the Garage backup check). Load: rbpi ~45 % RAM, rzbl ~47 %, oci ~36 %.
-- **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. Bots: `opencode` (agent VM), `renovate` (weekly, on Forgejo).
-- **Public:** apex `0xbf.ch` (0.1.16, `/cv` behind Anubis, SSH TUI `ssh -p 2222 0xbf.ch`), glob `blog.0xbf.ch` (0.1.5), exhib `gallery.0xbf.ch` (0.5.8 with the web uploader), forgejo, pds, atuin, jellyfin `stream.0xbf.ch` (SSO), immich `photos.0xbf.ch`, copyparty `files.0xbf.ch` (SSO), ntfy, authentik.
-- **Internal:** AGH, knot/kresd, devil (Kata, SSH `2223`, Rex server), *arr, qBittorrent (Proton VPN), Navidrome, Dawarich, Time Machine, ollama (GPU), opencode (Kata + CNP + bubblewrap sandbox), Renovate.
-- **Backup:** relay runs; Garage on the friend NAS refuses `3900`. Nothing is backed up. Test data only.
-- **thyme:** 0.1.3 (reading time left of the date) waits in Universe PR typst/packages#6463; then glob and apex move to it.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.91.0`, every Flux Kustomization and HelmRelease ready, Gatus 35/35 green. Load: rbpi ~28 % RAM, rzbl ~54 %, oci ~36 %.
+- **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. Bots: `opencode`, `renovate`.
+- **Public:** apex `0xbf.ch` (0.1.20, brand palette), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.6.2; 0.7.0 ready to tag), forgejo (SSO only), pds, atuin, jellyfin `stream`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `location`, ntfy, authentik.
+- **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex node `deviler`), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), opencode (Nix image in Kata, bubblewrap sandbox), Renovate.
+- **Backup:** Garage answers again, but the bucket `k8up` is gone: every backup fails. Nothing is backed up. Test data only.
+- **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
 
-- [x] **Backup path:** friend fixes Garage on `3900`. Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
+- [ ] **Backup path:** friend recreates the Garage bucket `k8up` and its key grant (atlas `garage-bucket`; the `3900` fix is done). Then restic round-trip, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [x] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
 - [x] **Go live with test data:** `docs/OPERATIONS.md` section 2: Time Machine of echo, Tailscale ACL autoApprovers, Immich admin (not created yet: `immich.internal`), ntfy app, Dawarich email.
 - [x] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.
@@ -22,10 +22,10 @@ Status as of 2026-11-20. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## NEXT
 
 - [x] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `devil`, owner-only). Left: `nh os switch` on devil, open the sign-in link from `rex server status`, disable key expiry on the node, then on the iPhone add `https://devil.tailac5960.ts.net`.
-- [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; public `music.0xbf.ch` when wanted.
+- [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; (`music.0xbf.ch` is public since 2026-11-23).
 - [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
 - [ ] glob post descriptions (wording).
-- [ ] **rbpi case** design + final assembly (HARDWARE.md).
+- [ ] **rbpi case** design + final assembly (`docs/HARDWARE.md`).
 
 ### omni (details in omni/ROADMAP.md)
 
