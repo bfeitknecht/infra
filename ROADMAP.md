@@ -17,7 +17,6 @@ Status as of 2026-11-25. Three lanes: **infra** (this repo), **omni** (nix), **w
 - [ ] **Backup path:** bucket and relay fixed (2026-11-25, manual atuin snapshot OK). Left: watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [ ] **CLI logins** by hand on devil and anti: `gh`, `tea`, `glab` (atlas `cli-logins`).
 - [ ] **Dawarich phone setup:** app on `location.0xbf.ch` with the API key; then the agent sets `ALLOW_EMAIL_PASSWORD_LOGIN=false` (atlas `dawarich-phone`).
-- [ ] **Zed host:** add `devil` as a Zed remote host (`ssh bf@devil`, Tailscale SSH).
 - [ ] **darwin switch:** first `nh darwin switch` on anti (part of echo -> anti).
 - [ ] **thyme 0.2.0:** wait for Universe PR typst/packages#6496, then tag glob 0.1.8.
 - [x] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
@@ -27,11 +26,13 @@ Status as of 2026-11-25. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Audit findings (2026-11-25)
 
-- [ ] **Renovate never opened a PR or a dashboard issue** on Forgejo infra. Runs finish in about 2 min, logs are gone. Debug: `kubectl -n renovate create job --from=cronjob/renovate renovate-manual`, read its logs (redact first).
+After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Projects`); anti is no longer a dev machine.
+
+- [x] **Renovate works** (2026-11-25): a manual run found 283 dependencies and opened the Dependency Dashboard (issue #1, 30 updates waiting for Monday); a run with the schedule lifted opened PR #2 (Talos 1.14.7) and #3 (patch group). Review both: #3 bumps the k8up chart without its CRD tag in `cluster/crds.yaml`. Why the Monday runs never got that far is unknown (logs gone); watch the next one.
 - [ ] **API timeouts from home to oci** (`100.73.186.19:6443` over Tailscale): ~150 five-second timeouts from rbpi in 20 h; the API server answers in < 0.1 s, so it is the path. k8up restarted 19 times in 32 h (lost leader lease).
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
 - [ ] **Rex node `deviler` ran over the DERP relay in Frankfurt.** 2026-11-25 after the devil restart: direct (`31.164.81.63`). Drop if it stays direct.
-- [ ] **Leftovers:** two `Completed` authentik pods; failed k8up Jobs (delete after the first green nightly, atlas `k8up-failed-jobs`).
+- [x] **Leftovers:** two `Completed` authentik pods and 18 failed k8up Jobs from the Garage outage deleted (2026-11-25).
 - [ ] **forgejo-runner is idle** since CI moved to GitHub only: keep it for later or remove `applications/forgejo-runner/` and turn off `[actions]`.
 - [ ] **podman on devil:** undecided (omni SOMEDAY).
 - [x] Duplicate CI: Forgejo workflows removed from all repos; GitHub runs CI.

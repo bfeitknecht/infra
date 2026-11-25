@@ -1907,14 +1907,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: null,
       },
       {
-        id: "passkey",
-        prio: 1,
-        cat: "manual",
-        t: "authentik: re-enrol the passkey once",
-        d: "Sign in with TOTP, Settings > MFA devices: delete Apple Passwords, enrol one passkey. Never enrol again from another Apple device: iCloud keeps one passkey per site and a new enrolment replaces it everywhere.",
-        svc: "authentik",
-      },
-      {
         id: "cli-logins",
         prio: 1,
         cat: "manual",
@@ -1939,14 +1931,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: "glob",
       },
       {
-        id: "k8up-failed-jobs",
-        prio: 2,
-        cat: "manual",
-        t: "Delete the stale failed backup Jobs",
-        d: "30 failed k8up Jobs from the Garage outage keep KubeJobFailed firing. Delete them after the first green nightly run (atuin, authentik, forgejo, pds).",
-        svc: null,
-      },
-      {
         id: "timemachine-mac",
         prio: 2,
         cat: "manual",
@@ -1961,14 +1945,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         t: "Invite people",
         d: "authentik > Directory > Invitations > Create (flow invite) > send by email. Then group family or friends (docs/OPERATIONS.md).",
         svc: "authentik",
-      },
-      {
-        id: "autoapprove",
-        prio: 3,
-        cat: "manual",
-        t: "Tailscale autoApprovers for tag:infra",
-        d: "Admin console > Access controls: autoApprovers.routes for 10.10.10.0/24, 10.10.20.0/24, 10.10.20.11/32, 10.20.20.0/24 -> tag:infra (docs/COMPONENTS.md). Check: the hardened policy from 2026-11-24 has them; drop this item once it is live.",
-        svc: null,
       },
       {
         id: "kubeconfig",
@@ -2798,6 +2774,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "Renovate verified: Dependency Dashboard (issue #1), first PRs #2 (Talos 1.14.7) and #3 (patch group); authentik Completed pods and 18 failed k8up Jobs deleted; owner: authentik passkey re-enrolled, Zed remote host devil, Tailscale autoApprovers live",
+      ],
       [
         "2026-11-25",
         "Backups work again: Garage bucket k8up back, relay on the new NAS IP; manual atuin Backup wrote snapshot aee77223",
