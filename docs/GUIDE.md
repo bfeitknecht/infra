@@ -34,7 +34,7 @@ or "Sign in with authentik".
 
 ## 2. Streaming
 
-Watch at `https://stream.0xbf.ch` ("Sign in with 0xbf"). TV and phone apps (Jellyfin, Swiftfin,
+Watch at `https://videos.0xbf.ch` ("Sign in with 0xbf"). TV and phone apps (Jellyfin, Swiftfin,
 Finamp for music): open the app, choose Quick Connect, approve the code in a logged-in browser
 (Jellyfin > avatar > Quick Connect).
 

@@ -36,10 +36,10 @@ endpoints:
   - {!!merge <<: *public, name: pds, url: 'https://pds.0xbf.ch/xrpc/_health'}
   - {!!merge <<: *public, name: atuin, url: 'https://atuin.0xbf.ch/healthz'}
   - {!!merge <<: *public, name: auth, url: 'https://auth.0xbf.ch/-/health/live/'}
-  - {!!merge <<: *public, name: stream, url: 'https://stream.0xbf.ch/health'}
+  - {!!merge <<: *public, name: videos, url: 'https://videos.0xbf.ch/health'}
   - {!!merge <<: *public, name: notify, url: 'https://notify.0xbf.ch/v1/health'}
   - {!!merge <<: *public, name: photos, url: 'https://photos.0xbf.ch/api/server/ping'}
-  - {!!merge <<: *public, name: location, url: 'https://location.0xbf.ch/api/v1/health'}
+  - {!!merge <<: *public, name: locations, url: 'https://locations.0xbf.ch/api/v1/health'}
   # copyparty answers 401/403 without login; any non-5xx is up.
   - name: files
     group: public

@@ -39,7 +39,7 @@ spec:
             - name: DATABASE_NAME
               value: dawarich
             - name: APPLICATION_HOSTS
-              value: location.0xbf.ch
+              value: locations.0xbf.ch
             - name: APPLICATION_PROTOCOL
               value: http
             - name: TIME_ZONE
@@ -58,7 +58,7 @@ spec:
             - name: OIDC_ISSUER
               value: https://auth.0xbf.ch/application/o/dawarich/
             - name: OIDC_REDIRECT_URI
-              value: https://location.0xbf.ch/users/auth/openid_connect/callback
+              value: https://locations.0xbf.ch/users/auth/openid_connect/callback
             - name: OIDC_PROVIDER_NAME
               value: "0xbf"
             - name: OIDC_AUTO_REGISTER
@@ -137,8 +137,29 @@ spec:
   # Public so the phone app can post points from anywhere. Web login is
   # authentik (OIDC); the app authenticates with the user's Dawarich API key.
   hostnames:
-    - location.0xbf.ch
+    - locations.0xbf.ch
   rules:
     - backendRefs:
         - name: dawarich
           port: 80
+---
+# The old name (location.0xbf.ch, until 2026-11-25): a permanent redirect, so apps and
+# bookmarks that still use it find the new one. Drop it once nothing does.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dawarich-old-name
+  namespace: dawarich
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: ingress
+      sectionName: websecure
+  hostnames:
+    - location.0xbf.ch
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            hostname: locations.0xbf.ch
+            statusCode: 301

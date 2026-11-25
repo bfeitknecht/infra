@@ -20,10 +20,10 @@ authentik at `https://auth.0xbf.ch` is the login for every app that supports it.
 | Forgejo                            | git.0xbf.ch                     | OIDC                                         | developers                                            |
 | Grafana                            | grafana.internal                | OIDC (PKCE)                                  | developers; authentik Admins = Grafana admin          |
 | Immich                             | photos.0xbf.ch, immich.internal | OIDC                                         | family, developers                                    |
-| Jellyfin                           | stream.0xbf.ch                  | OIDC via SSO plugin; "Sign in with 0xbf"     | family, friends, developers; authentik Admins = admin |
+| Jellyfin                           | videos.0xbf.ch                  | OIDC via SSO plugin; "Sign in with 0xbf"     | family, friends, developers; authentik Admins = admin |
 | copyparty                          | files.0xbf.ch                   | forward auth; share links `/shr/` open       | family, developers                                    |
 | Gallery upload                     | gallery.0xbf.ch/upload          | forward auth                                 | user bf only                                          |
-| Dawarich                           | location.0xbf.ch                | OIDC (PKCE)                                  | family, developers                                    |
+| Dawarich                           | locations.0xbf.ch               | OIDC (PKCE)                                  | family, developers                                    |
 | Navidrome                          | music.0xbf.ch                   | forward auth; `/rest` open for Subsonic apps | family, friends, developers                           |
 | OpenCode                           | opencode.internal               | forward auth                                 | developers                                            |
 | *arr, qBittorrent, Gatus           | *.internal                      | forward auth                                 | authentik Admins                                      |
@@ -62,7 +62,7 @@ TOTP and backup codes).
 
 ## 3. Streaming: Jellyfin and the *arr apps
 
-Jellyfin at `stream.0xbf.ch`. One-time settings at `jellyfin.internal` > Dashboard:
+Jellyfin at `videos.0xbf.ch`. One-time settings at `jellyfin.internal` > Dashboard:
 Playback > Transcoding = NVIDIA NVENC; Networking > Known proxies = `10.244.0.0/16`;
 Libraries: Movies `/data/media/movies`, Shows `/data/media/tv`, Music `/data/media/music`.
 
@@ -86,7 +86,7 @@ Once:
 
 Each show: Sonarr > Add New > search > root folder `/data/media/tv`, monitor, quality profile,
 "start search" > Add. qBittorrent downloads through the VPN, Sonarr moves the episode into
-the library and tells Jellyfin. Watch at `stream.0xbf.ch`.
+the library and tells Jellyfin. Watch at `videos.0xbf.ch`.
 
 ## 4. Photos, files, gallery, Time Machine
 

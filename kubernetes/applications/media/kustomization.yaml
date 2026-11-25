@@ -16,7 +16,7 @@ resources:
   - prowlarr.yaml
   - flaresolverr.yaml
   - seerr.yaml
-  # Public stream.0xbf.ch (wizard done 2026-11-16).
+  # Public videos.0xbf.ch (stream.0xbf.ch redirects) (wizard done 2026-11-16).
   - httproute-public.yaml
 configMapGenerator:
   # Jellyfin branding (logo, monochrome CSS, login note). Git owns it: the

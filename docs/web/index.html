@@ -1114,7 +1114,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "1",
         ns: "media",
         ks: "media",
-        host: "https://stream.0xbf.ch · https://jellyfin.internal",
+        host: "https://videos.0xbf.ch · https://jellyfin.internal",
         image: "jellyfin/jellyfin:12.4",
         desc: "Media server with NVENC/NVDEC on the GTX 1660 Ti.",
         ports: "HTTP 8096",
@@ -1123,7 +1123,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         storage: "jellyfin-data 20Gi (nvme), media-files 2Ti (ssd, shared)",
         runbook: "docs/OPERATIONS.md",
         notes: [
-          "Public at stream.0xbf.ch since 2026-11-16. Server name: 0xbf.",
+          "Public at videos.0xbf.ch (stream.0xbf.ch until 2026-11-25, now a redirect). Server name: 0xbf.",
           "Branding: ^@ logo, monochrome CSS, login note (git-owned branding.xml).",
           "No SSO yet: the SSO plugin does not support Jellyfin 12. Local users.",
         ],
@@ -1410,7 +1410,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         tier: "1",
         ns: "dawarich",
         ks: "dawarich",
-        host: "https://location.0xbf.ch",
+        host: "https://locations.0xbf.ch",
         image: "freikin/dawarich:1.23.0, postgis 17-3.5, redis 8",
         desc: "Location history (Google Timeline alternative).",
         ports: "HTTP 3000",
@@ -1918,8 +1918,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         id: "dawarich-phone",
         prio: 2,
         cat: "manual",
-        t: "Dawarich: phone app on location.0xbf.ch",
-        d: "Web: https://location.0xbf.ch, sign in with authentik. Settings > API key: copy it. Phone: Dawarich app (or OwnTracks/Overland), server https://location.0xbf.ch, paste the API key, allow location always. Check: points show on the map. Then tell the agent: it sets ALLOW_EMAIL_PASSWORD_LOGIN=false (SSO only).",
+        t: "Dawarich: phone app on locations.0xbf.ch",
+        d: "Web: https://locations.0xbf.ch, sign in with authentik. Settings > API key: copy it. Phone: Dawarich app (or OwnTracks/Overland), server https://locations.0xbf.ch, paste the API key, allow location always. Check: points show on the map. Then tell the agent: it sets ALLOW_EMAIL_PASSWORD_LOGIN=false (SSO only).",
         svc: "dawarich",
       },
       {
@@ -2029,7 +2029,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["traefik.internal", "internal", "Traefik dashboard"],
       ["devil (tailnet)", "tailnet", "dev VM: Tailscale SSH; Rex at deviler"],
       ["0xbf.ch:2222 (ssh)", "public", "sshmux → apex TUI"],
-      ["stream.0xbf.ch", "public", "Jellyfin"],
+      ["videos.0xbf.ch", "public", "Jellyfin (stream.0xbf.ch redirects)"],
       ["jellyfin.internal", "internal", "Jellyfin"],
       [
         "sonarr.internal / radarr.internal / prowlarr.internal / lidarr.internal",
@@ -2042,7 +2042,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["qbittorrent.internal", "internal", "prepared"],
       ["photos.0xbf.ch", "public", "Immich"],
       ["immich.internal", "internal", "Immich"],
-      ["location.0xbf.ch", "public", "Dawarich (OIDC; phone app with API key)"],
+      ["locations.0xbf.ch", "public", "Dawarich (OIDC; phone app with API key; location.0xbf.ch redirects)"],
       ["copyparty.internal", "internal", "copyparty"],
       ["files.0xbf.ch", "public", "copyparty"],
       ["opencode.internal", "internal", "opencode (authentik)"],
@@ -2774,6 +2774,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "Renamed: stream.0xbf.ch -> videos.0xbf.ch (Jellyfin), location.0xbf.ch -> locations.0xbf.ch (Dawarich); old names 301 to the new; authentik apps Videos (Jellyfin), Locations (Dawarich)",
+      ],
       [
         "2026-11-25",
         "Renovate verified: Dependency Dashboard (issue #1), first PRs #2 (Talos 1.14.7) and #3 (patch group); authentik Completed pods and 18 failed k8up Jobs deleted; owner: authentik passkey re-enrolled, Zed remote host devil, Tailscale autoApprovers live",
@@ -4184,7 +4188,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["gpu", "GPU plugin", "4 slots", 1205, 375, 75, "gpu"],
       ["auth", "authentik", "auth.0xbf.ch", 670, 440, 100, "authentik"],
       ["immich", "immich", "GPU ML", 780, 440, 90, "immich"],
-      ["daw", "dawarich", "location", 880, 440, 90, "dawarich"],
+      ["daw", "dawarich", "locations", 880, 440, 90, "dawarich"],
       ["cp", "copyparty", "files.0xbf.ch", 980, 440, 90, "copyparty"],
       ["tm", "Time Machine", "smb .145", 1080, 440, 110, "timemachine"],
       ["relay", "ts-relay", "→ NAS :3900", 1200, 440, 80, "relay"],
