@@ -1923,12 +1923,20 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: null,
       },
       {
-        id: "claude-login",
+        id: "cli-logins",
         prio: 1,
         cat: "manual",
-        t: "Claude Code: log in on the opencode pod",
-        d: "kubectl --kubeconfig kubeconfig -n opencode exec -it deploy/opencode -- claude, then /login, Claude account (subscription), open the URL, paste the code. Credentials stay in ~/.claude on the PVC. Then pick the Claude Agent models in the opencode UI.",
-        svc: "opencode",
+        t: "devil and anti: log in the forge CLIs by hand",
+        d: "Agents use these CLIs (omni agents.md); tokens are not declarative on purpose. On devil (ssh bf@devil) and on anti: `gh auth login` (GitHub.com, HTTPS, browser); `tea login add --name 0xbf --url https://git.0xbf.ch --token <token>` (Forgejo > Settings > Applications, scopes repository + issue rw, user + organization read); `glab auth login` (GitLab host you use). Check: `gh auth status`, `tea whoami`, `glab auth status`.",
+        svc: "devil",
+      },
+      {
+        id: "dawarich-phone",
+        prio: 2,
+        cat: "manual",
+        t: "Dawarich: phone app on location.0xbf.ch",
+        d: "Web: https://location.0xbf.ch, sign in with authentik. Settings > API key: copy it. Phone: Dawarich app (or OwnTracks/Overland), server https://location.0xbf.ch, paste the API key, allow location always. Check: points show on the map. Then tell the agent: it sets ALLOW_EMAIL_PASSWORD_LOGIN=false (SSO only).",
+        svc: "dawarich",
       },
       {
         id: "thyme-universe",
@@ -2798,6 +2806,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "Claude Code logged in on devil and the opencode pod; MCP tokens revoked (Forgejo, GitHub) and removed from omni sops; 87 dead pod records after the rzbl reboot deleted",
+      ],
       [
         "2026-11-25",
         "rzbl Kata config with reclaim_guest_freed_memory (talos 08-kata.yaml, applied + reboot): qemu runs with free-page-reporting, /dev/shm 94% -> 13%. opencode on the Nix image verified in Kata: sandboxed bash, write-protected /opt and store paths, hidden keys and state, git as the bot, allowlist blocks other domains, nix run works",

@@ -276,6 +276,7 @@ Phase 10: polish and ghosts (Nov 24)
 - a tighter tailnet: only my phones and Macs reach everything, and only on patched clients
 - **sshpiper** replaced our own SSH image: a pinned chart and a few `Pipe`s
 - `location.0xbf.ch` for the phone; one `brand/` folder for the mark and the palette
+- the OpenCode pod is a **Nix image from omni**; it kept killing its VM until rzbl's `/dev/shm` was the culprit
 
 <!-- end_slide -->
 
@@ -304,6 +305,7 @@ What went wrong (and what it taught)
 - a setting can be accepted and ignored: `--skip-local-2fa` stored nothing, the database said so
 - the clone URL said port 2223 for weeks: the display port is its own setting
 - behind a TCP proxy every client has the proxy's address: no fail2ban there
+- Kata keeps VM memory in `/dev/shm`: when it fills, qemu dies and the guest says nothing
 
 <!-- end_slide -->
 
@@ -313,7 +315,7 @@ Next
 <!-- font_size: 2 -->
 
 1. **backups**: the bucket back on the NAS, a green night, then a restore drill
-2. **opencode**: the caged pod defined in omni, with nix, built per release
+2. **agents**: a good `agents.md`, the CLIs logged in, one way per task
 3. thyme 0.2.0 on Universe, then glob 0.1.8
 4. Time Machine, the real photos and files, and the move from echo to anti
 
