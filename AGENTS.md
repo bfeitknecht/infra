@@ -129,7 +129,7 @@ Each line broke something once. Details in `docs/COMPONENTS.md`.
 ## Cluster access
 
 - `kubectl --kubeconfig kubeconfig ...` (repo root, gitignored; 24 h cert, renew with `topf kubeconfig`). Endpoint: oci tailscale IP `100.73.186.19:6443`. Manage from a tailnet device only.
-- `talosctl --talosconfig talosconfig -e 10.20.20.10 -n <node-ip>` for node work.
+- `talosctl --talosconfig talos/talosconfig -e 10.20.20.10 -n <node-ip>` for node work (the root `talosconfig` is an empty stub).
 - Storage: rbpi `/var/mnt/storage-nvme0|1`; rzbl `/var/mnt/storage-nvme0` and `/var/mnt/storage-ssd0` (4 TB). rzbl Talos is on a USB stick.
 
 ## Debugging playbook

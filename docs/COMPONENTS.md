@@ -205,7 +205,7 @@ No PVC exceptions left. Rename method without copying: set PV `Retain`, suspend 
 
 - `kubectl --kubeconfig kubeconfig ...` (repo root, gitignored). Server is K8s 1.37.2 (upgraded 2026-11-17 one minor at a time; etcd snapshots in `.private/`). Local kubectl matches (1.37.2). `talos/topf.yaml` `kubernetesVersion` must match the cluster, or `topf apply` rolls it back.
 - Endpoint is oci tailscale IP `100.73.186.19:6443` (kubeconfig for it). VCN allows only UDP `41641` (Tailscale WireGuard). No cluster ports are exposed. Manage from tailnet device only. Disable key expiry for node tailscale identities in admin console. Expired key takes endpoint down. Fallback: change `clusterEndpoint` to public IP, open security list, run `topf apply`.
-- `talosctl --talosconfig talosconfig -e 10.20.20.10 -n <node-ip>` for node work.
+- `talosctl --talosconfig talos/talosconfig -e 10.20.20.10 -n <node-ip>` for node work (the root `talosconfig` is an empty stub).
 - Nodes: `oci` control-plane tainted; no workloads except resolver and CoreDNS; `rbpi` and `rzbl` workers run workloads. Talos 1.14.6.
 - Storage: rbpi mounts its two existing xfs partitions with `ExistingVolumeConfig` (by fs UUID) at `/var/mnt/storage-nvme0|1`. rzbl: Talos on SanDisk USB stick (`/dev/sdb`), `/var` (EPHEMERAL) is 100 GiB on NVMe, user volumes `/var/mnt/storage-nvme0` (rest of NVMe) and `/var/mnt/storage-ssd0` (4 TB SATA). local-path `nodePathMap` lists both nodes.
 - Image Factory: topf computes schematic IDs locally. A new schematic is unknown to the factory (installer pull 404, node stuck in Booting). Use `topf apply|upgrade --submit-to-factory` once per new schematic.
