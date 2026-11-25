@@ -1,7 +1,7 @@
 # Operations: the owner's runbook
 
-Everything a person does by hand. Facts about how the cluster is built are in
-`AGENTS.md`; open tasks are in `ROADMAP.md` and the atlas (`docs/web/index.html`,
+Everything a person does by hand. Rules and traps are in `AGENTS.md`, the full
+notes per component in `docs/COMPONENTS.md`; open tasks are in `ROADMAP.md` and the atlas (`docs/web/index.html`,
 "Needs you").
 
 Commands are nushell. Run them from the infra repo root with
@@ -51,7 +51,7 @@ TOTP and backup codes).
    Finder > Go > Connect to Server > `smb://10.10.20.145/TimeMachine`, user `timemachine`.
    System Settings > General > Time Machine > Add Backup Disk. First run on the LAN.
 2. **Router:** done (WAN `2222` answers). Remove the old `2223` rule if it is still there.
-3. **Tailscale ACL:** `autoApprovers.routes` for `tag:infra` (snippet in `AGENTS.md`,
+3. **Tailscale ACL:** `autoApprovers.routes` for `tag:infra` (snippet in `docs/COMPONENTS.md`,
    tailscale on nodes).
 4. **Immich admin:** sign up first at `https://immich.internal` (LAN or tailnet). The first
    account becomes admin; `photos.0xbf.ch` blocks admin sign-up on purpose.
@@ -118,7 +118,7 @@ tokens `repo-migration` and `repo-migration-2` in Forgejo > Settings > Applicati
 
 ## 7. Secrets
 
-SOPS + age; Flux decrypts. Rules and the full list: `AGENTS.md`, Secrets. Patterns:
+SOPS + age; Flux decrypts. Rules: `AGENTS.md`, Secrets. Full list: `docs/COMPONENTS.md`, Secrets. Patterns:
 
 - Read one value (example): `sops -d <file> | from yaml | get data.<KEY> | decode base64 | decode`.
 - A new secret from a value you have (never echoed):
@@ -146,12 +146,13 @@ keep their own icons.
 ## 9. Backups
 
 k8up (restic) to Garage on a friend's NAS, through the `tailscale-relay` (details in
-`AGENTS.md`). **Blocked:** the tailnet path works, the NAS answers on 80/443, but `3900` is
-refused. The friend checks: the Garage container runs; `3900` is published from Docker;
-`ss -ltnp` shows a listener on `0.0.0.0` or `[::]`; the NAS firewall allows `3900` on
-`tailscale0`. When Gatus `garage via relay` turns green, the agent runs a restic round-trip
-and a forgejo restore drill and adds Schedules for immich, copyparty, samba and the app
-databases.
+`docs/COMPONENTS.md`, k8up). **Blocked (2026-11-24):** Garage answers again (Gatus
+`garage via relay` is green, the key authenticates), but `restic init` fails: the key may not
+create buckets and the bucket `k8up` is gone. The friend runs
+`garage bucket create k8up` and
+`garage bucket allow --read --write --owner k8up --key GK3e334142e0c47bd805588381`. Then the
+agent runs a restic round-trip and a forgejo restore drill and adds Schedules for immich,
+copyparty, samba and the app databases.
 
 ## 10. Workspace conventions
 

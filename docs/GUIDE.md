@@ -1,7 +1,7 @@
 # Guide: using the homelab day to day
 
 How to _use_ things. One-time setup and maintenance are in `docs/OPERATIONS.md`, how the cluster
-is built is in `AGENTS.md`, the map of where everything runs is in `README.md`.
+is built is in `AGENTS.md` and `docs/COMPONENTS.md`, the map of where everything runs is in `README.md`.
 
 ## 1. Signing in (authentik)
 

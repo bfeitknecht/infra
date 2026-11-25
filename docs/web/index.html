@@ -1907,12 +1907,12 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: "authentik",
       },
       {
-        id: "opencode-tiers",
-        prio: 2,
-        cat: "decision",
-        t: "opencode: caged pod vs trusted tier, NixOS pod, MCP servers",
-        d: "Open discussion (2026-11-24): pod as NixOS with nix daemon + safe MCPs (mcp-nixos, forgejo-mcp as bot); trusted tier on devil/Macs with atuin mcp, Rex skill, GitHub/Forgejo as bf.",
-        svc: "opencode",
+        id: "releases-2026-11-25",
+        prio: 1,
+        cat: "manual",
+        t: "Push the two releases from the night of 2026-11-25",
+        d: "The agent may not tag. exhib: cd ~/HOME/CODE/GENESIS/exhib; just release (v0.7.0: one exhib package, new gallery editor; Keel restarts the gallery). infra: the next infra tag drops devil's old ssh mount, so devil's Kata VM restarts; afterwards check that no Error pod blocks it (kubectl -n devil get pods) and that rzbl has one devil qemu.",
+        svc: null,
       },
       {
         id: "garage-bucket",
@@ -1942,8 +1942,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         id: "thyme-universe",
         prio: 2,
         cat: "manual",
-        t: "thyme 0.2.0: open the Universe PR, then release glob 0.1.8",
-        d: "Open https://github.com/typst/packages/compare/main...bfeitknecht:thyme-0.2.0 (0.1.4 was never submitted; delete its branch on the fork). After the merge: tag glob v0.1.8 (master imports 0.2.0).",
+        t: "thyme 0.2.0: wait for Universe PR #6496, then release glob 0.1.8",
+        d: "https://github.com/typst/packages/pull/6496 is open (no review yet, checked 2026-11-25). After the merge: tag glob v0.1.8 (master imports 0.2.0).",
         svc: "glob",
       },
       {
@@ -1975,7 +1975,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         prio: 3,
         cat: "manual",
         t: "Tailscale autoApprovers for tag:infra",
-        d: "Admin console > Access controls: autoApprovers.routes for 10.10.10.0/24, 10.10.20.0/24, 10.10.20.11/32, 10.20.20.0/24 -> tag:infra (AGENTS.md).",
+        d: "Admin console > Access controls: autoApprovers.routes for 10.10.10.0/24, 10.10.20.0/24, 10.10.20.11/32, 10.20.20.0/24 -> tag:infra (docs/COMPONENTS.md). Check: the hardened policy from 2026-11-24 has them; drop this item once it is live.",
         svc: null,
       },
       {
@@ -2806,6 +2806,22 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "AGENTS.md trimmed from 64 KB to 14 KB (rules and traps); the full notes moved unchanged to docs/COMPONENTS.md; OPERATIONS backup note brought up to date (bucket gone, not port refused)",
+      ],
+      [
+        "2026-11-25",
+        "devil: the old ssh subPath mount dropped from the Deployment (live with the next tag)",
+      ],
+      [
+        "2026-11-25",
+        "exhib 0.7.0 prepared: all Python in one uv package (src/exhib, command exhib); gallery editor with item cards, an item dialog, drop anywhere; tested end to end in the image (release by the owner)",
+      ],
+      [
+        "2026-11-25",
+        "opencode tiers decided and built: Nix pod in Kata (caged) and devil (trusted), no MCP servers, CLIs from agents.md",
+      ],
       [
         "2026-11-25",
         "Claude Code logged in on devil and the opencode pod; MCP tokens revoked (Forgejo, GitHub) and removed from omni sops; 87 dead pod records after the rzbl reboot deleted",

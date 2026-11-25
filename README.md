@@ -5,8 +5,8 @@
 Hybrid Talos Linux Kubernetes cluster, managed by Flux from this repo. One
 control plane in Oracle Cloud `eu-zurich-1` (oci), two workers at home: a
 Raspberry Pi 5 (rbpi, the always-on edge) and a Razer Blade 15 (rzbl, GPU
-and bulk storage). Hardware details: `HARDWARE.md`. Agent and operator rules:
-`AGENTS.md`. Owner runbook: `docs/OPERATIONS.md`. Day-to-day use (sign-in, streaming, Rex, opencode): `docs/GUIDE.md`. Interactive atlas:
+and bulk storage). Hardware details: `docs/HARDWARE.md`. Agent and operator rules:
+`AGENTS.md` (full notes per component: `docs/COMPONENTS.md`). Owner runbook: `docs/OPERATIONS.md`. Day-to-day use (sign-in, streaming, Rex, opencode): `docs/GUIDE.md`. Interactive atlas:
 `docs/web/index.html`.
 
 ### Infrastructure & Operations
@@ -102,7 +102,7 @@ can report a dead rzbl. Live view: `docs/web/index.html` (atlas).
     ├── cluster/                    # crds.yaml, infrastructure.yaml, applications.yaml
     ├── infrastructure/             # platform: storage, network, ingress, egress,
     │                               # monitoring, backup, keel, knative, gpu, kata
-    └── applications/               # one directory = one namespace (full list: AGENTS.md)
+    └── applications/               # one directory = one namespace (full list: docs/COMPONENTS.md, Layout)
 ```
 
 ### Network Model
@@ -174,7 +174,7 @@ Dry-run validates all manifests in a Kustomization before apply. So CRs must not
 
 ### Secrets
 
-All secrets are SOPS-encrypted with age (`.sops.yaml`, files `*.sops.yaml`). Flux decrypts with the `sops-age` key. The full list is in `AGENTS.md` (Secrets), plus the Talos secrets bundle and node Tailscale patch in `talos/`.
+All secrets are SOPS-encrypted with age (`.sops.yaml`, files `*.sops.yaml`). Flux decrypts with the `sops-age` key. The full list is in `docs/COMPONENTS.md` (Secrets), plus the Talos secrets bundle and node Tailscale patch in `talos/`.
 
 ### Access
 

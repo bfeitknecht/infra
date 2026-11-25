@@ -23,7 +23,7 @@ spec:
       hostname: devil
       # rzbl since 2026-11-23; amd64 since the move off the Pi. Kata hang on
       # stop leaves an orphan qemu: reboot the node after force-deletes
-      # (AGENTS.md, devil).
+      # (docs/COMPONENTS.md, devil).
       nodeSelector:
         kubernetes.io/hostname: rzbl
       # Devil does not use the Kubernetes API. Do not mount a service account token.
@@ -35,7 +35,7 @@ spec:
       initContainers:
         - name: init-state
           image: busybox:1.36
-          command: ["sh", "-c", "mkdir -p /volume/home /volume/ssh /volume/nix/store && chown 1000:100 /volume/home"]
+          command: ["sh", "-c", "mkdir -p /volume/home /volume/nix/store && chown 1000:100 /volume/home"]
           volumeMounts:
             - name: state
               mountPath: /volume
@@ -109,10 +109,6 @@ spec:
             - name: state
               mountPath: /home
               subPath: home
-            # Keep SSH host keys on PVC. A new pod must not create a new host key.
-            - name: state
-              mountPath: /var/lib/ssh
-              subPath: ssh
           resources:
             requests:
               cpu: 500m
