@@ -1899,6 +1899,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 
     const NEEDS = [
       {
+        id: "immich-dawarich",
+        prio: 2,
+        cat: "manual",
+        t: "Connect Immich to Dawarich (photo locations on the map)",
+        d: "Immich > Account Settings > API Keys > new key (asset.read). Dawarich > Settings > Integrations: Immich URL http://immich-server.immich.svc.cluster.local, the key, save; then Imports > Immich. Per user. Reachability checked 2026-11-25 (ping ok, no network policy in the way).",
+        svc: "dawarich",
+      },
+      {
         id: "echo-anti",
         prio: 1,
         cat: "manual",

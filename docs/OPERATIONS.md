@@ -92,6 +92,11 @@ the library and tells Jellyfin. Watch at `videos.0xbf.ch`.
 
 - **Immich** (`photos.0xbf.ch`): phone app server `https://photos.0xbf.ch`, "Login with 0xbf".
   Share links use the public name. No "back up all photos" before section 9.
+- **Immich -> Dawarich** (photo locations on the map, per user, by hand: the key is yours).
+  Immich > Account Settings > API Keys > New API Key (name `dawarich`, permission
+  `asset.read` is enough), copy it. Dawarich (`locations.0xbf.ch`) > Settings > Integrations:
+  Immich URL `http://immich-server.immich.svc.cluster.local` (in-cluster, no public hop),
+  paste the key, save. Then Imports > Immich to pull the GPS points of existing photos.
 - **copyparty** (`files.0xbf.ch`): login through authentik. Your folder `/u/bf`, the family's
   `/shared`. Share links (`/shr/...`) open without an account. `copyparty.internal` still takes
   the password of `bf` (in `copyparty-config`).
