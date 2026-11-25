@@ -1034,7 +1034,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "SSO via authentik (login source authentik, group developers). Sign-up only through authentik.",
           "Theme 0xbf (exhib/glob grayscale) and ^@ logo.",
           "SSH on clean 22 since infra v1.42.0 (was 2223).",
-          "Actions enabled. Runner in forgejo-runner (rzbl).",
+          "Actions enabled. Runner in forgejo-runner (rzbl), idle: no repo has Forgejo workflows since 2026-11-25 (CI runs on GitHub).",
           "Primary for bf/{apex,infra,thyme,glob,exhib,omni} since 2026-11-20. Push mirrors to GitHub (on push + 8 h) carry tags to CI.",
           "Bots: opencode (agent VM, HTTPS token), renovate (weekly CronJob).",
         ],
@@ -1899,20 +1899,20 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 
     const NEEDS = [
       {
+        id: "echo-anti",
+        prio: 1,
+        cat: "manual",
+        t: "Next: move echo to anti (factory reset, apply omni)",
+        d: "Runbook: omni docs/RESET.md (decisions first, then the day). Gate: the age key (~/.config/sops/age/keys.txt) is off the Mac; it decrypts omni and infra, and talos/talosconfig + kubeconfig regenerate from it (topf talosconfig, topf kubeconfig).",
+        svc: null,
+      },
+      {
         id: "passkey",
         prio: 1,
         cat: "manual",
         t: "authentik: re-enrol the passkey once",
         d: "Sign in with TOTP, Settings > MFA devices: delete Apple Passwords, enrol one passkey. Never enrol again from another Apple device: iCloud keeps one passkey per site and a new enrolment replaces it everywhere.",
         svc: "authentik",
-      },
-      {
-        id: "releases-2026-11-25",
-        prio: 1,
-        cat: "manual",
-        t: "Push the two releases from the night of 2026-11-25",
-        d: "The agent may not tag. exhib: cd ~/HOME/CODE/GENESIS/exhib; just release (v0.7.0: one exhib package, new gallery editor, curated photo metadata with place names; Keel restarts the gallery). When the new pod runs: just metadata (once; strips the old Apple metadata from published photos and adds place names, no re-encode). infra: the next infra tag drops devil's old ssh mount, so devil's Kata VM restarts; afterwards check that no Error pod blocks it (kubectl -n devil get pods) and that rzbl has one devil qemu.",
-        svc: null,
       },
       {
         id: "garage-bucket",
@@ -2806,6 +2806,18 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-25",
+        "exhib 0.7.0 live (owner tag); just metadata run: published photos keep camera fields, place names (Zürich, Bern, ...), Display P3 profile back; renamed copies serve 200",
+      ],
+      [
+        "2026-11-25",
+        "Forgejo workflows removed from infra, apex, exhib, glob, thyme: CI runs on GitHub only",
+      ],
+      [
+        "2026-11-25",
+        "Merged fork branches thyme-0.1.0 to 0.1.3 deleted (bfeitknecht/packages); thyme-0.2.0 stays for PR #6496",
+      ],
       [
         "2026-11-25",
         "AGENTS.md trimmed from 64 KB to 14 KB (rules and traps); the full notes moved unchanged to docs/COMPONENTS.md; OPERATIONS backup note brought up to date (bucket gone, not port refused)",
