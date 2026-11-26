@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <BrandingOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <LoginDisclaimer>&lt;a href="/sso/OID/start/authentik" class="raised emby-button button-submit block" style="display:block;text-align:center;padding:.9em;margin:1em 0"&gt;Sign in with 0xbf&lt;/a&gt;0xbf · invite only&lt;br&gt;TV and phone apps: use Quick Connect.</LoginDisclaimer>
+  <LoginDisclaimer>&lt;h1 class="oxbf-title"&gt;0xbf videos&lt;/h1&gt;&lt;a href="/sso/OID/start/authentik" class="raised emby-button button-submit block oxbf-signin"&gt;Sign in with 0xbf&lt;/a&gt;&lt;p&gt;Invite only.&lt;/p&gt;&lt;p&gt;TV or phone app? Choose Quick Connect there. Then sign in here and enter the code under Quick Connect in your user menu.&lt;/p&gt;</LoginDisclaimer>
   <CustomCss>/* 0xbf branding: monochrome palette of exhib and glob (dark values). */
 :root {
   --0xbf-bg: oklch(17% 0 0);
@@ -61,6 +61,38 @@ html, body, .backgroundContainer, .skinHeader, .mainDrawer, .dialog, .formDialog
 .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: var(--0xbf-fg) !important;
 }
+/* Login. The 0xbf sign-in first, Quick Connect under it. The password
+   form is hidden on videos.0xbf.ch only (web client login.css). */
+.readOnlyContent {
+  display: flex !important;
+  flex-direction: column;
+  max-width: 22em !important;
+  margin: 10vh auto 1em !important;
+}
+.loginDisclaimerContainer { order: -1; margin: 0 0 .5em !important; }
+.loginDisclaimer {
+  color: var(--0xbf-muted) !important;
+  text-align: center;
+  line-height: 1.5;
+  max-width: none !important;
+}
+.loginDisclaimer p { margin: .4em 0; }
+.oxbf-title {
+  color: var(--0xbf-fg);
+  font-size: 2.2em;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  margin: 0 0 .9em;
+}
+.oxbf-signin {
+  display: block !important;
+  text-align: center;
+  text-decoration: none;
+  padding: .9em !important;
+  margin: 0 0 1.2em !important;
+  font-size: 1.05em;
+}
+.btnQuick { order: 1; }
 </CustomCss>
   <SplashscreenEnabled>false</SplashscreenEnabled>
 </BrandingOptions>

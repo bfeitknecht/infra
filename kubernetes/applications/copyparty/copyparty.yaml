@@ -70,9 +70,14 @@ spec:
         - name: files
           persistentVolumeClaim:
             claimName: copyparty-files
+        # copyparty.conf (Secret: accounts, volumes) and branding.conf.
         - name: config
-          secret:
-            secretName: copyparty-config
+          projected:
+            sources:
+              - secret:
+                  name: copyparty-config
+              - configMap:
+                  name: copyparty-branding
 ---
 apiVersion: v1
 kind: Service

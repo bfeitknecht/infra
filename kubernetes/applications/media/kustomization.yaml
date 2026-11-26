@@ -19,9 +19,17 @@ resources:
   # Public videos.0xbf.ch (wizard done 2026-11-16).
   - httproute-public.yaml
 configMapGenerator:
-  # Jellyfin branding (logo, monochrome CSS, login note). Git owns it: the
-  # initContainer copies it on every start, UI edits are overwritten.
+  # Jellyfin branding: branding.xml (logo, monochrome CSS, login note; UI
+  # edits are overwritten on every start) and the web client patch (icons,
+  # manifest, login.css; initContainer `web`).
   - name: jellyfin-branding
     namespace: media
     files:
       - jellyfin-branding/branding.xml
+      - jellyfin-branding/login.css
+      - jellyfin-branding/manifest.json
+      - jellyfin-branding/favicon.svg
+      - jellyfin-branding/favicon.ico
+      - jellyfin-branding/apple-touch-icon.png
+      - jellyfin-branding/icon-192.png
+      - jellyfin-branding/icon-512.png

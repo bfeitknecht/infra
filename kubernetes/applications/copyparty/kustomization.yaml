@@ -8,3 +8,9 @@ resources:
   - pvc.yaml
   - copyparty.yaml
   - copyparty-config.sops.yaml
+configMapGenerator:
+  # Tab title, name, favicon, description (merged into the Secret's config).
+  - name: copyparty-branding
+    namespace: copyparty
+    files:
+      - branding/branding.conf

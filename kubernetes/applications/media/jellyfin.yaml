@@ -1,5 +1,3 @@
-# Internal only until the owner completes the first-run wizard (it creates
-# the admin with no auth). Then add a websecure HTTPRoute for public access.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,9 +34,20 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       initContainers:
+        # Git owns branding.xml (logo, CSS, login note) and the server name
+        # (tab title, name in the apps): both are written on every start.
         - name: branding
           image: docker.io/library/busybox:1.37.0
-          command: ["sh", "-c", "mkdir -p /config/config && cp /branding/branding.xml /config/config/branding.xml"]
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              mkdir -p /config/config
+              cp /branding/branding.xml /config/config/branding.xml
+              if [ -f /config/config/system.xml ]; then
+                sed -i 's|<ServerName>[^<]*</ServerName>|<ServerName>0xbf videos</ServerName>|' /config/config/system.xml
+              fi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -119,6 +128,44 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+        # The web client, patched: tab title, description, 0xbf icons, app
+        # manifest, and login.css (hides the password form). A copy of the
+        # image's own jellyfin-web, so it follows every Jellyfin upgrade. Same
+        # image tag as the server. If the sed patterns stop matching after an
+        # upgrade, the log says so and Jellyfin starts unbranded.
+        - name: web
+          image: docker.io/jellyfin/jellyfin:12.4
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              cp -R /jellyfin/jellyfin-web/. /web/
+              cd /web
+              mkdir -p 0xbf
+              for f in login.css favicon.svg favicon.ico apple-touch-icon.png icon-192.png icon-512.png; do
+                cp "/branding/$f" "0xbf/$f"
+              done
+              : > 0xbf/empty.css
+              cp /branding/manifest.json manifest.json
+              sed -i \
+                -e 's|<title>[^<]*</title>|<title>0xbf videos</title><meta name="description" content="Films and series. Invite only.">|' \
+                -e 's|<meta name="application-name" content="[^"]*">|<meta name="application-name" content="0xbf videos">|' \
+                -e 's|<link rel="apple-touch-icon"[^>]*>|<link rel="apple-touch-icon" sizes="180x180" href="0xbf/apple-touch-icon.png">|' \
+                -e 's|<link rel="shortcut icon"[^>]*>|<link rel="icon" type="image/svg+xml" href="0xbf/favicon.svg"><link rel="icon" sizes="32x32" href="0xbf/favicon.ico"><link rel="stylesheet" href="0xbf/login.css">|' \
+                -e 's|<meta name="msapplication-TileImage"[^>]*>||' \
+                index.html
+              grep -q '0xbf/login.css' index.html || echo "web: index.html patterns did not match; jellyfin-web is unbranded" >&2
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: web
+              mountPath: /web
+            - name: branding
+              mountPath: /branding
+              readOnly: true
       containers:
         - name: jellyfin
           image: docker.io/jellyfin/jellyfin:12.4
@@ -165,7 +212,14 @@ spec:
             # instant moves work only with one volume and one path.
             - name: library
               mountPath: /data
+            # The patched web client from initContainer `web`.
+            - name: web
+              mountPath: /jellyfin/jellyfin-web
+              readOnly: true
       volumes:
+        - name: web
+          emptyDir:
+            sizeLimit: 256Mi
         - name: sso
           secret:
             secretName: jellyfin-sso-config
@@ -207,6 +261,25 @@ spec:
   hostnames:
     - jellyfin.internal
   rules:
+    # Internal only: the password form stays (native admin sign-in).
+    - matches:
+        - path:
+            type: Exact
+            value: /web/0xbf/login.css
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: internal-allowlist
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /web/0xbf/empty.css
+      backendRefs:
+        - name: jellyfin
+          port: 80
     - filters:
         - type: ExtensionRef
           extensionRef:

@@ -1,0 +1,10 @@
+/* videos.0xbf.ch: sign-in is authentik only. No password form, no user
+   cards, no "forgot password". Quick Connect stays (TV and phone apps).
+   jellyfin.internal gets an empty file instead (HTTPRoute rewrite), so the
+   native admin can still sign in with a password there. */
+.manualLoginForm,
+.visualLoginForm,
+.btnManual,
+.btnForgotPassword {
+  display: none !important;
+}

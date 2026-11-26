@@ -39,7 +39,7 @@ kubernetes/
 └── applications/     one directory = one namespace = one Flux Kustomization
 ```
 
-Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), forgejo-runner, pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `stream`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, opencode (Kata), copyparty (`files`), dawarich (`location`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
+Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), forgejo-runner, pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, opencode (Kata), copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
 
 ## Naming conventions
 
@@ -51,7 +51,7 @@ One rule per kind. New resources must follow them.
 - **StorageClass by role:** `data`/`db`/`cache` on `local-path-nvme`, `files` on `local-path-ssd` (rzbl). rbpi apps use `local-path`.
 - **Secret = `<app>-secrets`** (env keys) or `<app>-config` (whole config file). **File = `<secret-name>.sops.yaml`.** Exception: GHCR pull secret `dockerconfigjson` in `ghcr.sops.yaml`.
 - **ConfigMap = `<app>-config`** (`configMapGenerator`, hash suffix).
-- **Hostnames:** public services by **purpose** (`git`, `auth`, `blog`, `gallery`, `stream`, `files`, `photos`, `location`, `music`). The authentik launcher shows them as `Purpose (Software)`, e.g. `Git (Forgejo)`. Avoid names with two meanings. Internal tools by **software**: `<app>.internal`. Every new `*.internal` name goes into the `internal-hosts` certificate `dnsNames` in the same PR.
+- **Hostnames:** public services by **purpose** (`git`, `auth`, `blog`, `gallery`, `videos`, `files`, `photos`, `locations`, `music`). The authentik launcher shows them as `Purpose (Software)`, e.g. `Git (Forgejo)`. Avoid names with two meanings. Internal tools by **software**: `<app>.internal`. Every new `*.internal` name goes into the `internal-hosts` certificate `dnsNames` in the same PR.
 - **LB IPs:** last octet = `100 + (port mod 100)`. Check for a clash first. Gateway is `.128`.
 - **Flux Kustomization = app directory name.**
 - Known exceptions: Service `pds-http` (a Service `pds` injects `PDS_PORT` and breaks the image); Service `resolver` in `dns`; qbittorrent runs in ns `media` (shares PVC `media-files`).
@@ -109,6 +109,7 @@ Each line broke something once. Details in `docs/COMPONENTS.md`.
 - **Tier-2 (apex, glob, exhib):** `:latest` + Keel; the Kustomization must ignore the image field, or Flux reverts Keel. No Keel on tier 1, tier 3 or Knative.
 - **Knative:** all config in the `KnativeServing` CR `spec.config` (the operator overwrites ConfigMaps). Istio plugin disabled. Its PDBs block drains: `topf upgrade --delete-if-eviction-fails`. Whims (`whimsy` ns) are outside Flux: deploy with `kn`.
 - **Forgejo:** app.ini edits go into the ConfigMap seed **and** the live `/data/gitea/conf/app.ini` (as `su-exec git`). `ACCOUNT_LINKING = login`, never `auto`. SSO only; clear local 2FA with `forgejo admin user reset-mfa` (`--skip-local-2fa` is a no-op in 16).
+- **Web client patches** (jellyfin, immich): initContainer `web` copies the image's web root and patches it with sed. Its image tag must equal the server's. After an upgrade, check its log for "did not match".
 - **Seeded configs** (AGH, jellyfin SSO, forgejo app.ini) are copied only if absent; the app owns the file after. Configs from Secrets (copyparty, ntfy) need a `0xbf.ch/config-rev` bump.
 - **Services:** a Service named like an app can inject `<NAME>_PORT` env and break images (pds, atuin): use `enableServiceLinks: false` or another name.
 - **authentik:** rename blueprint objects in the blueprint, never in the GUI (a GUI rename ends in a duplicate).

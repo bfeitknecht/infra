@@ -1,5 +1,4 @@
-# Public route for friends and family. Enable only after the setup wizard is
-# done (the wizard runs without login).
+# Public route for friends and family.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -13,6 +12,23 @@ spec:
   hostnames:
     - videos.0xbf.ch
   rules:
+    # No password sign-in from the internet: authentik (SSO plugin) in the
+    # browser, Quick Connect in the apps. Jellyfin routes are
+    # case-insensitive, so the match is too. Password sign-in (native admin)
+    # works on jellyfin.internal only.
+    - matches:
+        - path:
+            type: RegularExpression
+            value: "(?i)^/+(emby/+)?users/+(authenticatebyname|[^/]+/+authenticate)/*$"
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: deny-all
+      backendRefs:
+        - name: jellyfin
+          port: 80
     - backendRefs:
         - name: jellyfin
           port: 80

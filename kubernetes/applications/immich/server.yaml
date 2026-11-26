@@ -24,6 +24,48 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: rzbl
       enableServiceLinks: false
+      initContainers:
+        # The web client, patched: 0xbf icons, tab title and description; the
+        # look stays Immich. A copy of the image's own /build/www (same tag
+        # as the server), so it follows every upgrade. sirv serves the
+        # precompressed .br/.gz first: delete them for every patched file.
+        # Unmatched patterns leave Immich unbranded, never broken.
+        - name: web
+          image: ghcr.io/immich-app/immich-server:v3.4.1
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              cp -R /build/www/. /web/
+              cd /web
+              cp /branding/favicon.ico favicon.ico
+              cp /branding/favicon.svg icon.svg
+              cp /branding/apple-touch-icon.png apple-icon-180.png
+              cp /branding/icon-192.png manifest-icon-192.maskable.png
+              cp /branding/icon-512.png manifest-icon-512.maskable.png
+              sed -i \
+                -e 's|<!-- metadata:tags -->|<!-- metadata:tags -->\n    <title>0xbf photos</title>\n    <meta name="description" content="Photos. Invite only." />|' \
+                index.html
+              sed -i \
+                -e 's|"name": "Immich"|"name": "0xbf photos"|' \
+                -e 's|"short_name": "Immich"|"short_name": "photos"|' \
+                -e 's|"description": "[^"]*"|"description": "Photos. Invite only."|' \
+                -e 's|"any maskable"|"any"|g' \
+                manifest.json
+              # Page titles: "Albums - Immich" becomes "Albums · 0xbf".
+              grep -rl ' - Immich`' _app | while read -r f; do
+                sed -i 's/ - Immich`/ · 0xbf`/g' "$f"
+                rm -f "$f.br" "$f.gz"
+              done
+              rm -f icon.svg.br icon.svg.gz index.html.br index.html.gz manifest.json.br manifest.json.gz
+              grep -q '0xbf photos' index.html || echo "web: index.html pattern did not match; Immich is unbranded" >&2
+          volumeMounts:
+            - name: web
+              mountPath: /web
+            - name: branding
+              mountPath: /branding
+              readOnly: true
       containers:
         - name: server
           image: ghcr.io/immich-app/immich-server:v3.4.1
@@ -67,7 +109,17 @@ spec:
             - name: config
               mountPath: /config
               readOnly: true
+            # The patched web client from initContainer `web`.
+            - name: web
+              mountPath: /build/www
+              readOnly: true
       volumes:
+        - name: web
+          emptyDir:
+            sizeLimit: 512Mi
+        - name: branding
+          configMap:
+            name: immich-branding
         - name: config
           secret:
             secretName: immich-config
