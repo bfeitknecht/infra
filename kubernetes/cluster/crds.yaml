@@ -90,7 +90,7 @@ spec:
   interval: 1h
   url: https://github.com/k8up-io/k8up
   ref:
-    tag: k8up-4.10.0
+    tag: k8up-4.10.1
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
