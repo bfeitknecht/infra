@@ -115,6 +115,7 @@ Each line broke something once. Details in `docs/COMPONENTS.md`.
 - **authentik:** rename blueprint objects in the blueprint, never in the GUI (a GUI rename ends in a duplicate).
 - **Header trust:** apps that trust `X-authentik-*` (navidrome, copyparty, exhib upload) need a CNP that admits only Traefik.
 - **sshmux:** a new SSH TUI = a new `Pipe`, never a new WAN port. Git is not on the mux.
+- **Artifact contents:** `flux push artifact` drops files by its `--ignore-paths` default (`*.jpg`, `*.gif`, `*.zip`, ...; `.sourceignore` is not read). The publish workflow sets the list without `*.png` (v1.95.0 broke media and immich: PNGs missing). A new binary type for a configMapGenerator: check `flux build artifact` contents first.
 - **YAML:** quote `"0xbf"` (unquoted it is the number 191).
 - **Talos:** `topf.yaml` `kubernetesVersion` must match the cluster, or `topf apply` rolls it back. A new schematic needs `--submit-to-factory` once. topf has no reboot mode: use auto, then `talosctl reboot`.
 - **Backups:** Garage is a shared-in NAS: when its tailnet IP changes, update the relay forwarder (`egress/tailscale/relay.yaml`). Never rotate the restic repo password (`k8up-secrets` `password`).
