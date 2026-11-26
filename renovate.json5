@@ -40,13 +40,57 @@
       enabled: false,
     },
     {
-      // A chart and its pinned CRD GitRepository move together (AGENTS.md).
+      // Patch updates of everything else in one weekly PR. This rule comes
+      // before the chart groups below: in Renovate the last matching rule
+      // wins, so a chart and its CRD tag keep their own group (and PR) also
+      // for a patch. Placed last, it took the k8up chart alone (PR #3).
+      groupName: "patch updates",
+      matchUpdateTypes: ["patch", "digest"],
+      matchPackageNames: ["*"],
+    },
+    // The pinned CRD GitRepository tags (cluster/crds.yaml) carry the chart
+    // name as a prefix: without this versioning Renovate skips them.
+    {
+      matchDatasources: ["github-tags"],
+      matchPackageNames: ["k8up-io/k8up"],
+      versioning: "regex:^k8up-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+    },
+    {
+      matchDatasources: ["github-tags"],
+      matchPackageNames: ["prometheus-community/helm-charts"],
+      versioning: "regex:^kube-prometheus-stack-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+    },
+    {
+      matchDatasources: ["github-tags"],
+      matchPackageNames: ["tg123/sshpiper-chart"],
+      versioning: "regex:^sshpiper-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+    },
+    {
+      matchDatasources: ["github-tags"],
+      matchPackageNames: ["knative/operator"],
+      versioning: "regex:^knative-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+    },
+    // A chart (or operator image) and its pinned CRD tag move together
+    // (AGENTS.md): one group each, for every update type.
+    {
       groupName: "kube-prometheus-stack",
       matchPackageNames: ["kube-prometheus-stack", "prometheus-community/helm-charts"],
     },
     {
       groupName: "traefik",
       matchPackageNames: ["traefik", "traefik/traefik-helm-chart"],
+    },
+    {
+      groupName: "k8up",
+      matchPackageNames: ["k8up", "k8up-io/k8up"],
+    },
+    {
+      groupName: "sshpiper",
+      matchPackageNames: ["sshpiper", "tg123/sshpiper-chart"],
+    },
+    {
+      groupName: "knative operator",
+      matchPackageNames: ["gcr.io/knative-releases/knative.dev/operator/cmd/operator", "knative/operator"],
     },
     {
       groupName: "gateway-api",
@@ -57,12 +101,6 @@
       matchPackageNames: ["siderolabs/talos", "kubernetes/kubernetes"],
       // One minor at a time, after a etcd snapshot: see the debugging playbook.
       separateMinorPatch: true,
-    },
-    {
-      // Patch updates of everything else in one weekly PR.
-      groupName: "patch updates",
-      matchUpdateTypes: ["patch", "digest"],
-      matchPackageNames: ["*"],
     },
   ],
 }
