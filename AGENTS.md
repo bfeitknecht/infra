@@ -28,6 +28,7 @@ edit manifests -> git commit -> push vX.Y.Z tag -> CI publishes to ghcr.io/bfeit
 ## Layout
 
 ```
+flake.nix             dev shell (direnv): topf (nix/topf.nix), talosctl, kubectl, flux, helm, kn, cilium, sops, just, yamlfmt
 images/opencode/      flake.nix pinning omni: the OpenCode server image (Nix build)
 talos/                topf config, schematics, node patches (talos/patches/node/<node>/)
 docs/                 COMPONENTS.md (full notes), OPERATIONS.md (runbook), GUIDE.md, journey.md, web/ (atlas)

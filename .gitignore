@@ -5,3 +5,5 @@ talos/talosconfig
 /talosconfig
 talos/output
 __pycache__/
+result
+result-*

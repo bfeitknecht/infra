@@ -37,8 +37,7 @@ fmt *args:
     # `.yamlfmt` (repo root) holds the style and the exclusions. yamlfmt has
     # only single-dash flags, so the recipe owns them and takes just `--check`.
     if ! command -v yamlfmt >/dev/null 2>&1; then
-        echo "yamlfmt not found — install it with: go install github.com/google/yamlfmt/cmd/yamlfmt@v0.21.0" >&2
-        echo "(brew: brew install yamlfmt)" >&2
+        echo "yamlfmt not found: use the dev shell (direnv allow, or nix develop)" >&2
         exit 1
     fi
     case "{{ args }}" in
