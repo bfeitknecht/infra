@@ -224,8 +224,12 @@ spec:
           secret:
             secretName: jellyfin-sso-config
         - name: branding
-          configMap:
-            name: jellyfin-branding
+          projected:
+            sources:
+              - configMap:
+                  name: jellyfin-branding
+              - configMap:
+                  name: jellyfin-branding-png
         - name: config
           persistentVolumeClaim:
             claimName: jellyfin-data

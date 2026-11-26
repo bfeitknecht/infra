@@ -5,6 +5,7 @@ resources:
   - middleware.yaml
   - pvc.yaml
   - jellyfin.yaml
+  - jellyfin-branding-png.yaml
   - jellyfin-sso-config.sops.yaml
   - sonarr.yaml
   - radarr.yaml
@@ -30,6 +31,3 @@ configMapGenerator:
       - jellyfin-branding/manifest.json
       - jellyfin-branding/favicon.svg
       - jellyfin-branding/favicon.ico
-      - jellyfin-branding/apple-touch-icon.png
-      - jellyfin-branding/icon-192.png
-      - jellyfin-branding/icon-512.png

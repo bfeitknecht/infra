@@ -118,8 +118,12 @@ spec:
           emptyDir:
             sizeLimit: 512Mi
         - name: branding
-          configMap:
-            name: immich-branding
+          projected:
+            sources:
+              - configMap:
+                  name: immich-branding
+              - configMap:
+                  name: immich-branding-png
         - name: config
           secret:
             secretName: immich-config

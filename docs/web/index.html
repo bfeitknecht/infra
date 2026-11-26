@@ -2784,7 +2784,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
       [
         "2026-11-26",
-        "Publish: flux push artifact keeps *.png (its default --ignore-paths dropped the branding icons; v1.95.0 failed media and immich builds)"
+        "Branding PNGs as binaryData ConfigMaps (Flux drops *.png from the artifact; v1.95.0 and v1.96.0 failed media and immich builds, old pods kept running)"
       ],
       [
         "2026-11-26",

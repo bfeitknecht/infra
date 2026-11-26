@@ -7,17 +7,16 @@ resources:
   - db.yaml
   - redis.yaml
   - server.yaml
+  - immich-branding-png.yaml
   - machine-learning.yaml
   - immich-secrets.sops.yaml
   - immich-config.sops.yaml
 configMapGenerator:
   # 0xbf icons for the web client (initContainer `web` in server.yaml).
-  # Copies of apex/brand: favicon.ico, mark.svg, png/mark-{180,192,512}.png.
+  # Copies of apex/brand: favicon.ico, mark.svg. The PNGs are in
+  # immich-branding-png.yaml (binaryData).
   - name: immich-branding
     namespace: immich
     files:
       - branding/favicon.ico
       - branding/favicon.svg
-      - branding/apple-touch-icon.png
-      - branding/icon-192.png
-      - branding/icon-512.png

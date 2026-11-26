@@ -43,12 +43,9 @@ jobs:
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@v2.9.6
 
-      # --ignore-paths is the flux default minus *.png: kustomize
-      # configMapGenerator files (branding icons) must be in the artifact.
       - name: Publish OCI Artifact to GHCR
         run: |
           flux push artifact oci://ghcr.io/${{ github.repository_owner }}/infra:${{ github.ref_name }} \
             --path="./" \
-            --ignore-paths=".git/,.gitignore,.gitmodules,.gitattributes,*.jpg,*.jpeg,*.gif,*.wmv,*.flv,*.tar.gz,*.zip" \
             --source="${{ github.server_url }}/${{ github.repository }}" \
             --revision="${{ github.ref_name }}"
