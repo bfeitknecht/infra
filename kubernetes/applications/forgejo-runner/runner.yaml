@@ -25,7 +25,7 @@ spec:
       initContainers:
         # Register once. The .runner file on the PVC holds the identity.
         - name: register
-          image: code.forgejo.org/forgejo/runner:13.2.1
+          image: code.forgejo.org/forgejo/runner:13.2.2
           command:
             - sh
             - -c
@@ -48,7 +48,7 @@ spec:
               mountPath: /data
       containers:
         - name: runner
-          image: code.forgejo.org/forgejo/runner:13.2.1
+          image: code.forgejo.org/forgejo/runner:13.2.2
           command: ["sh", "-c", "until docker info >/dev/null 2>&1; do sleep 2; done; forgejo-runner daemon"]
           workingDir: /data
           env:

@@ -22,7 +22,7 @@ spec:
         # after that. Create both directories. Local-path does not create
         # subPath directories.
         - name: config-seed
-          image: codeberg.org/forgejo/forgejo:16.0.5
+          image: codeberg.org/forgejo/forgejo:16.0.7
           command: ["sh", "/seed/init.sh"]
           env:
             - name: ADMIN_USER
@@ -51,7 +51,7 @@ spec:
               readOnly: true
       containers:
         - name: forgejo
-          image: codeberg.org/forgejo/forgejo:16.0.5
+          image: codeberg.org/forgejo/forgejo:16.0.7
           # The image writes FORGEJO__section__KEY env into app.ini on start,
           # so mail needs no edit of the live file. Proton SMTP, noreply@0xbf.ch.
           env:

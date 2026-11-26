@@ -26,7 +26,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: server
-          image: ghcr.io/immich-app/immich-server:v3.4.1
+          image: ghcr.io/immich-app/immich-server:v3.4.2
           env:
             # OIDC (authentik) and SMTP (Proton). Settings in this file are
             # read-only in the admin UI; edit immich-config instead.

@@ -27,7 +27,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v3.4.1-cuda
+          image: ghcr.io/immich-app/immich-machine-learning:v3.4.2-cuda
           env:
             - name: NVIDIA_VISIBLE_DEVICES
               value: all

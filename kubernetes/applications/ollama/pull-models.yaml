@@ -15,7 +15,7 @@ spec:
         kubernetes.io/hostname: rzbl
       containers:
         - name: pull
-          image: docker.io/ollama/ollama:0.40.16
+          image: docker.io/ollama/ollama:0.40.18
           command: ["ollama", "pull", "qwen2.5-coder:7b"]
           env:
             - name: OLLAMA_HOST
