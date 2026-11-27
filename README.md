@@ -125,11 +125,11 @@ Function zones use decade-based third octets.
 | Kubernetes    | API server / kubelet                                  | 1.37.2                          |
 | GitOps        | Flux (source, kustomize, helm, notification)          | 2.9.5                           |
 | CNI           | Cilium (kube-proxy replacement, LB-IPAM, L2 announce) | 1.20.2                          |
-| Ingress       | Traefik via Gateway API                               | chart 41.6.0 (v3.7)             |
+| Ingress       | Traefik via Gateway API                               | chart 43.0.0 (v3.8)             |
 | Gateway API   | experimental channel CRDs (TCPRoute)                  | 1.6.2                           |
 | Certificates  | cert-manager                                          | 1.21.2                          |
 | Mesh / VPN    | Tailscale (operator + extension on nodes)             | 1.102.3                         |
-| Monitoring    | kube-prometheus-stack, metrics-server, Gatus          | 91.4.1 / 3.14.0 / v5.36.0       |
+| Monitoring    | kube-prometheus-stack, metrics-server, Gatus          | 94.2.0 / 3.14.0 / v5.38.0       |
 | Backups       | k8up (restic to Garage S3)                            | chart 4.10.0 (operator v2.16.0) |
 | Whim platform | Knative Serving via operator (scale-to-zero)          | 1.23.0 (operator 1.23.1)        |
 
@@ -146,8 +146,8 @@ flux reconcile kustomization flux-system          # apply immediately (optional)
 ### Kustomization Topology
 
 ```
-cluster/crds.yaml            gateway-api-crds (v1.6.2), traefik-crds (v41.6.0),
-                             prometheus-crds (91.4.1), k8up-crds (4.10.0), knative-operator-crds (v1.23.1)
+cluster/crds.yaml            gateway-api-crds (v1.7.0), traefik-crds (v43.0.0),
+                             prometheus-crds (94.2.0), k8up-crds (4.10.1), knative-operator-crds (v1.24.1)
                              pinned GitRepository sources, prune: false
 
 cluster/infrastructure.yaml  storage -> cilium -> ipam

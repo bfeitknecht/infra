@@ -36,7 +36,7 @@ spec:
   interval: 1h
   url: https://github.com/traefik/traefik-helm-chart
   ref:
-    tag: v41.7.1
+    tag: v43.0.0
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -74,7 +74,7 @@ spec:
   interval: 1h
   url: https://github.com/prometheus-community/helm-charts
   ref:
-    tag: kube-prometheus-stack-91.9.0
+    tag: kube-prometheus-stack-94.2.0
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

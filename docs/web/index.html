@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.104.0";
+    const INFRA_TAG = "v1.105.0";
 
     const NODES = [
       {
@@ -2098,6 +2098,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.105.0",
+        "2026-11-28",
+        "traefik chart 43.0.0 (Traefik 3.8, service.spec.type), kube-prometheus-stack 94.2.0 (operator 0.95.1)",
+      ],
+      [
         "v1.104.0",
         "2026-11-28",
         "gateway-api 1.7.0 (TCPRoute v1), knative operator + serving 1.24, kube-prometheus-stack 91.9.0, traefik 41.7.1; ollama pull Job force-replaced",
@@ -2754,6 +2759,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "Upgrades batch 3 (v1.105.0): traefik chart 43 / Traefik 3.8, kube-prometheus-stack 94.2.0.",
+      ],
       [
         "2026-11-28",
         "Forgejo 16.0.7 crash (authorized_keys held the deleted bot key): file rebuilt, SSH OK. Upgrades batch 2 (v1.104.0): gateway-api 1.7.0, knative 1.24, kube-prometheus-stack 91.9.0, traefik 41.7.1.",

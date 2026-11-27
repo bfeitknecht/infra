@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: "41.7.1"
+      version: "43.0.0"
       sourceRef:
         kind: HelmRepository
         name: traefik
@@ -40,7 +40,9 @@ spec:
       type: Recreate
     service:
       enabled: true
-      type: LoadBalancer
+      # Chart 43: the Service type moved under spec.
+      spec:
+        type: LoadBalancer
     ports:
       web:
         port: 8000
