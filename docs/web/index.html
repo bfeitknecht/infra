@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.99.0";
+    const INFRA_TAG = "v1.100.0";
 
     const NODES = [
       {
@@ -2112,6 +2112,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.100.0",
+        "2026-11-27",
+        "Traefik Hub CRDs out (unused); Traefik HelmRelease install.crds Skip",
+      ],
+      [
         "v1.99.0",
         "2026-11-27",
         "forgejo-runner removed (namespace, PVC, Kustomization, secret); Forgejo Actions off",
@@ -2749,6 +2754,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-27",
+        "Traefik Hub CRDs (15, unused) out: $patch: delete in traefik-crds, HelmRelease install.crds Skip, CRDs deleted (v1.100.0). Apiserver memory.",
+      ],
       [
         "2026-11-27",
         "API timeouts home -> oci fixed: tailscaled used the cilium_host IP (pod CIDR) as a path, looped through VXLAN over Tailscale, stalled ~7 s every 1-2 min. Talos rule 5190 (iif lo, fwmark 0x80000, to 10.244.0.0/16, unreachable) on all nodes.",

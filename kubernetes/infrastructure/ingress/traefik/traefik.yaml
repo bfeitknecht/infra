@@ -25,6 +25,8 @@ spec:
   targetNamespace: ingress
   install:
     createNamespace: true
+    # CRDs come from the traefik-crds Kustomization (cluster/crds.yaml).
+    crds: Skip
   values:
     deployment:
       kind: Deployment
