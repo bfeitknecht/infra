@@ -70,7 +70,7 @@ One node failure must take down one role only.
 
 - **GitHub is the origin** (`git@github.com:bfeitknecht/<repo>.git`) for apex, exhib, glob, infra, omni, thyme (since 2026-11-28). Push there. CI runs there.
 - **Forgejo is a backup:** `bf/<repo>` on `git.0xbf.ch` are pull mirrors of GitHub (every 1 h). Remote `forgejo`, read only. A push to it fails.
-- **Renovate** is the Mend GitHub App. Shared preset: `renovate/default.json5`. Each repo extends it in `renovate.json5`. No automerge. Infra PRs still go PR -> merge -> tag.
+- **Renovate** is the Mend GitHub App on apex, exhib, glob, infra (not thyme, not omni). Shared preset: `renovate/default.json5`. Each repo extends it in `renovate.json5`. No automerge. Infra PRs still go PR -> merge -> tag.
 
 ## Kustomization dependency tree
 

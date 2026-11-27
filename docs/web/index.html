@@ -1835,8 +1835,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         id: "renovate-app",
         prio: 1,
         cat: "manual",
-        t: "Install the Renovate GitHub App on the six repos",
-        d: "https://github.com/apps/renovate > Install > Only select repositories: apex, exhib, glob, infra, omni, thyme. Each repo already has renovate.json5 (shared preset infra renovate/default.json5), so no onboarding PRs. Then revoke the old GitHub tokens: the Forgejo push-mirror PAT and Renovate's GITHUB_COM_TOKEN (GitHub > Settings > Developer settings). In Forgejo delete the users renovate and opencode.",
+        t: "Install the Renovate GitHub App on apex, exhib, glob, infra",
+        d: "https://github.com/apps/renovate > Install > Only select repositories: apex, exhib, glob, infra (not thyme, not omni). Each repo already has renovate.json5 (shared preset infra renovate/default.json5), so no onboarding PRs. Then revoke the old GitHub tokens: the Forgejo push-mirror PAT and Renovate's GITHUB_COM_TOKEN (GitHub > Settings > Developer settings). The Forgejo users renovate and opencode are deleted.",
         svc: "forgejo",
       },
       {
@@ -1852,7 +1852,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         prio: 2,
         cat: "manual",
         t: "After the opencode removal: delete the Forgejo bot and the GHCR package",
-        d: "Live since v1.98.0: namespace and PVC gone, rzbl runs one qemu (devil, checked 2026-11-27). Left: Forgejo > Site Administration > User Accounts: delete opencode (or revoke its token and collaborator rights); GitHub > Packages: delete opencode.",
+        d: "Live since v1.98.0: namespace, PVC, qemu and the Forgejo user opencode are gone (checked 2026-11-28). Left: GitHub > Packages > opencode > Package settings > Delete.",
         svc: "devil",
       },
       {
@@ -2744,6 +2744,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "Renovate scope: apex, exhib, glob, infra only (not thyme, omni); configs committed in apex, exhib, glob with Dockerfile annotations; Forgejo bot renovate deleted.",
+      ],
       [
         "2026-11-28",
         "GitHub primary for the six repos; Forgejo repos re-created as pull mirrors (1 h, refs equal, git backups taken first). Renovate: Mend GitHub App with shared preset (no PR limits, actions pinned, lock files, Typst imports, Dockerfile ARGs, Knative Serving, topf; DB majors by approval; false linuxserver majors blocked); in-cluster CronJob removed (v1.102.0).",

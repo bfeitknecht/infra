@@ -118,7 +118,8 @@ Typst Universe flow run there.
 Forgejo (`git.0xbf.ch/bf/<repo>`) is a backup: each repo is a pull mirror of GitHub (every 1 h).
 Do not push to it. Sync one now: Forgejo > repo > Settings > Mirror settings > Synchronize now.
 
-Renovate is the Mend Renovate GitHub App (github.com/apps/renovate). It reads `renovate.json5` in
+Renovate is the Mend Renovate GitHub App (github.com/apps/renovate) on apex, exhib, glob and infra
+(not thyme, not omni). It reads `renovate.json5` in
 each repo (shared preset: infra `renovate/default.json5`) and opens PRs; the Dependency Dashboard
 is an issue in each repo. Left for you: revoke the GitHub tokens that only Forgejo and the old
 CronJob used (push mirror token in `.private/github-mirror-token.sops.yaml`, Renovate's

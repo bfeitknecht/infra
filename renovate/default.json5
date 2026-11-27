@@ -1,6 +1,6 @@
 {
-  // Shared Renovate preset for every bfeitknecht repo (apex, exhib, glob,
-  // infra, omni, thyme). Each repo: renovate.json5 with
+  // Shared Renovate preset for apex, exhib, glob and infra (not thyme, not
+  // omni: owner, 2026-11-28). Each repo: renovate.json5 with
   //   extends: ["github>bfeitknecht/infra//renovate/default.json5"]
   // Runs as the Mend Renovate GitHub App. Pull requests only, no automerge.
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
