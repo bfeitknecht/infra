@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.102.0";
+    const INFRA_TAG = "v1.103.0";
 
     const NODES = [
       {
@@ -1029,7 +1029,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "forgejo",
         ks: "forgejo",
         host: "https://git.0xbf.ch · ssh://git@git.0xbf.ch",
-        image: "codeberg.org/forgejo/forgejo:16.0.5",
+        image: "codeberg.org/forgejo/forgejo:16.0.7",
         desc: "Git forge.",
         ports: "HTTP 3000, SSH 22 (WAN/LB 22)",
         deps: ["traefik", "storage"],
@@ -1055,7 +1055,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "pds",
         ks: "pds",
         host: "https://pds.0xbf.ch · *.pds.0xbf.ch",
-        image: "ghcr.io/bluesky-social/pds:0.4.5034",
+        image: "ghcr.io/bluesky-social/pds:0.4.5065",
         desc: "Bluesky/atproto personal data server. Handles <name>.pds.0xbf.ch.",
         ports: "HTTP 3000 (Service pds-http)",
         deps: ["traefik", "storage"],
@@ -1077,7 +1077,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "atuin",
         ks: "atuin",
         host: "https://atuin.0xbf.ch",
-        image: "ghcr.io/atuinsh/atuin:18.24.2",
+        image: "ghcr.io/atuinsh/atuin:18.25.1",
         desc: "Shell history sync (client-side encrypted).",
         ports: "HTTP 8888",
         deps: ["traefik", "storage"],
@@ -2098,6 +2098,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.103.0",
+        "2026-11-28",
+        "patch and minor updates: 24 images, authentik 2026.8.7, cert-manager 1.21.3, cilium 1.20.5, nvidia-device-plugin 0.20.2, local-path-provisioner 0.0.37 (security fix), flux action 2.10.1",
+      ],
+      [
         "v1.102.0",
         "2026-11-28",
         "Renovate CronJob and secret out (the Mend GitHub App replaces it); shared preset renovate/default.json5; GitHub primary, Forgejo pull mirrors",
@@ -2744,6 +2749,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "Upgrades batch 1 (v1.103.0): all patch and minor image and chart updates except chart+CRD groups, Talos and devil.",
+      ],
       [
         "2026-11-28",
         "Renovate scope: apex, exhib, glob, infra only (not thyme, omni); configs committed in apex, exhib, glob with Dockerfile annotations; Forgejo bot renovate deleted.",

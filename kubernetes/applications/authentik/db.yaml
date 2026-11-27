@@ -40,7 +40,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: postgres
-          image: docker.io/library/postgres:17.11-trixie
+          image: docker.io/library/postgres:17.12-trixie
           env:
             - name: POSTGRES_USER
               value: authentik

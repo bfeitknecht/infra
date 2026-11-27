@@ -98,7 +98,7 @@ spec:
         # localhost (gluetun port push) and the pod CIDR (the *arr apps;
         # people reach the UI only through authentik).
         - name: settings
-          image: docker.io/library/busybox:1.37
+          image: docker.io/library/busybox:1.38
           command:
             - sh
             - -c
@@ -145,7 +145,7 @@ spec:
               mountPath: /config
       containers:
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:5.3.0
+          image: lscr.io/linuxserver/qbittorrent:5.3.1
           env:
             - name: PUID
               value: "1000"

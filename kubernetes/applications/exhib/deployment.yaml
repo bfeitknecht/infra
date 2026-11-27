@@ -32,7 +32,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: prepare-site-volume
-          image: busybox:1.37.0
+          image: busybox:1.38.0
           command: ["sh", "-c", "mkdir -p /data/public /data/incoming /data/content /data/originals"]
           securityContext:
             allowPrivilegeEscalation: false

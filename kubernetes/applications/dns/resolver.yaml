@@ -25,7 +25,7 @@ spec:
         # Kresd does public recursion. It validates DNSSEC. It stubs
         # internal to knotd on loopback.
         - name: kresd
-          image: docker.io/cznic/knot-resolver:v6.4.2
+          image: docker.io/cznic/knot-resolver:v6.5.1
           args: ["-c", "/kresd-config/config.yaml"]
           ports:
             - containerPort: 53
@@ -59,7 +59,7 @@ spec:
         # Knotd is authority for internal. zone. Kresd reaches it on
         # loopback. No other client reaches it.
         - name: knotd
-          image: docker.io/cznic/knot:v3.6.0
+          image: docker.io/cznic/knot:v3.6.2
           command: ["knotd", "-c", "/knot-config/knot.conf"]
           ports:
             - containerPort: 53

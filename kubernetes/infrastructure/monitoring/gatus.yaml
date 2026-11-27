@@ -41,7 +41,7 @@ spec:
             claimName: gatus-data
       containers:
         - name: gatus
-          image: ghcr.io/twin/gatus:v5.36.0
+          image: ghcr.io/twin/gatus:v5.38.0
           env:
             - name: NTFY_TOKEN
               valueFrom:

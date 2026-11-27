@@ -31,7 +31,7 @@ spec:
         # precompressed .br/.gz first: delete them for every patched file.
         # Unmatched patterns leave Immich unbranded, never broken.
         - name: web
-          image: ghcr.io/immich-app/immich-server:v3.4.1
+          image: ghcr.io/immich-app/immich-server:v3.4.2
           command:
             - sh
             - -c
@@ -68,7 +68,7 @@ spec:
               readOnly: true
       containers:
         - name: server
-          image: ghcr.io/immich-app/immich-server:v3.4.1
+          image: ghcr.io/immich-app/immich-server:v3.4.2
           env:
             # OIDC (authentik) and SMTP (Proton). Settings in this file are
             # read-only in the admin UI; edit immich-config instead.

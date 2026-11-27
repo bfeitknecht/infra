@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: pds
-          image: ghcr.io/bluesky-social/pds:0.4.5034
+          image: ghcr.io/bluesky-social/pds:0.4.5065
           # Service pds creates PDS_PORT variable. Pin PDS_PORT to 3000.
           # The bind port does not depend on env order.
           env:

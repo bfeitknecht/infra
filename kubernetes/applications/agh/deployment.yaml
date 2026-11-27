@@ -21,7 +21,7 @@ spec:
         # UI edits persist on PVC. Create both directories. Local-path does
         # not create subPath directories.
         - name: config-seed
-          image: docker.io/busybox:1.37.0
+          image: docker.io/busybox:1.38.0
           command: ["sh", "-c", "mkdir -p /agh-data/conf /agh-data/work && [ -f /agh-data/conf/AdGuardHome.yaml ] || cp /agh-seed/AdGuardHome.yaml /agh-data/conf/AdGuardHome.yaml"]
           volumeMounts:
             - name: data
@@ -31,7 +31,7 @@ spec:
               readOnly: true
       containers:
         - name: agh
-          image: docker.io/adguard/adguardhome:v0.107.79
+          image: docker.io/adguard/adguardhome:v0.107.80
           args:
             - "-c"
             - "/agh-data/conf/AdGuardHome.yaml"

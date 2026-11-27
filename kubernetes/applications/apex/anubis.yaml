@@ -67,7 +67,7 @@ spec:
         # (the route sends only that path here). Anubis' CSS options are
         # enterprise-only; this keeps the stock image.
         - name: style
-          image: docker.io/joseluisq/static-web-server:2.44.1-alpine
+          image: docker.io/joseluisq/static-web-server:2.44.3-alpine
           env:
             - name: SERVER_PORT
               value: "8080"

@@ -37,7 +37,7 @@ spec:
         # Git owns branding.xml (logo, CSS, login note) and the server name
         # (tab title, name in the apps): both are written on every start.
         - name: branding
-          image: docker.io/library/busybox:1.37.0
+          image: docker.io/library/busybox:1.38.0
           command:
             - sh
             - -c
@@ -66,7 +66,7 @@ spec:
         # per-provider element is <PluginConfiguration>, not <OidConfig>
         # (written by the plugin API; Jellyfin silently resets an unreadable file).
         - name: sso-plugin
-          image: docker.io/library/alpine:3.22
+          image: docker.io/library/alpine:3.24
           env:
             - name: VERSION
               value: "5.1.1"
@@ -102,7 +102,7 @@ spec:
         # display extras. Pinned + sha256 like the SSO plugin. Its settings
         # live in the Jellyfin dashboard (Plugins > Jellyfin Enhanced).
         - name: enhanced-plugin
-          image: docker.io/library/alpine:3.22
+          image: docker.io/library/alpine:3.24
           env:
             - name: VERSION
               value: "12.16.0.0"

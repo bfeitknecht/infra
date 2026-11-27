@@ -25,7 +25,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: gpu-exporter
-          image: docker.io/utkuozdemir/nvidia_gpu_exporter:1.2.1
+          image: docker.io/utkuozdemir/nvidia_gpu_exporter:1.19.0
           # Explicit fields: AUTO also picks up fields whose names contain
           # brackets (power_smoothing ... [ms]) on newer drivers, and the
           # exporter panics on them.
