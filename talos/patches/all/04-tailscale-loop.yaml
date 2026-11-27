@@ -1,0 +1,14 @@
+# tailscaled advertises the cilium_host address (pod CIDR) as an endpoint.
+# A peer then sends WireGuard to it through Cilium VXLAN, which itself runs
+# over Tailscale: a loop. The path flapped every 1-2 min with ~7 s stalls
+# (API timeouts home -> oci, k8up lease loss). This rule makes the kernel
+# refuse tailscaled's own packets (fwmark 0x80000/0xff0000, iif lo = sent by
+# the host) to the pod CIDR, so disco never picks that path.
+apiVersion: v1alpha1
+kind: RoutingRuleConfig
+name: "5190"
+dst: 10.244.0.0/16
+iifName: lo
+fwMark: 524288
+fwMask: 16711680
+action: unreachable

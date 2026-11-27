@@ -2751,6 +2751,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
       [
         "2026-11-27",
+        "API timeouts home -> oci fixed: tailscaled used the cilium_host IP (pod CIDR) as a path, looped through VXLAN over Tailscale, stalled ~7 s every 1-2 min. Talos rule 5190 (iif lo, fwmark 0x80000, to 10.244.0.0/16, unreachable) on all nodes.",
+      ],
+      [
+        "2026-11-27",
         "forgejo-runner removed and Forgejo Actions off (seed and live app.ini): Forgejo is the origin, GitHub the push mirror and the CI runner (v1.99.0). No Forgejo workflows in any repo (all branches checked).",
       ],
       [

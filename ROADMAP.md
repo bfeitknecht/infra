@@ -9,12 +9,12 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Machines:** anti (MacBook, nix-darwin) is the daily driver since 2026-11-25; echo is retired. devil (Kata NixOS VM on rzbl) is the dev box: Tailscale SSH `ssh bf@devil`, Rex over `ssh://devil`, the agents run there.
 - **Public:** apex `0xbf.ch` (0.1.20), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
 - **Internal:** AGH, knot/kresd, devil, *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate.
-- **Backup:** works since 2026-11-25 (NAS on a new tailnet IP, v1.93.0). Nightly: atuin, authentik, forgejo, pds. Restore drill not done.
+- **Backup:** works since 2026-11-25 (NAS on a new tailnet IP, v1.93.0). Nightly (green since 2026-11-26): atuin, authentik, forgejo, pds. Restore drill not done.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
 
-- [ ] **Backup path:** watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
+- [ ] **Backup path:** nightlies green since 2026-11-26 (atuin, authentik, forgejo, pds). Left: restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [ ] **Age key backup** off the Mac (omni NOW). It decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it.
 - [ ] **CLI logins** by hand: `gh`, `tea`, `glab` on devil; `gh`, `tea` on anti (atlas `cli-logins`).
 - [ ] **opencode leftovers:** delete the Forgejo bot `opencode` and the GHCR package `opencode` (atlas `opencode-gone`). Namespace, PVC and qemu are gone (checked 2026-11-27).
@@ -24,7 +24,7 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Audit findings (2026-11-25)
 
-- [ ] **API timeouts from home to oci** (`100.73.186.19:6443` over Tailscale): ~150 five-second timeouts from rbpi in 20 h; the API server answers in < 0.1 s, so it is the path. k8up restarted 19 times in 32 h (lost leader lease).
+- [x] **API timeouts from home to oci** (2026-11-27): tailscaled used the `cilium_host` IP (pod CIDR) as a path; it loops through Cilium VXLAN over Tailscale and stalled ~7 s every 1-2 min. etcd was fast (all lease writes < 0.4 s). Fixed with Talos rule 5190 (`talos/patches/all/04-tailscale-loop.yaml`) on all nodes. Watch k8up restarts and the apiserver lease 504 count.
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
 - [ ] **Renovate Monday runs:** a manual run works (Dependency Dashboard issue #1, PRs #2 Talos 1.14.7, #3 patch group). Watch the next scheduled run.
 - [ ] **devil rollout hangs:** a Kata stop can hang with the guest up (v1.92.0, again v1.98.0: Terminating for hours). The fix is `ssh bf@devil sudo systemctl poweroff`. Find the cause (qemu stop timeout, agent shutdown).
