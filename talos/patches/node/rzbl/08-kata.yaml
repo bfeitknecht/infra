@@ -1,6 +1,6 @@
 # Kata (rzbl): our own copy of the qemu config, so one setting can change.
-# Kata backs each VM's RAM with /dev/shm (8.3 GB here; devil and opencode
-# share it). A full shm kills qemu with SIGBUS (2026-11-25). With
+# Kata backs each VM's RAM with /dev/shm (8.3 GB here; devil is the one
+# VM since 2026-11-27). A full shm kills qemu with SIGBUS (2026-11-25). With
 # reclaim_guest_freed_memory the balloon reports freed guest pages and qemu
 # returns them to the host, so shm shrinks again.
 #

@@ -6,7 +6,7 @@ Hybrid Talos Linux Kubernetes cluster, managed by Flux from this repo. One
 control plane in Oracle Cloud `eu-zurich-1` (oci), two workers at home: a
 Raspberry Pi 5 (rbpi, the always-on edge) and a Razer Blade 15 (rzbl, GPU
 and bulk storage). Hardware details: `docs/HARDWARE.md`. Agent and operator rules:
-`AGENTS.md` (full notes per component: `docs/COMPONENTS.md`). Owner runbook: `docs/OPERATIONS.md`. Day-to-day use (sign-in, streaming, Rex, opencode): `docs/GUIDE.md`. Interactive atlas:
+`AGENTS.md` (full notes per component: `docs/COMPONENTS.md`). Owner runbook: `docs/OPERATIONS.md`. Day-to-day use (sign-in, streaming, Rex, agents): `docs/GUIDE.md`. Interactive atlas:
 `docs/web/index.html`.
 
 ### Infrastructure & Operations
@@ -25,7 +25,7 @@ and bulk storage). Hardware details: `docs/HARDWARE.md`. Agent and operator rule
 
 - **Public sites:** apex `0xbf.ch` (SSH TUI: `ssh -p 2222 0xbf.ch`), glob `blog.0xbf.ch`, exhib `gallery.0xbf.ch`
 - **Public apps:** Forgejo `git.0xbf.ch` (git SSH on `22`), Jellyfin `videos.0xbf.ch`, Immich `photos.0xbf.ch`, copyparty `files.0xbf.ch`, atuin `atuin.0xbf.ch`, ATProto PDS `pds.0xbf.ch`, ntfy `notify.0xbf.ch`
-- **Internal (`*.internal`):** *arr apps, qBittorrent (Proton VPN), Navidrome, Dawarich, opencode (agent VM, bubblewrap sandbox), Ollama, devil (dev VM), Grafana, Gatus, AdGuard Home
+- **Internal (`*.internal`):** *arr apps, qBittorrent (Proton VPN), Navidrome, Dawarich, Ollama, devil (dev VM, the agents run here), Grafana, Gatus, AdGuard Home
 - **Platform:** knotd + kresd (`.internal` zone), DDNS, Time Machine (Samba), Forgejo Actions runner, Knative (tier-3 whims)
 
 ### Planned
@@ -50,7 +50,7 @@ flowchart LR
   subgraph rbpi["rbpi · Raspberry Pi 5 · edge, always on"]
     edge["Traefik (Gateway), AGH 10.10.20.153, sshmux"]
     ctrl["Flux, cert-manager, Keel, tailscale operator, local-path"]
-    core["forgejo, pds, atuin, ntfy, devil (Kata)"]
+    core["forgejo, pds, atuin, ntfy"]
     web["apex + apex-tui, exhib"]
     mon["Prometheus, Alertmanager, Grafana, Gatus"]
   end
@@ -60,7 +60,7 @@ flowchart LR
     media["*arr, qbittorrent + gluetun (VPN), navidrome"]
     pg["authentik, immich, dawarich (Postgres)"]
     files["copyparty, Time Machine (4 TB SSD)"]
-    agent["opencode (Kata), forgejo runner, Renovate"]
+    agent["devil (Kata VM, the agents), forgejo runner, Renovate"]
   end
 
   float["floating: glob, apex-anubis, ddns, tailscale-relay, knative, metrics-server"]
@@ -94,8 +94,6 @@ can report a dead rzbl. Live view: `docs/web/index.html` (atlas).
 │       ├── all/                    # cluster-wide: hostname, tailscale, CNI
 │       ├── control-plane/          # oci: install disk, network, certSANs
 │       └── node/                   # per-host: 01-install, 02-network, 03-tailscale, 04-storage
-│
-├── images/                         # in-tree images (sshmux, opencode), published with the release tag
 │
 └── kubernetes/                     # Flux GitOps Manifests
     ├── flux/                       # OCIRepository (semver) + root Kustomization
@@ -164,13 +162,13 @@ Dry-run validates all manifests in a Kustomization before apply. So CRs must not
 
 ### Ingress & Certificates
 
-- Traefik is Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners use `8000/8443` plus TCP `22` for forgejo git-ssh, `2222` for the sshmux (apex TUI), `2223` for devil SSH (LAN/tailnet only). The router forwards WAN `80/443/22/2222` to rbpi (Traefik hostPorts).
+- Traefik is Gateway API implementation (`gatewayClassName: traefik`). Gateway listeners use `8000/8443` plus TCP `22` for forgejo git-ssh, `2222` for the sshmux (apex TUI). The router forwards WAN `80/443/22/2222` to rbpi (Traefik hostPorts).
 - Gateway address `10.10.20.128` is from Cilium LB-IPAM pool in `network/ipam`. It is L2-announced on worker `end0`.
 - Public names `0xbf.ch` and `*.0xbf.ch` use Let's Encrypt wildcard via Cloudflare DNS-01.
 - Internal names `*.internal` use cert-manager internal CA. Chain is selfsigned bootstrap to 10y CA (name-constrained to `.internal`) to 1y cert with explicit names. Let's Encrypt cannot issue for `internal`.
 - Traefik dashboard is at `https://traefik.internal`. It is IngressRoute with LAN allowlist middleware.
 - ATProto PDS is at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle via `/.well-known/atproto-did`). Custom handles use DNS TXT.
-- Devil kata VM: SSH on `devil.internal:2223` via TCPRoute to VM sshd, LAN + tailnet only. Rex rides that SSH. No web route.
+- devil (Kata VM): no route at all. Tailscale SSH on its own tailnet node (`ssh bf@devil`), Rex on the node `deviler`. No sshd since 2026-11-24.
 
 ### Secrets
 

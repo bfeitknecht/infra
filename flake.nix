@@ -2,7 +2,7 @@
   # The tools to work on infra: `direnv allow` (or `nix develop`) in the
   # repository. talosctl and kubectl must match the cluster (talos/topf.yaml
   # talosVersion, kubernetesVersion); flake.lock pins them, so check both
-  # after `nix flake update`. images/opencode has its own flake.
+  # after `nix flake update`.
   description = "infra: cluster tools";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

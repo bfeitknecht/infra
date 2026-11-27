@@ -1,6 +1,6 @@
 ---
 title: "GENESIS: a homelab journey"
-sub_title: "From one Pi to a three-node Talos cluster, in 73 days"
+sub_title: "From one Pi to a three-node Talos cluster, in 76 days"
 author: Basil Feitknecht
 theme:
     override:
@@ -53,12 +53,12 @@ By the numbers
 
 |              |                                              |
 | ------------ | -------------------------------------------- |
-| days         | **69** calendar, **40** active               |
+| days         | **76** calendar, **47** active               |
 | repositories | **6**: infra, apex, exhib, glob, thyme, omni |
-| commits      | **530** (plus **123** merged pull requests)  |
-| releases     | **208** tags, **163** of them infra          |
-| lines        | **+173,813 / −118,345**                      |
-| roadmap      | **56** items done, **19** open               |
+| commits      | **720** (plus **123** merged pull requests)  |
+| releases     | **258** tags, **203** of them infra          |
+| lines        | **+195,115 / −130,906**                      |
+| roadmap      | **71** items done, **21** open               |
 
 Source: `python3 scripts/journey.py` -> `docs/web/journey.html`
 
@@ -101,7 +101,7 @@ Razer Blade 15, GTX 1660 Ti, 4 TB SSD
 - GPU: Jellyfin, Ollama, Immich ML
 - media, photos, files
 - authentik + Postgres
-- Kata VMs for agents
+- devil: the dev VM (Kata)
 
 <!-- end_slide -->
 
@@ -280,6 +280,22 @@ Phase 10: polish and ghosts (Nov 24)
 
 <!-- end_slide -->
 
+Phase 11: the new Mac and less to run (Nov 25 to 27)
+===
+
+<!-- font_size: 2 -->
+
+- **echo to anti**: one `install.sh` from a fresh Mac to a nix-darwin switch; the age key off the Mac first
+- anti starts plain: function-only macOS settings, ANSI colours everywhere, the **NULL** wallpaper from apex
+- **backups** work again: the NAS on a new tailnet IP, the bucket back, the first snapshot
+- **Renovate** runs for real: a dashboard and grouped PRs, chart and CRD tag together
+- names by purpose: `videos.0xbf.ch`, `locations.0xbf.ch`; 0xbf icons in Jellyfin, Immich, copyparty
+- CI on GitHub only; infra gets its own **dev shell** (topf, talosctl, flux from one flake)
+- devil becomes a sops recipient: two keys, anti and devil, nothing else
+- the **opencode server is gone**: rzbl sat at 78 % RAM; the agents run on devil, reached by Rex
+
+<!-- end_slide -->
+
 What went wrong (and what it taught)
 ===
 
@@ -306,6 +322,8 @@ What went wrong (and what it taught)
 - the clone URL said port 2223 for weeks: the display port is its own setting
 - behind a TCP proxy every client has the proxy's address: no fail2ban there
 - Kata keeps VM memory in `/dev/shm`: when it fills, qemu dies and the guest says nothing
+- Flux drops `*.png` twice, in the push and in the source: ship icons as `binaryData`
+- an isolated agent server cost a whole VM: the cheapest wall is the one you do not run
 
 <!-- end_slide -->
 
@@ -314,10 +332,10 @@ Next
 
 <!-- font_size: 2 -->
 
-1. **backups**: the bucket back on the NAS, a green night, then a restore drill
-2. **agents**: a good `agents.md`, the CLIs logged in, one way per task
-3. thyme 0.2.0 on Universe, then glob 0.1.8
-4. Time Machine, the real photos and files, and the move from echo to anti
+1. **backups**: green nights, a restore drill, then Schedules for photos and files
+2. **anti**: the rice, one piece at a time (bar, window manager, launcher)
+3. **devil**: nvf as the editor, the CLIs logged in, the agents from the phone over Rex
+4. thyme 0.2.0 on Universe, then glob 0.1.8
 
 <!-- pause -->
 

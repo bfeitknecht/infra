@@ -1,17 +1,19 @@
 # Roadmap
 
-Status as of 2026-11-25. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md` and the atlas "Needs you"; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
+Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md` and the atlas "Needs you"; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.91.0`, every Flux Kustomization and HelmRelease ready, Gatus 35/35 green. Load: rbpi ~28 % RAM, rzbl ~54 %, oci ~36 %.
-- **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. CI runs on GitHub only (Forgejo workflows removed 2026-11-25; the runner is idle). Bots: `opencode`, `renovate`.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.97.0`, every Flux Kustomization and HelmRelease ready. Load: rbpi ~28 % RAM, rzbl ~78 % (devil's Kata VM 4.7 GB), oci ~39 %. The opencode server is out of the tree (live with the next tag).
+- **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. CI runs on GitHub only (Forgejo workflows removed 2026-11-25; the runner is idle). Bots: `renovate` (`opencode` retired 2026-11-27).
 - **Public:** apex `0xbf.ch` (0.1.20, brand palette), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0, curated photo metadata live), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
-- **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex node `deviler`), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), opencode (Nix image in Kata, bubblewrap sandbox), Renovate.
+- **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex node `deviler`), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate. The agents (opencode, Claude Code) run on devil.
 - **Backup:** works again since 2026-11-25 (NAS on a new tailnet IP, v1.93.0; bucket back). First snapshot: atuin. Nightly schedules: atuin, authentik, forgejo, pds. Restore drill not done yet.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
+
+- [ ] **Release the opencode removal** (`just release X.Y.Z`): Flux prunes the namespace and PVC `opencode-data` (its data goes). Then: no opencode qemu on rzbl, delete the Forgejo bot `opencode` and the GHCR package `opencode` (atlas `opencode-gone`).
 
 - [ ] **Next push: echo -> anti** (factory reset, apply omni). Runbook and decisions: omni `docs/RESET.md`. Gate: the age key is off the Mac (it decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it).
 - [ ] **Backup path:** bucket and relay fixed (2026-11-25, manual atuin snapshot OK). Left: watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
@@ -40,7 +42,7 @@ After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Project
 
 ## NEXT
 
-- [x] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `devil`, owner-only). Left: `nh os switch` on devil, open the sign-in link from `rex server status`, disable key expiry on the node, then on the iPhone add `https://devil.tailac5960.ts.net`.
+- [x] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `deviler`, owner-only); live, the iPhone uses `https://deviler.tailac5960.ts.net`.
 - [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; (`music.0xbf.ch` is public since 2026-11-23).
 - [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
 - [ ] glob post descriptions (wording).
@@ -55,6 +57,8 @@ After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Project
 - [ ] Identity: atproto login source.
 
 ## Done (recent)
+
+- [x] 2026-11-27 opencode server out of the tree (app, cert name, authentik objects absent, image and CI step, release pin check): rzbl memory; the agents run on devil. Live with the next tag (atlas `opencode-gone`). Atlas and journey current as of v1.97.0.
 
 - [x] 2026-11-20 devil browser terminal removed (v1.58.0); 89 merged branches deleted across the repos.
 - [x] 2026-11-20 Forgejo primary with GitHub push mirrors, Renovate on Forgejo (v1.57.0); docs unified (OPERATIONS, GUIDE, README diagram); Anubis on `/cv` plain monochrome (v1.56.x); exhib web uploader (0.5.8, v1.55.0); glob links in the footer (0.1.5); thyme 0.1.3 PR; `.private` cleanup.
@@ -99,9 +103,9 @@ Domain template is `{{.Name}}.0xbf.ch`. KSvc name sets subdomain. Pull secrets a
 
 | Node | Path                     | Disk          | Users                                                                             |
 | ---- | ------------------------ | ------------- | --------------------------------------------------------------------------------- |
-| rbpi | `/var/mnt/storage-nvme0` | NVMe 256 GB   | agh, pds, atuin, devil, exhib                                                     |
+| rbpi | `/var/mnt/storage-nvme0` | NVMe 256 GB   | agh, pds, atuin, ntfy, exhib, monitoring                                          |
 | rbpi | `/var/mnt/storage-nvme1` | NVMe 250 GB   | forgejo                                                                           |
-| rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, authentik db, ollama, opencode, immich db/models, dawarich, runner |
+| rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, authentik db, ollama, devil, immich db/models, dawarich, runner   |
 | rzbl | `/var/mnt/storage-ssd0`  | SATA SSD 4 TB | media library, immich photos, copyparty, Time Machine (class `local-path-ssd`)    |
 
 ## Conventions for every new application

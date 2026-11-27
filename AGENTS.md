@@ -29,7 +29,6 @@ edit manifests -> git commit -> push vX.Y.Z tag -> CI publishes to ghcr.io/bfeit
 
 ```
 flake.nix             dev shell (direnv): topf (nix/topf.nix), talosctl, kubectl, flux, helm, kn, cilium, sops, just, yamlfmt
-images/opencode/      flake.nix pinning omni: the OpenCode server image (Nix build)
 talos/                topf config, schematics, node patches (talos/patches/node/<node>/)
 docs/                 COMPONENTS.md (full notes), OPERATIONS.md (runbook), GUIDE.md, journey.md, web/ (atlas)
 kubernetes/
@@ -40,7 +39,7 @@ kubernetes/
 └── applications/     one directory = one namespace = one Flux Kustomization
 ```
 
-Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), forgejo-runner, pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, opencode (Kata), copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
+Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), forgejo-runner, pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
 
 ## Naming conventions
 
@@ -64,7 +63,7 @@ One node failure must take down one role only.
 
 - **oci:** control plane + `dns` resolver. The taint stays. No other workloads.
 - **rbpi** (always-on edge): Traefik (pinned), AGH, tier-1 small-state apps (forgejo, pds, atuin), tier-2 sites, monitoring. Platform controllers **prefer** rbpi (`preferredDuringScheduling`, weight 100): cert-manager, Keel, tailscale operator, local-path-provisioner, Flux (a `kubectl patch`; a new `flux install` drops it).
-- **rzbl** (heavy): GPU, bulk storage, Postgres apps (authentik, immich, dawarich), Kata VMs (opencode, devil), CI runner. It boots from USB: do not make the cluster depend on it to heal.
+- **rzbl** (heavy): GPU, bulk storage, Postgres apps (authentik, immich, dawarich), the Kata VM (devil), CI runner. It boots from USB: do not make the cluster depend on it to heal.
 - Stateless apps float. Stateful apps follow their PVC (local-path PVs are node-bound).
 
 ## Kustomization dependency tree
@@ -80,7 +79,7 @@ knative-operator dependsOn knative-operator-crds; knative-serving dependsOn knat
 keel, gpu, kata: no dependencies
 
 apps: most depend on storage and traefik
-agh +dns; media, ollama +gpu; devil +kata; opencode +ollama, authentik
+agh +dns; media, ollama +gpu; devil +kata
 forgejo-runner +forgejo; qbittorrent +media; authentik +k8up-crds
 sshmux +traefik, sshpiper-crds; renovate: none
 ```
@@ -103,10 +102,9 @@ Each line broke something once. Details in `docs/COMPONENTS.md`.
 - **Tailscale operator:** do not rename Secret `operator-oauth`. OAuth client tags are fixed at creation.
 - **Tailscale nodes:** an extra home node needs `--accept-routes --advertise-routes=<ip>/32` plus `RoutingRuleConfig` priority 5200 `dst 10.10.0.0/16 table main`, or rbpi's route hijacks LAN traffic.
 - **Tagged nodes cannot reach shared-in machines.** Use the untagged `tailscale-relay` (ns `egress`) for shared targets (Garage).
-- **Kata memory:** each Kata VM is 2 GiB plus its memory limit, backed by rzbl `/dev/shm` (8.3 GB). A full shm kills qemu (SIGBUS, no guest log). Keep both VMs' limits + 4 GiB below shm: opencode 2Gi, devil 4Gi. rzbl runs its own qemu config (`reclaim_guest_freed_memory`, `talos/patches/node/rzbl/08-kata.yaml`).
+- **Kata memory:** each Kata VM is 2 GiB plus its memory limit, backed by rzbl `/dev/shm` (8.3 GB). A full shm kills qemu (SIGBUS, no guest log). Keep the sum of all Kata limits + 2 GiB per VM below shm: today devil alone (5Gi, 7 GiB). Add a second Kata VM only after that sum. rzbl runs its own qemu config (`reclaim_guest_freed_memory`, `talos/patches/node/rzbl/08-kata.yaml`).
 - **Kata pods:** a clean shutdown still leaves the pod `Error` (exit 143); with `strategy: Recreate` it blocks the rollout until deleted. Each force-delete can leave an orphan qemu: check `talosctl -n <node> ps | grep qemu`. The stop can also hang with the guest still up (devil, v1.92.0: Terminating for 15 min): `ssh bf@devil sudo systemctl poweroff` ends it cleanly, no orphan.
 - **devil:** stays Kata (owner, 2026-11-23). Tailscale SSH only (`ssh bf@devil`): no sshd, no Service, no route; do not add an HTTPRoute. `register-nix-paths.service` stays masked in omni (it hangs the systemd job queue). After a move: no qemu on the old node, and `rex whoami` matches.
-- **opencode:** the image pin in `applications/opencode/` must equal the release tag (`just release` refuses a mismatch); bump `images/opencode/flake.lock` with `nix flake update omni`. Never set `OPENCODE_SANDBOX_CONFIG` (it overrides the policy file). Never put model keys or `ANTHROPIC_API_KEY` in env vars.
 - **Tier-2 (apex, glob, exhib):** `:latest` + Keel; the Kustomization must ignore the image field, or Flux reverts Keel. No Keel on tier 1, tier 3 or Knative.
 - **Knative:** all config in the `KnativeServing` CR `spec.config` (the operator overwrites ConfigMaps). Istio plugin disabled. Its PDBs block drains: `topf upgrade --delete-if-eviction-fails`. Whims (`whimsy` ns) are outside Flux: deploy with `kn`.
 - **Forgejo:** app.ini edits go into the ConfigMap seed **and** the live `/data/gitea/conf/app.ini` (as `su-exec git`). `ACCOUNT_LINKING = login`, never `auto`. SSO only; clear local 2FA with `forgejo admin user reset-mfa` (`--skip-local-2fa` is a no-op in 16).

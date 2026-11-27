@@ -764,10 +764,12 @@ data:
           group: !KeyOf group-developers
         attrs:
           order: 1
+  # The forward-auth apps and the embedded outpost. The key keeps its first
+  # name (opencode.yaml): authentik tracks a blueprint instance by its path.
   opencode.yaml: |-
-    # Forward auth (single app) for opencode.internal, group developers.
-    # Internal only. The embedded outpost serves it. Add later forward-auth
-    # providers to the same outpost list here.
+    # Forward auth (one forward_single provider per host), internal only.
+    # The embedded outpost serves them: add every new forward-auth provider
+    # to its list below.
     version: 1
     metadata:
       name: 0xbf app opencode
@@ -776,30 +778,6 @@ data:
         id: group-developers
         identifiers:
           name: developers
-      - model: authentik_providers_proxy.proxyprovider
-        id: provider
-        identifiers:
-          name: opencode
-        attrs:
-          mode: forward_single
-          external_host: https://opencode.internal
-          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-          access_token_validity: hours=24
-      - model: authentik_core.application
-        id: app
-        identifiers:
-          slug: opencode
-        attrs:
-          name: OpenCode
-          provider: !KeyOf provider
-          meta_launch_url: https://opencode.internal
-      - model: authentik_policies.policybinding
-        identifiers:
-          target: !KeyOf app
-          group: !KeyOf group-developers
-        attrs:
-          order: 0
       # Internal tools behind forward auth (one forward_single provider per host).
       - model: authentik_core.group
         id: group-family
@@ -1084,7 +1062,6 @@ data:
           managed: goauthentik.io/outposts/embedded
         attrs:
           providers:
-            - !KeyOf provider
             - !KeyOf provider-copyparty
             - !KeyOf provider-exhib
             - !KeyOf provider-sonarr
@@ -1130,8 +1107,18 @@ data:
         state: absent
         identifiers:
           name: sandbox-3
-      # agent.0xbf.ch was public for a few hours on 2026-11-17. Removed: opencode
-      # stays internal. These entries delete the objects; drop them later.
+      # opencode.internal, removed 2026-11-27 with the opencode server (rzbl
+      # memory). These entries delete the objects; drop them later.
+      - model: authentik_core.application
+        state: absent
+        identifiers:
+          slug: opencode
+      - model: authentik_providers_proxy.proxyprovider
+        state: absent
+        identifiers:
+          name: opencode
+      # agent.0xbf.ch was public for a few hours on 2026-11-17. These
+      # entries delete the objects; drop them later.
       - model: authentik_core.application
         state: absent
         identifiers:

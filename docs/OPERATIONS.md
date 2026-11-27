@@ -25,7 +25,6 @@ authentik at `https://auth.0xbf.ch` is the login for every app that supports it.
 | Gallery upload                     | gallery.0xbf.ch/upload          | forward auth                                 | user bf only                                          |
 | Dawarich                           | locations.0xbf.ch               | OIDC (PKCE)                                  | family, developers                                    |
 | Navidrome                          | music.0xbf.ch                   | forward auth; `/rest` open for Subsonic apps | family, friends, developers                           |
-| OpenCode                           | opencode.internal               | forward auth                                 | developers                                            |
 | *arr, qBittorrent, Gatus           | *.internal                      | forward auth                                 | authentik Admins                                      |
 | PDS, atuin, AGH, Traefik dashboard |                                 | own login                                    |                                                       |
 
@@ -106,7 +105,7 @@ the library and tells Jellyfin. Watch at `videos.0xbf.ch`.
 
 ## 5. Remote development
 
-How to use devil, Rex and opencode: `docs/GUIDE.md` sections 3 and 4. Owner-side setup left:
+How to use devil, Rex and the agents on devil: `docs/GUIDE.md` sections 3 and 4. Owner-side setup left:
 the Rex key of the iPhone app (give its public key to the agent) and, later, Rex over the tailnet
 (ROADMAP).
 

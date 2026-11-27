@@ -111,13 +111,14 @@ spec:
               subPath: home
           resources:
             requests:
-              cpu: 500m
-              memory: 2Gi
+              cpu: "1"
+              memory: 3Gi
             # The Kata VM is 2 GiB plus this limit, backed by rzbl's /dev/shm
-            # (8.3 GB, shared with opencode). A full shm kills qemu (SIGBUS).
+            # (8.3 GB): 7 GiB of it. A full shm kills qemu (SIGBUS). More
+            # than 5Gi needs a bigger /dev/shm or less else on rzbl.
             limits:
-              cpu: "4"
-              memory: 4Gi
+              cpu: "6"
+              memory: 5Gi
       volumes:
         - name: state
           persistentVolumeClaim:

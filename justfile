@@ -4,13 +4,7 @@
 default:
     @just --list
 
-# Build the opencode image (a Nix build from omni, pinned by
-# images/opencode/flake.lock). Needs x86_64-linux, e.g. devil. CI builds and
-# pushes it on release tags.
-image:
-    nix build ./images/opencode#default -o opencode-image
-
-# Check: every Flux Kustomization path must build. Reads from disk, no cluster access.
+# Check: every Flux Kustomization path must build, every CRD tag must match its chart. Reads from disk, no cluster access.
 check:
     #!/usr/bin/env sh
     set -eu
@@ -29,6 +23,32 @@ check:
         kubectl kustomize "$p" > /dev/null
     done
     echo "all Kustomizations build"
+
+    # A chart (or operator image) and its pinned CRD tag move together
+    # (AGENTS.md). Renovate groups them (renovate.json5); this catches a
+    # PR that bumps one alone. Columns: CRD GitRepository, tag prefix,
+    # the file with the chart version (or image tag).
+    crds=kubernetes/cluster/crds.yaml
+    bad=0
+    while read -r repo prefix file; do
+        tag="$(yq "select(.kind == \"GitRepository\" and .metadata.name == \"${repo}\") | .spec.ref.tag" "$crds")"
+        case "$file" in
+          *operator.yaml) version="v$(grep -o 'operator/cmd/operator:v[0-9.]*' "$file" | head -n1 | sed 's/.*:v//')" ;;
+          *) version="$(yq 'select(.kind == "HelmRelease") | .spec.chart.spec.version' "$file")" ;;
+        esac
+        if [ "$tag" != "${prefix}${version#v}" ] && [ "$tag" != "${prefix}${version}" ]; then
+            echo "check: ${repo} is ${tag}, but ${file} has ${version}" >&2
+            bad=1
+        fi
+    done <<'PAIRS'
+    traefik-crds v kubernetes/infrastructure/ingress/traefik/traefik.yaml
+    prometheus-crds kube-prometheus-stack- kubernetes/infrastructure/monitoring/kube-prometheus-stack.yaml
+    k8up-crds k8up- kubernetes/infrastructure/backup/k8up/k8up.yaml
+    sshpiper-crds sshpiper- kubernetes/applications/sshmux/sshpiper.yaml
+    knative-operator-crds knative-v kubernetes/infrastructure/knative/operator/operator.yaml
+    PAIRS
+    [ "$bad" = 0 ] || exit 1
+    echo "all CRD tags match their charts"
 
 # Format the YAML tree and the justfile. `just fmt --check` only reports. Sops files excluded.
 fmt *args:
@@ -73,15 +93,6 @@ release version *flags:
     git fetch -q origin
     [ "$(git rev-parse HEAD)" = "$(git rev-parse '@{u}')" ] \
       || { echo "release: HEAD differs from upstream; push or pull first" >&2; exit 1; }
-
-    # The opencode image (Nix, from omni) publishes with the release tag. The
-    # Deployment pin must name it: a tag whose image mismatches crash-loops.
-    for app in opencode; do
-        pin="$(grep -rhoE 'ghcr.io/bfeitknecht/'"$app"':v[0-9]+\.[0-9]+\.[0-9]+' \
-          "kubernetes/applications/$app/" | head -1)"
-        [ "$pin" = "ghcr.io/bfeitknecht/$app:$tag" ] \
-          || { echo "release: $app deployment pins '$pin', not $tag; bump the pin in the same commit" >&2; exit 1; }
-    done
 
     just check
     just fmt --check

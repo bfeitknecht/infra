@@ -68,34 +68,27 @@ the laptop, pick it up from another device.
   prints the sign-in link; open it, then disable key expiry for `deviler` in the admin console.
 - No browser terminal: devil is SSH and Rex only.
 
-## 4. Agentic development (opencode)
+## 4. Agentic development (on devil)
 
 ```
- browser ──> opencode.internal ──authentik──┐
- devil: oc ─────────────── direct ──────────┤
- Mac:  oc = ssh -t devil oc ──────────────┘
-                                            v
-                 opencode web server (Kata VM on rzbl, its own disk)
-                   every bash command: bubblewrap sandbox
-                   git: bot `opencode` ──HTTPS──> git.0xbf.ch (bf/*)
-                                                     │ push mirror
-                                                     v
-                                                 github.com (CI, images)
+ Mac:    Ghostty / Zed ──Tailscale SSH──┐
+ iPhone: Rex app ──tailnet (deviler)────┤
+                                        v
+                 devil (Kata VM on rzbl, your user bf)
+                   opencode (background service: one set of sessions)
+                   claude (Claude Code)
+                   git: your own keys ──SSH──> git.0xbf.ch
 ```
 
-- **One server, many clients.** The browser, `oc` on devil and `oc` on a Mac all show the same
-  sessions. Sessions run in the server, so closing the laptop stops nothing.
-- **Models:** `/connect` once in any client; the key stays on the server. Local fallback: Qwen 2.5
-  Coder 7B on the GPU (Ollama).
-- **Code lives on the server's disk** (`/home/node/Projects`). The agent clones `bf/<repo>` from Forgejo,
-  works on a branch and pushes as the bot `opencode`. You review and merge on `git.0xbf.ch`; the
-  mirror carries it to GitHub, where CI builds images.
-- **What the agent can reach:** the model APIs, package registries, GitHub and Forgejo, nothing else.
-  It cannot see the cluster, your LAN, devil or your keys. Each bash command also runs in its own
-  bubblewrap sandbox: it may write only to the project directory and `/tmp`, cannot read secret
-  paths or opencode's stored API keys, and gets only an allowlist of domains.
-- **Where you do your own work:** devil (`~/src`, your keys, Rex sessions). The agent never touches
-  devil's files.
+- **The agents run on devil, as you.** `opencode` and `claude` are on devil's PATH (omni
+  `hosts/devil.nix`). Sessions live on devil's disk, so closing the laptop stops nothing.
+- **From anywhere:** `ssh bf@devil`, or the Rex app on the phone (a Rex session keeps the agent
+  running). Zed remote on `devil` reaches the same opencode sessions.
+- **Models:** the keys come from omni sops (`opencode/<provider>`), read as files; never as env
+  vars. Local fallback: Qwen 2.5 Coder 7B on the GPU (Ollama).
+- **No isolation wall any more:** the agents act with your rights on devil (your keys, your
+  repos). The isolated server (`opencode.internal`, its own Kata VM, bubblewrap sandbox, Forgejo
+  bot `opencode`) was removed 2026-11-27 to free memory on rzbl. Review what an agent pushes.
 
 ## 5. Gallery and files
 

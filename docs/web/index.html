@@ -786,8 +786,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     /* ============================================================
        DATA. Update this block when the cluster changes.
        ============================================================ */
-    const ASOF = "2026-11-18";
-    const INFRA_TAG = "v1.41.3";
+    const ASOF = "2026-11-27";
+    const INFRA_TAG = "v1.97.0";
 
     const NODES = [
       {
@@ -832,7 +832,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         storage: [{
           path: "/var/mnt/storage-nvme0",
           size: "256 GB",
-          use: "agh, pds, atuin, devil, exhib",
+          use: "agh, pds, atuin, exhib",
         }, { path: "/var/mnt/storage-nvme1", size: "250 GB", use: "forgejo" }],
         routing:
           "Tailscale subnet router for 10.10.10.0/24 and 10.10.20.0/24. Cilium L2 announcements for LB IPs on end0. Router forwards WAN 80/443/22/2222 here.",
@@ -842,7 +842,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "forgejo",
           "pds",
           "atuin",
-          "devil (kata)",
+          "ntfy",
           "exhib",
           "apex + apex-tui",
           "sshmux",
@@ -899,12 +899,17 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "--accept-routes + RoutingRuleConfig 5200 (10.10.0.0/16 → main), advertises 10.10.20.11/32 (approved) so oci reaches it directly. VXLAN via rbpi SNAT does not work.",
         runs: [
           "jellyfin (GPU)",
-          "sonarr",
-          "radarr",
-          "prowlarr",
+          "sonarr, radarr, prowlarr, lidarr, bazarr, seerr, flaresolverr",
+          "qbittorrent (gluetun VPN)",
+          "navidrome",
           "ollama (GPU)",
-          "opencode (kata)",
-          "authentik",
+          "devil (kata)",
+          "authentik (+ Postgres)",
+          "immich (+ ML on GPU, Postgres)",
+          "dawarich (+ Postgres)",
+          "copyparty",
+          "samba (Time Machine)",
+          "forgejo-runner, renovate",
           "nvidia-device-plugin",
           "tailscale-relay",
           "k8up",
@@ -914,7 +919,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         notes: [
           "GPU time-sliced: nvidia.com/gpu = 4 slots, 6 GB VRAM shared, no isolation.",
           "Joined 2026-11-15. Schematic had to be submitted to the Image Factory (404 before).",
-          "Role: heavy, GPU, bulk storage, agent VMs. Not for controllers the cluster needs to heal.",
+          "Role: heavy, GPU, bulk storage, the devil VM. Not for controllers the cluster needs to heal.",
+          "Memory (2026-11-27): 78 % used of 15.5 GiB; devil's qemu 4.7 GB RSS. Kata guest RAM lives in /dev/shm (8.3 GB): the opencode VM was removed to free it.",
         ],
       },
     ];
@@ -1036,7 +1042,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "SSH on clean 22 since infra v1.42.0 (was 2223).",
           "Actions enabled. Runner in forgejo-runner (rzbl), idle: no repo has Forgejo workflows since 2026-11-25 (CI runs on GitHub).",
           "Primary for bf/{apex,infra,thyme,glob,exhib,omni} since 2026-11-20. Push mirrors to GitHub (on push + 8 h) carry tags to CI.",
-          "Bots: opencode (agent VM, HTTPS token), renovate (weekly CronJob).",
+          "Bots: renovate (weekly CronJob). The bot opencode is retired (2026-11-27): delete it or revoke its token.",
         ],
       },
       {
@@ -1099,7 +1105,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         storage: "authentik-db 10Gi (rzbl nvme)",
         runbook: "docs/OPERATIONS.md",
         notes: [
-          "Live since 2026-11-17 (v1.25.1). IdP for Forgejo, Grafana, Immich, Dawarich, Navidrome, opencode, *arr, qBittorrent, Gatus (docs/AUTHENTIK.md).",
+          "Live since 2026-11-17 (v1.25.1). IdP for Forgejo, Grafana, Immich, Dawarich, Navidrome, *arr, qBittorrent, Gatus (docs/AUTHENTIK.md).",
           "Mail via Proton (noreply@0xbf.ch); forgot-password flow recover.",
           "2026-11-17: akadmin deactivated before bf had a password. Recover with ak create_recovery_key (docs/AUTHENTIK.md).",
         ],
@@ -1342,34 +1348,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         storage: "ollama-cache 100Gi (rzbl nvme)",
         notes: [
           "Pull more models: change the Job name in pull-models.yaml or kubectl exec ollama pull.",
-        ],
-      },
-      {
-        id: "opencode",
-        name: "opencode",
-        cat: "ai",
-        status: "live",
-        exp: "internal",
-        node: "rzbl",
-        tier: "1",
-        ns: "opencode",
-        ks: "opencode",
-        host: "https://opencode.internal",
-        image: "ghcr.io/bfeitknecht/opencode:<release tag> (Nix build from omni modules/images/opencode.nix, pinned by images/opencode/flake.lock)",
-        desc: "Coding agent web UI, default model Ollama.",
-        ports:
-          "HTTP 4096 (authentik + server password; devil connects with --server)",
-        deps: ["ollama", "traefik", "storage"],
-        secrets: [
-          "opencode/opencode-secrets.sops.yaml",
-          "opencode/opencode-providers.sops.yaml",
-        ],
-        storage: "opencode-data 50Gi (rzbl nvme)",
-        runbook: "docs/OPERATIONS.md",
-        notes: [
-          "Isolated: Kata VM, Cilium egress allowlist (ingress from Traefik and devil), authentik forward auth (group developers), no SA token.",
-          "v2: serve command, password auth always on (OPENCODE_PASSWORD), sandbox plugin 0.7.0 loads dist/v2.js.",
-          "Claude Code: subscription via the Claude Agent provider (claude on PATH; opencode runs its tools, so the plugin sandbox applies). Login: kubectl exec -it deploy/opencode -- claude, /login. Managed settings /etc/claude-code (own bash sandbox, deny reads). API credits: provider anthropic (key from sops).",
         ],
       },
       {
@@ -1863,9 +1841,9 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "—",
         ks: "kata",
         host: "—",
-        image: "kata 3.32.0 (Talos ext, rbpi + rzbl)",
+        image: "kata-containers 4.3.1 (Talos ext, rbpi + rzbl; rzbl with its own qemu config)",
         desc:
-          "RuntimeClass kata-qemu for VM pods (devil, opencode, agent sandboxes).",
+          "RuntimeClass kata-qemu for VM pods (devil; opencode and the agent sandboxes are gone).",
         ports: "—",
         deps: [],
         secrets: [],
@@ -1907,6 +1885,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: "dawarich",
       },
       {
+        id: "opencode-gone",
+        prio: 1,
+        cat: "manual",
+        t: "Release the opencode removal, then clean up after it",
+        d: "The tree no longer has applications/opencode (2026-11-27). Flux prunes the namespace and PVC opencode-data (reclaim Delete: the data goes) when the next tag is live: `just release X.Y.Z`. Before that, if you want the data: set the PV to Retain. After: no qemu left for opencode on rzbl (`talosctl -n 10.10.20.11 ps | grep qemu`: one, devil); delete the Forgejo bot opencode (or revoke its token and collaborator rights) and the GHCR package opencode; in authentik the old blueprint objects go by themselves (state absent).",
+        svc: "devil",
+      },
+      {
         id: "echo-anti",
         prio: 1,
         cat: "manual",
@@ -1942,8 +1928,8 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         id: "timemachine-mac",
         prio: 2,
         cat: "manual",
-        t: "Time Machine: add the disk on echo",
-        d: "Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/OPERATIONS.md). Before the move to anti.",
+        t: "Time Machine: add the disk on anti",
+        d: "Finder > Go > Connect to Server: smb://10.10.20.145/TimeMachine, user timemachine, password from sops (docs/OPERATIONS.md).",
         svc: "timemachine",
       },
       {
@@ -1967,7 +1953,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         prio: 3,
         cat: "decision",
         t: "Nix dev shells per repo",
-        d: "No repo has flake.nix except omni. See docs/OPERATIONS.md, section 10.",
+        d: "omni and infra (2026-11-26) have a flake.nix dev shell; apex, exhib, glob and thyme do not. See docs/OPERATIONS.md, section 10.",
         svc: null,
       },
     ];
@@ -2053,7 +2039,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["locations.0xbf.ch", "public", "Dawarich (OIDC; phone app with API key)"],
       ["copyparty.internal", "internal", "copyparty"],
       ["files.0xbf.ch", "public", "copyparty"],
-      ["opencode.internal", "internal", "opencode (authentik)"],
     ];
     const TAIL = [
       [
@@ -2146,7 +2131,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         "storage-nvme0",
         "live",
       ],
-      ["opencode", "opencode-data", "50Gi", "rzbl", "storage-nvme0", "live"],
       ["media", "qbittorrent-data", "1Gi", "rzbl", "storage-nvme0", "live"],
       ["ntfy", "ntfy-data", "1Gi", "rbpi", "storage-nvme0", "live"],
       ["authentik", "authentik-db", "10Gi", "rzbl", "storage-nvme0", "live"],
@@ -2161,7 +2145,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
                  ├─ tailscale
                  ├─ monitoring (metrics-server only)
                  └─ apps: apex glob exhib forgejo pds atuin homepage devil agh(dns) media* …
-    gpu ── media, ollama ── opencode
+    gpu ── media, ollama
     backup (k8up) ← egress-tailscale
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
@@ -2702,18 +2686,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         "RENOVATE_TOKEN (Forgejo bot renovate), GITHUB_COM_TOKEN (release notes only)",
       ],
       [
-        "applications/opencode/opencode-secrets.sops.yaml",
-        "opencode",
-        "exists",
-        "git-credentials (Forgejo bot opencode HTTPS token), server-password (v2 server auth; same value in omni)",
-      ],
-      [
-        "applications/opencode/opencode-providers.sops.yaml",
-        "opencode",
-        "exists",
-        "model API keys: anthropic, mistral, openrouter (owner)",
-      ],
-      [
         "applications/pds/pds-secrets.sops.yaml",
         "pds",
         "exists",
@@ -2782,6 +2754,18 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-27",
+        "opencode server removed from the tree (app, Kustomization, opencode.internal cert name, authentik app/provider absent, ReferenceGrant, image build and CI step, just release pin check): rzbl at 78 % RAM; the agents run on devil. Live with the next tag.",
+      ],
+      [
+        "2026-11-27",
+        "atlas and journey brought up to date (as of v1.97.0: nodes, devil on rzbl, Phase 11 in docs/journey.md, journey.html regenerated)",
+      ],
+      [
+        "2026-11-26",
+        "sops: two recipients only, anti (owner) and devil, in infra and omni",
+      ],
       [
         "2026-11-26",
         "Branding PNGs as binaryData ConfigMaps (Flux drops *.png from the artifact; v1.95.0 and v1.96.0 failed media and immich builds, old pods kept running)"
@@ -4185,7 +4169,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["atuin", "atuin", "", 475, 375, 105, "atuin"],
       ["exhib", "exhib", "gallery.0xbf.ch", 60, 440, 110, "exhib"],
       ["apex", "apex", "0xbf.ch + ssh :2222", 180, 440, 110, "apex"],
-      ["devil", "devil", "kata VM", 300, 440, 100, "devil"],
+      ["devil", "devil", "kata VM · Rex", 1100, 375, 95, "devil"],
       ["aghpod", "AGH pod", "", 410, 440, 80, "agh"],
       ["nv0", "nvme0/nvme1", "256+250 GB", 500, 440, 90, null],
       ["glob", "glob", "blog.0xbf.ch", 60, 505, 110, "glob"],
@@ -4204,7 +4188,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["jelly", "Jellyfin", "GPU", 670, 375, 100, "jellyfin"],
       ["arr", "*arr", "sonarr radarr prowlarr lidarr", 780, 375, 150, "sonarr"],
       ["ollama", "Ollama", "GPU · qwen2.5-coder", 940, 375, 150, "ollama"],
-      ["opencode", "opencode", "kata VM", 1100, 375, 95, "opencode"],
       ["gpu", "GPU plugin", "4 slots", 1205, 375, 75, "gpu"],
       ["auth", "authentik", "auth.0xbf.ch", 670, 440, 100, "authentik"],
       ["immich", "immich", "GPU ML", 780, 440, 90, "immich"],
@@ -4254,16 +4237,13 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ["traefik", "atuin", ""],
       ["traefik", "exhib", ""],
       ["traefik", "apex", ""],
-      ["traefik", "devil", ""],
       ["traefik", "jelly", ""],
       ["traefik", "arr", ""],
       ["traefik", "auth", ""],
       ["traefik", "immich", ""],
       ["traefik", "daw", ""],
       ["traefik", "cp", ""],
-      ["traefik", "opencode", ""],
       ["traefik", "glob", ""],
-      ["opencode", "ollama", ""],
       ["ddns", "cf", "wan"],
       ["ctl", "le", "wan"],
       ["gpu", "jelly", ""],

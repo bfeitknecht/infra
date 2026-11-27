@@ -1,9 +1,5 @@
-# Publishes the OCI artifact (Flux source) and, from the same tag, the
-# opencode image (a Nix build from omni, pinned by images/opencode/flake.lock).
-# Image tags equal the git tag, so the Deployment pin matches what CI
-# publishes. The image builds first:
-# Flux may reconcile the artifact as soon as it exists, and a manifest whose
-# image is still pushing would crash-loop.
+# Publishes the OCI artifact (the Flux source) for a release tag. The
+# artifact tag equals the git tag.
 name: Publish OCI Artifact
 
 on:
@@ -27,18 +23,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      # The opencode image is a Nix build defined in omni
-      # (modules/images/opencode.nix); images/opencode/flake.lock pins omni.
-      - name: Install Nix
-        uses: cachix/install-nix-action@v32
-
-      - name: Build and push opencode image
-        run: |
-          nix build ./images/opencode#default -o opencode-image
-          docker load < opencode-image
-          docker tag ghcr.io/bfeitknecht/opencode:dev ghcr.io/${{ github.repository_owner }}/opencode:${{ github.ref_name }}
-          docker push ghcr.io/${{ github.repository_owner }}/opencode:${{ github.ref_name }}
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@v2.9.6

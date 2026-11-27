@@ -34,5 +34,5 @@ jobs:
       - name: Format check
         run: just fmt --check
 
-      - name: Build all Kustomizations
+      - name: Build all Kustomizations, CRD tags match their charts
         run: just check
