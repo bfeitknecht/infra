@@ -1,0 +1,65 @@
+{
+  // Shared Renovate preset for every bfeitknecht repo (apex, exhib, glob,
+  // infra, omni, thyme). Each repo: renovate.json5 with
+  //   extends: ["github>bfeitknecht/infra//renovate/default.json5"]
+  // Runs as the Mend Renovate GitHub App. Pull requests only, no automerge.
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommitsDisabled",
+    ":configMigration",
+    // GitHub Actions pinned to a commit digest (tag kept in a comment).
+    "helpers:pinGitHubActionDigests",
+    // Lock files (flake.lock, Cargo.lock, uv.lock) refreshed once a week.
+    ":maintainLockFilesWeekly",
+    // `# renovate: datasource=... depName=...` above an ARG/ENV in Dockerfiles.
+    "customManagers:dockerfileVersions",
+  ],
+  timezone: "Europe/Zurich",
+  // Track everything, hold nothing back: no PR rate limits.
+  prConcurrentLimit: 0,
+  prHourlyLimit: 0,
+  branchConcurrentLimit: 0,
+  osvVulnerabilityAlerts: true,
+  vulnerabilityAlerts: { labels: ["security"] },
+  // flake.lock: inputs move with lock file maintenance.
+  nix: { enabled: true },
+  customDatasources: {
+    // Typst Universe: one index for all packages.
+    typst: {
+      defaultRegistryUrlTemplate: "https://packages.typst.org/preview/index.json",
+      transformTemplates: ['{"releases": $[name = "{{packageName}}"].{"version": version}}'],
+    },
+  },
+  customManagers: [
+    {
+      // Typst package imports: #import "@preview/name:1.2.3"
+      customType: "regex",
+      managerFilePatterns: ["/\\.typ$/"],
+      matchStrings: ['"@preview/(?<depName>[a-z0-9-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"'],
+      datasourceTemplate: "custom.typst",
+      versioningTemplate: "semver",
+    },
+  ],
+  packageRules: [
+    {
+      // Own images run :latest and are rolled by Keel, not Renovate.
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/bfeitknecht/**"],
+      enabled: false,
+    },
+    {
+      // Patch and digest updates of everything in one PR per repo. Groups
+      // below come later and win (last matching rule wins).
+      groupName: "patch updates",
+      matchUpdateTypes: ["patch", "digest"],
+      matchPackageNames: ["*"],
+    },
+    {
+      groupName: "github actions",
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor", "patch", "digest", "pin", "pinDigest"],
+    },
+  ],
+}

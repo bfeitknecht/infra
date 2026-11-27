@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.101.0";
+    const INFRA_TAG = "v1.102.0";
 
     const NODES = [
       {
@@ -909,7 +909,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "dawarich (+ Postgres)",
           "copyparty",
           "samba (Time Machine)",
-          "renovate",
           "nvidia-device-plugin",
           "tailscale-relay",
           "k8up",
@@ -1040,9 +1039,9 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "SSO via authentik (login source authentik, group developers). Sign-up only through authentik.",
           "Theme 0xbf (exhib/glob grayscale) and ^@ logo.",
           "SSH on clean 22 since infra v1.42.0 (was 2223).",
-          "Actions off since 2026-11-27 (v1.99.0): CI runs on GitHub, the push mirror. The runner is gone.",
-          "Primary for bf/{apex,infra,thyme,glob,exhib,omni} since 2026-11-20. Push mirrors to GitHub (on push + 8 h) carry tags to CI.",
-          "Bots: renovate (weekly CronJob). The bot opencode is retired (2026-11-27): delete it or revoke its token.",
+          "Actions off since 2026-11-27 (v1.99.0): CI runs on GitHub. The runner is gone.",
+          "Backup only since 2026-11-28: bf/{apex,exhib,glob,infra,omni,thyme} are pull mirrors of GitHub (1 h). GitHub is the origin (Forgejo was primary 2026-11-20 to 11-28).",
+          "Bots: none left. Delete the users renovate and opencode (retired 2026-11-27, 2026-11-28).",
         ],
       },
       {
@@ -1468,27 +1467,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ],
       },
       {
-        id: "renovate",
-        name: "Renovate",
-        cat: "dev",
-        status: "live",
-        exp: "cluster",
-        node: "rzbl",
-        tier: "1",
-        ns: "renovate",
-        ks: "renovate",
-        host: "—",
-        image: "ghcr.io/renovatebot/renovate:44.251.0",
-        desc:
-          "Weekly dependency PRs (Mondays 05:00) on bf/infra in Forgejo (bot renovate, since v1.57.0). GitHub token only for release notes. No automerge.",
-        ports: "—",
-        deps: [],
-        secrets: ["renovate/renovate-secrets.sops.yaml"],
-        notes: [
-          "Config renovate.json5 in the repo. Add repos via RENOVATE_REPOSITORIES once each has a config.",
-        ],
-      },
-      {
         id: "agh",
         name: "AdGuard Home",
         cat: "network",
@@ -1854,6 +1832,14 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
 
     const NEEDS = [
       {
+        id: "renovate-app",
+        prio: 1,
+        cat: "manual",
+        t: "Install the Renovate GitHub App on the six repos",
+        d: "https://github.com/apps/renovate > Install > Only select repositories: apex, exhib, glob, infra, omni, thyme. Each repo already has renovate.json5 (shared preset infra renovate/default.json5), so no onboarding PRs. Then revoke the old GitHub tokens: the Forgejo push-mirror PAT and Renovate's GITHUB_COM_TOKEN (GitHub > Settings > Developer settings). In Forgejo delete the users renovate and opencode.",
+        svc: "forgejo",
+      },
+      {
         id: "immich-dawarich",
         prio: 2,
         cat: "manual",
@@ -2111,6 +2097,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.102.0",
+        "2026-11-28",
+        "Renovate CronJob and secret out (the Mend GitHub App replaces it); shared preset renovate/default.json5; GitHub primary, Forgejo pull mirrors",
+      ],
       [
         "v1.101.0",
         "2026-11-28",
@@ -2685,12 +2676,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         "[security] block, admin, SMTP token (mailer-password)",
       ],
       [
-        "applications/renovate/renovate-secrets.sops.yaml",
-        "renovate",
-        "exists",
-        "RENOVATE_TOKEN (Forgejo bot renovate), GITHUB_COM_TOKEN (release notes only)",
-      ],
-      [
         "applications/pds/pds-secrets.sops.yaml",
         "pds",
         "exists",
@@ -2759,6 +2744,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "GitHub primary for the six repos; Forgejo repos re-created as pull mirrors (1 h, refs equal, git backups taken first). Renovate: Mend GitHub App with shared preset (no PR limits, actions pinned, lock files, Typst imports, Dockerfile ARGs, Knative Serving, topf; DB majors by approval; false linuxserver majors blocked); in-cluster CronJob removed (v1.102.0).",
+      ],
       [
         "2026-11-28",
         "Streaming: qBittorrent stuck since 2026-11-26 (gluetun port forward failed once, never retried; DHT 0 nodes; 3 metadata-less magnets held all 3 slots). Restarted; liveness probes on gluetun port forward and DHT; queue 8/10, slow torrents not counted (v1.101.0).",

@@ -111,14 +111,18 @@ the Rex key of the iPhone app (give its public key to the agent) and, later, Rex
 
 ## 6. Git hosting
 
-Forgejo (`git.0xbf.ch`) holds `bf/{apex,infra,thyme,glob,exhib,omni}`. Clone and push over
-SSH on the clean port: `ssh://git@git.0xbf.ch/bf/<repo>.git`.
+GitHub (`github.com/bfeitknecht/<repo>`) is the origin for apex, exhib, glob, infra, omni and
+thyme. Clone and push over SSH: `git@github.com:bfeitknecht/<repo>.git`. CI, GHCR images and the
+Typst Universe flow run there.
 
-Push mirrors to `github.com/bfeitknecht/<repo>` run on every push and every 8 h (token:
-`.private/github-mirror-token.sops.yaml`, Contents + Workflows read and write; renew it before it
-expires and update each mirror in the repo settings). GitHub keeps CI, GHCR images and the Typst
-Universe flow. Never push to GitHub directly: the mirror overwrites it. Left for you: delete the
-tokens `repo-migration` and `repo-migration-2` in Forgejo > Settings > Applications.
+Forgejo (`git.0xbf.ch/bf/<repo>`) is a backup: each repo is a pull mirror of GitHub (every 1 h).
+Do not push to it. Sync one now: Forgejo > repo > Settings > Mirror settings > Synchronize now.
+
+Renovate is the Mend Renovate GitHub App (github.com/apps/renovate). It reads `renovate.json5` in
+each repo (shared preset: infra `renovate/default.json5`) and opens PRs; the Dependency Dashboard
+is an issue in each repo. Left for you: revoke the GitHub tokens that only Forgejo and the old
+CronJob used (push mirror token in `.private/github-mirror-token.sops.yaml`, Renovate's
+`GITHUB_COM_TOKEN`) in GitHub > Settings > Developer settings > Personal access tokens.
 
 ## 7. Secrets
 

@@ -1,12 +1,10 @@
 {
-  // Renovate for the infra tree. Pull requests only, never automerge: every
-  // change still goes PR -> merge -> tag (AGENTS.md). Runs as a weekly CronJob
-  // (applications/renovate) and opens its PRs on Forgejo as the bot `renovate`.
+  // Renovate for the infra tree: the shared preset (renovate/default.json5)
+  // plus the infra rules below. Runs as the Mend Renovate GitHub App. Pull
+  // requests only, never automerge: every change still goes PR -> merge ->
+  // tag (AGENTS.md).
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", ":dependencyDashboard", ":semanticCommitsDisabled"],
-  timezone: "Europe/Zurich",
-  schedule: ["before 7am on monday"],
-  prConcurrentLimit: 5,
+  extends: ["local>bfeitknecht/infra//renovate/default.json5"],
   // Manifests live under kubernetes/; Flux HelmRelease, HelmRepository,
   // GitRepository and OCIRepository are read by the flux manager.
   flux: { managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"] },
@@ -31,23 +29,27 @@
       depNameTemplate: "kubernetes/kubernetes",
       extractVersionTemplate: "^v(?<version>.*)$",
     },
+    {
+      // KnativeServing spec.version: the operator installs this Serving.
+      customType: "regex",
+      managerFilePatterns: ["/^kubernetes/infrastructure/knative/serving/kserving\\.yaml$/"],
+      matchStrings: ['version: "(?<currentValue>[0-9.]+)"'],
+      datasourceTemplate: "github-tags",
+      depNameTemplate: "knative/serving",
+      extractVersionTemplate: "^knative-v(?<version>.*)$",
+    },
+    {
+      // topf, built from source in nix/topf.nix. A bump also needs the two
+      // hashes (see the file): approve in the dashboard, then fix by hand.
+      customType: "regex",
+      managerFilePatterns: ["/^nix/topf\\.nix$/"],
+      matchStrings: ['version = "(?<currentValue>[0-9.]+)";'],
+      datasourceTemplate: "github-releases",
+      depNameTemplate: "postfinance/topf",
+      extractVersionTemplate: "^v(?<version>.*)$",
+    },
   ],
   packageRules: [
-    {
-      // Tier-2 apps run :latest and are rolled by Keel, not Renovate.
-      matchDatasources: ["docker"],
-      matchPackageNames: ["ghcr.io/bfeitknecht/**"],
-      enabled: false,
-    },
-    {
-      // Patch updates of everything else in one weekly PR. This rule comes
-      // before the chart groups below: in Renovate the last matching rule
-      // wins, so a chart and its CRD tag keep their own group (and PR) also
-      // for a patch. Placed last, it took the k8up chart alone (PR #3).
-      groupName: "patch updates",
-      matchUpdateTypes: ["patch", "digest"],
-      matchPackageNames: ["*"],
-    },
     // The pinned CRD GitRepository tags (cluster/crds.yaml) carry the chart
     // name as a prefix: without this versioning Renovate skips them.
     {
@@ -89,12 +91,32 @@
       matchPackageNames: ["sshpiper", "tg123/sshpiper-chart"],
     },
     {
-      groupName: "knative operator",
-      matchPackageNames: ["gcr.io/knative-releases/knative.dev/operator/cmd/operator", "knative/operator"],
-    },
-    {
       groupName: "gateway-api",
       matchPackageNames: ["kubernetes-sigs/gateway-api"],
+    },
+    {
+      groupName: "knative",
+      matchPackageNames: ["gcr.io/knative-releases/knative.dev/operator/cmd/operator", "knative/operator", "knative/serving"],
+    },
+    {
+      matchPackageNames: ["postfinance/topf"],
+      dependencyDashboardApproval: true,
+    },
+    {
+      // Database majors need a dump and restore (or pg_upgrade): by hand.
+      matchDatasources: ["docker"],
+      matchPackageNames: ["docker.io/library/postgres", "ghcr.io/immich-app/postgres", "docker.io/valkey/valkey"],
+      matchUpdateTypes: ["major"],
+      dependencyDashboardApproval: true,
+    },
+    {
+      // Old linuxserver tags look like majors (qbittorrent 14.x and 20.x, lidarr 8.x).
+      matchPackageNames: ["lscr.io/linuxserver/qbittorrent"],
+      allowedVersions: "<14",
+    },
+    {
+      matchPackageNames: ["lscr.io/linuxserver/lidarr"],
+      allowedVersions: "<8",
     },
     {
       groupName: "talos and kubernetes",

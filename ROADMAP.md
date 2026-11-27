@@ -5,15 +5,17 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 ## Where things stand
 
 - **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.101.0`. Load: rbpi ~29 % RAM, rzbl ~75 % (devil's Kata VM), oci ~37 %. opencode server gone (v1.98.0), Forgejo runner gone (v1.99.0).
-- **Git:** Forgejo `git.0xbf.ch` is the origin for the six repos (apex, infra, thyme, glob, exhib, omni). Forgejo push mirrors carry commits and tags to GitHub. GitHub is the mirror and the CI runner (GHCR images, the OCI artifact, Typst releases). Forgejo Actions off; no Forgejo workflows in any repo. Bot: `renovate`.
+- **Git:** GitHub is the origin for the six repos (apex, exhib, glob, infra, omni, thyme) since 2026-11-28: push, CI, GHCR, Typst releases. Forgejo `git.0xbf.ch` keeps pull mirrors (1 h) as a backup. Renovate is the Mend GitHub App with one shared preset (infra `renovate/default.json5`).
 - **Machines:** anti (MacBook, nix-darwin) is the daily driver since 2026-11-25; echo is retired. devil (Kata NixOS VM on rzbl) is the dev box: Tailscale SSH `ssh bf@devil`, Rex over `ssh://devil`, the agents run there.
 - **Public:** apex `0xbf.ch` (0.1.20), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
-- **Internal:** AGH, knot/kresd, devil, *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate.
+- **Internal:** AGH, knot/kresd, devil, *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU).
 - **Backup:** works since 2026-11-25 (NAS on a new tailnet IP, v1.93.0). Nightly (green since 2026-11-26): atuin, authentik, forgejo, pds. Restore drill not done.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
 
+- [ ] **Renovate GitHub App:** install https://github.com/apps/renovate on apex, exhib, glob, infra, omni, thyme (only these). Then the agent reviews every PR it opens.
+- [ ] **Revoke old GitHub tokens:** the Forgejo push-mirror token and Renovate's `GITHUB_COM_TOKEN` (GitHub > Settings > Developer settings). Both secrets are out of the tree.
 - [ ] **Backup path:** nightlies green since 2026-11-26 (atuin, authentik, forgejo, pds). Left: restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [ ] **Age key backup** off the Mac (omni NOW). It decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it.
 - [ ] **CLI logins** by hand: `gh`, `tea`, `glab` on devil; `gh`, `tea` on anti (atlas `cli-logins`).
@@ -26,7 +28,6 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 - [x] **API timeouts from home to oci** (2026-11-27): tailscaled used the `cilium_host` IP (pod CIDR) as a path; it loops through Cilium VXLAN over Tailscale and stalled ~7 s every 1-2 min. etcd was fast (all lease writes < 0.4 s). Fixed with Talos rule 5190 (`talos/patches/all/04-tailscale-loop.yaml`) on all nodes. Watch k8up restarts and the apiserver lease 504 count.
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
-- [ ] **Renovate Monday runs:** a manual run works (Dependency Dashboard issue #1, PRs #2 Talos 1.14.7, #3 patch group). Watch the next scheduled run.
 - [ ] **devil rollout hangs:** a Kata stop can hang with the guest up (v1.92.0, again v1.98.0: Terminating for hours). The fix is `ssh bf@devil sudo systemctl poweroff`. Find the cause (qemu stop timeout, agent shutdown).
 - [ ] **podman on devil:** undecided (omni SOMEDAY).
 
@@ -48,6 +49,8 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-28 GitHub primary, Forgejo pull mirrors (1 h) as backup; Renovate moves from the in-cluster CronJob (Forgejo bot) to the Mend GitHub App with a shared preset (no PR limits, actions pinned, lock files, Typst imports, Dockerfile ARGs, Knative Serving, topf) (v1.102.0).
+- [x] 2026-11-28 Streaming: qBittorrent self-heals (gluetun port forward and DHT probes), queue 8/10 (v1.101.0).
 - [x] 2026-11-27 Forgejo runner out of the tree (namespace, PVC, Kustomization, secret) and Forgejo Actions off (seed and live `app.ini`): Forgejo is the origin, GitHub the mirror and CI (v1.99.0). No Forgejo workflows in any repo, all branches checked.
 - [x] 2026-11-27 Rex over Tailscale SSH: the Rex nodes `deviler`, `antir` are gone; clients use `ssh://devil` and `ssh://anti`. anti runs the open-source tailscaled (`tag:anti`).
 - [x] 2026-11-25 echo -> anti: anti is the daily driver (omni RESET and MIGRATION runbooks retired 2026-11-27).

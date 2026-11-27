@@ -11,7 +11,7 @@ and bulk storage). Hardware details: `docs/HARDWARE.md`. Agent and operator rule
 
 ### Infrastructure & Operations
 
-- **CD & Automation:** Flux (OCI artifact per `v*` tag), Keel (tier-2 `:latest`), Renovate, Kustomize
+- **CD & Automation:** Flux (OCI artifact per `v*` tag), Keel (tier-2 `:latest`), Renovate (GitHub App), Kustomize
 - **Secrets Management:** SOPS + age
 - **Backups:** k8up (restic) to Garage S3 on a friend's NAS. Blocked: the NAS refuses `3900`, so nothing is backed up yet.
 
@@ -60,7 +60,7 @@ flowchart LR
     media["*arr, qbittorrent + gluetun (VPN), navidrome"]
     pg["authentik, immich, dawarich (Postgres)"]
     files["copyparty, Time Machine (4 TB SSD)"]
-    agent["devil (Kata VM, the agents), Renovate"]
+    agent["devil (Kata VM, the agents)"]
   end
 
   float["floating: glob, apex-anubis, ddns, tailscale-relay, knative, metrics-server"]
@@ -68,8 +68,7 @@ flowchart LR
   rbpi <-->|"WireGuard (Tailscale), VXLAN"| oci
   rzbl <-->|LAN + Tailscale| oci
   rbpi <-->|LAN| rzbl
-  agent -->|"git push (bot)"| core
-  core -->|"push mirror"| github[(GitHub CI, GHCR)]
+  github[(GitHub: origin, CI, GHCR, Renovate)] -->|"pull mirror (1 h)"| core
   github -->|"OCI artifact per tag"| ctrl
 ```
 
@@ -136,7 +135,7 @@ Function zones use decade-based third octets.
 
 ### GitOps Delivery
 
-Manifests are packaged as OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag (tags are pushed to Forgejo; its push mirror carries them to GitHub). OCIRepository in `flux-system` tracks `semver >=1.0.0`. Push tag is the only deploy method. Cluster never reads working tree or plain git.
+Manifests are packaged as OCI artifact and published to `ghcr.io/bfeitknecht/infra` by GitHub Actions on every `v*` tag (tags are pushed to GitHub, the origin; Forgejo pulls a mirror copy). OCIRepository in `flux-system` tracks `semver >=1.0.0`. Push tag is the only deploy method. Cluster never reads working tree or plain git.
 
 ```
 just release X.Y.Z                                # gates (check, fmt), tag, push; CI publishes

@@ -39,7 +39,7 @@ kubernetes/
 └── applications/     one directory = one namespace = one Flux Kustomization
 ```
 
-Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
+Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
 
 ## Naming conventions
 
@@ -63,8 +63,14 @@ One node failure must take down one role only.
 
 - **oci:** control plane + `dns` resolver. The taint stays. No other workloads.
 - **rbpi** (always-on edge): Traefik (pinned), AGH, tier-1 small-state apps (forgejo, pds, atuin), tier-2 sites, monitoring. Platform controllers **prefer** rbpi (`preferredDuringScheduling`, weight 100): cert-manager, Keel, tailscale operator, local-path-provisioner, Flux (a `kubectl patch`; a new `flux install` drops it).
-- **rzbl** (heavy): GPU, bulk storage, Postgres apps (authentik, immich, dawarich), the Kata VM (devil), Renovate. It boots from USB: do not make the cluster depend on it to heal.
+- **rzbl** (heavy): GPU, bulk storage, Postgres apps (authentik, immich, dawarich), the Kata VM (devil). It boots from USB: do not make the cluster depend on it to heal.
 - Stateless apps float. Stateful apps follow their PVC (local-path PVs are node-bound).
+
+## Git and Renovate
+
+- **GitHub is the origin** (`git@github.com:bfeitknecht/<repo>.git`) for apex, exhib, glob, infra, omni, thyme (since 2026-11-28). Push there. CI runs there.
+- **Forgejo is a backup:** `bf/<repo>` on `git.0xbf.ch` are pull mirrors of GitHub (every 1 h). Remote `forgejo`, read only. A push to it fails.
+- **Renovate** is the Mend GitHub App. Shared preset: `renovate/default.json5`. Each repo extends it in `renovate.json5`. No automerge. Infra PRs still go PR -> merge -> tag.
 
 ## Kustomization dependency tree
 
@@ -81,7 +87,7 @@ keel, gpu, kata: no dependencies
 apps: most depend on storage and traefik
 agh +dns; media, ollama +gpu; devil +kata
 qbittorrent +media; authentik +k8up-crds
-sshmux +traefik, sshpiper-crds; renovate: none
+sshmux +traefik, sshpiper-crds
 ```
 
 Dry-run validates all manifests in a Kustomization before apply. A CR without its CRD fails the dry-run, and then nothing in that Kustomization applies (also not the HelmRelease that would make the CRD). So:
