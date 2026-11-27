@@ -4,7 +4,7 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.97.0`, every Flux Kustomization and HelmRelease ready. Load: rbpi ~28 % RAM, rzbl ~78 % (devil's Kata VM 4.7 GB), oci ~39 %. The opencode server is out of the tree (live with the next tag).
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.98.0`, every Flux Kustomization and HelmRelease ready. Load: rbpi ~28 % RAM, rzbl ~78 % (devil's Kata VM 4.7 GB), oci ~39 %. The opencode server is gone (v1.98.0).
 - **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. CI runs on GitHub only (Forgejo workflows removed 2026-11-25; the runner is idle). Bots: `renovate` (`opencode` retired 2026-11-27).
 - **Public:** apex `0xbf.ch` (0.1.20, brand palette), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0, curated photo metadata live), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
 - **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex node `deviler`), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate. The agents (opencode, Claude Code) run on devil.
@@ -13,7 +13,7 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **Release the opencode removal** (`just release X.Y.Z`): Flux prunes the namespace and PVC `opencode-data` (its data goes). Then: no opencode qemu on rzbl, delete the Forgejo bot `opencode` and the GHCR package `opencode` (atlas `opencode-gone`).
+- [ ] **After the opencode removal (v1.98.0):** check that rzbl runs no opencode qemu; delete the Forgejo bot `opencode` and the GHCR package `opencode` (atlas `opencode-gone`).
 
 - [ ] **Next push: echo -> anti** (factory reset, apply omni). Runbook and decisions: omni `docs/RESET.md`. Gate: the age key is off the Mac (it decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it).
 - [ ] **Backup path:** bucket and relay fixed (2026-11-25, manual atuin snapshot OK). Left: watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
@@ -30,7 +30,7 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Projects`); anti is no longer a dev machine.
 
-- [x] **Renovate works** (2026-11-25): a manual run found 283 dependencies and opened the Dependency Dashboard (issue #1, 30 updates waiting for Monday); a run with the schedule lifted opened PR #2 (Talos 1.14.7) and #3 (patch group). Review both: #3 bumps the k8up chart without its CRD tag in `cluster/crds.yaml`. Why the Monday runs never got that far is unknown (logs gone); watch the next one.
+- [x] **Renovate works** (2026-11-25): a manual run found 283 dependencies and opened the Dependency Dashboard (issue #1, 30 updates waiting for Monday); a run with the schedule lifted opened PR #2 (Talos 1.14.7) and #3 (patch group). The k8up group (chart and CRD tag together) merged in v1.98.0; `just check` now fails when a chart and its CRD tag differ. Why the Monday runs never got that far is unknown (logs gone); watch the next one.
 - [ ] **API timeouts from home to oci** (`100.73.186.19:6443` over Tailscale): ~150 five-second timeouts from rbpi in 20 h; the API server answers in < 0.1 s, so it is the path. k8up restarted 19 times in 32 h (lost leader lease).
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
 - [ ] **Rex node `deviler` ran over the DERP relay in Frankfurt.** 2026-11-25 after the devil restart: direct (`31.164.81.63`). Drop if it stays direct.
@@ -58,7 +58,7 @@ After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Project
 
 ## Done (recent)
 
-- [x] 2026-11-27 opencode server out of the tree (app, cert name, authentik objects absent, image and CI step, release pin check): rzbl memory; the agents run on devil. Live with the next tag (atlas `opencode-gone`). Atlas and journey current as of v1.97.0.
+- [x] 2026-11-27 opencode server out of the tree (app, cert name, authentik objects absent, image and CI step, release pin check): rzbl memory; the agents run on devil. Live in v1.98.0, with k8up 4.10.1 and the CRD tag check in `just check`; devil 3Gi/5Gi. Atlas and journey current as of v1.97.0.
 
 - [x] 2026-11-20 devil browser terminal removed (v1.58.0); 89 merged branches deleted across the repos.
 - [x] 2026-11-20 Forgejo primary with GitHub push mirrors, Renovate on Forgejo (v1.57.0); docs unified (OPERATIONS, GUIDE, README diagram); Anubis on `/cv` plain monochrome (v1.56.x); exhib web uploader (0.5.8, v1.55.0); glob links in the footer (0.1.5); thyme 0.1.3 PR; `.private` cleanup.
