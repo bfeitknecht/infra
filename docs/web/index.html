@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.100.0";
+    const INFRA_TAG = "v1.101.0";
 
     const NODES = [
       {
@@ -2112,6 +2112,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.101.0",
+        "2026-11-28",
+        "qbittorrent: liveness on gluetun port forward and DHT nodes; queue 8 downloads, slow torrents not counted",
+      ],
+      [
         "v1.100.0",
         "2026-11-27",
         "Traefik Hub CRDs out (unused); Traefik HelmRelease install.crds Skip",
@@ -2754,6 +2759,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "Streaming: qBittorrent stuck since 2026-11-26 (gluetun port forward failed once, never retried; DHT 0 nodes; 3 metadata-less magnets held all 3 slots). Restarted; liveness probes on gluetun port forward and DHT; queue 8/10, slow torrents not counted (v1.101.0).",
+      ],
       [
         "2026-11-27",
         "Traefik Hub CRDs (15, unused) out: $patch: delete in traefik-crds, HelmRelease install.crds Skip, CRDs deleted (v1.100.0). Apiserver memory.",

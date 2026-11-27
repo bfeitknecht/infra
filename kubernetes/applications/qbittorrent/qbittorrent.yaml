@@ -68,6 +68,18 @@ spec:
                 secretKeyRef:
                   name: qbittorrent-secrets
                   key: WIREGUARD_PRIVATE_KEY
+          # Port forwarding runs once after the tunnel is up. If NAT-PMP fails
+          # then (2026-11-26), gluetun never retries: no port. Restart it.
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - wget -qO- -T 5 http://127.0.0.1:8000/v1/portforward | grep -q '"port":[1-9]'
+            initialDelaySeconds: 180
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 5
           securityContext:
             capabilities:
               add: ["NET_ADMIN"]
@@ -111,6 +123,11 @@ spec:
               set_key BitTorrent 'Session\GlobalMaxSeedingMinutes' 0
               set_key BitTorrent 'Session\GlobalMaxInactiveSeedingMinutes' 0
               set_key BitTorrent 'Session\ShareLimitAction' Stop
+              # A magnet without metadata holds a slot forever: do not count
+              # stalled torrents, and allow more at once.
+              set_key BitTorrent 'Session\IgnoreSlowTorrentsForQueueing' true
+              set_key BitTorrent 'Session\MaxActiveDownloads' 8
+              set_key BitTorrent 'Session\MaxActiveTorrents' 10
               # qBittorrent 5 keeps Web UI keys in [WebUI] (not Preferences\WebUI\).
               set_key WebUI LocalHostAuth false
               set_key WebUI AuthSubnetWhitelistEnabled true
@@ -146,6 +163,18 @@ spec:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 10
+          # DHT with 0 nodes: magnets never get metadata (2026-11-26 to 11-28,
+          # after a bad VPN start). 10 min at 0 nodes restarts qBittorrent.
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl -sf -m 5 http://127.0.0.1:8080/api/v2/transfer/info | grep -qv '"dht_nodes":0,'
+            initialDelaySeconds: 300
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 10
           resources:
             requests:
               cpu: 100m
