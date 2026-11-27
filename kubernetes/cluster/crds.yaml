@@ -7,7 +7,7 @@ spec:
   interval: 1h
   url: https://github.com/kubernetes-sigs/gateway-api
   ref:
-    tag: v1.6.2
+    tag: v1.7.0
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -36,7 +36,7 @@ spec:
   interval: 1h
   url: https://github.com/traefik/traefik-helm-chart
   ref:
-    tag: v41.6.0
+    tag: v41.7.1
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -74,7 +74,7 @@ spec:
   interval: 1h
   url: https://github.com/prometheus-community/helm-charts
   ref:
-    tag: kube-prometheus-stack-91.4.1
+    tag: kube-prometheus-stack-91.9.0
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -128,7 +128,7 @@ spec:
   interval: 1h
   url: https://github.com/knative/operator
   ref:
-    tag: knative-v1.23.1
+    tag: knative-v1.24.1
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

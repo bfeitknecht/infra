@@ -5,6 +5,10 @@ kind: Job
 metadata:
   name: ollama-pull-qwen2-5-coder-7b
   namespace: ollama
+  annotations:
+    # A Job template is immutable: Flux re-creates the Job when it changes
+    # (image bump). The pull is idempotent.
+    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
   backoffLimit: 20
   ttlSecondsAfterFinished: 86400
