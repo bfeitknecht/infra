@@ -7,7 +7,7 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 - **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.98.0`, every Flux Kustomization and HelmRelease ready. Load: rbpi ~28 % RAM, rzbl ~78 % (devil's Kata VM 4.7 GB), oci ~39 %. The opencode server is gone (v1.98.0).
 - **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. CI runs on GitHub only (Forgejo workflows removed 2026-11-25; the runner is idle). Bots: `renovate` (`opencode` retired 2026-11-27).
 - **Public:** apex `0xbf.ch` (0.1.20, brand palette), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0, curated photo metadata live), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
-- **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex node `deviler`), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate. The agents (opencode, Claude Code) run on devil.
+- **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex over Tailscale SSH), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate. The agents (opencode, Claude Code) run on devil.
 - **Backup:** works again since 2026-11-25 (NAS on a new tailnet IP, v1.93.0; bucket back). First snapshot: atuin. Nightly schedules: atuin, authentik, forgejo, pds. Restore drill not done yet.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
@@ -33,7 +33,6 @@ After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Project
 - [x] **Renovate works** (2026-11-25): a manual run found 283 dependencies and opened the Dependency Dashboard (issue #1, 30 updates waiting for Monday); a run with the schedule lifted opened PR #2 (Talos 1.14.7) and #3 (patch group). The k8up group (chart and CRD tag together) merged in v1.98.0; `just check` now fails when a chart and its CRD tag differ. Why the Monday runs never got that far is unknown (logs gone); watch the next one.
 - [ ] **API timeouts from home to oci** (`100.73.186.19:6443` over Tailscale): ~150 five-second timeouts from rbpi in 20 h; the API server answers in < 0.1 s, so it is the path. k8up restarted 19 times in 32 h (lost leader lease).
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
-- [ ] **Rex node `deviler` ran over the DERP relay in Frankfurt.** 2026-11-25 after the devil restart: direct (`31.164.81.63`). Drop if it stays direct.
 - [x] **Leftovers:** two `Completed` authentik pods and 18 failed k8up Jobs from the Garage outage deleted (2026-11-25).
 - [ ] **forgejo-runner is idle** since CI moved to GitHub only: keep it for later or remove `applications/forgejo-runner/` and turn off `[actions]`.
 - [ ] **podman on devil:** undecided (omni SOMEDAY).
@@ -42,7 +41,7 @@ After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Project
 
 ## NEXT
 
-- [x] **Rex over the tailnet:** declared in omni (`services.rex.tailscale`, node `deviler`, owner-only); live, the iPhone uses `https://deviler.tailac5960.ts.net`.
+- [x] **Rex over Tailscale SSH** (2026-11-27): the Rex nodes `deviler`, `antir`, `iotar` are gone; every client uses `ssh://devil` and `ssh://anti` (omni `ssh.nix`, `rex.nix`). anti runs the open-source tailscaled with `tag:anti` for its SSH server.
 - [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; (`music.0xbf.ch` is public since 2026-11-23).
 - [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
 - [ ] glob post descriptions (wording).

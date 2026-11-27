@@ -171,7 +171,7 @@ kubernetes/
     ├── copyparty/      file share at files.0xbf.ch
     ├── dawarich/       location history at locations.0xbf.ch (Postgres + Valkey)
     ├── samba/          Time Machine at smb://10.10.20.145
-    ├── devil/          kata VM pod: Tailscale SSH (ssh bf@devil) + Rex (deviler), no route
+    ├── devil/          kata VM pod: Tailscale SSH (ssh bf@devil, Rex ssh://devil), no route
     ├── renovate/       weekly Renovate CronJob (rzbl), Forgejo platform (bot renovate), renovate.json5
     ├── ntfy/           push notifications (notify.0xbf.ch): Alertmanager + Gatus alerts
     ├── sshmux/         SSH username router on WAN 2222 (default -> apex)

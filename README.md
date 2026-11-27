@@ -168,7 +168,7 @@ Dry-run validates all manifests in a Kustomization before apply. So CRs must not
 - Internal names `*.internal` use cert-manager internal CA. Chain is selfsigned bootstrap to 10y CA (name-constrained to `.internal`) to 1y cert with explicit names. Let's Encrypt cannot issue for `internal`.
 - Traefik dashboard is at `https://traefik.internal`. It is IngressRoute with LAN allowlist middleware.
 - ATProto PDS is at `pds.0xbf.ch` (API) and `*.pds.0xbf.ch` (handle via `/.well-known/atproto-did`). Custom handles use DNS TXT.
-- devil (Kata VM): no route at all. Tailscale SSH on its own tailnet node (`ssh bf@devil`), Rex on the node `deviler`. No sshd since 2026-11-24.
+- devil (Kata VM): no route at all. Tailscale SSH on its own tailnet node (`ssh bf@devil`), Rex over the same Tailscale SSH (`ssh://devil`; no Rex node since 2026-11-27). No sshd since 2026-11-24.
 
 ### Secrets
 

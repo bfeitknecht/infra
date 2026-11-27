@@ -60,19 +60,17 @@ the laptop, pick it up from another device.
 
 - **ssh:** `ssh bf@devil` (Tailscale SSH: no key, no port; the tailnet policy lets your own Macs
   and phones in). Zed remote and ish use the same host. devil has no sshd since 2026-11-24.
-- **Mac:** open Rex. Add Remote Host > `https://deviler.tailac5960.ts.net` (devil's Rex server runs
-  its own Tailscale node `deviler`, owned by your account, so only your devices get in). The Rex
-  CLI's `devil` entry (`~/.config/rex/init.lua`, from omni) goes over `ssh://devil`.
-- **iPhone:** the same `https://deviler.tailac5960.ts.net` (or scan the QR from
-  `rex server tailscale pair` on devil). After a Rex reinstall: `ssh bf@devil rex server status`
-  prints the sign-in link; open it, then disable key expiry for `deviler` in the admin console.
+  anti runs Tailscale SSH too (open-source tailscaled, `tag:anti`): `ssh anti` from devil.
+- **Rex:** every client uses Tailscale SSH: `ssh://devil` (Mac app, CLI, iPhone), `ssh://anti`.
+  No Rex tailnet nodes (`deviler`, `antir`, `iotar` are gone since 2026-11-27). The CLI hosts
+  come from omni (`~/.config/rex/init.lua`).
 - No browser terminal: devil is SSH and Rex only.
 
 ## 4. Agentic development (on devil)
 
 ```
  Mac:    Ghostty / Zed ──Tailscale SSH──┐
- iPhone: Rex app ──tailnet (deviler)────┤
+ iPhone: Rex app ──Tailscale SSH───────┤
                                         v
                  devil (Kata VM on rzbl, your user bf)
                    opencode (background service: one set of sessions)
