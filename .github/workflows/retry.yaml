@@ -1,0 +1,22 @@
+# Re-run a failed workflow run once: a flaky step (a download, a rate limit)
+# must not need a manual re-run. A second failure stays red.
+name: Retry
+
+on:
+  workflow_run:
+    workflows: [CI, Publish OCI Artifact]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  retry:
+    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt == 1
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Re-run the failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh run rerun "${{ github.event.workflow_run.id }}" --failed

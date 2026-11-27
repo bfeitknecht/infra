@@ -18,12 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The action that just's README names. install.sh asked the GitHub API
+      # without a token and hit its rate limit (2 of 8 runs, 2026-11-26/27).
       - name: Install just
-        run: |
-          set -eu
-          mkdir -p "$HOME/.local/bin"
-          curl -fsSL "https://just.systems/install.sh" | bash -s -- --to "$HOME/.local/bin"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        uses: extractions/setup-just@v4
 
       - name: Install yamlfmt (pinned)
         run: |
