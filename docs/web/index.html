@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.97.0";
+    const INFRA_TAG = "v1.99.0";
 
     const NODES = [
       {
@@ -909,7 +909,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "dawarich (+ Postgres)",
           "copyparty",
           "samba (Time Machine)",
-          "forgejo-runner, renovate",
+          "renovate",
           "nvidia-device-plugin",
           "tailscale-relay",
           "k8up",
@@ -1040,7 +1040,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
           "SSO via authentik (login source authentik, group developers). Sign-up only through authentik.",
           "Theme 0xbf (exhib/glob grayscale) and ^@ logo.",
           "SSH on clean 22 since infra v1.42.0 (was 2223).",
-          "Actions enabled. Runner in forgejo-runner (rzbl), idle: no repo has Forgejo workflows since 2026-11-25 (CI runs on GitHub).",
+          "Actions off since 2026-11-27 (v1.99.0): CI runs on GitHub, the push mirror. The runner is gone.",
           "Primary for bf/{apex,infra,thyme,glob,exhib,omni} since 2026-11-20. Push mirrors to GitHub (on push + 8 h) carry tags to CI.",
           "Bots: renovate (weekly CronJob). The bot opencode is retired (2026-11-27): delete it or revoke its token.",
         ],
@@ -1437,29 +1437,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         storage: "timemachine-files 1Ti (ssd), cap 1 T",
         runbook: "docs/OPERATIONS.md",
         notes: ["No mDNS: add the server by IP on each Mac."],
-      },
-      {
-        id: "runner",
-        name: "Forgejo runner",
-        cat: "dev",
-        status: "live",
-        exp: "cluster",
-        node: "rzbl",
-        tier: "1",
-        ns: "forgejo-runner",
-        ks: "forgejo-runner",
-        host: "—",
-        image: "code.forgejo.org/forgejo/runner:13.2.1 + docker:28-dind",
-        desc: "CI runner for Forgejo Actions (labels docker, ubuntu-latest).",
-        ports: "—",
-        deps: ["forgejo", "storage"],
-        secrets: ["forgejo-runner/forgejo-runner-secrets.sops.yaml"],
-        storage: "forgejo-runner-data 5Gi (nvme)",
-        runbook: "docs/OPERATIONS.md",
-        notes: [
-          "Enable [actions] in Forgejo app.ini.",
-          "GitHub becomes a push mirror.",
-        ],
       },
       // ---------- internal platform apps
       {
@@ -1886,19 +1863,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       },
       {
         id: "opencode-gone",
-        prio: 1,
+        prio: 2,
         cat: "manual",
-        t: "Release the opencode removal, then clean up after it",
-        d: "The tree no longer has applications/opencode (2026-11-27). Flux prunes the namespace and PVC opencode-data (reclaim Delete: the data goes) when the next tag is live: `just release X.Y.Z`. Before that, if you want the data: set the PV to Retain. After: no qemu left for opencode on rzbl (`talosctl -n 10.10.20.11 ps | grep qemu`: one, devil); delete the Forgejo bot opencode (or revoke its token and collaborator rights) and the GHCR package opencode; in authentik the old blueprint objects go by themselves (state absent).",
+        t: "After the opencode removal: delete the Forgejo bot and the GHCR package",
+        d: "Live since v1.98.0: namespace and PVC gone, rzbl runs one qemu (devil, checked 2026-11-27). Left: Forgejo > Site Administration > User Accounts: delete opencode (or revoke its token and collaborator rights); GitHub > Packages: delete opencode.",
         svc: "devil",
-      },
-      {
-        id: "echo-anti",
-        prio: 1,
-        cat: "manual",
-        t: "Next: move echo to anti (factory reset, apply omni)",
-        d: "Runbook: omni docs/RESET.md (decisions first, then the day). Gate: the age key (~/.config/sops/age/keys.txt) is off the Mac; it decrypts omni and infra, and talos/talosconfig + kubeconfig regenerate from it (topf talosconfig, topf kubeconfig).",
-        svc: null,
       },
       {
         id: "cli-logins",
@@ -2123,14 +2092,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
       ["copyparty", "copyparty-files", "500Gi", "rzbl", "storage-ssd0", "live"],
       ["samba", "timemachine-files", "1Ti", "rzbl", "storage-ssd0", "live"],
-      [
-        "forgejo-runner",
-        "forgejo-runner-data",
-        "5Gi",
-        "rzbl",
-        "storage-nvme0",
-        "live",
-      ],
       ["media", "qbittorrent-data", "1Gi", "rzbl", "storage-nvme0", "live"],
       ["ntfy", "ntfy-data", "1Gi", "rbpi", "storage-nvme0", "live"],
       ["authentik", "authentik-db", "10Gi", "rzbl", "storage-nvme0", "live"],
@@ -2150,6 +2111,46 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.99.0",
+        "2026-11-27",
+        "forgejo-runner removed (namespace, PVC, Kustomization, secret); Forgejo Actions off",
+      ],
+      [
+        "v1.98.0",
+        "2026-11-27",
+        "opencode server removed; k8up 4.10.1; just check: every CRD tag matches its chart; devil 3Gi/5Gi",
+      ],
+      [
+        "v1.97.0",
+        "2026-11-26",
+        "branding PNGs as binaryData ConfigMaps (Flux drops *.png)",
+      ],
+      [
+        "v1.96.0",
+        "2026-11-26",
+        "publish keeps *.png (did not help: the source-controller drops them too)",
+      ],
+      [
+        "v1.95.0",
+        "2026-11-26",
+        "branding for Jellyfin, Immich, copyparty (broke media and immich: PNGs dropped)",
+      ],
+      [
+        "v1.94.0",
+        "2026-11-25",
+        "opencode pin v1.94.0",
+      ],
+      [
+        "v1.93.0",
+        "2026-11-25",
+        "egress relay: NAS on a new tailnet IP (backups work again)",
+      ],
+      [
+        "v1.92.0",
+        "2026-11-25",
+        "opencode pin v1.92.0",
+      ],
       [
         "v1.91.0",
         "2026-11-25",
@@ -2674,12 +2675,6 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         "[security] block, admin, SMTP token (mailer-password)",
       ],
       [
-        "applications/forgejo-runner/forgejo-runner-secrets.sops.yaml",
-        "forgejo-runner",
-        "exists",
-        "RUNNER_TOKEN (minted by agent)",
-      ],
-      [
         "applications/renovate/renovate-secrets.sops.yaml",
         "renovate",
         "exists",
@@ -2754,6 +2749,18 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-27",
+        "forgejo-runner removed and Forgejo Actions off (seed and live app.ini): Forgejo is the origin, GitHub the push mirror and the CI runner (v1.99.0). No Forgejo workflows in any repo (all branches checked).",
+      ],
+      [
+        "2026-11-27",
+        "echo -> anti done (omni): anti is the owner Mac; RESET and MIGRATION runbooks retired.",
+      ],
+      [
+        "2026-11-27",
+        "opencode leftovers checked: namespace and PVC gone, one qemu on rzbl (devil).",
+      ],
       [
         "2026-11-27",
         "opencode server removed from the tree (app, Kustomization, opencode.internal cert name, authentik app/provider absent, ReferenceGrant, image build and CI step, just release pin check): rzbl at 78 % RAM; the agents run on devil. Live with the next tag.",

@@ -1,7 +1,6 @@
-# Renovate, weekly, on rzbl next to the Forgejo runner. Pull requests only, no
-# automerge (renovate.json5 in each repo). Platform is GitHub, where the repos
-# live. Token: fine-grained PAT (contents, pull requests, issues, workflows:
-# read/write; metadata: read) in Secret renovate-secrets.
+# Renovate, weekly, on rzbl. Pull requests only, no automerge
+# (renovate.json5 in each repo). Platform is Forgejo (RENOVATE_PLATFORM).
+# Token in Secret renovate-secrets.
 apiVersion: batch/v1
 kind: CronJob
 metadata:

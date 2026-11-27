@@ -39,7 +39,7 @@ kubernetes/
 └── applications/     one directory = one namespace = one Flux Kustomization
 ```
 
-Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), forgejo-runner, pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
+Apps: apex (`0xbf.ch` + SSH TUI), glob (`blog`), exhib (`gallery`), atuin, forgejo (`git`), pds, immich (`photos`), authentik (`auth`), agh, ddns, dns, media (jellyfin `videos`, *arr, navidrome `music`, seerr, bazarr, flaresolverr), qbittorrent (ns media), ollama, copyparty (`files`), dawarich (`locations`), samba (Time Machine), devil (Kata NixOS VM, tailnet only), renovate, ntfy (`notify`), sshmux (sshpiper on WAN 2222), homepage (off).
 
 ## Naming conventions
 
@@ -63,7 +63,7 @@ One node failure must take down one role only.
 
 - **oci:** control plane + `dns` resolver. The taint stays. No other workloads.
 - **rbpi** (always-on edge): Traefik (pinned), AGH, tier-1 small-state apps (forgejo, pds, atuin), tier-2 sites, monitoring. Platform controllers **prefer** rbpi (`preferredDuringScheduling`, weight 100): cert-manager, Keel, tailscale operator, local-path-provisioner, Flux (a `kubectl patch`; a new `flux install` drops it).
-- **rzbl** (heavy): GPU, bulk storage, Postgres apps (authentik, immich, dawarich), the Kata VM (devil), CI runner. It boots from USB: do not make the cluster depend on it to heal.
+- **rzbl** (heavy): GPU, bulk storage, Postgres apps (authentik, immich, dawarich), the Kata VM (devil), Renovate. It boots from USB: do not make the cluster depend on it to heal.
 - Stateless apps float. Stateful apps follow their PVC (local-path PVs are node-bound).
 
 ## Kustomization dependency tree
@@ -80,7 +80,7 @@ keel, gpu, kata: no dependencies
 
 apps: most depend on storage and traefik
 agh +dns; media, ollama +gpu; devil +kata
-forgejo-runner +forgejo; qbittorrent +media; authentik +k8up-crds
+qbittorrent +media; authentik +k8up-crds
 sshmux +traefik, sshpiper-crds; renovate: none
 ```
 

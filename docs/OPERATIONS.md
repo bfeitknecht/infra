@@ -45,7 +45,7 @@ TOTP and backup codes).
 
 ## 2. Going live (one-time steps)
 
-1. **Time Machine of echo** before the move to anti (the only real backup today).
+1. **Time Machine of anti** (echo is retired).
    Password: `sops -d kubernetes/applications/samba/timemachine-secrets.sops.yaml | from yaml | get data.PASSWORD | decode base64 | decode`.
    Finder > Go > Connect to Server > `smb://10.10.20.145/TimeMachine`, user `timemachine`.
    System Settings > General > Time Machine > Add Backup Disk. First run on the LAN.

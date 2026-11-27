@@ -4,52 +4,43 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.98.0`, every Flux Kustomization and HelmRelease ready. Load: rbpi ~28 % RAM, rzbl ~78 % (devil's Kata VM 4.7 GB), oci ~39 %. The opencode server is gone (v1.98.0).
-- **Git:** Forgejo `git.0xbf.ch` is primary for the six repos; push mirrors to GitHub carry commits and tags to CI. CI runs on GitHub only (Forgejo workflows removed 2026-11-25; the runner is idle). Bots: `renovate` (`opencode` retired 2026-11-27).
-- **Public:** apex `0xbf.ch` (0.1.20, brand palette), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0, curated photo metadata live), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
-- **Internal:** AGH, knot/kresd, devil (Kata NixOS VM, Tailscale SSH `ssh bf@devil`, Rex over Tailscale SSH), *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate. The agents (opencode, Claude Code) run on devil.
-- **Backup:** works again since 2026-11-25 (NAS on a new tailnet IP, v1.93.0; bucket back). First snapshot: atuin. Nightly schedules: atuin, authentik, forgejo, pds. Restore drill not done yet.
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.99.0`. Load: rbpi ~29 % RAM, rzbl ~75 % (devil's Kata VM), oci ~37 %. opencode server gone (v1.98.0), Forgejo runner gone (v1.99.0).
+- **Git:** Forgejo `git.0xbf.ch` is the origin for the six repos (apex, infra, thyme, glob, exhib, omni). Forgejo push mirrors carry commits and tags to GitHub. GitHub is the mirror and the CI runner (GHCR images, the OCI artifact, Typst releases). Forgejo Actions off; no Forgejo workflows in any repo. Bot: `renovate`.
+- **Machines:** anti (MacBook, nix-darwin) is the daily driver since 2026-11-25; echo is retired. devil (Kata NixOS VM on rzbl) is the dev box: Tailscale SSH `ssh bf@devil`, Rex over `ssh://devil`, the agents run there.
+- **Public:** apex `0xbf.ch` (0.1.20), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
+- **Internal:** AGH, knot/kresd, devil, *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU), Renovate.
+- **Backup:** works since 2026-11-25 (NAS on a new tailnet IP, v1.93.0). Nightly: atuin, authentik, forgejo, pds. Restore drill not done.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
 
-- [ ] **After the opencode removal (v1.98.0):** check that rzbl runs no opencode qemu; delete the Forgejo bot `opencode` and the GHCR package `opencode` (atlas `opencode-gone`).
-
-- [ ] **Next push: echo -> anti** (factory reset, apply omni). Runbook and decisions: omni `docs/RESET.md`. Gate: the age key is off the Mac (it decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it).
-- [ ] **Backup path:** bucket and relay fixed (2026-11-25, manual atuin snapshot OK). Left: watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
-- [ ] **CLI logins** by hand on devil and anti: `gh`, `tea`, `glab` (atlas `cli-logins`).
+- [ ] **Backup path:** watch the first green nightly, restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
+- [ ] **Age key backup** off the Mac (omni NOW). It decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it.
+- [ ] **CLI logins** by hand: `gh`, `tea`, `glab` on devil; `gh`, `tea` on anti (atlas `cli-logins`).
+- [ ] **opencode leftovers:** delete the Forgejo bot `opencode` and the GHCR package `opencode` (atlas `opencode-gone`). Namespace, PVC and qemu are gone (checked 2026-11-27).
 - [ ] **Dawarich phone setup:** app on `locations.0xbf.ch` with the API key; then the agent sets `ALLOW_EMAIL_PASSWORD_LOGIN=false` (atlas `dawarich-phone`).
-- [ ] **darwin switch:** first `nh darwin switch` on anti (part of echo -> anti).
+- [ ] **Time Machine on anti:** add the disk (atlas `timemachine-mac`).
 - [ ] **thyme 0.2.0:** wait for Universe PR typst/packages#6496, then tag glob 0.1.8.
-- [x] **authentik passkey:** recover with `docs/GUIDE.md` section 1; add TOTP + static codes so one broken passkey never locks you out.
-- [x] **Go live with test data:** `docs/OPERATIONS.md` section 2: Time Machine of echo, Tailscale ACL autoApprovers, Immich admin (not created yet: `immich.internal`), ntfy app, Dawarich email.
-- [x] **Forgejo cleanup:** delete tokens `repo-migration`, `repo-migration-2`. Your Forgejo email is the ETH student address: move it to an address that outlives your studies.
-- [x] **thyme 0.1.3 merged:** bump glob and apex.
 
 ## Audit findings (2026-11-25)
 
-After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Projects`); anti is no longer a dev machine.
-
-- [x] **Renovate works** (2026-11-25): a manual run found 283 dependencies and opened the Dependency Dashboard (issue #1, 30 updates waiting for Monday); a run with the schedule lifted opened PR #2 (Talos 1.14.7) and #3 (patch group). The k8up group (chart and CRD tag together) merged in v1.98.0; `just check` now fails when a chart and its CRD tag differ. Why the Monday runs never got that far is unknown (logs gone); watch the next one.
 - [ ] **API timeouts from home to oci** (`100.73.186.19:6443` over Tailscale): ~150 five-second timeouts from rbpi in 20 h; the API server answers in < 0.1 s, so it is the path. k8up restarted 19 times in 32 h (lost leader lease).
 - [ ] **rbpi -> rzbl kubelet (`10.10.20.11:10250`) partly over Tailscale**, not the LAN. Looks like the route-hijack trap: check rbpi's `RoutingRuleConfig` (priority 5200, `dst 10.10.0.0/16 table main`).
-- [x] **Leftovers:** two `Completed` authentik pods and 18 failed k8up Jobs from the Garage outage deleted (2026-11-25).
-- [ ] **forgejo-runner is idle** since CI moved to GitHub only: keep it for later or remove `applications/forgejo-runner/` and turn off `[actions]`.
+- [ ] **Renovate Monday runs:** a manual run works (Dependency Dashboard issue #1, PRs #2 Talos 1.14.7, #3 patch group). Watch the next scheduled run.
+- [ ] **devil rollout hangs:** a Kata stop can hang with the guest up (v1.92.0, again v1.98.0: Terminating for hours). The fix is `ssh bf@devil sudo systemctl poweroff`. Find the cause (qemu stop timeout, agent shutdown).
 - [ ] **podman on devil:** undecided (omni SOMEDAY).
-- [x] Duplicate CI: Forgejo workflows removed from all repos; GitHub runs CI.
-- [x] Merged fork branches `thyme-0.1.0`...`0.1.3` deleted.
 
 ## NEXT
 
-- [x] **Rex over Tailscale SSH** (2026-11-27): the Rex nodes `deviler`, `antir`, `iotar` are gone; every client uses `ssh://devil` and `ssh://anti` (omni `ssh.nix`, `rex.nix`). anti runs the open-source tailscaled with `tag:anti` for its SSH server.
-- [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone; (`music.0xbf.ch` is public since 2026-11-23).
-- [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10). Host has no working `rustup` shim.
+- [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone (`music.0xbf.ch` is public since 2026-11-23).
+- [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10).
 - [ ] glob post descriptions (wording).
 - [ ] **rbpi case** design + final assembly (`docs/HARDWARE.md`).
 
 ### omni (details in omni/ROADMAP.md)
 
-- [ ] **MacBook Pro echo -> anti:** now in NOW. Runbook `docs/RESET.md`, inventory `docs/MIGRATION.md`.
+- [ ] Rice on anti, one piece per `nh darwin switch` (tiling, bar, borders, launcher, keys, look).
+- [ ] Rex on the phone over `ssh://bf@devil`; then delete the Tailscale node `iotar`.
 
 ## LATER
 
@@ -57,6 +48,11 @@ After the reset, development moves to devil (`ssh bf@devil`, repos in `~/Project
 
 ## Done (recent)
 
+- [x] 2026-11-27 Forgejo runner out of the tree (namespace, PVC, Kustomization, secret) and Forgejo Actions off (seed and live `app.ini`): Forgejo is the origin, GitHub the mirror and CI (v1.99.0). No Forgejo workflows in any repo, all branches checked.
+- [x] 2026-11-27 Rex over Tailscale SSH: the Rex nodes `deviler`, `antir` are gone; clients use `ssh://devil` and `ssh://anti`. anti runs the open-source tailscaled (`tag:anti`).
+- [x] 2026-11-25 echo -> anti: anti is the daily driver (omni RESET and MIGRATION runbooks retired 2026-11-27).
+- [x] 2026-11-25 Duplicate CI gone: Forgejo workflows removed from all repos; merged fork branches `thyme-0.1.0`...`0.1.3` deleted; Renovate works on Forgejo.
+- [x] 2026-11-25 authentik passkey recovery, go-live with test data, Forgejo token cleanup, thyme 0.1.3 in glob and apex.
 - [x] 2026-11-27 opencode server out of the tree (app, cert name, authentik objects absent, image and CI step, release pin check): rzbl memory; the agents run on devil. Live in v1.98.0, with k8up 4.10.1 and the CRD tag check in `just check`; devil 3Gi/5Gi. Atlas and journey current as of v1.97.0.
 
 - [x] 2026-11-20 devil browser terminal removed (v1.58.0); 89 merged branches deleted across the repos.
@@ -104,7 +100,7 @@ Domain template is `{{.Name}}.0xbf.ch`. KSvc name sets subdomain. Pull secrets a
 | ---- | ------------------------ | ------------- | --------------------------------------------------------------------------------- |
 | rbpi | `/var/mnt/storage-nvme0` | NVMe 256 GB   | agh, pds, atuin, ntfy, exhib, monitoring                                          |
 | rbpi | `/var/mnt/storage-nvme1` | NVMe 250 GB   | forgejo                                                                           |
-| rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, authentik db, ollama, devil, immich db/models, dawarich, runner   |
+| rzbl | `/var/mnt/storage-nvme0` | NVMe 893 GB   | media configs, authentik db, ollama, devil, immich db/models, dawarich           |
 | rzbl | `/var/mnt/storage-ssd0`  | SATA SSD 4 TB | media library, immich photos, copyparty, Time Machine (class `local-path-ssd`)    |
 
 ## Conventions for every new application
