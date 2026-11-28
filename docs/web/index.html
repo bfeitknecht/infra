@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.106.0";
+    const INFRA_TAG = "v1.107.0";
 
     const NODES = [
       {
@@ -2097,6 +2097,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.107.0",
+        "2026-11-28",
+        "authentik Postgres 17 -> 19 (dump/restore into pg19/)",
+      ],
       [
         "v1.106.0",
         "2026-11-28",

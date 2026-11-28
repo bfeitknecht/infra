@@ -12,6 +12,9 @@ spec:
       storage: 10Gi
 ---
 # Own Postgres instead of the chart's Bitnami subchart. Same pattern as immich.
+# Postgres 19 since 2026-11-28 (dump/restore from 17): data in pg19/; the old
+# pgdata/ (17) and dump-pg17-20261128.sql stay on the PVC as the rollback.
+# A major upgrade = a new PGDATA directory, never the old one.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,14 +43,14 @@ spec:
       enableServiceLinks: false
       containers:
         - name: postgres
-          image: docker.io/library/postgres:17.12-trixie
+          image: docker.io/library/postgres:19.0-trixie
           env:
             - name: POSTGRES_USER
               value: authentik
             - name: POSTGRES_DB
               value: authentik
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pg19
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
