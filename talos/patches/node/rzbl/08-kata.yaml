@@ -5,7 +5,9 @@
 # returns them to the host, so shm shrinks again.
 #
 # The file is the stock configuration-qemu.toml of the Kata extension
-# (kata-containers 4.3.1, comments removed) with that one value changed.
+# (kata-containers 4.3.1, comments removed) with two values changed:
+# reclaim_guest_freed_memory, and default_memory 1024 (stock 2048; the guest
+# kernel and agent need far less; 2026-11-28: 1 GiB more room on rzbl).
 # After a Kata extension upgrade, diff against the new stock file:
 #   talosctl -n 10.10.20.11 read /usr/local/share/kata-containers/configuration-qemu.toml
 # machine.files are written at boot: a change here needs a reboot of rzbl.
@@ -33,7 +35,7 @@ machine:
         default_vcpus = 1
         default_maxvcpus = 0
         default_bridges = 1
-        default_memory = 2048
+        default_memory = 1024
         memory_slots = 10
         default_maxmemory = 0
         memory_offset = 0

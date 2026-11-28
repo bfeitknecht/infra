@@ -179,3 +179,59 @@ Worker node rzbl (same tailnet / Talos cluster):
 All storage on Pi shares single PCIe lane. Link is limited to **Gen 2** by 52Pi B12. NVMe and SATA traffic share it. Do not expect full Gen 3 NVMe speed during heavy NAS transfers. This is accepted by design. It is fine for NAS workload. Network: AX7501 10G plan is limited to **1 GbE by Pi 5 Ethernet port**. Razer Blade GbE port has same 1 Gb/s cap. All inter-node LAN traffic is at gigabit speed. Router 10G capability does not change that.
 
 Sources: [Razer Blade 15" Base GTX1660 Ti (2019) RZ09-03009 specs](https://mysupport.razer.com/app/answers/detail/a_id/3643), [iFixit Razer Blade 15 2019](https://www.ifixit.com/Device/Razer_Blade_15_2019), [Kingston memory compatibility RZ09-03009](https://www.kingston.com/en/memory/search/model/106608/razer-blade-15-base-gtx1660-ti-2019-rz09-03009)
+
+## Planned: off-site media node (research 2026-11-28, not bought)
+
+Goal: a fourth node, off-site (family location), that runs only the media
+stack and holds ~30 TB usable for the family. It takes jellyfin, the *arr
+apps, qbittorrent, navidrome, seerr and the bulk files off rzbl; rzbl keeps
+devil, ollama, authentik, immich and dawarich. Owner idea; nothing is
+decided.
+
+### Candidates
+
+| Machine | CPU / iGPU (transcode) | 3.5" bays + NVMe | RAM | Network | Power (measured by reviewers) | Price (barebone) |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Aoostar WTR MAX** (suggested) | Ryzen 7 PRO 8845HS, Radeon 780M (VAAPI/AMF) | 6 + 5 M.2 | up to 128 GB, ECC | 2x 10GbE SFP+, 2x 2.5GbE | ~18 W idle (no HDDs), 73-89 W all busy | ~559-699 USD |
+| Minisforum N5 Pro | Ryzen AI 9 HX PRO 370, Radeon 890M | 5 (hot-swap) + M.2 | ECC | 10GbE + 5GbE | n/a | ~899-1039 USD |
+| UGREEN DXP6800 Pro | Core i5-1235U, Iris Xe (Quick Sync) | 6 + 2 M.2 | non-ECC | 2x 10GbE | n/a | ~1100 USD |
+| DIY: Jonsbo N3/N4 + CWWK N355 (or N150) Mini-ITX | Intel N355, UHD (Quick Sync) | 6 SATA on board | one DDR5 SODIMM, non-ECC | 2.5GbE | ~9-10 W idle with SSDs, 30-40 W under load | ~290 USD board + case + PSU |
+
+Notes:
+
+- **Transcoding:** Intel Quick Sync is the most reliable Jellyfin path; AMD
+  VAAPI on 780M/890M works but has fewer codec paths. Most family clients
+  can direct play; size for 2-3 transcodes. Talos needs the matching
+  extension: `siderolabs/i915` (Intel) or `siderolabs/amdgpu` + `amd-ucode`.
+- **ECC:** the WTR MAX and N5 Pro take ECC with a PRO CPU; worth it for a
+  ZFS box that holds family data.
+- **WTR MAX caveats:** 10GbE is SFP+ (copper needs a module), fan noise
+  ~35-38 dBA on auto, BYO OS (fine: Talos).
+
+### Storage on Talos
+
+Talos has no mdraid. Use the `siderolabs/zfs` system extension (in the
+schematic; load the `zfs` module in the machine config) and one RAIDZ2
+pool: 6x 8 TB ≈ 32 TB usable, 6x 10 TB ≈ 40 TB, survives two disk
+failures. Create the pool once from a privileged debug pod; local-path
+(class `local-path-zfs`) on a dataset serves the PVCs. Check the extension
+tag against the Talos version at each upgrade.
+
+### Network and placement
+
+- Joins the cluster over Tailscale like the home nodes: `tag:infra`,
+  `--accept-routes --advertise-routes=<own-ip>/32`, route in the tailnet
+  `autoApprovers`. It is on another LAN, so the rbpi rule 5200 does not
+  apply; add rule 5190 (Tailscale endpoint loop) like every node.
+- Label and taint it (`node-role/media`); media workloads select it,
+  nothing else lands there. Jellyfin needs its own public path at that
+  site (or stays behind the home edge and streams over the tailnet; check
+  the upload bandwidth at the site first).
+- Moving the media PVCs is a copy (local-path is node-bound): rsync the
+  4 TB from `storage-ssd0` over the tailnet, then switch the PVs.
+
+### Open questions for the owner
+
+1. Site upload bandwidth (decides where Jellyfin streams from).
+2. Budget for 6 disks (8 vs 10 TB).
+3. Who power-cycles the box at the site (no IPMI on these).

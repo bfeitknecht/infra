@@ -34,6 +34,8 @@ Status as of 2026-11-28. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NEXT
 
+- [ ] **Off-site media node** (~30 TB usable, family): research in `docs/HARDWARE.md` (Aoostar WTR MAX, Minisforum N5 Pro, UGREEN DXP6800 Pro, DIY N355). Takes the media stack off rzbl. Open: site upload bandwidth, disk budget, remote power cycle.
+- [ ] **rzbl RAM 16 -> 32 GB** (2x 16 GB DDR4-2667 SODIMM, < 100 CHF): the cheapest headroom until the media node.
 - [ ] **Music streaming:** connect qBittorrent in Lidarr, Navidrome app on the phone (`music.0xbf.ch` is public since 2026-11-23).
 - [ ] Nix dev shells per repo from omni (`docs/OPERATIONS.md`, section 10).
 - [ ] glob post descriptions (wording).
