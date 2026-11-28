@@ -1848,11 +1848,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: "dawarich",
       },
       {
-        id: "rzbl-reboot",
+        id: "devil-resume",
         prio: 1,
         cat: "manual",
-        t: "Reboot rzbl: staged Talos 1.14.7, then resume devil",
-        d: "From anti in ~/Projects/infra: ssh bf@devil sudo systemctl poweroff; talosctl --talosconfig talos/talosconfig -e 10.20.20.10 -n 10.10.20.11 reboot; wait for kubectl get nodes (rzbl Ready, Talos 1.14.7); flux resume kustomization devil. Check: one qemu on rzbl, ssh bf@devil hostname.",
+        t: "Resume devil (restarts the VM)",
+        d: "rzbl runs Talos 1.14.7 and Kata default_memory 1024 (2026-11-28). From anti: flux resume kustomization devil. It restarts devil with busybox 1.38 and page_reporting_order=5. Check: one qemu on rzbl, ssh bf@devil hostname.",
         svc: "devil",
       },
       {
@@ -2779,6 +2779,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "rzbl rebooted on Talos 1.14.7 (owner); 97 Failed cilium-operator pods from the graceful shutdown deleted; Flux back on rbpi. rzbl RAM 63 %, shm 2.5 GB.",
+      ],
       [
         "2026-11-28",
         "Sonarr/Radarr profile 4: 1080p, else 720p, upgrade to WEB 1080p. Kata default_memory 1024 on rzbl (active after reboot). Off-site media node research in docs/HARDWARE.md.",

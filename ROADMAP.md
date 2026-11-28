@@ -14,7 +14,7 @@ Status as of 2026-11-28. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## NOW
 
-- [ ] **rzbl reboot (owner, from anti):** `ssh bf@devil sudo systemctl poweroff`, then `talosctl --talosconfig talos/talosconfig -e 10.20.20.10 -n 10.10.20.11 reboot` (staged Talos 1.14.7), then `flux resume kustomization devil` (busybox 1.38 + guest `page_reporting_order=5`). Check: rzbl on 1.14.7, one qemu, `ssh bf@devil hostname`.
+- [ ] **Resume devil:** `flux resume kustomization devil` (rzbl rebooted on Talos 1.14.7 and default_memory 1024 is live, 2026-11-28; the resume restarts devil with busybox 1.38 and `page_reporting_order=5`).
 - [ ] **omni ssh.nix (owner or omni agent):** host `0xbf.ch` with `port = 2222; identityFile = "~/.ssh/github";` (IdentitiesOnly offers no key today, so the sshmux asks for a password). Then `nh darwin switch`.
 - [ ] **After 2026-12-05:** delete the Postgres rollbacks: authentik-db `pgdata/` + `dump-pg17-20261128.sql`, immich-db `pgdata/` + `dump-pg14-20261128.sql`; Forgejo `forgejo-16.0.7-20261128.db`, Prowlarr `prowlarr-2.7.0-20261128.db`.
 - [ ] **Renovate:** the first Dependency Dashboard issue on apex, exhib, glob, infra; then the agent reviews every PR it opens.
