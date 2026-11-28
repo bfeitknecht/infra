@@ -1,5 +1,5 @@
-# GPU metrics for Grafana (dashboard 14574): nvidia_gpu_exporter reads
-# nvidia-smi. The RuntimeClass nvidia injects nvidia-smi and the driver libs;
+# GPU metrics for Grafana (dashboard 14574): nvidia_gpu_exporter 2 reads NVML
+# (libnvidia-ml). The RuntimeClass nvidia injects nvidia-smi and the driver libs;
 # the upstream chart mounts /usr/bin/nvidia-smi from the host, which Talos does
 # not have. No nvidia.com/gpu request: it only reads, so it takes no time slot.
 apiVersion: apps/v1
@@ -25,7 +25,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: gpu-exporter
-          image: docker.io/utkuozdemir/nvidia_gpu_exporter:1.19.0
+          image: docker.io/utkuozdemir/nvidia_gpu_exporter:2.0.0
           # Explicit fields: AUTO also picks up fields whose names contain
           # brackets (power_smoothing ... [ms]) on newer drivers, and the
           # exporter panics on them.

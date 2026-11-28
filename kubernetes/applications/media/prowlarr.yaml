@@ -27,7 +27,7 @@ spec:
       containers:
         - name: prowlarr
           # linuxserver image starts as root (s6 init), then drops to PUID/PGID.
-          image: lscr.io/linuxserver/prowlarr:2.7.0
+          image: lscr.io/linuxserver/prowlarr:3.1.0
           env:
             - name: PUID
               value: "1000"

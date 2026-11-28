@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.105.0";
+    const INFRA_TAG = "v1.106.0";
 
     const NODES = [
       {
@@ -1029,7 +1029,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "forgejo",
         ks: "forgejo",
         host: "https://git.0xbf.ch · ssh://git@git.0xbf.ch",
-        image: "codeberg.org/forgejo/forgejo:16.0.7",
+        image: "codeberg.org/forgejo/forgejo:17.0.2",
         desc: "Git forge.",
         ports: "HTTP 3000, SSH 22 (WAN/LB 22)",
         deps: ["traefik", "storage"],
@@ -1225,7 +1225,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "media",
         ks: "media",
         host: "https://prowlarr.internal",
-        image: "lscr.io/linuxserver/prowlarr:2.7.0",
+        image: "lscr.io/linuxserver/prowlarr:3.1.0",
         desc: "Indexer manager for the *arr apps.",
         ports: "HTTP 9696",
         deps: ["storage"],
@@ -1477,7 +1477,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         ns: "agh",
         ks: "agh",
         host: "10.10.20.153 (DNS) · https://agh.internal",
-        image: "adguard/adguardhome:v0.107.79",
+        image: "adguard/adguardhome:v1.0.0",
         desc: "LAN DNS edge. Upstream: kresd 10.96.0.53.",
         ports: "DNS 53 (LB .153), UI 80",
         deps: ["dns", "storage"],
@@ -2097,6 +2097,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.106.0",
+        "2026-11-28",
+        "forgejo 17.0.2, AdGuard Home 1.0.0, prowlarr 3.1.0, nvidia_gpu_exporter 2.0.0 (NVML); sshmux owner trusts the GitHub keys",
+      ],
       [
         "v1.105.0",
         "2026-11-28",
@@ -2759,6 +2764,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "Upgrades batch 4 (v1.106.0): Forgejo 17.0.2, AGH 1.0.0, Prowlarr 3.1.0, GPU exporter 2.0.0 (backups: forgejo-16.0.7-20261128.db, prowlarr-2.7.0-20261128.db, AdGuardHome.yaml.bak-0.107.80). sshmux: owner route trusts github.com/bfeitknecht.keys. PLL on the 720p/1080p profile; 7 dead torrents blocklisted.",
+      ],
       [
         "2026-11-28",
         "Upgrades batch 3 (v1.105.0): traefik chart 43 / Traefik 3.8, kube-prometheus-stack 94.2.0.",
