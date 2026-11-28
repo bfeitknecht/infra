@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.107.0";
+    const INFRA_TAG = "v1.108.0";
 
     const NODES = [
       {
@@ -2098,6 +2098,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     * suspended: none`;
     const TAGS = [
       [
+        "v1.108.0",
+        "2026-11-28",
+        "immich Postgres 14 -> 16 (dump/restore into pg16/)",
+      ],
+      [
         "v1.107.0",
         "2026-11-28",
         "authentik Postgres 17 -> 19 (dump/restore into pg19/)",
@@ -2769,6 +2774,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "Postgres majors: authentik 17 -> 19 (v1.107.0), immich 14 -> 16 (v1.108.0), each by pg_dumpall into a new PGDATA dir; old dirs and dumps kept on the PVCs.",
+      ],
       [
         "2026-11-28",
         "Upgrades batch 4 (v1.106.0): Forgejo 17.0.2, AGH 1.0.0, Prowlarr 3.1.0, GPU exporter 2.0.0 (backups: forgejo-16.0.7-20261128.db, prowlarr-2.7.0-20261128.db, AdGuardHome.yaml.bak-0.107.80). sshmux: owner route trusts github.com/bfeitknecht.keys. PLL on the 720p/1080p profile; 7 dead torrents blocklisted.",

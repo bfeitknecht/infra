@@ -4,7 +4,7 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.107.0`. Load: rbpi ~29 % RAM, rzbl ~75 % (devil's Kata VM), oci ~37 %. opencode server gone (v1.98.0), Forgejo runner gone (v1.99.0).
+- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.108.0`. Load: rbpi ~29 % RAM, rzbl ~75 % (devil's Kata VM), oci ~37 %. opencode server gone (v1.98.0), Forgejo runner gone (v1.99.0).
 - **Git:** GitHub is the origin for the six repos (apex, exhib, glob, infra, omni, thyme) since 2026-11-28: push, CI, GHCR, Typst releases. Forgejo `git.0xbf.ch` keeps pull mirrors (1 h) as a backup. Renovate is the Mend GitHub App with one shared preset (infra `renovate/default.json5`).
 - **Machines:** anti (MacBook, nix-darwin) is the daily driver since 2026-11-25; echo is retired. devil (Kata NixOS VM on rzbl) is the dev box: Tailscale SSH `ssh bf@devil`, Rex over `ssh://devil`, the agents run there.
 - **Public:** apex `0xbf.ch` (0.1.20), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.

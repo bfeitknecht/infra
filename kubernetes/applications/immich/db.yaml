@@ -22,8 +22,10 @@ spec:
       enableServiceLinks: false
       containers:
         - name: postgres
-          # Image and digest are from the immich v3.4.1 docker-compose.yml.
-          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+          # Postgres 16 since 2026-11-28 (dump/restore from 14; Immich supports
+          # 14 to 19). Data in pg16/; old pgdata/ (14) and dump-pg14-20261128.sql
+          # stay on the PVC as the rollback. A major = a new PGDATA directory.
+          image: ghcr.io/immich-app/postgres:16-vectorchord0.4.3-pgvectors0.2.0@sha256:1a078b237c1d9b420b0ee59147386b4aa60d3a07a8e6a402fc84a57e41b043a4
           env:
             - name: POSTGRES_USER
               value: postgres
@@ -32,7 +34,7 @@ spec:
             - name: POSTGRES_INITDB_ARGS
               value: --data-checksums
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pg16
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
