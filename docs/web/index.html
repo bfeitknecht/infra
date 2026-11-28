@@ -787,7 +787,7 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
        DATA. Update this block when the cluster changes.
        ============================================================ */
     const ASOF = "2026-11-27";
-    const INFRA_TAG = "v1.108.0";
+    const INFRA_TAG = "v1.109.0";
 
     const NODES = [
       {
@@ -1848,11 +1848,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
         svc: "dawarich",
       },
       {
-        id: "opencode-gone",
-        prio: 2,
+        id: "rzbl-reboot",
+        prio: 1,
         cat: "manual",
-        t: "After the opencode removal: delete the Forgejo bot and the GHCR package",
-        d: "Live since v1.98.0: namespace, PVC, qemu and the Forgejo user opencode are gone (checked 2026-11-28). Left: GitHub > Packages > opencode > Package settings > Delete.",
+        t: "Reboot rzbl: staged Talos 1.14.7, then resume devil",
+        d: "From anti in ~/Projects/infra: ssh bf@devil sudo systemctl poweroff; talosctl --talosconfig talos/talosconfig -e 10.20.20.10 -n 10.10.20.11 reboot; wait for kubectl get nodes (rzbl Ready, Talos 1.14.7); flux resume kustomization devil. Check: one qemu on rzbl, ssh bf@devil hostname.",
         svc: "devil",
       },
       {
@@ -2097,6 +2097,11 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
     kata, keel, knative-operator → knative-serving, ddns, dns, authentik
     * suspended: none`;
     const TAGS = [
+      [
+        "v1.109.0",
+        "2026-11-28",
+        "Talos 1.14.7 (oci, rbpi; rzbl staged), K8s 1.37.3 in topf.yaml; devil busybox 1.38 + guest page_reporting_order=5 (devil Kustomization suspended until the rzbl reboot); CI on ubuntu-26.04",
+      ],
       [
         "v1.108.0",
         "2026-11-28",
@@ -2774,6 +2779,10 @@ Talos nodes resolve via router 10.10.10.1 (not AGH). Pods use CoreDNS 10.96.0.10
       ],
     ];
     const DONE = [ // every completed task: [date, what], newest first. Add one line per finished task.
+      [
+        "2026-11-28",
+        "All upgrades done except the rzbl reboot: Talos 1.14.7 on oci and rbpi, K8s 1.37.3 everywhere, apex 0.1.25, exhib 0.7.1, glob master (STIX stays v2.13b171). rzbl RAM creep explained (devil VM shm); fix ships with the next devil start.",
+      ],
       [
         "2026-11-28",
         "Postgres majors: authentik 17 -> 19 (v1.107.0), immich 14 -> 16 (v1.108.0), each by pg_dumpall into a new PGDATA dir; old dirs and dumps kept on the PVCs.",

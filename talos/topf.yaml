@@ -2,8 +2,8 @@ clusterName: infra
 # clusterEndpoint: https://10.20.20.10:6443
 clusterEndpoint: https://100.73.186.19:6443 # tailscale
 # clusterEndpoint: https://140.238.213.197:6443 # public
-kubernetesVersion: 1.37.2
-talosVersion: 1.14.6
+kubernetesVersion: 1.37.3
+talosVersion: 1.14.7
 
 patchesDir: patches
 secretsPath: secrets.sops.yaml

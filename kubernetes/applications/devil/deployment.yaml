@@ -14,6 +14,12 @@ spec:
     metadata:
       labels:
         app: devil
+      annotations:
+        # Guest kernel: report free blocks from order 5 (128 KiB), not only
+        # 2 MiB, so freed guest RAM returns to rzbl's /dev/shm (2026-11-28: the
+        # VM held 6 GB of shm with 3 GB free inside). Kata allows this
+        # annotation (enable_annotations in talos/patches/node/rzbl/08-kata.yaml).
+        io.katacontainers.config.hypervisor.kernel_params: "page_reporting.page_reporting_order=5"
     spec:
       # Kata sets vCPU and RAM from container limits. Without a CPU limit the
       # VM boots with one vCPU. This is too slow for nix builds. The VM wall
@@ -34,7 +40,7 @@ spec:
       # Create the home directory for user 1000.
       initContainers:
         - name: init-state
-          image: busybox:1.36
+          image: busybox:1.38
           command: ["sh", "-c", "mkdir -p /volume/home /volume/nix/store && chown 1000:100 /volume/home"]
           volumeMounts:
             - name: state

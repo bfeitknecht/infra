@@ -1,25 +1,26 @@
 # Roadmap
 
-Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md` and the atlas "Needs you"; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
+Status as of 2026-11-28. Three lanes: **infra** (this repo), **omni** (nix), **web** (apex, glob, exhib, whims). `.private/TODO.md` in each repo feeds this file. Owner steps: `docs/OPERATIONS.md` and the atlas "Needs you"; day-to-day use: `docs/GUIDE.md`; where things run: `README.md`.
 
 ## Where things stand
 
-- **Cluster:** 3 nodes on Talos 1.14.6, K8s 1.37.2, all Ready. Infra tag `v1.108.0`. Load: rbpi ~29 % RAM, rzbl ~75 % (devil's Kata VM), oci ~37 %. opencode server gone (v1.98.0), Forgejo runner gone (v1.99.0).
+- **Cluster:** 3 nodes, K8s 1.37.3; Talos 1.14.7 on oci and rbpi, staged on rzbl (applies at its next reboot). Infra tag `v1.109.0`; every dependency on its newest release (2026-11-28): Traefik 3.8, kube-prometheus-stack 94, Forgejo 17, AGH 1.0, Prowlarr 3, authentik Postgres 19, immich Postgres 16. Load: rbpi ~29 % RAM, rzbl ~75 % (devil's Kata VM), oci ~37 %. opencode server gone (v1.98.0), Forgejo runner gone (v1.99.0).
 - **Git:** GitHub is the origin for the six repos (apex, exhib, glob, infra, omni, thyme) since 2026-11-28: push, CI, GHCR, Typst releases. Forgejo `git.0xbf.ch` keeps pull mirrors (1 h) as a backup. Renovate is the Mend GitHub App with one shared preset (infra `renovate/default.json5`).
 - **Machines:** anti (MacBook, nix-darwin) is the daily driver since 2026-11-25; echo is retired. devil (Kata NixOS VM on rzbl) is the dev box: Tailscale SSH `ssh bf@devil`, Rex over `ssh://devil`, the agents run there.
-- **Public:** apex `0xbf.ch` (0.1.20), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.0), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
+- **Public:** apex `0xbf.ch` (0.1.25), glob `blog.0xbf.ch` (0.1.7; 0.1.8 waits for thyme 0.2.0 on Universe), exhib `gallery.0xbf.ch` (0.7.1), forgejo (SSO only), pds, atuin, jellyfin `videos`, immich `photos`, copyparty `files`, navidrome `music`, dawarich `locations`, ntfy, authentik.
 - **Internal:** AGH, knot/kresd, devil, *arr, qBittorrent (Proton VPN), Time Machine, ollama (GPU).
 - **Backup:** works since 2026-11-25 (NAS on a new tailnet IP, v1.93.0). Nightly (green since 2026-11-26): atuin, authentik, forgejo, pds. Restore drill not done.
 - **thyme:** 0.2.0 waits in Universe PR typst/packages#6496; then glob 0.1.8.
 
 ## NOW
 
-- [ ] **Renovate GitHub App:** install https://github.com/apps/renovate on apex, exhib, glob, infra (only these; not thyme, not omni). Then the agent reviews every PR it opens.
-- [ ] **Revoke old GitHub tokens:** the Forgejo push-mirror token and Renovate's `GITHUB_COM_TOKEN` (GitHub > Settings > Developer settings). Both secrets are out of the tree.
+- [ ] **rzbl reboot (owner, from anti):** `ssh bf@devil sudo systemctl poweroff`, then `talosctl --talosconfig talos/talosconfig -e 10.20.20.10 -n 10.10.20.11 reboot` (staged Talos 1.14.7), then `flux resume kustomization devil` (busybox 1.38 + guest `page_reporting_order=5`). Check: rzbl on 1.14.7, one qemu, `ssh bf@devil hostname`.
+- [ ] **omni ssh.nix (owner or omni agent):** host `0xbf.ch` with `port = 2222; identityFile = "~/.ssh/github";` (IdentitiesOnly offers no key today, so the sshmux asks for a password). Then `nh darwin switch`.
+- [ ] **After 2026-12-05:** delete the Postgres rollbacks: authentik-db `pgdata/` + `dump-pg17-20261128.sql`, immich-db `pgdata/` + `dump-pg14-20261128.sql`; Forgejo `forgejo-16.0.7-20261128.db`, Prowlarr `prowlarr-2.7.0-20261128.db`.
+- [ ] **Renovate:** the first Dependency Dashboard issue on apex, exhib, glob, infra; then the agent reviews every PR it opens.
 - [ ] **Backup path:** nightlies green since 2026-11-26 (atuin, authentik, forgejo, pds). Left: restore drill (forgejo), k8up Schedules for immich, copyparty, samba, exhib and the app databases. **Gate for real data.**
 - [ ] **Age key backup** off the Mac (omni NOW). It decrypts omni and infra; `talos/talosconfig` and `kubeconfig` regenerate from it.
 - [ ] **CLI logins** by hand: `gh`, `tea`, `glab` on devil; `gh`, `tea` on anti (atlas `cli-logins`).
-- [ ] **opencode leftovers:** delete the GHCR package `opencode` (the Forgejo user is gone) (atlas `opencode-gone`). Namespace, PVC and qemu are gone (checked 2026-11-27).
 - [ ] **Dawarich phone setup:** app on `locations.0xbf.ch` with the API key; then the agent sets `ALLOW_EMAIL_PASSWORD_LOGIN=false` (atlas `dawarich-phone`).
 - [ ] **Time Machine on anti:** add the disk (atlas `timemachine-mac`).
 - [ ] **thyme 0.2.0:** wait for Universe PR typst/packages#6496, then tag glob 0.1.8.
@@ -49,6 +50,8 @@ Status as of 2026-11-27. Three lanes: **infra** (this repo), **omni** (nix), **w
 
 ## Done (recent)
 
+- [x] 2026-11-28 All upgrades (v1.103.0 to v1.109.0, apex 0.1.25, exhib 0.7.1, glob master): ~45 infra updates in 4 batches, chart+CRD groups, Traefik 43/3.8 (TCPRoute v1, gateway-api 1.7), kps 94, Forgejo 17 (authorized_keys fix), AGH 1.0, Prowlarr 3, GPU exporter 2 (NVML), authentik Postgres 17 -> 19 and immich 14 -> 16 (dump/restore, rollbacks kept), Talos 1.14.7 (oci, rbpi; rzbl staged), K8s 1.37.3, CI on ubuntu-26.04. Pretty Little Liars: profile 720p/1080p, dead torrents blocklisted. sshmux owner trusts the GitHub keys. rzbl memory: devil VM shm, fix staged.
+- [x] 2026-11-28 opencode leftovers gone (GHCR packages opencode, sshmux, browser absent; Forgejo users renovate and opencode deleted). Old GitHub tokens revoked, Renovate App installed (owner).
 - [x] 2026-11-28 GitHub primary, Forgejo pull mirrors (1 h) as backup; Renovate moves from the in-cluster CronJob (Forgejo bot) to the Mend GitHub App with a shared preset (no PR limits, actions pinned, lock files, Typst imports, Dockerfile ARGs, Knative Serving, topf) (v1.102.0).
 - [x] 2026-11-28 Streaming: qBittorrent self-heals (gluetun port forward and DHT probes), queue 8/10 (v1.101.0).
 - [x] 2026-11-27 Forgejo runner out of the tree (namespace, PVC, Kustomization, secret) and Forgejo Actions off (seed and live `app.ini`): Forgejo is the origin, GitHub the mirror and CI (v1.99.0). No Forgejo workflows in any repo, all branches checked.
